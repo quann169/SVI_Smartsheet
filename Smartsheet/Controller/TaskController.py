@@ -23,7 +23,7 @@ class RowParsing():
 	def getAllDataOfSheet(sheet_name, sheets_):
 		allRows, sheet = RowParsing.connectSmartsheet(sheet_name)
 		dictRows = {}
-		count = 0
+		count = 1
 		totalRow = len(allRows)
 		for row in allRows:
 			if ((count % 200) == 0 and count != 0):
@@ -31,7 +31,7 @@ class RowParsing():
 			if (Row.isRowEmpty(row) == 1):
 				dictheader = sheets_[sheet_name]
 				dictHeaderOut = Row.getHeaders(sheet_name, sheet, dictheader)
-				dictRow= Row.getDataRow(row, dictHeaderOut)
+				dictRow= Row.getDataRow(row, dictHeaderOut, count)
 				dictRows[row['id']] = dictRow
 			count += 1
 		return dictRows
@@ -53,17 +53,17 @@ class RowParsing():
 				#pick task is not a parent task
 				if not (dictRows[row][Enum.GenSmartsheet.ID]  in listParentId):
 					if dictRows[row]['info'][Enum.Header.ASSIGNED_TO] == 'NaN':
-						strlog += 'Skip--AssignTo is empty in Sheet name: %s, Task name: %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME])
+						strlog += 'Skip--AssignTo is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE])
 						continue
 					else:
 # 						
 						startToEndDay = []
 
 						if dictRows[row]['info'][Enum.Header.ALLOCATION] == 'NaN':
-							strlog += 'Skip--Allocation is empty in Sheet name: %s, Task name: %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME]) 
+							strlog += 'Skip--Allocation is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE]) 
 							continue
 						if (dictRows[row]['info'][Enum.Header.START_DATE] == 'NaN') or (dictRows[row]['info'][Enum.Header.END_DATE] == "NaN"):
-							strlog += 'Skip--Start date or End date is empty in Sheet name: %s, Task name: %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME])
+							strlog += 'Skip--Start date or End date is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE])
 							continue
 						else:
 							syear, smonth, sday = Util.toDate(dictRows[row]['info'][Enum.Header.START_DATE])
@@ -208,7 +208,7 @@ class RowParsing():
 					sheetInfoDict[sheet_][team_][user__][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthS
 					sheetInfoDict[sheet_][team_][user__][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekS
 					
-				totalWeekU, totalMonthU = Util.cacutlateTotal(listMonth, listWeek, sheetInfoDict[sheet_][team_], Enum.WorkHourColor.IS_SHEET_NAME, True)
+				totalWeekU, totalMonthU = Util.cacutlateTotal(listMonth, listWeek, sheetInfoDict[sheet_][team_], Enum.WorkHourColor.IS_POSITION, True)
 				sheetInfoDict[sheet_][team_][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthU
 				sheetInfoDict[sheet_][team_][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekU
 # 			pprint(sheetInfoDict)
@@ -237,6 +237,11 @@ class Controllers():
 				sheetName.col(columIndex).width = 256 * 20
 			else:
 				sheetName.col(columIndex).width = 256 * 11
+# 			header = ''
+# 				y, m, d = Util.toDate(head1[0])
+# 				header = '%s/%s' %(d, m)
+# 			else:
+# 				header = head1[0]
 			sheetName.write(rowIndex, columIndex, head1[0], style1)
 			columIndex += 1
 		rowIndex += 1

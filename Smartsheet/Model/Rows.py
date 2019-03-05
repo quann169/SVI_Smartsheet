@@ -4,7 +4,7 @@ from Enum import Enum
 class Row():
 	
 	#get all info of a row (dictionary)
-	def getInfoInRow(cells, dictHeader):
+	def getInfoInRow(cells, dictHeader, count):
 		dictInfo  ={}
 		index = 0
 		for colum in cells:
@@ -18,10 +18,11 @@ class Row():
 					value = 'NaN'
 				dictInfo[dictHeader[index]] = value
 			index = index + 1
+		dictInfo['line'] = count
 		return dictInfo
 		
 	#get all info of all row (dictionary)
-	def getDataRow(row, dictHeader):
+	def getDataRow(row, dictHeader, count):
 		info = {}
 		info[Enum.GenSmartsheet.ID] = row[Enum.GenSmartsheet.ID]
 		if Enum.GenSmartsheet.PARENT_ID in row:
@@ -33,7 +34,7 @@ class Row():
 			info[Enum.GenSmartsheet.SIBLING_ID] = row[Enum.GenSmartsheet.SIBLING_ID]
 		else:
 			info[Enum.GenSmartsheet.SIBLING_ID] = ''
-		info['info'] = Row.getInfoInRow(row[Enum.GenSmartsheet.CELLS], dictHeader)
+		info['info'] = Row.getInfoInRow(row[Enum.GenSmartsheet.CELLS], dictHeader, count)
 		return info
 		
 	#find empty row 

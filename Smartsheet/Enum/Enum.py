@@ -23,6 +23,7 @@ class GenSmartsheet():
 	TITLE = 'title'
 	ID = 'id'
 	DISPLAY_VALUE = 'display_value'
+	LINE = 'line'
 	
 	
 class ListItemKey():
@@ -51,8 +52,8 @@ class DateTime():
 	
 class WorkHourColor:
 	IS_EQUAL = 'lime'
-	IS_GREATER = 'gold'
-	IS_LESS = 'coral'
+	IS_GREATER = 'light_yellow'
+	IS_LESS = 'rose'
 	IS_HEADER = 'gray_ega'
 	IS_USER_NAME = 'gray25'
 	IS_SHEET_NAME = 'ice_blue'

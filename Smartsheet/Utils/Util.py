@@ -142,11 +142,11 @@ def definedColor():
     listColor = [Enum.WorkHourColor.IS_EQUAL, Enum.WorkHourColor.IS_GREATER, Enum.WorkHourColor.IS_LESS, Enum.WorkHourColor.IS_HEADER,
                 Enum.WorkHourColor.IS_USER_NAME, Enum.WorkHourColor.IS_SHEET_NAME, Enum.WorkHourColor.BACK_GROUND, Enum.WorkHourColor.IS_POSITION]
     for color in listColor:
-        formatCommand = 'align: wrap yes;pattern: pattern solid, fore-colour %s; border: left thin, top thin, right thin, bottom thin, bottom-color gray25, top-color gray25, left-color gray25, right-color gray25' %(color)
+        formatCommand = 'align: wrap yes;pattern: pattern solid, fore-colour %s; border: left thin, top thin, right thin, bottom thin, bottom-color gray25, top-color gray25, left-color gray25, right-color gray25; font: bold 0,height 240;' %(color)
         style = xlwt.easyxf(formatCommand)
         colorDict[color] = style
     for color in listColor:
-        formatCommand = 'align: wrap yes;pattern: pattern solid, fore-colour %s' %(color)
+        formatCommand = 'align: wrap yes;pattern: pattern solid, fore-colour %s; font: bold 0,height 240;' %(color)
         style = xlwt.easyxf(formatCommand)
         colorDictNoneBorder[color] = style
     return colorDict, colorDictNoneBorder
