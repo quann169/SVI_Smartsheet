@@ -1,0 +1,58 @@
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: Digital PnR, Line : 63 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Bias, Line : 70 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: LPFII, Line : 71 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Pcaltop, Line : 72 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Top level, Line : 73 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Share area estimation, Line : 101 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Evaluate the power between lvt and ulvt structure, Line : 102 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Provide the spec for Active current, Line : 103 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Update the Design Rule Documentation by 30/11/2018, Line : 104 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Double-check the PDK, Line : 105 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Decide which architecture w or w/o regulators, Line : 106 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh/Tuan to double-check the power simulation result., Line : 108 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh/Tuan to estimate the LPF-Cap and Charge-pump current to have Loop-BW smaller than 40MHz (Measuring Kvco)., Line : 109 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to report peak-current to estimate decap for without-regulator-arch., Line : 110 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: aChanh to estimate the regulator decaps value., Line : 111 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to check close-loop locking at slowest and fastest condition., Line : 112 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to update the % completion smartsheet., Line : 113 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh to estimate the digital DLL with 8-stages delay-line., Line : 114 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Trying area estimation without decaps, Line : 116 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Trying the process variation compensation for bias control circuit, Line : 117 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: SVI to explore best way to generate DLL model for functional simulation: Verilog or top-level schematic, Line : 119 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Update preliminary specs for SSS, Line : 120 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: SSS to share voltage/current reference from SSS, Line : 121 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuning the BIAS circuit of Delay-line. Consider to investigate new delay-line structure., Line : 122 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuning PFD, Line : 123 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Verify performance of PFD+CP, Line : 125 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuning Current reference generator with 1.8V+BJT devices( low priority), Line : 126 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to draw layout floorplan, Line : 128 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to draw updated block-diagram, Line : 129 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh to update the layout floorplan,  the ctrl signals from the left side, Line : 131 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Hao to send layout review checklist to Thanh/aChanh, Line : 133 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh to update the signal name to review checklist, Line : 134 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to add top-cell simulation parameters, Line : 135 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to check sub-threshold, Line : 136 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh to consider to remove the Replica from SDLL Block Diagram, Line : 137 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: aChanh to send out the work list to Hao, Line : 139 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Hao to arrange tasks and resource according to aChanh's list, Line : 140 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh to handover to Hao, Tuan, Line : 141 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Hao and Tuan work on Spectra license, Line : 142 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to fine-tune switch in charge-pump, Line : 144 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: aChanh to check with Sony if there is PnR library, Line : 145 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Mi Le to start another structure of MUX, Line : 146 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to check-in all test-bench/schematic to SVN, Line : 147 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Lai to fine-tune zero-setup of DFF/Latch in Cal sampling, then find-out to target code of PSEL<> over PTV, Line : 148 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to write the measurement of Phase Error of PDF at cycle by cycle to detect the locking time, Line : 149 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Dung to handle AC chz for Op-amp, Line : 150 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to check with Thanh the reason of current Interpolator layout structure, Line : 151 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: We need to decide 1.8V in CP for more range of Vctrl in DR v0.5 --> aDuong to send-out initial schematic for simulation, Line : 152 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SVI to sum up simulation specs and targeted specs, then discuss on specs which could not be accomplished, Line : 154 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SSS will consider and provide the std_cell lib if possible by the end of next week, Line : 155 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Review the testbech/measurement --> consider to measure DCD by taking Min/Max from 10 cycles, Line : 157 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: aChanh to confirm the note "taken from the average" in spec, Line : 158 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: aChanh to notify the delay on DR1, Line : 159 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Full guarding both N/P region, Line : 161 
+Skip--Allocation is empty in Sheet name: NRE_s020_SDLL, Task name: Put Poly AND to cut long Poly of PMOS/NMOS, Line : 162 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: antclf, Line : 165 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: ppin,pinf_log, Line : 166 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: PrimetimeSI   (.cdb), Line : 167 
