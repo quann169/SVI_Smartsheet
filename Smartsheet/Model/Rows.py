@@ -82,7 +82,6 @@ class Row():
 		for row in dictRows:
 			if (dictRows[row][Enum.GenSmartsheet.PARENT_ID] != '') and not (dictRows[row][Enum.GenSmartsheet.PARENT_ID] in lists) :
 				lists.append(dictRows[row][Enum.GenSmartsheet.PARENT_ID])
-# 		print (lists)
 		return lists
 	
 	

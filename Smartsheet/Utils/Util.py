@@ -7,8 +7,6 @@ import sys
 sys.path.append('..')
 from Enum import Enum
 from pprint import pprint
-#get all work day of month (Mon to Fri)
-
 
 def toDate(strg):
     try:
@@ -44,15 +42,13 @@ def getWorkDay(fromdate, todate):
             day = datetime.date(y, m, d)
 #             days = np.busday_count(start, end)
             startWeek = day - datetime.timedelta(days=day.weekday())
-#             print(startWeek)
-            
+ 
         if calendar.day_name[calendar.weekday(y,m,d)] in Enum.DateTime.LIST_WORK_DAY_OF_WEEK:
             info = [str(datetime.date(y,m,d)), str(startWeek)]
             listWorkDay.append(info)
         elif len(listWorkDay) == 0:
             info = [str(datetime.date(y,m,d)), str(startWeek)]
             listWorkDay.append(info)
-#     print(listWorkDay)
     return listWorkDay
 
 #[[week, total hour work], ...]
@@ -127,7 +123,6 @@ def getUserOfString(string):
 
 def CompareAndSelectColorToPrintExcel(currentHour, totalHour):
     color = ''
-#     print(type(currentHour), type(totalHour))
     if currentHour > totalHour:
         color = Enum.WorkHourColor.IS_GREATER
     elif currentHour < totalHour:
@@ -189,7 +184,7 @@ def caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, d
 def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser):
     dictWorkWeek = {}
     dictWorkMonth = {}
-#     pprint(dictTotal)
+
     for month in listMonth:
         total = 0
         
@@ -198,11 +193,10 @@ def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser):
             if keyOfDict in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK, ]:
                 continue
             else:
-#                 print(dictTotal)
+
                 total += dictTotal[keyOfDict][Enum.HeaderExcelAndKeys.TOTAL_MONTH][month_][0]
         if not sheetOrUser:
             color = CompareAndSelectColorToPrintExcel(total, month[2])
-#         color = CompareAndSelectColorToPrintExcel(total, month[2])
         dictWorkMonth[month_] = [total, color]
         
     for weeks in listWeek:
@@ -261,10 +255,7 @@ def headerToPrintExcel(type_, startDate, endDate, by):
                 monthColor = [month, Enum.WorkHourColor.IS_HEADER]
                 ListPrintExcel.append(monthColor)
         out = ListPrintExcel
-        
-        
-        
-#     print(ListPrintExcel)   
+  
     return ListPrintExcel
-#             ListPrintExcel[0].append(headerNameExcel[0])
+
     

@@ -36,7 +36,7 @@ class RowParsing():
 			count += 1
 		return dictRows
 
-	def getAllSheetAndWorkTimeOfUser(listSheet, ListUser, startDate, endDate, userInfo, dictInfoUser, sheets_):
+	def getAllSheetAndWorkTimeOfUser(listSheet, ListUser, startDate, endDate, userInfo, dictInfoUser, sheets_, dir_):
 
 		UserInfoDict = {}
 		sheetInfoDict = {}
@@ -155,21 +155,19 @@ class RowParsing():
 												allocaton2 = float(dictRows[row]['info'][Enum.Header.ALLOCATION])
 												dayOfWeek2[1] += allocaton2*8
 			if len(strlog):
-				logname = '%s_log.log' %(sheetName)
+				logname = '%s\Log\%s_log.log' %(dir_, sheetName)
 				print('Created  %s: skip row in %s' %(logname, sheetName))
 				f = open(logname, "w")
 				f.write(strlog)
 				f.close()
-# 		pprint(sheetInfoDict)
-# 		asdasd
+
 		return UserInfoDict, sheetInfoDict
 	
 	def caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict, sheetInfoDict):
-# 		print('sssss')
-		#caculate for UserDict
+
 		listMonth = Util.getWorkMonth(startDate, endDate)
 		listWeek = Util.getWorkWeek(startDate, endDate)
-# 		pprint(userInfoDict)
+
 		for team in userInfoDict:
 			if team in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
 				continue
@@ -187,13 +185,12 @@ class RowParsing():
 				totalWeekU, totalMonthU = Util.cacutlateTotal(listMonth, listWeek, userInfoDict[team][user_], Enum.WorkHourColor.BACK_GROUND, False)
 				userInfoDict[team][user_][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthU
 				userInfoDict[team][user_][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekU
-# 			pprint(UserInfoDict)
-# 			asdas
+
 			totalWeekT, totalMonthT = Util.cacutlateTotal(listMonth, listWeek, userInfoDict[team], Enum.WorkHourColor.IS_POSITION, True)
 			userInfoDict[team][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthT
 			userInfoDict[team][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekT
 		
-		#caculate for SheetDict
+
 		for sheet_ in sheetInfoDict:
 			if sheet_ in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
 				continue
@@ -211,13 +208,11 @@ class RowParsing():
 				totalWeekU, totalMonthU = Util.cacutlateTotal(listMonth, listWeek, sheetInfoDict[sheet_][team_], Enum.WorkHourColor.IS_POSITION, True)
 				sheetInfoDict[sheet_][team_][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthU
 				sheetInfoDict[sheet_][team_][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekU
-# 			pprint(sheetInfoDict)
-# 			asdas
+
 			totalWeekT, totalMonthT = Util.cacutlateTotal(listMonth, listWeek, sheetInfoDict[sheet_], Enum.WorkHourColor.IS_SHEET_NAME, True)
 			sheetInfoDict[sheet_][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthT
 			sheetInfoDict[sheet_][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekT
-# 		pprint(sheetInfoDict)
-# 		asdas
+
 		return userInfoDict, sheetInfoDict
 
 
@@ -228,116 +223,105 @@ class RowParsing():
 
 class Controllers():
 
-	def printDictToExcel(sheetName, lsheader, dictToPrint, startRow, startColum, getBy, colorDict, colorDictNoneBorder):
+	def printDictToExcel(sheetName, lsheader, dictToPrint, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail):
 		rowIndex = startRow
 		columIndex = startColum
 		for head1 in lsheader:
-			style1 = Util.selectColorToPrint(head1[1], colorDict, colorDictNoneBorder)
-			if columIndex in [startColum, startColum + 1, startColum + 2]:
-				sheetName.col(columIndex).width = 256 * 20
+			if (showDetail == 0) and (head1[0] == Enum.HeaderExcelAndKeys.SHEET_NAME):
+				continue
 			else:
-				sheetName.col(columIndex).width = 256 * 11
-# 			header = ''
-# 				y, m, d = Util.toDate(head1[0])
-# 				header = '%s/%s' %(d, m)
-# 			else:
-# 				header = head1[0]
-			sheetName.write(rowIndex, columIndex, head1[0], style1)
-			columIndex += 1
+				style1 = Util.selectColorToPrint(head1[1], colorDict, colorDictNoneBorder)
+				lsLongHeader = []
+				if showDetail:
+					lsLongHeader = [startColum, startColum + 1, startColum + 2]
+				else:
+					lsLongHeader = [startColum, startColum + 1]
+				if columIndex in lsLongHeader:
+					sheetName.col(columIndex).width = 256 * 25
+				else:
+					sheetName.col(columIndex).width = 256 * 11
+				sheetName.write(rowIndex, columIndex, head1[0], style1)
+				columIndex += 1
 		rowIndex += 1
 		columIndex = 2
 		for keyLV1 in dictToPrint.keys():
-# 			print(position_, '++++++++++++++++++++++')
+
 			if keyLV1 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
 				continue
 			else:
-# 				position = userInfoDict[position_]
+
 				count1 = 0
 				for head2 in lsheader:
-					value1 = 0
-					if count1 > 2:
-						value1 = dictToPrint[keyLV1][getBy][head2[0]][0]
-						st1 = dictToPrint[keyLV1][getBy][head2[0]][1]
+					if (showDetail == 0) and (head2[0] == Enum.HeaderExcelAndKeys.SHEET_NAME):
+						count1 += 1
+						continue
 					else:
-						value1 = dictToPrint[keyLV1][head2[0]][0]
-						st1 = dictToPrint[keyLV1][head2[0]][1]
-					style2 = Util.selectColorToPrint(st1, colorDict, colorDictNoneBorder)
-	# 				print(position[head2[0]])
-# 					print( '========', value1)
-					if columIndex in [startColum, startColum + 1, startColum + 2]:
-						sheetName.col(columIndex).width = 256 * 20
-					else:
-						sheetName.col(columIndex).width = 256 * 11
-					sheetName.write(rowIndex, columIndex, value1, style2)
-					columIndex += 1
-					count1 += 1
+						value1 = 0
+						if count1 > 2:
+							value1 = dictToPrint[keyLV1][getBy][head2[0]][0]
+							st1 = dictToPrint[keyLV1][getBy][head2[0]][1]
+						else:
+							value1 = dictToPrint[keyLV1][head2[0]][0]
+							st1 = dictToPrint[keyLV1][head2[0]][1]
+						style2 = Util.selectColorToPrint(st1, colorDict, colorDictNoneBorder)
+
+						sheetName.write(rowIndex, columIndex, value1, style2)
+						columIndex += 1
+						count1 += 1
 				rowIndex += 1
 				columIndex = 2
-# 			print(userInfoDict[position].keys())
-# 			if keyLV1 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
-# 				continue
-# 			else:
+
 				for keyLV2 in dictToPrint[keyLV1].keys():
-# 					print(keyLV2, '-----------------------')
+
 					if keyLV2 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
 						continue
 					else:
-						user = dictToPrint[keyLV1][keyLV2]
+
 						count2 = 0
 						for head3 in lsheader:
-							value2 = 0
-							if count2 > 2:
-								value2 = dictToPrint[keyLV1][keyLV2][getBy][head3[0]][0]
-								st2 = dictToPrint[keyLV1][keyLV2][getBy][head3[0]][1]
-							else:
-		# 						print(userInfoDict[keyLV1])
-# 								pprint(userInfoDict[keyLV1][keyLV2])
-								value2 = dictToPrint[keyLV1][keyLV2][head3[0]][0]
-								st2 = dictToPrint[keyLV1][keyLV2][head3[0]][1]
-							style3 = Util.selectColorToPrint(st2, colorDict, colorDictNoneBorder)
-# 							print( '=====================', value2)
-							if columIndex in [startColum, startColum + 1, startColum + 2]:
-								sheetName.col(columIndex).width = 256 * 20
-							else:
-								sheetName.col(columIndex).width = 256 * 11
-							sheetName.write(rowIndex, columIndex, value2, style3)
-							columIndex += 1
-							count2 += 1
-						rowIndex += 1
-						columIndex = 2
-# 					if keyLV2 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.keyLV2NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
-# 						continue
-# 					else:
-						for keyLV3 in dictToPrint[keyLV1][keyLV2].keys():
-							if keyLV3 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+							if (showDetail == 0) and (head3[0] == Enum.HeaderExcelAndKeys.SHEET_NAME):
+								count2 += 1
 								continue
 							else:
-# 							print(keyLV3, '==================')
-# 								user_
-# 								sheet = userInfoDict[keyLV1][user_][sheet]
-								count3 = 0
-								for head4 in lsheader:
-									value3 = 0
-									if count3 > 2:
-										value3 = dictToPrint[keyLV1][keyLV2][keyLV3][getBy][head4[0]][0]
-										st3 = dictToPrint[keyLV1][keyLV2][keyLV3][getBy][head4[0]][1]
-									else:
-# 										print(keyLV2, keyLV3, head4[0])
-										value3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][0]
-										st3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][1]
-									style4 = Util.selectColorToPrint(st3, colorDict, colorDictNoneBorder)
-# 									print( '========================================', value3)
-									if columIndex in [startColum, startColum + 1, startColum + 2]:
-										sheetName.col(columIndex).width = 256 * 20
-									else:
-										sheetName.col(columIndex).width = 256 * 11
-									if (not value3) and st3 == Enum.WorkHourColor.BACK_GROUND:
-										value3 = ''
-									sheetName.write(rowIndex, columIndex, value3, style4)
-									columIndex += 1
-									count3 += 1
-								rowIndex += 1
-								columIndex = 2
-								
-								
-# pprint(Controllers.getTaskAndTimeOfUserByMonth(['QA_FLOW'], ['toannguyen'], '2019-1-1', '2019-1-10'))
+								value2 = 0
+								if count2 > 2:
+									value2 = dictToPrint[keyLV1][keyLV2][getBy][head3[0]][0]
+									st2 = dictToPrint[keyLV1][keyLV2][getBy][head3[0]][1]
+								else:
+
+									value2 = dictToPrint[keyLV1][keyLV2][head3[0]][0]
+									st2 = dictToPrint[keyLV1][keyLV2][head3[0]][1]
+								style3 = Util.selectColorToPrint(st2, colorDict, colorDictNoneBorder)
+								sheetName.write(rowIndex, columIndex, value2, style3)
+								columIndex += 1
+								count2 += 1
+						rowIndex += 1
+						columIndex = 2
+
+						if not showDetail:
+							continue
+						else:
+							for keyLV3 in dictToPrint[keyLV1][keyLV2].keys():
+								if keyLV3 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+									continue
+								else:
+
+									count3 = 0
+									for head4 in lsheader:
+										value3 = 0
+										if count3 > 2:
+											value3 = dictToPrint[keyLV1][keyLV2][keyLV3][getBy][head4[0]][0]
+											st3 = dictToPrint[keyLV1][keyLV2][keyLV3][getBy][head4[0]][1]
+										else:
+
+											value3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][0]
+											st3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][1]
+										style4 = Util.selectColorToPrint(st3, colorDict, colorDictNoneBorder)
+
+										if (not value3) and st3 == Enum.WorkHourColor.BACK_GROUND:
+											value3 = ''
+										sheetName.write(rowIndex, columIndex, value3, style4)
+										columIndex += 1
+										count3 += 1
+									rowIndex += 1
+									columIndex = 2

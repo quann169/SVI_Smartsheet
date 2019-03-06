@@ -12,6 +12,12 @@ class UserInfoConfig():
 	POSITION = 'Position'
 	LIST_MAIL = 'Other info'
 	SENIORITY_LEVEL = 'Seniority level'
+	#row, colum to get info from Config.xlsx
+	ROW_GET_STATUS_AND_START_END_DATE = 2
+	ROW_GET_SHOW_DETAIL = 3
+	ROW_GET_SHEET = 6
+	ROW_GET_USER_INFO = 1
+	COLUM_GET_STATUS = 1
 	
 class GenSmartsheet():
 	TOKEN = "nls2smz4rzdckgfp9pcem9sg8y"
@@ -52,8 +58,8 @@ class DateTime():
 	
 class WorkHourColor:
 	IS_EQUAL = 'lime'
-	IS_GREATER = 'light_yellow'
-	IS_LESS = 'rose'
+	IS_GREATER = 'orange'
+	IS_LESS = 'tan'
 	IS_HEADER = 'gray_ega'
 	IS_USER_NAME = 'gray25'
 	IS_SHEET_NAME = 'ice_blue'
