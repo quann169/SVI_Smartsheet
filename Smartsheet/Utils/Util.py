@@ -1,6 +1,7 @@
 import calendar
 import datetime
 import xlwt
+import time
 # import numpy as np
 # import pandas
 import sys
@@ -258,4 +259,8 @@ def headerToPrintExcel(type_, startDate, endDate, by):
   
     return ListPrintExcel
 
-    
+def getTimeRun(startTime, currentTime):
+    diff = int(currentTime - startTime)
+    minutes, seconds = diff // 60, diff % 60
+    out = str(minutes) + ':' + str(seconds).zfill(2)
+    return out

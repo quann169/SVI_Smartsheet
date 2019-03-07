@@ -8,7 +8,7 @@ from Model.Rows import Row
 from Enum import Enum
 from Utils import Util
 import datetime
-from pprint import pprint
+import time
 
 class RowParsing():
 	#connect to smartsheet
@@ -43,8 +43,9 @@ class RowParsing():
 		#add data into UserInfoDict
 		for sheetName in listSheet:
 			strlog = ''
-			print('Parsing %s........' %(sheetName))
-			print('------------------------------------------------------------------------------')
+			time1_ = time.time()
+			print('Start parsing %s........' %(sheetName))
+			
 			dictRows = RowParsing.getAllDataOfSheet(sheetName, sheets_)
 			listParentId = Row.getParentId(dictRows)
 			for row in dictRows:
@@ -58,7 +59,6 @@ class RowParsing():
 					else:
 # 						
 						startToEndDay = []
-
 						if dictRows[row]['info'][Enum.Header.ALLOCATION] == 'NaN':
 							strlog += 'Skip--Allocation is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE]) 
 							continue
@@ -160,6 +160,9 @@ class RowParsing():
 				f = open(logname, "w")
 				f.write(strlog)
 				f.close()
+			time2_ = time.time()
+			print('Parsing %s done: %s' %(sheetName, Util.getTimeRun(time1_, time2_)))
+			print('------------------------------------------------------------------------------')
 
 		return UserInfoDict, sheetInfoDict
 	
