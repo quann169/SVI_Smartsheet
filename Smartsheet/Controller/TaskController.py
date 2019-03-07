@@ -155,7 +155,7 @@ class RowParsing():
 												allocaton2 = float(dictRows[row]['info'][Enum.Header.ALLOCATION])
 												dayOfWeek2[1] += allocaton2*8
 			if len(strlog):
-				logname = '%s\Log\%s_log.log' %(dir_, sheetName)
+				logname = '%s\Log\%s.log' %(dir_, sheetName)
 				print('Created  %s: skip row in %s' %(logname, sheetName))
 				f = open(logname, "w")
 				f.write(strlog)
