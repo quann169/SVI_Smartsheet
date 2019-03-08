@@ -196,10 +196,10 @@ class RowParsing():
 												dayOfWeek2[1] += allocaton2*8
 				else:
 					countRowParent += 1
+			print('Skip (not save into log) %s parent task in %s' %(countRowParent, sheetName))
 			if len(strlog):
 				logname = '%s\Log\%s.log' %(dir_, sheetName)
 				print('Skip %s row in %s' %(countSkipRow, sheetName))
-				print('Skip (not save into log) %s parent task in %s' %(countRowParent, sheetName))
 				print('Created  %s: skip row in %s' %(logname, sheetName))
 				f = open(logname, "w")
 				f.write(strlog)
