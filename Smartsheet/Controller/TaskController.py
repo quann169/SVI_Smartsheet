@@ -11,6 +11,42 @@ import datetime
 import time
 
 class RowParsing():
+	def checkSheetConfigIsExist(listSheetConfig):
+# 		listSheetConfig = ['BUG_A001', 'BUG_A002', 'ssss', 'adasd']
+		TOKEN = Enum.GenSmartsheet.TOKEN
+		smartsheet = Smartsheet(TOKEN)
+		sheets = smartsheet.sheets.list()
+		listSheetSms = []
+		for sheetSmartsheet in sheets:
+			listSheetSms.append(sheetSmartsheet.name)
+		strOut = ''
+		listOut = []
+		for sheetConfig in listSheetConfig:
+			if not (sheetConfig in listSheetSms):
+				listOut.append(sheetConfig)
+		strOut = ', '.join(listOut)
+		return strOut
+	
+	def checkHeaderExistInSheet(sheetName, listHeader):
+
+		TOKEN = Enum.GenSmartsheet.TOKEN
+		smartsheet = Smartsheet(TOKEN)
+		sheet = smartsheet.sheets.get(sheetName)
+		sheetInfo = sheet.columns
+		# For each column, print Id and Title.
+		lHeader = []
+		for col in sheetInfo:
+			lHeader.append(col[Enum.GenSmartsheet.TITLE])
+		strOut = ''
+		listOut = []
+		for hConfig in listHeader:
+			if not(hConfig in lHeader):
+				listOut.append(hConfig)
+		strOut = ', '.join(listOut)
+		return strOut
+		
+	
+	
 	#connect to smartsheet
 	def connectSmartsheet(sheet_name):
 		TOKEN = Enum.GenSmartsheet.TOKEN
@@ -45,7 +81,8 @@ class RowParsing():
 			strlog = ''
 			time1_ = time.time()
 			print('Start parsing %s........' %(sheetName))
-			
+			countSkipRow = 0
+			countRowParent = 0
 			dictRows = RowParsing.getAllDataOfSheet(sheetName, sheets_)
 			listParentId = Row.getParentId(dictRows)
 			for row in dictRows:
@@ -55,15 +92,18 @@ class RowParsing():
 				if not (dictRows[row][Enum.GenSmartsheet.ID]  in listParentId):
 					if dictRows[row]['info'][Enum.Header.ASSIGNED_TO] == 'NaN':
 						strlog += 'Skip--AssignTo is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE])
+						countSkipRow += 1
 						continue
 					else:
 # 						
 						startToEndDay = []
 						if dictRows[row]['info'][Enum.Header.ALLOCATION] == 'NaN':
 							strlog += 'Skip--Allocation is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE]) 
+							countSkipRow += 1
 							continue
 						if (dictRows[row]['info'][Enum.Header.START_DATE] == 'NaN') or (dictRows[row]['info'][Enum.Header.END_DATE] == "NaN"):
 							strlog += 'Skip--Start date or End date is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE])
+							countSkipRow += 1
 							continue
 						else:
 							syear, smonth, sday = Util.toDate(dictRows[row]['info'][Enum.Header.START_DATE])
@@ -154,8 +194,12 @@ class RowParsing():
 											if str(date2) == dayOfWeek2[0]:
 												allocaton2 = float(dictRows[row]['info'][Enum.Header.ALLOCATION])
 												dayOfWeek2[1] += allocaton2*8
+				else:
+					countRowParent += 1
 			if len(strlog):
-				logname = '%s\Log\%s_log.log' %(dir_, sheetName)
+				logname = '%s\Log\%s.log' %(dir_, sheetName)
+				print('Skip %s row in %s' %(countSkipRow, sheetName))
+				print('Skip (not save into log) %s parent task in %s' %(countRowParent, sheetName))
 				print('Created  %s: skip row in %s' %(logname, sheetName))
 				f = open(logname, "w")
 				f.write(strlog)
@@ -328,3 +372,4 @@ class Controllers():
 										count3 += 1
 									rowIndex += 1
 									columIndex = 2
+# RowParsing.checkHeaderExistInSheet('listSheetConfig', '')

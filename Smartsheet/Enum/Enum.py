@@ -13,10 +13,10 @@ class UserInfoConfig():
 	LIST_MAIL = 'Other info'
 	SENIORITY_LEVEL = 'Seniority level'
 	#row, colum to get info from Config.xlsx
-	ROW_GET_STATUS_AND_START_END_DATE = 2
-	ROW_GET_SHOW_DETAIL = 3
-	ROW_GET_SHEET = 6
-	ROW_GET_USER_INFO = 1
+	ROW_GET_STATUS_AND_START_END_DATE = 3
+	ROW_GET_SHOW_DETAIL = 4
+	ROW_GET_SHEET = 7
+	ROW_GET_USER_INFO = 2
 	COLUM_GET_STATUS = 1
 	
 class GenSmartsheet():

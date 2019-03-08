@@ -12,18 +12,17 @@ import time
 import shutil
 
 def Run__():
-	
-	
 	time1 = time.time()
 	print('Start time: %s' %(str(datetime.datetime.now())))
 	print("------------------------------------------------------------------------------")
+	
 	dir_ = os.path.dirname(os.path.abspath(__file__))
 	try:
 		os.makedirs(dir_ + '\Log')
 	except:
 		shutil.rmtree(dir_ + '\Log')
 		os.makedirs(dir_ + '\Log')
-	
+	 #open config file
 	staff_path = ("%s\Config.xlsx"%(dir_)) 
 	userInfo = {}
 	print('Config file is %s' %(staff_path))
@@ -42,41 +41,64 @@ def Run__():
 	sheet1 = wb.sheet_by_name('Staff') 
 	sheet1.cell_value(0, 0)
 	print('Start get info from Config.xlsx')
+	
 	#get info of user
-
 	for row_ in range(Enum.UserInfoConfig.ROW_GET_USER_INFO, sheet1.nrows):
 		lsRow = sheet1.row_values(row_)
-		userInfo[lsRow[4]] = {}
-		userInfo[lsRow[4]][Enum.UserInfoConfig.POSITION] = lsRow[5]
-		userInfo[lsRow[4]][Enum.UserInfoConfig.SENIORITY_LEVEL] = lsRow[6]
-		listOtherInfo = lsRow[7]. split(',')
+		userInfo[lsRow[1]] = {}
+		userInfo[lsRow[1]][Enum.UserInfoConfig.POSITION] = lsRow[2]
+		userInfo[lsRow[1]][Enum.UserInfoConfig.SENIORITY_LEVEL] = lsRow[3]
+		listOtherInfo = lsRow[4]. split(',')
 		for id1 in range(0, len(listOtherInfo)):
 			listOtherInfo[id1] = listOtherInfo[id1].strip()
-		userInfo[lsRow[4]][Enum.UserInfoConfig.LIST_MAIL] = listOtherInfo
+		userInfo[lsRow[1]][Enum.UserInfoConfig.LIST_MAIL] = listOtherInfo
 	print('Config ' + str(len(userInfo)) + ' user ')
-		
+	#--------------------------------------------
+	
 	#get item
 	sheet2 = wb.sheet_by_name('Config')	
 	lsRow_ = sheet2.row_values(Enum.UserInfoConfig.ROW_GET_STATUS_AND_START_END_DATE)
 	for i in range(Enum.UserInfoConfig.COLUM_GET_STATUS, Enum.UserInfoConfig.COLUM_GET_STATUS + 4):
+		
+		#check config status------------
 		if lsRow_[i].lower() == 'yes':
 			listItems[i]['status'] = 1
-		else:
+		elif lsRow_[i].lower() == 'no':
 			listItems[i]['status'] = 0
-	startDate = str(lsRow_[6])
-	endDate = str(lsRow_[7])
+		else:
+			print('Config Error: Select "Run" must be yes or no, not be ' + lsRow_[i])
+			sys.exit()
+	startDate = str(lsRow_[5])
+	endDate = str(lsRow_[6])
+	
+		#check config start, end date------------
+	try:
+		objDateS = datetime.datetime.strptime(startDate, '%Y-%m-%d')
+	except:
+		print('Config Error:: Format start date error: ' + startDate)
+		sys.exit()
+	try:
+		objDateE = datetime.datetime.strptime(endDate, '%Y-%m-%d')
+	except:
+		print('Config Error:: Format end date error: ' + endDate)
+		sys.exit()	
+	
 	sy, sm, sd = Util.toDate(startDate)
 	ey, em, ed = Util.toDate(endDate)
 	if datetime.datetime(ey, em, ed) <= datetime.datetime(sy, sm, sd):
-		print('Start date and End date fail in Config.xlsx')
+		print('Config Error: End date is previou day of start date: Start date: %s - End date: %s' %(startDate, endDate))
 		sys.exit()
-	
+		
+		#check config show detail------------
 	lsRow2_ = sheet2.row_values(Enum.UserInfoConfig.ROW_GET_SHOW_DETAIL)
 	for j in range(Enum.UserInfoConfig.COLUM_GET_STATUS, Enum.UserInfoConfig.COLUM_GET_STATUS + 2):
 		if lsRow2_[j].lower() == 'yes':
 			listItems[j]['show detail'] = 1
-		else:
+		elif lsRow2_[j].lower() == 'no':
 			listItems[j]['show detail'] = 0
+		else:
+			print('Config Error: Select "Show detail" must be yes or no, not be ' + lsRow2_[j])
+			sys.exit()
 	for item in listItems:
 		if listItems[item]['status']:
 			if (item in [1,2]) and (listItems[item]['show detail']):
@@ -85,6 +107,7 @@ def Run__():
 				print('Select item ' + str(item))
 	print('Config start date is: ' + startDate)
 	print('Config end date is: ' + endDate)
+	#--------------------------------------
 	
 	#get sheet dict
 	for row___ in range(Enum.UserInfoConfig.ROW_GET_SHEET, sheet2.nrows):
@@ -108,6 +131,22 @@ def Run__():
 	for user_ in userInfo.keys():
 		ListUserFilter.append(user_)
 	print('Config ' + str(len(ListSheetFilter)) + ' sheet: ' + ', '.join(ListSheetFilter))
+		
+		#check config Sheet name
+	strOutS = RowParsing.checkSheetConfigIsExist(ListSheetFilter)
+	if len(strOutS):
+		print('Config Error: Not exist in Smartsheet - Sheet name: ' + strOutS)
+		sys.exit()
+		
+		#check config header name
+	for sheetN in ListSheetFilter:
+		lsHeader = []
+		for head__ in Sheet[sheetN].values():
+			lsHeader.append(head__)
+		strOutH = RowParsing.checkHeaderExistInSheet(sheetN, lsHeader)
+		if len(strOutH):
+			print('Config Error: Not exist Header name in %s - Header name: %s' %(sheetN, strOutH))
+			sys.exit()
 	time2 = time.time()
 	print("Get info from Config.xlsx done: " + Util.getTimeRun(time1, time2))
 	print("------------------------------------------------------------------------------")
@@ -176,9 +215,12 @@ if __name__ == '__main__':
     try:
     	Run__()
     except BaseException:
-        print(sys.exc_info()[0])
-        import traceback
-        print(traceback.format_exc())
+    	if str(sys.exc_info()[0]) == "<class 'SystemExit'>":
+    		print('Error: System Exit')
+    	else:
+#     		print(sys.exc_info()[0])
+	        import traceback
+	        print(traceback.format_exc())
     finally:
         print("Press Enter to exit ...")
         input() 
