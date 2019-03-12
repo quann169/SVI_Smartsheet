@@ -51,6 +51,8 @@ def Run__():
 		listOtherInfo = lsRow[4]. split(',')
 		for id1 in range(0, len(listOtherInfo)):
 			listOtherInfo[id1] = listOtherInfo[id1].strip()
+		if not (lsRow[1].lower() in listOtherInfo):
+			listOtherInfo.append(lsRow[1].lower())
 		userInfo[lsRow[1]][Enum.UserInfoConfig.LIST_MAIL] = listOtherInfo
 	print('Config ' + str(len(userInfo)) + ' user ')
 	#--------------------------------------------
