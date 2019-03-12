@@ -9,23 +9,35 @@ from Enum import Enum
 from Utils import Util
 import datetime
 import time
+from pprint import pprint
 
 class RowParsing():
-	def checkSheetConfigIsExist(listSheetConfig):
-# 		listSheetConfig = ['BUG_A001', 'BUG_A002', 'ssss', 'adasd']
+	def checkSheetConfigIsExist(listSheetConfig, Sheet):
+		SheetEdit = {}
+		listSheetConfigReplace = []
 		TOKEN = Enum.GenSmartsheet.TOKEN
 		smartsheet = Smartsheet(TOKEN)
 		sheets = smartsheet.sheets.list()
-		listSheetSms = []
+		dictSheetSms = {}
 		for sheetSmartsheet in sheets:
-			listSheetSms.append(sheetSmartsheet.name)
+			dictSheetSms[sheetSmartsheet.name.lower()] = sheetSmartsheet.name
 		strOut = ''
 		listOut = []
-		for sheetConfig in listSheetConfig:
-			if not (sheetConfig in listSheetSms):
+# 		for sheetConfig in listSheetConfig:
+# 			if not (sheetConfig in listSheetSms):
+# 				listOut.append(sheetConfig)
+# 		strOut = ', '.join(listOut)
+		
+		for index_ in range(0, len(listSheetConfig)):
+			if not (listSheetConfig[index_].lower() in dictSheetSms.keys()):
 				listOut.append(sheetConfig)
+			else:
+				listSheetConfigReplace.append(dictSheetSms[listSheetConfig[index_].lower()])
+				SheetEdit[dictSheetSms[listSheetConfig[index_].lower()]] = Sheet[listSheetConfig[index_]]
 		strOut = ', '.join(listOut)
-		return strOut
+		
+		
+		return strOut, listSheetConfigReplace, SheetEdit
 	
 	def checkHeaderExistInSheet(sheetName, listHeader):
 
@@ -33,12 +45,22 @@ class RowParsing():
 		smartsheet = Smartsheet(TOKEN)
 		sheet = smartsheet.sheets.get(sheetName)
 		sheetInfo = sheet.columns
+# 		if sheetName == 'NRE_ECC_CPL':
+# 			pprint (sheetInfo)
+# 			asd
 		# For each column, print Id and Title.
 		lHeader = []
+		lsHSheet = []
 		for col in sheetInfo:
-			lHeader.append(col[Enum.GenSmartsheet.TITLE])
+			lsHSheet.append(col[Enum.GenSmartsheet.TITLE])
+			#remove % in header
+			headerName_ = col[Enum.GenSmartsheet.TITLE].replace('%', '')
+			headerName = headerName_.strip()
+			lHeader.append(headerName)
 		strOut = ''
 		listOut = []
+# 		print (lHeader, listHeader)
+		print('Header of %s: %s' %(sheetName, ', '.join(lsHSheet)))
 		for hConfig in listHeader:
 			if not(hConfig in lHeader):
 				listOut.append(hConfig)

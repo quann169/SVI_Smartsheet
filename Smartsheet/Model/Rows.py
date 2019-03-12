@@ -57,13 +57,19 @@ class Row():
 		index = 0
 		# listIndex = []
 		for title in Datacolums:
-			if title[Enum.GenSmartsheet.TITLE] in dictHeaderConfig.values():
+			headerName_ = title[Enum.GenSmartsheet.TITLE].replace('%', '')
+			headerName = headerName_.strip()
+			if headerName in dictHeaderConfig.values():
 				for key, value in dictHeaderConfig.items():
-					if value == title[Enum.GenSmartsheet.TITLE]:
+					#remove % in header
+					headerName1_ = value.replace('%', '')
+					headerName1 = headerName1_.strip()
+					if headerName1 == headerName:
 						dictHeader[index] = key
 						# listHeader.append(key)
 						# listIndex.append(index)
 				# print(listHeader, index)
+				
 			index = index + 1
 		# return listHeader, listIndex
 		return dictHeader

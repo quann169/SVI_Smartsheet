@@ -117,8 +117,11 @@ def Run__():
 		Sheet[lsRow__[1]] ={}
 		for j in range(1, 9):
 			for index in range(0,len(lsSheetKey)):
-				Sheet[lsRow__[1]][lsSheetKey[index]] = lsRow__[index + 2]
-				
+				#remove % in header
+				headerName_ = lsRow__[index + 2].replace('%', '')
+				headerName = headerName_.strip()
+				Sheet[lsRow__[1]][lsSheetKey[index]] = headerName
+	
 	
 	for user__ in userInfo:
 		if len(userInfo[user__][Enum.UserInfoConfig.LIST_MAIL]) != 0:
@@ -135,7 +138,9 @@ def Run__():
 	print('Config ' + str(len(ListSheetFilter)) + ' sheet: ' + ', '.join(ListSheetFilter))
 		
 		#check config Sheet name
-	strOutS = RowParsing.checkSheetConfigIsExist(ListSheetFilter)
+	strOutS, lsSheet, sheetEdit = RowParsing.checkSheetConfigIsExist(ListSheetFilter, Sheet)
+	ListSheetFilter = lsSheet
+	Sheet = sheetEdit
 	if len(strOutS):
 		print('Config Error: Not exist in Smartsheet - Sheet name: ' + strOutS)
 		sys.exit()
@@ -144,7 +149,9 @@ def Run__():
 	for sheetN in ListSheetFilter:
 		lsHeader = []
 		for head__ in Sheet[sheetN].values():
+			
 			lsHeader.append(head__)
+# 		print(lsHeader)
 		strOutH = RowParsing.checkHeaderExistInSheet(sheetN, lsHeader)
 		if len(strOutH):
 			print('Config Error: Not exist Header name in %s - Header name: %s' %(sheetN, strOutH))
