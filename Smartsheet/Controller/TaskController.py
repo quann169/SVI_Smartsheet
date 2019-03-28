@@ -30,7 +30,8 @@ class RowParsing():
 		
 		for index_ in range(0, len(listSheetConfig)):
 			if not (listSheetConfig[index_].lower() in dictSheetSms.keys()):
-				listOut.append(sheetConfig)
+# 				pprint (dictSheetSms.keys())
+				listOut.append(listSheetConfig[index_])
 			else:
 				listSheetConfigReplace.append(dictSheetSms[listSheetConfig[index_].lower()])
 				SheetEdit[dictSheetSms[listSheetConfig[index_].lower()]] = Sheet[listSheetConfig[index_]]
