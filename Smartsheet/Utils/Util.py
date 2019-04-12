@@ -126,11 +126,13 @@ def CompareAndSelectColorToPrintExcel(currentHour, totalHour):
     color = ''
     if currentHour > totalHour:
         color = Enum.WorkHourColor.IS_GREATER
+        return color, totalHour
     elif currentHour < totalHour:
         color = Enum.WorkHourColor.IS_LESS
+        return color, currentHour
     else:
         color = Enum.WorkHourColor.IS_EQUAL
-    return color
+        return color, currentHour
 
 def definedColor():
     colorDict = {}
@@ -153,19 +155,22 @@ def selectColorToPrint(color, colorDict, colorDictNoneBorder):
     else:
         return(colorDictNoneBorder[color])
     
-def caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, dictWeek, color, sheetOrUser):
+def caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, dictWeek, color, sheetOrUser, limit):
     dictWorkOut = {}
     for week in listWeek:
+
         workTime = 0
         for day in dictWeek[week[0]]:
             workTime += day[1]
         if sheetOrUser:
-            color = CompareAndSelectColorToPrintExcel(workTime, week[1])
-        workColor = [workTime, color]
+            color, hour_ = CompareAndSelectColorToPrintExcel(workTime, week[1])
+            workColor = [hour_, color]
+        else:
+            workColor = [workTime, color]
         dictWorkOut[week[0]] = workColor
     return dictWorkOut
 
-def caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, dictWeek, color, sheetOrUser):
+def caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, dictWeek, color, sheetOrUser, limit):
     dictWorkOut = {}
 
     for month in listMonth:
@@ -176,13 +181,15 @@ def caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, d
                 if (m == month[0]) and (y == month[1]):
                     workTime += day[1]
         if sheetOrUser:
-            color = CompareAndSelectColorToPrintExcel(workTime, month[2])
-        workColor = [workTime, color]
+            color, hour_ = CompareAndSelectColorToPrintExcel(workTime, month[2])
+            workColor = [hour_, color]
+        else:
+            workColor = [workTime, color]
         month_ = '%s-%s' %(Enum.DateTime.LIST_MONTH[month[0]], month[1])
         dictWorkOut[month_] = workColor
     return dictWorkOut
 
-def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser):
+def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser, limit):
     dictWorkWeek = {}
     dictWorkMonth = {}
 
@@ -197,9 +204,10 @@ def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser):
 
                 total += dictTotal[keyOfDict][Enum.HeaderExcelAndKeys.TOTAL_MONTH][month_][0]
         if not sheetOrUser:
-            color = CompareAndSelectColorToPrintExcel(total, month[2])
-        dictWorkMonth[month_] = [total, color]
-        
+            color, hour_ = CompareAndSelectColorToPrintExcel(total, month[2])
+            dictWorkMonth[month_] = [hour_, color]
+        else:
+            dictWorkMonth[month_] = [total, color]
     for weeks in listWeek:
         color2 = color
         total2 = 0
@@ -211,8 +219,10 @@ def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser):
                 total2 += dictTotal[keyOfDict][Enum.HeaderExcelAndKeys.TOTAL_WEEK][week][0]
         
         if not sheetOrUser:
-            color2 = CompareAndSelectColorToPrintExcel(total2, weeks[1])
-        dictWorkWeek[week] = [total2, color2]
+            color2, hour_ = CompareAndSelectColorToPrintExcel(total2, weeks[1])
+            dictWorkWeek[week] = [hour_, color2]
+        else:
+            dictWorkWeek[week] = [total2, color2]
     return dictWorkWeek, dictWorkMonth
 
 
