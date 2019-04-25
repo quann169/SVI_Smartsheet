@@ -1,5 +1,4 @@
 import sys
-from openpyxl.styles.builtins import total
 sys.path.append('..')
 import smartsheet
 from simple_smartsheet import Smartsheet
@@ -10,7 +9,7 @@ from Utils import Util
 import datetime
 import time
 from pprint import pprint
-
+import xlwt
 class RowParsing():
 	def checkSheetConfigIsExist(listSheetConfig, Sheet):
 		SheetEdit = {}
@@ -95,10 +94,11 @@ class RowParsing():
 			count += 1
 		return dictRows
 
-	def getAllSheetAndWorkTimeOfUser(listSheet, ListUser, startDate, endDate, userInfo, dictInfoUser, sheets_, dir_):
+	def getAllSheetAndWorkTimeOfUser(listSheet, ListUser, startDate, endDate, userInfo, dictInfoUser, sheets_, dir_, excelHoliday):
 
 		UserInfoDict = {}
 		sheetInfoDict = {}
+		sheetInfoDict2 = {}
 		#add data into UserInfoDict
 		for sheetName in listSheet:
 			strlog = ''
@@ -118,12 +118,10 @@ class RowParsing():
 						countSkipRow += 1
 						continue
 					else:
-# 						
+						
 						startToEndDay = []
 						if dictRows[row]['info'][Enum.Header.ALLOCATION] == 'NaN':
-							strlog += 'Skip--Allocation is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE]) 
-							countSkipRow += 1
-							continue
+							dictRows[row]['info'][Enum.Header.ALLOCATION] = 0
 						if (dictRows[row]['info'][Enum.Header.START_DATE] == 'NaN') or (dictRows[row]['info'][Enum.Header.END_DATE] == "NaN"):
 							strlog += 'Skip--Start date or End date is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE])
 							countSkipRow += 1
@@ -133,11 +131,12 @@ class RowParsing():
 							eyear, emonth, eday = Util.toDate(dictRows[row]['info'][Enum.Header.END_DATE])
 							start_dt = datetime.date(syear, smonth, sday)
 							end_dt = datetime.date(eyear, emonth, eday)
-							listWorkDay1 = Util.getWorkDay(startDate, endDate)
+							listWorkDay1 = Util.getWorkDay(startDate, endDate, dir_, excelHoliday)
 							for date_ in Util.daterange(start_dt, end_dt):
 								for wday in listWorkDay1:
 									if wday[0] == str(date_):
 										startToEndDay.append(str(date_))
+# 						print(startToEndDay, syear, smonth, sday, eyear, emonth, eday)
 						if len(startToEndDay) == 0:
 							continue
 						else:
@@ -152,7 +151,7 @@ class RowParsing():
 								else:
 									user = users
 								position_ = '%s %s' %(userInfo[user][Enum.UserInfoConfig.SENIORITY_LEVEL], userInfo[user][Enum.UserInfoConfig.POSITION])
-								
+							task_name = dictRows[row]['info'][Enum.Header.TASK_NAME]
 							#create empty dict for user key = position
 							if not (position_ in UserInfoDict.keys()):
 								UserInfoDict[position_] = {}
@@ -177,10 +176,33 @@ class RowParsing():
 							if not(user in sheetInfoDict[sheetName][position_].keys()):
 								sheetInfoDict[sheetName][position_][user] = {}
 								Util.createDict(sheetInfoDict[sheetName][position_][user], '', user, '', Enum.WorkHourColor.BACK_GROUND, Enum.WorkHourColor.IS_USER_NAME, Enum.WorkHourColor.BACK_GROUND)
+							#create empty dict for user key = position
+							if not(sheetName  in sheetInfoDict2.keys()):
+								sheetInfoDict2[sheetName] = {}
+ 							
+							#create empty dict for user key = position
+							if not (position_ in sheetInfoDict2[sheetName].keys()):
+								sheetInfoDict2[sheetName][position_] = {}
+ 								
+							#create empty dict for position key = username
+							if not(user in sheetInfoDict2[sheetName][position_].keys()):
+								sheetInfoDict2[sheetName][position_][user] = {}
+							if task_name in sheetInfoDict2[sheetName][position_][user].keys():
+								while True:
+									i = 1
+									task_name =  task_name +'(' + str(i) + ')'
+									if not(task_name in sheetInfoDict2[sheetName][position_][user].keys()):
+										break
+									else:
+										i = i + 1	
+							
+							
+							
+# 							print(sheetInfoDict2[sheetName][position_][user][task_name]['week'].keys(), sheetInfoDict2[sheetName][position_][user][task_name]['month'].keys(), task_name, user, listWorkWeekOfTask, dictRows[row]['info'][Enum.Header.START_DATE], dictRows[row]['info'][Enum.Header.END_DATE])
 							#get work day of 1 task, Mon to Fri
 							for date2 in startToEndDay:
-								listWorkDay = Util.getWorkDay(startDate, endDate)
-								
+								listWorkDay = Util.getWorkDay(startDate, endDate, dir_, excelHoliday)
+								listWorkMonth = Util.getWorkMonth(startDate, endDate, dir_, excelHoliday)
 								for weeks in listWorkDay:
 									if not (weeks[1] in UserInfoDict[position_][user][sheetName].keys()):
 										UserInfoDict[position_][user][sheetName][weeks[1]] = []
@@ -197,7 +219,7 @@ class RowParsing():
 											if days2[1] == weeks[1]:
 												info2 = [days2[0], 0]
 												sheetInfoDict[sheetName][position_][user][days2[1]].append(info2)
-												
+		
 								for week in UserInfoDict[position_][user][sheetName]:
 									if week in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
 										continue
@@ -217,6 +239,51 @@ class RowParsing():
 											if str(date2) == dayOfWeek2[0]:
 												allocaton2 = float(dictRows[row]['info'][Enum.Header.ALLOCATION])
 												dayOfWeek2[1] += allocaton2*8
+								
+								if not ( task_name in sheetInfoDict2[sheetName][position_][user].keys()):
+									sheetInfoDict2[sheetName][position_][user][task_name] = {}
+# 									pprint(sheetInfoDict2)
+									sheetInfoDict2[sheetName][position_][user][task_name][Enum.Header.START_DATE] = '%s-%s-%s'%(Util.toDate(dictRows[row]['info'][Enum.Header.START_DATE]))
+									sheetInfoDict2[sheetName][position_][user][task_name][Enum.Header.END_DATE] = '%s-%s-%s'%(Util.toDate(dictRows[row]['info'][Enum.Header.END_DATE]))
+									sheetInfoDict2[sheetName][position_][user][task_name]['week'] = {}
+									sheetInfoDict2[sheetName][position_][user][task_name]['allocation'] = str(int(float(dictRows[row]['info'][Enum.Header.ALLOCATION])*100)) + '%'
+									sheetInfoDict2[sheetName][position_][user][task_name]['month'] = {}
+								for wday in listWorkDay:
+									if wday[0] == date2:
+										if not (wday[1] in sheetInfoDict2[sheetName][position_][user][task_name]['week'].keys()):
+											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]] = {}
+											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['totalHour'] = 0
+											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['startWeek'] = wday[1]
+											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['endWeek'] = Util.get_end_start_week(wday[0])[0]
+											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['workWeek'] = Util.get_week_number(wday[0])
+											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['workHour'] = [0,'']
+										week___ = Util.get_end_start_week(date2)[1]
+										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][0] += 8*float(dictRows[row]['info'][Enum.Header.ALLOCATION])
+										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['totalHour'] += 8
+										currentHour = sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][0]
+										totalHour = sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['totalHour']
+										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour, totalHour)[0]
+ 																									
+								for wmonth in listWorkMonth:
+									y_, m_, d_ = Util.toDate(date2)
+									m_ = '%s/%s'%(m_, y_)
+									m = '%s/%s'%(wmonth[0], wmonth[1])
+									if (m == m_):
+										if not (m in sheetInfoDict2[sheetName][position_][user][task_name]['month'].keys()):
+											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m] = {}
+											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['totalHour'] = 0
+ 			
+											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['startMonth'] = Util.get_end_start_month('%s-%s'%(wmonth[1], wmonth[0]))[0]
+											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['endMonth'] = Util.get_end_start_month('%s-%s'%(wmonth[1], wmonth[0]))[1]
+			# 									sheetInfoDict2[sheetName][position_][user][task_name]['month'][monthTask[0]]['workMonth'] = {}
+											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['workHour'] = [0, '']
+ 									
+ 										
+										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][0] += 8*float(dictRows[row]['info'][Enum.Header.ALLOCATION])
+										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['totalHour'] += 8
+										currentHour2 = sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][0]
+										totalHour2 = sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['totalHour']
+										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour2, totalHour2)[0]
 				else:
 					countRowParent += 1
 			print('Skip (not save into log) %s parent task in %s' %(countRowParent, sheetName))
@@ -230,14 +297,12 @@ class RowParsing():
 			time2_ = time.time()
 			print('Parsing %s done: %s' %(sheetName, Util.getTimeRun(time1_, time2_)))
 			print('------------------------------------------------------------------------------')
-
-		return UserInfoDict, sheetInfoDict
+		return UserInfoDict, sheetInfoDict, sheetInfoDict2
 	
-	def caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict, sheetInfoDict):
+	def caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict, sheetInfoDict, dir_, excelHoliday):
 
-		listMonth = Util.getWorkMonth(startDate, endDate)
-		listWeek = Util.getWorkWeek(startDate, endDate)
-
+		listMonth = Util.getWorkMonth(startDate, endDate, dir_, excelHoliday)
+		listWeek = Util.getWorkWeek(startDate, endDate, dir_, excelHoliday)
 		for team in userInfoDict:
 			if team in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
 				continue
@@ -395,4 +460,99 @@ class Controllers():
 										count3 += 1
 									rowIndex += 1
 									columIndex = 2
-# RowParsing.checkHeaderExistInSheet('listSheetConfig', '')
+	def printToExcelMonthlyOrWeeklyTimesheet(sheetName, lsheader, sheetInfoDict2_, startRow, startColum, monthOrWeek):
+		startRow, startColum = (0, 0)
+		rowIndex = startRow
+		columIndex = startColum
+		formatHead = 'align: wrap 0; pattern: pattern solid, fore-colour grey25; border: left thin, top thin, right thin, bottom thin, bottom-color gray25, top-color gray25, left-color gray25, right-color gray25; font: name Calibri, bold 0,height 240;' 
+		styleHeader = xlwt.easyxf(formatHead)
+		for head1 in lsheader:
+# 			sheetName.col(columIndex).width = 256 * 20
+			if columIndex == 6:
+				sheetName.col(columIndex).width = 256 * 30
+			elif columIndex == 5:
+				sheetName.col(columIndex).width = 256 * 20
+			elif columIndex == 0:
+				sheetName.col(columIndex).width = 256 * 14
+			elif columIndex == 7:
+				sheetName.col(columIndex).width = 256 * 15
+			elif columIndex == 8:
+				sheetName.col(columIndex).width = 256 * 12
+			elif columIndex == 9:
+				sheetName.col(columIndex).width = 256 * 14
+			elif columIndex == 10:
+				sheetName.col(columIndex).width = 256 * 14
+			elif columIndex == 11:
+				sheetName.col(columIndex).width = 256 * 7
+			else:
+				sheetName.col(columIndex).width = 256 * 14
+# 			sheetName.row(rowIndex).height_mismatch = True
+# 			sheetName.row(rowIndex).height = 256*1
+			sheetName.write(rowIndex, columIndex, head1, styleHeader)
+			columIndex += 1
+		rowIndex += 1
+		columIndex = startColum
+		sw = True
+		styleCell = ''
+		styleCell_, styleCell__ = Util.style_for_timesheet()
+		for sheet_ in sheetInfoDict2_.keys():
+			for position_ in sheetInfoDict2_[sheet_].keys():
+				for user_ in sheetInfoDict2_[sheet_][position_].keys():
+					for task_ in sheetInfoDict2_[sheet_][position_][user_].keys():
+											
+						if sw:
+							sw = False
+							styleCell = styleCell_
+						else:
+							sw = True
+							styleCell = styleCell__
+						if monthOrWeek == 'month':
+							for month_ in sheetInfoDict2_[sheet_][position_][user_][task_]['month'].keys():
+								
+								startDate_ = sheetInfoDict2_[sheet_][position_][user_][task_]['StartDate']
+								sheetName.write(rowIndex, columIndex + 3, startDate_, styleCell)
+								endDate_ = sheetInfoDict2_[sheet_][position_][user_][task_]['EndDate']
+								sheetName.write(rowIndex, columIndex + 4, endDate_, styleCell)
+								sheetName.write(rowIndex, columIndex + 5, sheet_, styleCell)
+								sheetName.write(rowIndex, columIndex, position_, styleCell)
+								sheetName.write(rowIndex, columIndex + 7, user_, styleCell)
+# 								cwidth = sheetName.col(6).width
+# 								if (len(task_)*367) > cwidth:  
+# 									sheetName.col(6).width = (len(task_)*367)
+								sheetName.write(rowIndex, columIndex + 6, task_, styleCell)
+								allocation_ = sheetInfoDict2_[sheet_][position_][user_][task_]['allocation']
+								sheetName.write(rowIndex, columIndex + 8, allocation_, styleCell)
+								startMonth_ = sheetInfoDict2_[sheet_][position_][user_][task_]['month'][month_]['startMonth']
+								sheetName.write(rowIndex, columIndex + 1, startMonth_, styleCell)
+								endMonth_ = sheetInfoDict2_[sheet_][position_][user_][task_]['month'][month_]['endMonth']
+								sheetName.write(rowIndex, columIndex + 2, endMonth_, styleCell)
+								workHour_ = sheetInfoDict2_[sheet_][position_][user_][task_]['month'][month_]['workHour'][0]
+								sheetName.write(rowIndex, columIndex + 9, workHour_, styleCell)
+								totalhour_ = sheetInfoDict2_[sheet_][position_][user_][task_]['month'][month_]['totalHour']
+								sheetName.write(rowIndex, columIndex + 10, totalhour_, styleCell)
+								rowIndex += 1
+								
+								
+						else:
+							for week_ in sheetInfoDict2_[sheet_][position_][user_][task_]['week'].keys():
+								startDate_ = sheetInfoDict2_[sheet_][position_][user_][task_]['StartDate']
+								sheetName.write(rowIndex, columIndex + 3, startDate_, styleCell)
+								endDate_ = sheetInfoDict2_[sheet_][position_][user_][task_]['EndDate']
+								sheetName.write(rowIndex, columIndex + 4, endDate_, styleCell)
+								sheetName.write(rowIndex, columIndex + 5, sheet_, styleCell)
+								sheetName.write(rowIndex, columIndex, position_, styleCell)
+								sheetName.write(rowIndex, columIndex + 7, user_, styleCell)
+								sheetName.write(rowIndex, columIndex + 6, task_, styleCell)
+								allocation_ = sheetInfoDict2_[sheet_][position_][user_][task_]['allocation']
+								sheetName.write(rowIndex, columIndex + 8, allocation_, styleCell)
+								startWeek_ = sheetInfoDict2_[sheet_][position_][user_][task_]['week'][week_]['startWeek']
+								sheetName.write(rowIndex, columIndex + 1, startWeek_, styleCell)
+								endWeek_ = sheetInfoDict2_[sheet_][position_][user_][task_]['week'][week_]['endWeek']
+								sheetName.write(rowIndex, columIndex + 2, endWeek_, styleCell)
+								workHour_ = sheetInfoDict2_[sheet_][position_][user_][task_]['week'][week_]['workHour'][0]
+								sheetName.write(rowIndex, columIndex + 9, workHour_, styleCell)
+								totalhour_ = sheetInfoDict2_[sheet_][position_][user_][task_]['week'][week_]['totalHour']
+								sheetName.write(rowIndex, columIndex + 10, totalhour_, styleCell)
+								workWeek_ = sheetInfoDict2_[sheet_][position_][user_][task_]['week'][week_]['workWeek']
+								sheetName.write(rowIndex, columIndex + 11, workWeek_, styleCell)
+								rowIndex += 1

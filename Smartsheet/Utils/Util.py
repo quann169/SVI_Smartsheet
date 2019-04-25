@@ -1,14 +1,15 @@
-import calendar
+import calendar, os
 import datetime
 import xlwt
 import time
+import pandas
 # import numpy as np
 # import pandas
 import sys
 sys.path.append('..')
 from Enum import Enum
 from pprint import pprint
-
+from dateutil.relativedelta import relativedelta
 def toDate(strg):
     try:
         objDate = datetime.datetime.strptime(strg, '%Y-%m-%d')
@@ -16,8 +17,11 @@ def toDate(strg):
         try:
             objDate = datetime.datetime.strptime(strg, '%Y-%m-%dT%H:%M:%S')
         except:
-            print("Other Date time format")
-            sys.exit()
+            try:
+                objDate = datetime.datetime.strptime(strg, '%Y-%m-%d %H:%M:%S')
+            except:
+                print("Other Date time format")
+                sys.exit()
     year = objDate.year
     month = objDate.month
     day = objDate.day
@@ -28,7 +32,7 @@ def daterange(date1, date2):
         yield date1 + datetime.timedelta(n)
       
 #[[day, week], ...]  
-def getWorkDay(fromdate, todate):
+def getWorkDay(fromdate, todate, dir_, excelHoliday):
     sy, sm, sd = toDate(fromdate)
     ey, em, ed = toDate(todate)
     listWorkDay = []
@@ -36,6 +40,7 @@ def getWorkDay(fromdate, todate):
     end_date = datetime.date(ey, em, ed)
     for date in daterange(start_date, end_date):
         y, m, d = toDate(date.strftime("%Y-%m-%d"))
+        y_m_d = '%s-%s-%s'%(y, m, d)
         startWeek = None
         if calendar.day_name[calendar.weekday(y,m,d)] == Enum.DateTime.START_WEEK:
             startWeek = datetime.date(y, m, d)
@@ -44,7 +49,7 @@ def getWorkDay(fromdate, todate):
 #             days = np.busday_count(start, end)
             startWeek = day - datetime.timedelta(days=day.weekday())
  
-        if calendar.day_name[calendar.weekday(y,m,d)] in Enum.DateTime.LIST_WORK_DAY_OF_WEEK:
+        if (calendar.day_name[calendar.weekday(y,m,d)] in Enum.DateTime.LIST_WORK_DAY_OF_WEEK) and (not (y_m_d in excelHoliday)):
             info = [str(datetime.date(y,m,d)), str(startWeek)]
             listWorkDay.append(info)
         elif len(listWorkDay) == 0:
@@ -53,7 +58,7 @@ def getWorkDay(fromdate, todate):
     return listWorkDay
 
 #[[week, total hour work], ...]
-def getWorkWeek(fromdate, todate):
+def getWorkWeek(fromdate, todate, dir_, excelHoliday):
     sy, sm, sd = toDate(fromdate)
     ey, em, ed = toDate(todate)
     listWeek = []
@@ -61,6 +66,7 @@ def getWorkWeek(fromdate, todate):
     end_date = datetime.date(ey, em, ed)
     for date in daterange(start_date, end_date):
         y, m, d = toDate(date.strftime("%Y-%m-%d"))
+        y_m_d = '%s-%s-%s'%(y, m, d)
         startWeek = None
         if (calendar.day_name[calendar.weekday(y,m,d)] != Enum.DateTime.START_WEEK) and (listWeek == []):
             day = datetime.date(y, m, d)
@@ -72,12 +78,16 @@ def getWorkWeek(fromdate, todate):
             startWeek = datetime.date(y, m, d)
             listWeekHourTotal = [str(startWeek), 0]
             listWeek.append(listWeekHourTotal)
-        if calendar.day_name[calendar.weekday(y,m,d)] in Enum.DateTime.LIST_WORK_DAY_OF_WEEK:
+        if (calendar.day_name[calendar.weekday(y,m,d)] in Enum.DateTime.LIST_WORK_DAY_OF_WEEK)  and (not (y_m_d in excelHoliday)):
             listWeek[-1][1] += 8
+    for emptyW in listWeek:
+        if not (emptyW[1]):
+            listWeek.remove(emptyW)
     return listWeek
 
 # # [[momth, year, total hour work],...]
-def getWorkMonth(fromdate, todate):
+def getWorkMonth(fromdate, todate, dir_, excelHoliday):
+
     sy, sm, sd = toDate(fromdate)
     ey, em, ed = toDate(todate)
     listMonth = []
@@ -85,22 +95,24 @@ def getWorkMonth(fromdate, todate):
     endDate = datetime.date(ey, em, ed)
     total = 0
     for dt in daterange(startDate, endDate):
+        
         y, m, d = toDate(dt.strftime("%Y-%m-%d"))
+        y_m_d = '%s-%s-%s'%(y, m, d)
         month = [m, y]
         if len(listMonth) == 0:
             month = [m, y]
             listMonth.append(month)
-            if (calendar.day_name[calendar.weekday(y,m,d)] in Enum.DateTime.LIST_WORK_DAY_OF_WEEK):
+            if (calendar.day_name[calendar.weekday(y,m,d)] in Enum.DateTime.LIST_WORK_DAY_OF_WEEK)  and (not (y_m_d in excelHoliday)):
                 total += 8
         else:
             if not (month in listMonth):
                 listMonth.append(month)
                 listMonth[-2].append(total)
                 total = 0
-                if (calendar.day_name[calendar.weekday(y,m,d)] in Enum.DateTime.LIST_WORK_DAY_OF_WEEK):
+                if (calendar.day_name[calendar.weekday(y,m,d)] in Enum.DateTime.LIST_WORK_DAY_OF_WEEK)  and (not (y_m_d in excelHoliday)):
                     total += 8
             else:
-                if (calendar.day_name[calendar.weekday(y,m,d)] in Enum.DateTime.LIST_WORK_DAY_OF_WEEK):
+                if (calendar.day_name[calendar.weekday(y,m,d)] in Enum.DateTime.LIST_WORK_DAY_OF_WEEK)  and (not (y_m_d in excelHoliday)):
                     total += 8
     listMonth[-1].append(total)
 
@@ -140,11 +152,11 @@ def definedColor():
     listColor = [Enum.WorkHourColor.IS_EQUAL, Enum.WorkHourColor.IS_GREATER, Enum.WorkHourColor.IS_LESS, Enum.WorkHourColor.IS_HEADER,
                 Enum.WorkHourColor.IS_USER_NAME, Enum.WorkHourColor.IS_SHEET_NAME, Enum.WorkHourColor.BACK_GROUND, Enum.WorkHourColor.IS_POSITION]
     for color in listColor:
-        formatCommand = 'align: wrap yes;pattern: pattern solid, fore-colour %s; border: left thin, top thin, right thin, bottom thin, bottom-color gray25, top-color gray25, left-color gray25, right-color gray25; font: bold 0,height 240;' %(color)
+        formatCommand = 'align: wrap 0;pattern: pattern solid, fore-colour %s; border: left thin, top thin, right thin, bottom thin, bottom-color gray25, top-color gray25, left-color gray25, right-color gray25; font: name Calibri, bold 0,height 240;' %(color)
         style = xlwt.easyxf(formatCommand)
         colorDict[color] = style
     for color in listColor:
-        formatCommand = 'align: wrap yes;pattern: pattern solid, fore-colour %s; font: bold 0,height 240;' %(color)
+        formatCommand = 'align: wrap 0;pattern: pattern solid, fore-colour %s; font: name Calibri, bold 0,height 240;' %(color)
         style = xlwt.easyxf(formatCommand)
         colorDictNoneBorder[color] = style
     return colorDict, colorDictNoneBorder
@@ -172,10 +184,13 @@ def caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, dictWeek, colo
 
 def caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, dictWeek, color, sheetOrUser, limit):
     dictWorkOut = {}
-
+#     print(listMonth)
+#     print(listWeek)
+#     pprint(dictWeek)
     for month in listMonth:
         workTime = 0
         for week in listWeek:
+#             print(week)
             for day in dictWeek[week[0]]:
                 y, m, d = toDate(day[0])
                 if (m == month[0]) and (y == month[1]):
@@ -234,18 +249,18 @@ def createDict(dictIn, sheetName, userName, position, color1, color2, color3,):
     dictIn[Enum.HeaderExcelAndKeys.TOTAL_WEEK] = {}
     
     #1 user, 0 sheet
-def headerToPrintExcel(type_, startDate, endDate, by):
+def headerToPrintExcel(type_, startDate, endDate, by, dir_, excelHoliday):
     out = []
     if type_:
         ListPrintExcel = [[Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.WorkHourColor.IS_HEADER],  [Enum.HeaderExcelAndKeys.USER_NAME, Enum.WorkHourColor.IS_HEADER], [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.WorkHourColor.IS_HEADER]]
         if by == 'week':
-            listWeek = getWorkWeek(startDate, endDate)
+            listWeek = getWorkWeek(startDate, endDate, dir_, excelHoliday)
             for headerNameExcel in listWeek:
                 week = headerNameExcel[0]
                 weekColor = [week, Enum.WorkHourColor.IS_HEADER]
                 ListPrintExcel.append(weekColor)
         else:
-            listMonth = getWorkMonth(startDate, endDate)
+            listMonth = getWorkMonth(startDate, endDate, dir_, excelHoliday)
             for headerNameExcel in listMonth:
                 month = '%s-%s' %(Enum.DateTime.LIST_MONTH[headerNameExcel[0]], headerNameExcel[1])
                 monthColor = [month, Enum.WorkHourColor.IS_HEADER]
@@ -254,13 +269,13 @@ def headerToPrintExcel(type_, startDate, endDate, by):
     else:
         ListPrintExcel = [[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.WorkHourColor.IS_HEADER],  [Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.WorkHourColor.IS_HEADER], [Enum.HeaderExcelAndKeys.USER_NAME, Enum.WorkHourColor.IS_HEADER]]
         if by == 'week':
-            listWeek = getWorkWeek(startDate, endDate)
+            listWeek = getWorkWeek(startDate, endDate, dir_, excelHoliday)
             for headerNameExcel in listWeek:
                 week = headerNameExcel[0]
                 weekColor = [week, Enum.WorkHourColor.IS_HEADER]
                 ListPrintExcel.append(weekColor)
         else:
-            listMonth = getWorkMonth(startDate, endDate)
+            listMonth = getWorkMonth(startDate, endDate, dir_, excelHoliday)
             for headerNameExcel in listMonth:
                 month = '%s-%s' %(Enum.DateTime.LIST_MONTH[headerNameExcel[0]], headerNameExcel[1])
                 monthColor = [month, Enum.WorkHourColor.IS_HEADER]
@@ -274,3 +289,54 @@ def getTimeRun(startTime, currentTime):
     minutes, seconds = diff // 60, diff % 60
     out = str(minutes) + ':' + str(seconds).zfill(2)
     return out
+
+def get_info_excel(dir_):
+    df = pandas.read_excel("%s\Config.xlsx"%dir_, sheet_name='Holiday')
+    configInfo = {}
+    excelHoliday_ = df['Holiday']
+    cate = ''
+    excelHoliday = []
+    for i in excelHoliday_:
+        y, m, d = toDate(str(i))
+        excelHoliday.append('%s-%s-%s'%(y, m, d))
+    return excelHoliday
+def get_end_start_week(tringDate):
+    date_obj = datetime.datetime.strptime(tringDate, '%Y-%m-%d')
+    y, m, d = toDate(date_obj.strftime("%Y-%m-%d"))
+    y_m_d = '%s-%s-%s'%(y, m, d)
+    startWeek = None
+    if calendar.day_name[calendar.weekday(y,m,d)] == Enum.DateTime.START_WEEK:
+        startWeek = datetime.date(y, m, d)
+    else:
+        day = datetime.date(y, m, d)
+#             days = np.busday_count(start, end)
+        startWeek = day - datetime.timedelta(days=day.weekday())
+    endWeek = startWeek + datetime.timedelta(days=6)
+    return str(endWeek), str(startWeek)
+def get_end_start_month(tringDate_):
+    tringDate = tringDate_ + '-01'
+    date_obj = datetime.datetime.strptime(tringDate, '%Y-%m-%d')
+    last_day = str(date_obj + relativedelta(day=1, months=+1, days=-1)).split()[0]
+    first_day = str(date_obj + relativedelta(day=1)).split()[0]
+    
+    return first_day, last_day
+def get_week_number (strDate):
+    date_obj = datetime.datetime.strptime(strDate, '%Y-%m-%d')
+    y, m, d = toDate(date_obj.strftime("%Y-%m-%d"))
+    week = datetime.date(y, m, d).isocalendar()[1]
+    return week
+def get_month (strDate):
+    date_obj = datetime.datetime.strptime(strDate, '%Y-%m-%d')
+    y, m, d = toDate(date_obj.strftime("%Y-%m-%d"))
+    month = '%s/%s'%(m,y)
+    return month
+
+def style_for_timesheet():
+    formatCell = 'align: wrap 0; pattern: pattern solid, fore-colour light_turquoise;  font: name Calibri, bold 0,height 240;' 
+    formatCell1 = 'align: wrap 0; pattern: pattern solid, fore-colour white;  font: name Calibri, bold 0,height 240;' 
+    styleCell = xlwt.easyxf(formatCell)
+    styleCell1 = xlwt.easyxf(formatCell1)
+    return styleCell, styleCell1
+
+# def getWorkWeekOfTask(fromdate, todate, dir_, excelHoliday, startDate, endDate):
+#     

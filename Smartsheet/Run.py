@@ -10,7 +10,6 @@ import sys
 import os
 import time
 import shutil
-
 def Run__():
 	time1 = time.time()
 	print('Start time: %s' %(str(datetime.datetime.now())))
@@ -41,7 +40,8 @@ def Run__():
 	sheet1 = wb.sheet_by_name('Staff') 
 	sheet1.cell_value(0, 0)
 	print('Start get info from Config.xlsx')
-	
+	excelHoliday = Util.get_info_excel(dir_)
+
 	#get info of user
 	for row_ in range(Enum.UserInfoConfig.ROW_GET_USER_INFO, sheet1.nrows):
 		lsRow = sheet1.row_values(row_)
@@ -162,8 +162,8 @@ def Run__():
 
 # for item in ListItems:
 	
-	userInfoDict_, sheetInfoDict_ = RowParsing.getAllSheetAndWorkTimeOfUser(ListSheetFilter, ListUserFilter, startDate, endDate, userInfo, dictInfoUser, Sheet, dir_)
-	userInfoDict, sheetInfoDict = RowParsing.caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict_, sheetInfoDict_)
+	userInfoDict_, sheetInfoDict_, sheetInfoDict2_ = RowParsing.getAllSheetAndWorkTimeOfUser(ListSheetFilter, ListUserFilter, startDate, endDate, userInfo, dictInfoUser, Sheet, dir_, excelHoliday)
+	userInfoDict, sheetInfoDict = RowParsing.caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict_, sheetInfoDict_, dir_, excelHoliday)
 	startRow = Enum.HeaderExcelAndKeys.START_ROW
 	startColum = Enum.HeaderExcelAndKeys.START_COLUM
 
@@ -174,7 +174,7 @@ def Run__():
 		
 		showDetail = listItems[1]['show detail']
 		sheetName = wb.add_sheet('Weekly Resource')
-		lsheader = Util.headerToPrintExcel(1, startDate, endDate, 'week')
+		lsheader = Util.headerToPrintExcel(1, startDate, endDate, 'week', dir_, excelHoliday)
 		#colum, row
 		getBy = Enum.HeaderExcelAndKeys.TOTAL_WEEK
 		Controllers.printDictToExcel(sheetName, lsheader, userInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail)
@@ -186,7 +186,7 @@ def Run__():
 	
 		showDetail = listItems[2]['show detail']
 		sheetName = wb.add_sheet('Monthly Resource')
-		lsheader = Util.headerToPrintExcel(1, startDate, endDate, 'month')
+		lsheader = Util.headerToPrintExcel(1, startDate, endDate, 'month', dir_, excelHoliday)
 		#colum, row
 		getBy = Enum.HeaderExcelAndKeys.TOTAL_MONTH
 		Controllers.printDictToExcel(sheetName, lsheader, userInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail)	
@@ -196,7 +196,7 @@ def Run__():
 		
 		print("Running  Item I003 - Caculate work time and filter all user of sheet by week")
 		sheetName = wb.add_sheet('Weekly Project')
-		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'week')
+		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'week', dir_, excelHoliday)
 		#colum, row
 		getBy = Enum.HeaderExcelAndKeys.TOTAL_WEEK
 		Controllers.printDictToExcel(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, 1)
@@ -207,12 +207,28 @@ def Run__():
 		print("Running  Item I004 - Caculate work time and filter all user of sheet by month")
 		
 		sheetName = wb.add_sheet('Monthly Project')
-		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month')
+		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month', dir_, excelHoliday)
 		#colum, row
 		getBy = Enum.HeaderExcelAndKeys.TOTAL_MONTH
 		Controllers.printDictToExcel(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, 1)
 		print("Running  Item I004 done")
 		print("------------------------------------------------------------------------------")
+		
+	if True:
+		print("Creating Monthly Timesheet")
+		sheetName = wb.add_sheet('Monthly Timesheet')
+		lsheader = ['Position', 'Start month', 'End month', 'Start date', 'End date', 'Project', 'Task name', 'Emp name', 'Allocation', 'Work hours', 'Max hours']
+		#colum, row
+		Controllers.printToExcelMonthlyOrWeeklyTimesheet(sheetName, lsheader, sheetInfoDict2_, startRow, startColum, 'month')
+		
+	if True:
+		print("Creating Weekly Timesheet")
+		sheetName = wb.add_sheet('Weekly Timesheet')
+		lsheader = ['Position', 'Start week', 'End week', 'Start date', 'End date', 'Project', 'Task name', 'Emp name', 'Allocation', 'Work hours', 'Max hours', 'WW']
+		#colum, row
+		Controllers.printToExcelMonthlyOrWeeklyTimesheet(sheetName, lsheader, sheetInfoDict2_, startRow, startColum, 'week')
+	
+			
 	try:
 		wb.save('%s\TimeSheet.xls'%(dir_))
 	except:
