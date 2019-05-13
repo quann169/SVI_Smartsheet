@@ -30,7 +30,7 @@ def Run__():
 	except IOError as e:
 		print(e)
 		sys.exit()
-	listItems = {1 : {}, 2 : {}, 3 : {}, 4 : {}}
+	listItems = {1 : {}, 2 : {}, 3 : {}, 4 : {}, 5: {}, 6:{}}
 	startDate = ''
 	endDate = ''
 	
@@ -46,8 +46,8 @@ def Run__():
 	for row_ in range(Enum.UserInfoConfig.ROW_GET_USER_INFO, sheet1.nrows):
 		lsRow = sheet1.row_values(row_)
 		userInfo[lsRow[1]] = {}
-		userInfo[lsRow[1]][Enum.UserInfoConfig.POSITION] = lsRow[2]
-		userInfo[lsRow[1]][Enum.UserInfoConfig.SENIORITY_LEVEL] = lsRow[3]
+		userInfo[lsRow[1]][Enum.UserInfoConfig.TYPE] = lsRow[2]
+		userInfo[lsRow[1]][Enum.UserInfoConfig.ROLE] = lsRow[3]
 		listOtherInfo = lsRow[4]. split(',')
 		for id1 in range(0, len(listOtherInfo)):
 			listOtherInfo[id1] = listOtherInfo[id1].strip()
@@ -60,7 +60,7 @@ def Run__():
 	#get item
 	sheet2 = wb.sheet_by_name('Config')	
 	lsRow_ = sheet2.row_values(Enum.UserInfoConfig.ROW_GET_STATUS_AND_START_END_DATE)
-	for i in range(Enum.UserInfoConfig.COLUM_GET_STATUS, Enum.UserInfoConfig.COLUM_GET_STATUS + 4):
+	for i in range(Enum.UserInfoConfig.COLUM_GET_STATUS, Enum.UserInfoConfig.COLUM_GET_STATUS + 6):
 		
 		#check config status------------
 		if lsRow_[i].lower() == 'yes':
@@ -70,8 +70,8 @@ def Run__():
 		else:
 			print('Config Error: Select "Run" must be yes or no, not be ' + lsRow_[i])
 			sys.exit()
-	startDate = str(lsRow_[5])
-	endDate = str(lsRow_[6])
+	startDate = str(lsRow_[7])
+	endDate = str(lsRow_[8])
 	
 		#check config start, end date------------
 	try:
@@ -156,6 +156,7 @@ def Run__():
 		if len(strOutH):
 			print('Config Error: Not exist Header name in %s - Header name: %s' %(sheetN, strOutH))
 			sys.exit()
+
 	time2 = time.time()
 	print("Get info from Config.xlsx done: " + Util.getTimeRun(time1, time2))
 	print("------------------------------------------------------------------------------")
@@ -164,17 +165,19 @@ def Run__():
 	
 	userInfoDict_, sheetInfoDict_, sheetInfoDict2_ = RowParsing.getAllSheetAndWorkTimeOfUser(ListSheetFilter, ListUserFilter, startDate, endDate, userInfo, dictInfoUser, Sheet, dir_, excelHoliday)
 	userInfoDict, sheetInfoDict = RowParsing.caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict_, sheetInfoDict_, dir_, excelHoliday)
+
 	startRow = Enum.HeaderExcelAndKeys.START_ROW
 	startColum = Enum.HeaderExcelAndKeys.START_COLUM
 
 	wb = Workbook() 
 	colorDict, colorDictNoneBorder = Util.definedColor()
+	colorTextDict, colorTextDictNoneBorder = Util.definedColorText()
 	if listItems[1]['status'] == 1:
 		print("Running  Item I001 - Caculate work time and filter all sheet of user by week")
 		
 		showDetail = listItems[1]['show detail']
 		sheetName = wb.add_sheet('Weekly Resource')
-		lsheader = Util.headerToPrintExcel(1, startDate, endDate, 'week', dir_, excelHoliday)
+		lsheader = Util.headerToPrintExcel(1, startDate, endDate, 'week', dir_, excelHoliday, False)
 		#colum, row
 		getBy = Enum.HeaderExcelAndKeys.TOTAL_WEEK
 		Controllers.printDictToExcel(sheetName, lsheader, userInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail)
@@ -186,7 +189,7 @@ def Run__():
 	
 		showDetail = listItems[2]['show detail']
 		sheetName = wb.add_sheet('Monthly Resource')
-		lsheader = Util.headerToPrintExcel(1, startDate, endDate, 'month', dir_, excelHoliday)
+		lsheader = Util.headerToPrintExcel(1, startDate, endDate, 'month', dir_, excelHoliday, False)
 		#colum, row
 		getBy = Enum.HeaderExcelAndKeys.TOTAL_MONTH
 		Controllers.printDictToExcel(sheetName, lsheader, userInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail)	
@@ -196,7 +199,7 @@ def Run__():
 		
 		print("Running  Item I003 - Caculate work time and filter all user of sheet by week")
 		sheetName = wb.add_sheet('Weekly Project')
-		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'week', dir_, excelHoliday)
+		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'week', dir_, excelHoliday, False)
 		#colum, row
 		getBy = Enum.HeaderExcelAndKeys.TOTAL_WEEK
 		Controllers.printDictToExcel(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, 1)
@@ -207,13 +210,35 @@ def Run__():
 		print("Running  Item I004 - Caculate work time and filter all user of sheet by month")
 		
 		sheetName = wb.add_sheet('Monthly Project')
-		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month', dir_, excelHoliday)
+		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month', dir_, excelHoliday, False)
 		#colum, row
 		getBy = Enum.HeaderExcelAndKeys.TOTAL_MONTH
 		Controllers.printDictToExcel(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, 1)
 		print("Running  Item I004 done")
 		print("------------------------------------------------------------------------------")
-		
+	if listItems[5]['status'] == 1:
+ 		
+		print("Running  Item I005 - Caculate work time and filter all user of sheet by week (new format)")
+ 		
+		sheetName = wb.add_sheet('Weekly Project (new)')
+		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'week', dir_, excelHoliday, True)
+		#colum, row
+		getBy = Enum.HeaderExcelAndKeys.TOTAL_WEEK
+		Controllers.printDictToExcelByProjectNew(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder)
+		print("Running  Item I005 done")
+		print("------------------------------------------------------------------------------")
+	if listItems[6]['status'] == 1:
+ 		
+		print("Running  Item I005 - Caculate work time and filter all user of sheet by month (new format)")
+ 		
+		sheetName = wb.add_sheet('Monthly Project (new)')
+		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month', dir_, excelHoliday, True)
+		#colum, row
+		getBy = Enum.HeaderExcelAndKeys.TOTAL_MONTH
+		Controllers.printDictToExcelByProjectNew(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder)
+		print("Running  Item I005 done")
+		print("------------------------------------------------------------------------------")
+	
 	if True:
 		print("Creating Monthly Timesheet")
 		sheetName = wb.add_sheet('Monthly Timesheet')

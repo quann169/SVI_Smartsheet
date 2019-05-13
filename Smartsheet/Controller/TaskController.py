@@ -13,6 +13,7 @@ import xlwt
 class RowParsing():
 	def checkSheetConfigIsExist(listSheetConfig, Sheet):
 		SheetEdit = {}
+# 		print('saaa')
 		listSheetConfigReplace = []
 		TOKEN = Enum.GenSmartsheet.TOKEN
 		smartsheet = Smartsheet(TOKEN)
@@ -22,6 +23,7 @@ class RowParsing():
 			dictSheetSms[sheetSmartsheet.name.lower()] = sheetSmartsheet.name
 		strOut = ''
 		listOut = []
+# 		print('out')
 # 		for sheetConfig in listSheetConfig:
 # 			if not (sheetConfig in listSheetSms):
 # 				listOut.append(sheetConfig)
@@ -40,11 +42,12 @@ class RowParsing():
 		return strOut, listSheetConfigReplace, SheetEdit
 	
 	def checkHeaderExistInSheet(sheetName, listHeader):
-
+		
 		TOKEN = Enum.GenSmartsheet.TOKEN
 		smartsheet = Smartsheet(TOKEN)
 		sheet = smartsheet.sheets.get(sheetName)
 		sheetInfo = sheet.columns
+		
 # 		if sheetName == 'NRE_ECC_CPL':
 # 			pprint (sheetInfo)
 # 			asd
@@ -72,7 +75,10 @@ class RowParsing():
 	#connect to smartsheet
 	def connectSmartsheet(sheet_name):
 		TOKEN = Enum.GenSmartsheet.TOKEN
-		smartsheet = Smartsheet(TOKEN)
+		try:
+			smartsheet = Smartsheet(TOKEN)
+		except:
+			print ('Connect to %s error'%sheet_name)
 		sheet = smartsheet.sheets.get(sheet_name)
 		allRows = sheet.rows
 		return allRows, sheet
@@ -84,13 +90,13 @@ class RowParsing():
 		count = 1
 		totalRow = len(allRows)
 		for row in allRows:
-			if ((count % 200) == 0 and count != 0):
-				print ('%s: Parse lines %s of %s line' %(sheet_name, count, totalRow))
-			if (Row.isRowEmpty(row) == 1):
-				dictheader = sheets_[sheet_name]
-				dictHeaderOut = Row.getHeaders(sheet_name, sheet, dictheader)
-				dictRow= Row.getDataRow(row, dictHeaderOut, count)
-				dictRows[row['id']] = dictRow
+# 			if ((count % 200) == 0 and count != 0):
+# 				print ('%s: Parse lines %s of %s line' %(sheet_name, count, totalRow))
+# 			if (Row.isRowEmpty(row) == 1):
+			dictheader = sheets_[sheet_name]
+			dictHeaderOut = Row.getHeaders(sheet_name, sheet, dictheader)
+			dictRow= Row.getDataRow(row, dictHeaderOut, count)
+			dictRows[row['id']] = dictRow
 			count += 1
 		return dictRows
 
@@ -108,7 +114,11 @@ class RowParsing():
 			countRowParent = 0
 			dictRows = RowParsing.getAllDataOfSheet(sheetName, sheets_)
 			listParentId = Row.getParentId(dictRows)
+			count2 = 0
 			for row in dictRows:
+				totalRow = len(dictRows)
+				if ((count2 % 200) == 0 and count2 != 0):
+					print ('%s: Parse lines %s of %s line' %(sheetName, count2, totalRow))
 				user___ = dictRows[row]['info'][Enum.Header.ASSIGNED_TO].split(',')
 				users = user___[0]
 				#pick task is not a parent task
@@ -150,7 +160,7 @@ class RowParsing():
 									user = dictInfoUser[users]
 								else:
 									user = users
-								position_ = '%s %s' %(userInfo[user][Enum.UserInfoConfig.SENIORITY_LEVEL], userInfo[user][Enum.UserInfoConfig.POSITION])
+								position_ = '%s - %s' %(userInfo[user][Enum.UserInfoConfig.TYPE], userInfo[user][Enum.UserInfoConfig.ROLE])
 							task_name = dictRows[row]['info'][Enum.Header.TASK_NAME]
 							#create empty dict for user key = position
 							if not (position_ in UserInfoDict.keys()):
@@ -188,10 +198,12 @@ class RowParsing():
 							if not(user in sheetInfoDict2[sheetName][position_].keys()):
 								sheetInfoDict2[sheetName][position_][user] = {}
 							if task_name in sheetInfoDict2[sheetName][position_][user].keys():
+								i = 1
 								while True:
-									i = 1
-									task_name =  task_name +'(' + str(i) + ')'
-									if not(task_name in sheetInfoDict2[sheetName][position_][user].keys()):
+									task_name2 =  task_name +'(' + str(i) + ')'
+									if not(task_name2 in sheetInfoDict2[sheetName][position_][user].keys()):
+										task_name = task_name2
+										
 										break
 									else:
 										i = i + 1	
@@ -286,6 +298,7 @@ class RowParsing():
 										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour2, totalHour2)[0]
 				else:
 					countRowParent += 1
+				count2 += 1
 			print('Skip (not save into log) %s parent task in %s' %(countRowParent, sheetName))
 			if len(strlog):
 				logname = '%s\Log\%s.log' %(dir_, sheetName)
@@ -368,9 +381,9 @@ class Controllers():
 				style1 = Util.selectColorToPrint(head1[1], colorDict, colorDictNoneBorder)
 				lsLongHeader = []
 				if showDetail:
-					lsLongHeader = [startColum, startColum + 1, startColum + 2]
+					lsLongHeader = [startColum, startColum + 1, startColum + 2, startColum + 3]
 				else:
-					lsLongHeader = [startColum, startColum + 1]
+					lsLongHeader = [startColum, startColum + 1, startColum + 2]
 				if columIndex in lsLongHeader:
 					sheetName.col(columIndex).width = 256 * 25
 				else:
@@ -378,7 +391,7 @@ class Controllers():
 				sheetName.write(rowIndex, columIndex, head1[0], style1)
 				columIndex += 1
 		rowIndex += 1
-		columIndex = 2
+		columIndex = startColum
 		for keyLV1 in dictToPrint.keys():
 
 			if keyLV1 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
@@ -392,19 +405,38 @@ class Controllers():
 						continue
 					else:
 						value1 = 0
-						if count1 > 2:
+						if count1 > 3:
 							value1 = dictToPrint[keyLV1][getBy][head2[0]][0]
 							st1 = dictToPrint[keyLV1][getBy][head2[0]][1]
 						else:
-							value1 = dictToPrint[keyLV1][head2[0]][0]
-							st1 = dictToPrint[keyLV1][head2[0]][1]
+							if head2[0] in [Enum.HeaderExcelAndKeys.TYPE]:
+								value1_ = dictToPrint[keyLV1][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][0]
+								if value1_ == 'N/A':
+									value1 = 'N/A'
+								elif value1_ == '':
+									value1 = ''
+								else:
+									value1 = value1_.split(' - ')[0]
+								st1 = dictToPrint[keyLV1][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][1]
+							elif head2[0] in [Enum.HeaderExcelAndKeys.ROLE]:
+								value1_ = dictToPrint[keyLV1][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][0]
+								if value1_ == 'N/A':
+									value1 = 'N/A'
+								elif value1_ == '':
+									value1 = ''
+								else:
+									value1 = value1_.split(' - ')[1]
+								st1 = dictToPrint[keyLV1][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][1]
+							else:
+								value1 = dictToPrint[keyLV1][head2[0]][0]
+								st1 = dictToPrint[keyLV1][head2[0]][1]
 						style2 = Util.selectColorToPrint(st1, colorDict, colorDictNoneBorder)
 
 						sheetName.write(rowIndex, columIndex, value1, style2)
 						columIndex += 1
 						count1 += 1
 				rowIndex += 1
-				columIndex = 2
+				columIndex = startColum
 
 				for keyLV2 in dictToPrint[keyLV1].keys():
 
@@ -419,19 +451,41 @@ class Controllers():
 								continue
 							else:
 								value2 = 0
-								if count2 > 2:
+								if count2 > 3:
 									value2 = dictToPrint[keyLV1][keyLV2][getBy][head3[0]][0]
 									st2 = dictToPrint[keyLV1][keyLV2][getBy][head3[0]][1]
 								else:
-
-									value2 = dictToPrint[keyLV1][keyLV2][head3[0]][0]
-									st2 = dictToPrint[keyLV1][keyLV2][head3[0]][1]
+									if head3[0] in [Enum.HeaderExcelAndKeys.TYPE]:
+										value2_ = dictToPrint[keyLV1][keyLV2][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][0]
+										if value2_ == 'N/A':
+											value2 = 'N/A'
+										elif value2_ == '':
+											value2 = ''
+										else:
+											value2 = value2_.split(' - ')[0]
+										st2 = dictToPrint[keyLV1][keyLV2][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][1]
+									elif head3[0] in [Enum.HeaderExcelAndKeys.ROLE]:
+										
+										value2_ = dictToPrint[keyLV1][keyLV2][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][0]
+										
+										if value2_ == 'N/A':
+											value2 = 'N/A'
+										elif value2_ == '':
+											value2 = ''
+										else:
+											value2 = value2_.split(' - ')[1]
+										st2 = dictToPrint[keyLV1][keyLV2][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][1]
+									else:
+										value2 = dictToPrint[keyLV1][keyLV2][head3[0]][0]
+										st2 = dictToPrint[keyLV1][keyLV2][head3[0]][1]
+# 									value2 = dictToPrint[keyLV1][keyLV2][head3[0]][0]
+# 									st2 = dictToPrint[keyLV1][keyLV2][head3[0]][1]
 								style3 = Util.selectColorToPrint(st2, colorDict, colorDictNoneBorder)
 								sheetName.write(rowIndex, columIndex, value2, style3)
 								columIndex += 1
 								count2 += 1
 						rowIndex += 1
-						columIndex = 2
+						columIndex = startColum
 
 						if not showDetail:
 							continue
@@ -444,13 +498,22 @@ class Controllers():
 									count3 = 0
 									for head4 in lsheader:
 										value3 = 0
-										if count3 > 2:
+										if count3 > 3:
 											value3 = dictToPrint[keyLV1][keyLV2][keyLV3][getBy][head4[0]][0]
 											st3 = dictToPrint[keyLV1][keyLV2][keyLV3][getBy][head4[0]][1]
 										else:
+											if head4[0] in [Enum.HeaderExcelAndKeys.TYPE]:
+												value3 = dictToPrint[keyLV1][keyLV2][keyLV3][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][0]
+												st3 = dictToPrint[keyLV1][keyLV2][keyLV3][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][1]
+											elif head4[0] in [Enum.HeaderExcelAndKeys.ROLE]:
+												value3 = dictToPrint[keyLV1][keyLV2][keyLV3][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][0]
+												st3 = dictToPrint[keyLV1][keyLV2][keyLV3][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][1]
+											else:
+												value3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][0]
+												st3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][1]
 
-											value3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][0]
-											st3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][1]
+# 											value3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][0]
+# 											st3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][1]
 										style4 = Util.selectColorToPrint(st3, colorDict, colorDictNoneBorder)
 
 										if (not value3) and st3 == Enum.WorkHourColor.BACK_GROUND:
@@ -459,7 +522,8 @@ class Controllers():
 										columIndex += 1
 										count3 += 1
 									rowIndex += 1
-									columIndex = 2
+									columIndex = startColum
+									
 	def printToExcelMonthlyOrWeeklyTimesheet(sheetName, lsheader, sheetInfoDict2_, startRow, startColum, monthOrWeek):
 		startRow, startColum = (0, 0)
 		rowIndex = startRow
@@ -556,3 +620,107 @@ class Controllers():
 								workWeek_ = sheetInfoDict2_[sheet_][position_][user_][task_]['week'][week_]['workWeek']
 								sheetName.write(rowIndex, columIndex + 11, workWeek_, styleCell)
 								rowIndex += 1
+	def printDictToExcelByProjectNew(sheetName, lsheader, dictToPrint, startRow, startColum, getBy, colorDict, colorDictNoneBorder):
+		rowIndex = startRow
+		columIndex = startColum
+		for head1 in lsheader:
+
+			style1 = Util.selectColorToPrint(head1[1], colorDict, colorDictNoneBorder)
+			lsLongHeader = [startColum, startColum + 1, startColum + 2, startColum + 3]
+			if columIndex in lsLongHeader:
+				sheetName.col(columIndex).width = 256 * 25
+			else:
+				sheetName.col(columIndex).width = 256 * 11
+
+			sheetName.write(rowIndex, columIndex, head1[0], style1)
+			columIndex += 1
+		rowIndex += 1
+		columIndex = startColum
+		for keyLV1 in dictToPrint.keys():
+
+			if keyLV1 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+				continue
+			else:
+
+
+				totalLV1 = 0
+				for head2 in lsheader:
+					h2 = head2[0]
+					if head2[0] =='Resource':
+						h2 = 'User Name'
+					if h2 in [Enum.HeaderExcelAndKeys.SHEET_NAME, 'User Name']:
+						value1 = dictToPrint[keyLV1][h2][0]
+# 						st1 = dictToPrint[keyLV1][h2][1]
+						st1 = 'white'
+					elif h2 in ['Type']:
+						value1 = ''
+# 						st1 = dictToPrint[keyLV1]['Seniority Position'][1]
+						st1 = 'white'
+					elif h2 in ['Role']:
+						
+						value1 = ''
+# 						st1 = dictToPrint[keyLV1]['Seniority Position'][1]
+						st1 = 'white'
+					elif h2 in ['Total']:
+						value1 = totalLV1
+						st1 = 'white'
+					else:
+						value1 = dictToPrint[keyLV1][getBy][h2][0]
+# 						st1 = dictToPrint[keyLV1][getBy][h2][1]
+						st1 = 'white'
+						totalLV1 += int(value1)
+					style2 = Util.selectColorToPrint(st1, colorDict, colorDictNoneBorder)
+
+					sheetName.write(rowIndex, columIndex, value1, style2)
+					columIndex += 1
+				rowIndex += 1
+				columIndex = startColum
+				for keyLV2 in dictToPrint[keyLV1].keys():
+
+					if keyLV2 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+						continue
+					else:
+						
+						for keyLV3 in dictToPrint[keyLV1][keyLV2].keys():
+							if keyLV3 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+								continue
+							else:
+
+								total2 = 0
+								for head4 in lsheader:
+									h4 = head4[0]
+									if head4[0] =='Resource':
+										h4 = 'User Name'
+									if h4 in [Enum.HeaderExcelAndKeys.SHEET_NAME]:
+										value3 = dictToPrint[keyLV1][keyLV2][keyLV3][h4][0]
+										st3 = dictToPrint[keyLV1][h4][1]
+									elif h4 in ['User Name']:
+										value3 = dictToPrint[keyLV1][keyLV2][keyLV3][h4][0]
+										st3 = dictToPrint[keyLV1][h4][1]	
+									elif head4[0] in ['Type']:
+										if keyLV2 == 'N/A':
+											value3 = 'N/A'
+										else:
+											value3 = keyLV2.split(' - ')[0]
+										st3 = 'ice_blue'
+									elif head4[0] in ['Role']:
+										if keyLV2 == 'N/A':
+											value3 = 'N/A'
+										else:
+											value3 = keyLV2.split(' - ')[1]
+										st3 = 'ice_blue'
+									elif head4[0] in ['Total']:
+										value3 = total2
+										st3 = 'ice_blue'
+									else:
+										value3 = dictToPrint[keyLV1][keyLV2][keyLV3][getBy][h4][0]
+										st3 = dictToPrint[keyLV1][keyLV2][keyLV3][getBy][h4][1]
+										total2 += int(value3)
+									style3 = Util.selectColorToPrint(st3, colorDict, colorDictNoneBorder)
+									sheetName.write(rowIndex, columIndex, value3, style3)
+									columIndex += 1
+								
+								rowIndex += 1
+								columIndex = startColum
+					
+	

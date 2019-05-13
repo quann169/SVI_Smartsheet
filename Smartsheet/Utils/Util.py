@@ -166,7 +166,34 @@ def selectColorToPrint(color, colorDict, colorDictNoneBorder):
         return(colorDict[color])
     else:
         return(colorDictNoneBorder[color])
-    
+def definedColorText():
+    colorDict = {}
+    colorDictNoneBorder = {}
+    listColor = [Enum.WorkHourColor.IS_EQUAL, Enum.WorkHourColor.IS_GREATER, Enum.WorkHourColor.IS_LESS, Enum.WorkHourColor.IS_HEADER,
+                Enum.WorkHourColor.IS_USER_NAME, Enum.WorkHourColor.IS_SHEET_NAME, Enum.WorkHourColor.BACK_GROUND, Enum.WorkHourColor.IS_POSITION]
+    for color in listColor:
+        formatCommand = 'align: wrap 0;pattern: pattern solid, fore-colour white; border: left thin, top thin, right thin, bottom thin; font: name Calibri, bold 0,height 240, color %s;' %(color)
+        style = xlwt.easyxf(formatCommand)
+        colorDict[color] = style
+    for color in listColor:
+        formatCommand = 'align: wrap 0;pattern: pattern solid, fore-colour white; border: left thin, top thin, right thin, bottom thin; font: name Calibri, bold 0,height 240, color %s;' %(color)
+        style = xlwt.easyxf(formatCommand)
+        colorDictNoneBorder[color] = style
+    return colorDict, colorDictNoneBorder
+
+def selectColorTextToPrint(color, colorDict, colorDictNoneBorder):
+    if color in [Enum.WorkHourColor.BACK_GROUND, Enum.WorkHourColor.IS_SHEET_NAME, Enum.WorkHourColor.IS_HEADER]:
+        return(colorDict[color])
+    else:
+        return(colorDictNoneBorder[color])
+
+
+
+
+
+
+
+  
 def caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, dictWeek, color, sheetOrUser, limit):
     dictWorkOut = {}
     for week in listWeek:
@@ -249,10 +276,11 @@ def createDict(dictIn, sheetName, userName, position, color1, color2, color3,):
     dictIn[Enum.HeaderExcelAndKeys.TOTAL_WEEK] = {}
     
     #1 user, 0 sheet
-def headerToPrintExcel(type_, startDate, endDate, by, dir_, excelHoliday):
+def headerToPrintExcel(type_, startDate, endDate, by, dir_, excelHoliday, isNew):
     out = []
+    ListPrintExcel = []
     if type_:
-        ListPrintExcel = [[Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.WorkHourColor.IS_HEADER],  [Enum.HeaderExcelAndKeys.USER_NAME, Enum.WorkHourColor.IS_HEADER], [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.WorkHourColor.IS_HEADER]]
+        ListPrintExcel = [[Enum.HeaderExcelAndKeys.TYPE, Enum.WorkHourColor.IS_HEADER], [Enum.HeaderExcelAndKeys.ROLE, Enum.WorkHourColor.IS_HEADER],  [Enum.HeaderExcelAndKeys.USER_NAME, Enum.WorkHourColor.IS_HEADER], [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.WorkHourColor.IS_HEADER]]
         if by == 'week':
             listWeek = getWorkWeek(startDate, endDate, dir_, excelHoliday)
             for headerNameExcel in listWeek:
@@ -267,7 +295,11 @@ def headerToPrintExcel(type_, startDate, endDate, by, dir_, excelHoliday):
                 ListPrintExcel.append(monthColor)
         out = ListPrintExcel
     else:
-        ListPrintExcel = [[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.WorkHourColor.IS_HEADER],  [Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.WorkHourColor.IS_HEADER], [Enum.HeaderExcelAndKeys.USER_NAME, Enum.WorkHourColor.IS_HEADER]]
+        if isNew:
+            ListPrintExcel = [[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.WorkHourColor.IS_HEADER],  ['Resource', Enum.WorkHourColor.IS_HEADER], ['Type', Enum.WorkHourColor.IS_HEADER], ['Role', Enum.WorkHourColor.IS_HEADER], ]
+        else:  
+            ListPrintExcel = [[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.WorkHourColor.IS_HEADER],  [Enum.HeaderExcelAndKeys.TYPE, Enum.WorkHourColor.IS_HEADER], [Enum.HeaderExcelAndKeys.ROLE, Enum.WorkHourColor.IS_HEADER], [Enum.HeaderExcelAndKeys.USER_NAME, Enum.WorkHourColor.IS_HEADER]]
+        
         if by == 'week':
             listWeek = getWorkWeek(startDate, endDate, dir_, excelHoliday)
             for headerNameExcel in listWeek:
@@ -280,8 +312,10 @@ def headerToPrintExcel(type_, startDate, endDate, by, dir_, excelHoliday):
                 month = '%s-%s' %(Enum.DateTime.LIST_MONTH[headerNameExcel[0]], headerNameExcel[1])
                 monthColor = [month, Enum.WorkHourColor.IS_HEADER]
                 ListPrintExcel.append(monthColor)
+        if isNew:
+            ListPrintExcel.append(['Total', Enum.WorkHourColor.IS_HEADER])
         out = ListPrintExcel
-  
+    
     return ListPrintExcel
 
 def getTimeRun(startTime, currentTime):

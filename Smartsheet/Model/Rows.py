@@ -43,7 +43,8 @@ class Row():
 # 			print(row, '----------------------------')
 			if ('value' in i):
 				if i[Enum.GenSmartsheet.VALUE] not in [True, False]:
-					if i[Enum.GenSmartsheet.VALUE].strip() != '':
+					if str(i[Enum.GenSmartsheet.VALUE]).strip() != '':
+						
 						return 1
 		return 0
 

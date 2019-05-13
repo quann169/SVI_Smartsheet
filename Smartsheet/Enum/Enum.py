@@ -12,6 +12,9 @@ class UserInfoConfig():
 	POSITION = 'Position'
 	LIST_MAIL = 'Other info'
 	SENIORITY_LEVEL = 'Seniority level'
+	TYPE = 'Type'
+	ROLE = 'Role'
+	
 	#row, colum to get info from Config.xlsx
 	ROW_GET_STATUS_AND_START_END_DATE = 3
 	ROW_GET_SHOW_DETAIL = 4
@@ -67,11 +70,13 @@ class WorkHourColor:
 	IS_POSITION = 'light_turquoise'
 
 class HeaderExcelAndKeys():
-	SHEET_NAME = 'Sheet Name'
+	SHEET_NAME = 'Project'
 	USER_NAME = 'User Name'
 	SENIORITY_POSITION = 'Seniority Position'
+	TYPE = 'Type'
+	ROLE = 'Role'
 	TOTAL_MONTH = 'Total Month'
 	TOTAL_WEEK = 'Total Week'
-	START_ROW = 2
-	START_COLUM = 2
+	START_ROW = 0
+	START_COLUM = 0
  
