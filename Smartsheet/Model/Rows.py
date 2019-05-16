@@ -1,6 +1,7 @@
 import sys
 sys.path.append('..')
 from Enum import Enum
+from pprint import pprint
 class Row():
 	
 	#get all info of a row (dictionary)
@@ -17,8 +18,11 @@ class Row():
 				if value == '':
 					value = 'NaN'
 				dictInfo[dictHeader[index]] = value
+# 				if 'Allocation' == dictHeader[index]:
+# 					print(dictInfo[dictHeader[index]], colum, value)
 			index = index + 1
 		dictInfo['line'] = count
+# 		pprint(dictInfo)
 		return dictInfo
 		
 	#get all info of all row (dictionary)

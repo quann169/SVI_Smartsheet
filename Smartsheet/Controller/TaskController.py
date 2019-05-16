@@ -10,6 +10,10 @@ import datetime
 import time
 from pprint import pprint
 import xlwt
+from jinja2 import Environment
+from jinja2.loaders import FileSystemLoader
+import win32com.client as win32
+
 class RowParsing():
 	def checkSheetConfigIsExist(listSheetConfig, Sheet):
 		SheetEdit = {}
@@ -18,8 +22,10 @@ class RowParsing():
 		TOKEN = Enum.GenSmartsheet.TOKEN
 		smartsheet = Smartsheet(TOKEN)
 		sheets = smartsheet.sheets.list()
+		
 		dictSheetSms = {}
 		for sheetSmartsheet in sheets:
+# 			print(sheetSmartsheet.name.lower())
 			dictSheetSms[sheetSmartsheet.name.lower()] = sheetSmartsheet.name
 		strOut = ''
 		listOut = []
@@ -100,7 +106,7 @@ class RowParsing():
 			count += 1
 		return dictRows
 
-	def getAllSheetAndWorkTimeOfUser(listSheet, ListUser, startDate, endDate, userInfo, dictInfoUser, sheets_, dir_, excelHoliday):
+	def getAllSheetAndWorkTimeOfUser(listSheet, ListUser, startDate, endDate, userInfo, dictInfoUser, sheets_, dir_, excelHoliday, dictTimeOff):
 
 		UserInfoDict = {}
 		sheetInfoDict = {}
@@ -159,7 +165,8 @@ class RowParsing():
 								if users in dictInfoUser.keys():
 									user = dictInfoUser[users]
 								else:
-									user = users
+									if users in userInfo.keys():
+										user = users
 								position_ = '%s - %s' %(userInfo[user][Enum.UserInfoConfig.TYPE], userInfo[user][Enum.UserInfoConfig.ROLE])
 							task_name = dictRows[row]['info'][Enum.Header.TASK_NAME]
 							#create empty dict for user key = position
@@ -274,7 +281,7 @@ class RowParsing():
 										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['totalHour'] += 8
 										currentHour = sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][0]
 										totalHour = sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['totalHour']
-										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour, totalHour)[0]
+										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour, totalHour, 0)[0]
  																									
 								for wmonth in listWorkMonth:
 									y_, m_, d_ = Util.toDate(date2)
@@ -295,7 +302,7 @@ class RowParsing():
 										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['totalHour'] += 8
 										currentHour2 = sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][0]
 										totalHour2 = sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['totalHour']
-										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour2, totalHour2)[0]
+										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour2, totalHour2, 0)[0]
 				else:
 					countRowParent += 1
 				count2 += 1
@@ -312,7 +319,7 @@ class RowParsing():
 			print('------------------------------------------------------------------------------')
 		return UserInfoDict, sheetInfoDict, sheetInfoDict2
 	
-	def caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict, sheetInfoDict, dir_, excelHoliday):
+	def caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict, sheetInfoDict, dir_, excelHoliday, dictTimeOff):
 
 		listMonth = Util.getWorkMonth(startDate, endDate, dir_, excelHoliday)
 		listWeek = Util.getWorkWeek(startDate, endDate, dir_, excelHoliday)
@@ -325,16 +332,16 @@ class RowParsing():
 				for sheet__ in userInfoDict[team][user_]:
 					if sheet__ in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
 						continue
-					totalMonthS = Util.caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, userInfoDict[team][user_][sheet__], Enum.WorkHourColor.BACK_GROUND, False, 'unlimit')
-					totalWeekS = Util.caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, userInfoDict[team][user_][sheet__], Enum.WorkHourColor.BACK_GROUND, False, 'unlimit')
+					totalMonthS = Util.caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, userInfoDict[team][user_][sheet__], Enum.WorkHourColor.BACK_GROUND, False, 'unlimit', '', dictTimeOff)
+					totalWeekS = Util.caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, userInfoDict[team][user_][sheet__], Enum.WorkHourColor.BACK_GROUND, False, 'unlimit', '', dictTimeOff)
 					userInfoDict[team][user_][sheet__][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthS
 					userInfoDict[team][user_][sheet__][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekS
 					
-				totalWeekU, totalMonthU = Util.cacutlateTotal(listMonth, listWeek, userInfoDict[team][user_], Enum.WorkHourColor.BACK_GROUND, False, 'limit')
+				totalWeekU, totalMonthU = Util.cacutlateTotal(listMonth, listWeek, userInfoDict[team][user_], Enum.WorkHourColor.BACK_GROUND, False, 'limit', user_, dictTimeOff)
 				userInfoDict[team][user_][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthU
 				userInfoDict[team][user_][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekU
 
-			totalWeekT, totalMonthT = Util.cacutlateTotal(listMonth, listWeek, userInfoDict[team], Enum.WorkHourColor.IS_POSITION, True, 'unlimit')
+			totalWeekT, totalMonthT = Util.cacutlateTotal(listMonth, listWeek, userInfoDict[team], Enum.WorkHourColor.IS_POSITION, True, 'unlimit', '', dictTimeOff)
 			userInfoDict[team][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthT
 			userInfoDict[team][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekT
 		
@@ -348,16 +355,16 @@ class RowParsing():
 				for user__ in sheetInfoDict[sheet_][team_]:
 					if user__ in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
 						continue
-					totalMonthS = Util.caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, sheetInfoDict[sheet_][team_][user__], Enum.WorkHourColor.BACK_GROUND, True, 'limit')
-					totalWeekS = Util.caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, sheetInfoDict[sheet_][team_][user__], Enum.WorkHourColor.BACK_GROUND, True, 'limit')
+					totalMonthS = Util.caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, sheetInfoDict[sheet_][team_][user__], Enum.WorkHourColor.BACK_GROUND, True, 'limit', user__, dictTimeOff)
+					totalWeekS = Util.caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, sheetInfoDict[sheet_][team_][user__], Enum.WorkHourColor.BACK_GROUND, True, 'limit', user__, dictTimeOff)
 					sheetInfoDict[sheet_][team_][user__][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthS
 					sheetInfoDict[sheet_][team_][user__][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekS
 					
-				totalWeekU, totalMonthU = Util.cacutlateTotal(listMonth, listWeek, sheetInfoDict[sheet_][team_], Enum.WorkHourColor.IS_POSITION, True, 'unlimit')
+				totalWeekU, totalMonthU = Util.cacutlateTotal(listMonth, listWeek, sheetInfoDict[sheet_][team_], Enum.WorkHourColor.IS_POSITION, True, 'unlimit', '', dictTimeOff)
 				sheetInfoDict[sheet_][team_][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthU
 				sheetInfoDict[sheet_][team_][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekU
 
-			totalWeekT, totalMonthT = Util.cacutlateTotal(listMonth, listWeek, sheetInfoDict[sheet_], Enum.WorkHourColor.IS_SHEET_NAME, True, 'unlimit')
+			totalWeekT, totalMonthT = Util.cacutlateTotal(listMonth, listWeek, sheetInfoDict[sheet_], Enum.WorkHourColor.IS_SHEET_NAME, True, 'unlimit', '', dictTimeOff)
 			sheetInfoDict[sheet_][Enum.HeaderExcelAndKeys.TOTAL_MONTH] = totalMonthT
 			sheetInfoDict[sheet_][Enum.HeaderExcelAndKeys.TOTAL_WEEK] = totalWeekT
 
@@ -723,4 +730,66 @@ class Controllers():
 								rowIndex += 1
 								columIndex = startColum
 					
-	
+	def printReportToExcel(sheetName, lsheader, dictToSendMail, startWeekSendEmail, startRow, startColum, colorDict, colorDictNoneBorder, userInfo):
+		rowIndex = startRow
+		columIndex = startColum
+		for head1 in lsheader:
+
+			style1 = Util.selectColorToPrint('gray_ega', colorDict, colorDictNoneBorder)
+			lsLongHeader = [startColum, startColum + 1, startColum + 2, startColum + 6, startColum + 7]
+			if columIndex in lsLongHeader:
+				sheetName.col(columIndex).width = 256 * 25
+			else:
+				sheetName.col(columIndex).width = 256 * 11
+
+			sheetName.write(rowIndex, columIndex, head1, style1)
+			columIndex += 1
+		rowIndex += 1
+		columIndex = startColum
+		styleCell_, styleCell__ = Util.style_for_timesheet()
+		for manage in dictToSendMail.keys():
+			for user_ in dictToSendMail[manage].keys():
+				fullName = userInfo[user_][Enum.UserInfoConfig.FULL_NAME]
+				sheetName.write(rowIndex, columIndex, manage, styleCell_)
+				columIndex += 1
+				sheetName.write(rowIndex, columIndex, fullName, styleCell_)
+				columIndex += 1
+				sheetName.write(rowIndex, columIndex, dictToSendMail[manage][user_][0], styleCell_)
+				columIndex += 1
+				sheetName.write(rowIndex, columIndex, dictToSendMail[manage][user_][1], styleCell_)
+				columIndex += 1
+				sheetName.write(rowIndex, columIndex, dictToSendMail[manage][user_][2], styleCell_)
+				columIndex += 1
+				sheetName.write(rowIndex, columIndex, dictToSendMail[manage][user_][3], styleCell_)
+				columIndex += 1
+				sheetName.write(rowIndex, columIndex, dictToSendMail[manage][user_][4], styleCell_)
+				columIndex += 1
+				sheetName.write(rowIndex, columIndex, ' ', styleCell_)
+				columIndex = startColum
+				rowIndex += 1
+				
+				
+				
+	def send_mail(dir_, startWeekSendEmail):
+		dictReport = Util.get_info_report(dir_)
+		for manage_ in dictReport.keys():
+			outlook = win32.Dispatch('outlook.application')
+			mail = outlook.CreateItem(0)
+			mail.To = manage_
+			mail.Subject = 'Report Timesheet'
+			mail.Body = ''
+			var = {}
+			var['INFO'] = dictReport[manage_]
+			systemFile1 = FileSystemLoader(dir_)
+			j2_env1 = Environment(loader=systemFile1, trim_blocks=True)
+			run_template = j2_env1.get_template("Report.html")
+			str_ = run_template.render(var)
+			mail.HTMLBody = str_
+			 #this field is optional
+		
+		# To attach a file to the email (optional):
+# 		attachment  = "Path to the attachment"
+# 		mail.Attachments.Add(attachment)
+			mail.Send()
+			print('Send mail to %s'%manage_)
+			
