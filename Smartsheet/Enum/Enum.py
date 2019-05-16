@@ -14,7 +14,10 @@ class UserInfoConfig():
 	SENIORITY_LEVEL = 'Seniority level'
 	TYPE = 'Type'
 	ROLE = 'Role'
-	
+	MANAGER_EMAIL = 'Manager (Mail)'
+	IS_COUNT = 'is_count'
+	MAIL = 'Mail'
+	FULL_NAME = 'Full Name'
 	#row, colum to get info from Config.xlsx
 	ROW_GET_STATUS_AND_START_END_DATE = 3
 	ROW_GET_SHOW_DETAIL = 4

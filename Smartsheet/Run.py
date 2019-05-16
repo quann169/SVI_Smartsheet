@@ -7,9 +7,12 @@ import xlwt
 import xlrd
 from xlwt import Workbook 
 import sys
-import os
+import os, re
 import time
 import shutil
+from pprint import pprint
+
+
 def Run__():
 	time1 = time.time()
 	print('Start time: %s' %(str(datetime.datetime.now())))
@@ -46,9 +49,18 @@ def Run__():
 	for row_ in range(Enum.UserInfoConfig.ROW_GET_USER_INFO, sheet1.nrows):
 		lsRow = sheet1.row_values(row_)
 		userInfo[lsRow[1]] = {}
-		userInfo[lsRow[1]][Enum.UserInfoConfig.TYPE] = lsRow[2]
-		userInfo[lsRow[1]][Enum.UserInfoConfig.ROLE] = lsRow[3]
-		listOtherInfo = lsRow[4]. split(',')
+		userInfo[lsRow[1]][Enum.UserInfoConfig.TYPE] = lsRow[3].strip()
+		userInfo[lsRow[1]][Enum.UserInfoConfig.ROLE] = lsRow[4].strip()
+		userInfo[lsRow[1]][Enum.UserInfoConfig.FULL_NAME] = lsRow[2].strip()
+		userInfo[lsRow[1]][Enum.UserInfoConfig.MANAGER_EMAIL] = lsRow[6].strip()
+		userInfo[lsRow[1]][Enum.UserInfoConfig.IS_COUNT] = int(float(str(lsRow[7]).strip()))
+		lsM = re.findall('\S+@\S+', str(lsRow[5].strip()))
+		if len(lsM) != 0:
+			userInfo[lsRow[1]][Enum.UserInfoConfig.MAIL] = lsM[0].replace(',', '')
+		else:
+			userInfo[lsRow[1]][Enum.UserInfoConfig.MAIL] = ''
+		
+		listOtherInfo = lsRow[5]. split(',')
 		for id1 in range(0, len(listOtherInfo)):
 			listOtherInfo[id1] = listOtherInfo[id1].strip()
 		if not (lsRow[1].lower() in listOtherInfo):
@@ -57,6 +69,11 @@ def Run__():
 	print('Config ' + str(len(userInfo)) + ' user ')
 	#--------------------------------------------
 	
+	#get time off
+	dictTimeOff = Util.get_info_time_off(dir_, excelHoliday, userInfo)
+# 	pprint (dictTimeOff)
+
+
 	#get item
 	sheet2 = wb.sheet_by_name('Config')	
 	lsRow_ = sheet2.row_values(Enum.UserInfoConfig.ROW_GET_STATUS_AND_START_END_DATE)
@@ -72,6 +89,16 @@ def Run__():
 			sys.exit()
 	startDate = str(lsRow_[7])
 	endDate = str(lsRow_[8])
+	dateSendEmail = str(lsRow_[9])
+	ccMail_ = str(lsRow_[10])
+	ccMail = Util.get_cc_mail(ccMail_)
+# 	print (dateSendEmail, endDate)
+	i = datetime.datetime.now()
+	if dateSendEmail == '':
+		dateSendEmail = '%s-%s-%s'%(i.year, i.month, i.day)
+	Util.check_valid_send_email_date(startDate, endDate, dateSendEmail)
+	endWeekSendEmail, startWeekSendEmail = Util.get_end_start_week(dateSendEmail)
+	
 	
 		#check config start, end date------------
 	try:
@@ -107,6 +134,7 @@ def Run__():
 				print('Select item ' + str(item) + ' and show detail')
 			else:
 				print('Select item ' + str(item))
+	print('config Week to Report is: ' + startWeekSendEmail)
 	print('Config start date is: ' + startDate)
 	print('Config end date is: ' + endDate)
 	#--------------------------------------
@@ -162,14 +190,19 @@ def Run__():
 	print("------------------------------------------------------------------------------")
 
 # for item in ListItems:
-	
-	userInfoDict_, sheetInfoDict_, sheetInfoDict2_ = RowParsing.getAllSheetAndWorkTimeOfUser(ListSheetFilter, ListUserFilter, startDate, endDate, userInfo, dictInfoUser, Sheet, dir_, excelHoliday)
-	userInfoDict, sheetInfoDict = RowParsing.caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict_, sheetInfoDict_, dir_, excelHoliday)
 
+	userInfoDict_, sheetInfoDict_, sheetInfoDict2_ = RowParsing.getAllSheetAndWorkTimeOfUser(ListSheetFilter, ListUserFilter, startDate, endDate, userInfo, dictInfoUser, Sheet, dir_, excelHoliday, dictTimeOff)
+
+	userInfoDict, sheetInfoDict = RowParsing.caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict_, sheetInfoDict_, dir_, excelHoliday, dictTimeOff)
+# 	pprint(userInfoDict)
+# 	asd
+	dictToSendMail = Util.get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeOff)
+# 	pprint (dictToSendMail)
+# 	asd
 	startRow = Enum.HeaderExcelAndKeys.START_ROW
 	startColum = Enum.HeaderExcelAndKeys.START_COLUM
+	wb = Workbook()
 
-	wb = Workbook() 
 	colorDict, colorDictNoneBorder = Util.definedColor()
 	colorTextDict, colorTextDictNoneBorder = Util.definedColorText()
 	if listItems[1]['status'] == 1:
@@ -229,7 +262,7 @@ def Run__():
 		print("------------------------------------------------------------------------------")
 	if listItems[6]['status'] == 1:
  		
-		print("Running  Item I005 - Caculate work time and filter all user of sheet by month (new format)")
+		print("Running  Item I006 - Caculate work time and filter all user of sheet by month (new format)")
  		
 		sheetName = wb.add_sheet('Monthly Project (new)')
 		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month', dir_, excelHoliday, True)
@@ -252,14 +285,39 @@ def Run__():
 		lsheader = ['Position', 'Start week', 'End week', 'Start date', 'End date', 'Project', 'Task name', 'Emp name', 'Allocation', 'Work hours', 'Max hours', 'WW']
 		#colum, row
 		Controllers.printToExcelMonthlyOrWeeklyTimesheet(sheetName, lsheader, sheetInfoDict2_, startRow, startColum, 'week')
-	
-			
+		
+	if True:
+		print("Creating Report Timesheet")
+		sheetName = wb.add_sheet('Report')
+		lsheader = ['Manager (Mail)', 'Resource', 'Working hours', 'Off work', 'Total', 'Weekly hours', 'Detail', 'Comment']
+		#colum, row
+		Controllers.printReportToExcel(sheetName, lsheader, dictToSendMail, startWeekSendEmail, startRow, startColum, colorDict, colorDictNoneBorder, userInfo)
+# 	try:
+# 		os.remove('%s\TimeSheet.xls'%(dir_))
+# 	except:
+# 		print('Error to remove TimeSheet.xls')
 	try:
 		wb.save('%s\TimeSheet.xls'%(dir_))
+		os.system('start %s\TimeSheet.xls'%(dir_))
+		
 	except:
 		print('Error to save TimeSheet.xls')
+		sys.exit()
+	send_ = False
+	while True:
+		confirm_ = input("Do you want to send report [Yes/No]: ") 
+		confirm_ = confirm_.strip()
+		if confirm_.lower() == 'yes':
+			send_ = True
+			break
+		if confirm_.lower() == 'no':
+			break
+	if send_:
+		Controllers.send_mail(dir_, startWeekSendEmail, ccMail, userInfo)
 	time3 = time.time()
 	print('Time to run all: %s' %(Util.getTimeRun(time1, time3)))
+
+   
 
 if __name__ == '__main__':
     try:

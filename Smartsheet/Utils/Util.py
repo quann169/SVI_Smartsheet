@@ -11,6 +11,7 @@ from Enum import Enum
 from pprint import pprint
 from dateutil.relativedelta import relativedelta
 def toDate(strg):
+   
     try:
         objDate = datetime.datetime.strptime(strg, '%Y-%m-%d')
     except:
@@ -20,13 +21,28 @@ def toDate(strg):
             try:
                 objDate = datetime.datetime.strptime(strg, '%Y-%m-%d %H:%M:%S')
             except:
-                print("Other Date time format")
-                sys.exit()
+                try:
+                    objDate = datetime.datetime.strptime(strg, '%m/%d/%Y')
+                except:
+                    print("Other Date time format")
+                    sys.exit()
     year = objDate.year
     month = objDate.month
     day = objDate.day
     return year, month, day
-
+def check_valid_send_email_date(startDate, endDate, dateSendEmail):
+    sy, sm, sd = toDate(startDate)
+    ey, em, ed = toDate(endDate)
+    dy, dm, dd = toDate(dateSendEmail)
+    start = datetime.datetime(day = sd, month = sm, year = sy)
+    end = datetime.datetime(day = ed, month = em, year = ey)
+    copare = datetime.datetime(day = dd, month = dm ,year = dy)
+    if start <= copare <= end:
+        pass
+    else:
+        print ("[ERROR] %s out of range (%s - %s)"%(dateSendEmail, startDate, endDate))
+        sys.exit()
+    
 def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
         yield date1 + datetime.timedelta(n)
@@ -134,17 +150,18 @@ def getUserOfString(string):
         name = s
     return name
 
-def CompareAndSelectColorToPrintExcel(currentHour, totalHour):
+def CompareAndSelectColorToPrintExcel(currentHour_, totalHour, offHour):
     color = ''
+    currentHour = currentHour_ + offHour
     if currentHour > totalHour:
         color = Enum.WorkHourColor.IS_GREATER
         return color, totalHour
     elif currentHour < totalHour:
         color = Enum.WorkHourColor.IS_LESS
-        return color, currentHour
+        return color, currentHour_
     else:
         color = Enum.WorkHourColor.IS_EQUAL
-        return color, currentHour
+        return color, currentHour_
 
 def definedColor():
     colorDict = {}
@@ -194,7 +211,7 @@ def selectColorTextToPrint(color, colorDict, colorDictNoneBorder):
 
 
   
-def caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, dictWeek, color, sheetOrUser, limit):
+def caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, dictWeek, color, sheetOrUser, limit, user__, dictTimeOff):
     dictWorkOut = {}
     for week in listWeek:
 
@@ -202,14 +219,21 @@ def caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, dictWeek, colo
         for day in dictWeek[week[0]]:
             workTime += day[1]
         if sheetOrUser:
-            color, hour_ = CompareAndSelectColorToPrintExcel(workTime, week[1])
-            workColor = [hour_, color]
+#
+            offHour = 0
+            if user__ in dictTimeOff['week'].keys():
+                if week[0] in dictTimeOff['week'][user__].keys():
+                    offHour = dictTimeOff['week'][user__][week[0]]
+            
+#             
+            color, hour_ = CompareAndSelectColorToPrintExcel(workTime, week[1], offHour)
+            workColor = [hour_, color, workTime, offHour, week[1]]
         else:
             workColor = [workTime, color]
         dictWorkOut[week[0]] = workColor
     return dictWorkOut
 
-def caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, dictWeek, color, sheetOrUser, limit):
+def caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, dictWeek, color, sheetOrUser, limit, user__, dictTimeOff):
     dictWorkOut = {}
 #     print(listMonth)
 #     print(listWeek)
@@ -223,15 +247,25 @@ def caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, d
                 if (m == month[0]) and (y == month[1]):
                     workTime += day[1]
         if sheetOrUser:
-            color, hour_ = CompareAndSelectColorToPrintExcel(workTime, month[2])
-            workColor = [hour_, color]
+#            
+            month___ = '%s-%s'%(Enum.DateTime.LIST_MONTH[int(month[0])], month[1])
+            offHour = 0
+            if user__ in dictTimeOff['month'].keys():
+#                 print (user__, dictTimeOff['month'].keys())
+                if month___ in dictTimeOff['month'][user__].keys():
+                    offHour = dictTimeOff['month'][user__][month___]
+                    
+#             
+
+            color, hour_ = CompareAndSelectColorToPrintExcel(workTime, month[2], offHour)
+            workColor = [hour_, color, workTime,  offHour, month[2]]
         else:
             workColor = [workTime, color]
         month_ = '%s-%s' %(Enum.DateTime.LIST_MONTH[month[0]], month[1])
         dictWorkOut[month_] = workColor
     return dictWorkOut
 
-def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser, limit):
+def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser, limit, user__, dictTimeOff):
     dictWorkWeek = {}
     dictWorkMonth = {}
 
@@ -246,8 +280,13 @@ def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser, limit):
 
                 total += dictTotal[keyOfDict][Enum.HeaderExcelAndKeys.TOTAL_MONTH][month_][0]
         if not sheetOrUser:
-            color, hour_ = CompareAndSelectColorToPrintExcel(total, month[2])
-            dictWorkMonth[month_] = [hour_, color]
+            offHour_ = 0
+            if user__ in dictTimeOff['month'].keys():
+#                 print (user__, dictTimeOff['month'].keys())
+                if month_ in dictTimeOff['month'][user__].keys():
+                    offHour_ = dictTimeOff['month'][user__][month_]
+            color, hour_ = CompareAndSelectColorToPrintExcel(total, month[2], offHour_)
+            dictWorkMonth[month_] = [hour_, color, total,  offHour_, month[2]]
         else:
             dictWorkMonth[month_] = [total, color]
     for weeks in listWeek:
@@ -261,8 +300,12 @@ def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser, limit):
                 total2 += dictTotal[keyOfDict][Enum.HeaderExcelAndKeys.TOTAL_WEEK][week][0]
         
         if not sheetOrUser:
-            color2, hour_ = CompareAndSelectColorToPrintExcel(total2, weeks[1])
-            dictWorkWeek[week] = [hour_, color2]
+            offHour = 0
+            if user__ in dictTimeOff['week'].keys():
+                if week in dictTimeOff['week'][user__].keys():
+                     offHour = dictTimeOff['week'][user__][week]
+            color2, hour_ = CompareAndSelectColorToPrintExcel(total2, weeks[1], offHour)
+            dictWorkWeek[week] = [hour_, color2, total2,  offHour, weeks[1]]
         else:
             dictWorkWeek[week] = [total2, color2]
     return dictWorkWeek, dictWorkMonth
@@ -326,7 +369,6 @@ def getTimeRun(startTime, currentTime):
 
 def get_info_excel(dir_):
     df = pandas.read_excel("%s\Config.xlsx"%dir_, sheet_name='Holiday')
-    configInfo = {}
     excelHoliday_ = df['Holiday']
     cate = ''
     excelHoliday = []
@@ -334,6 +376,86 @@ def get_info_excel(dir_):
         y, m, d = toDate(str(i))
         excelHoliday.append('%s-%s-%s'%(y, m, d))
     return excelHoliday
+
+def get_info_report(dir_):
+    df = pandas.read_excel("%s\TimeSheet.xls"%dir_, sheet_name='Report')
+    manager_ = df['Manager (Mail)']
+    resource_ = df['Resource']
+    workingH_ = df['Working hours']
+    offW_ = df['Off work']
+    total_ = df['Total']
+    weeklyH_ = df['Weekly hours']
+    detail_ = df['Detail']
+    comment_ = df['Comment']
+    len_ = len(manager_)
+    dictOut = {}
+    for index in range (0, len_):
+        mn = convert_nan_value(str(manager_[index]))
+        if mn != '':
+            if mn not in dictOut.keys():
+                dictOut[manager_[index]] = []
+            rs = convert_nan_value(str(resource_[index]))    
+            wk = convert_nan_value(str(workingH_[index]))  
+            off = convert_nan_value(str(offW_[index]))
+            to = convert_nan_value(str(total_[index]))
+            we = convert_nan_value(str(weeklyH_[index]))
+            de = convert_nan_value(str(detail_[index]))
+            co = convert_nan_value(str(comment_[index]))
+                
+            dictOut[manager_[index]].append([rs, wk, off, to, we, de, co])
+#         dictOut[manager_[index]]['Resource'] = resource_[index]
+#         dictOut[manager_[index]]['Working hours'] = workingH_[index]
+#         dictOut[manager_[index]]['Off work'] = offW_[index]
+#         dictOut[manager_[index]]['Total'] = total_[index]
+#         dictOut[manager_[index]]['Weekly hour'] = weeklyH_[index]
+#         dictOut[manager_[index]]['Detail'] = detail_[index]
+#         dictOut[manager_[index]]['Comment'] = comment_[index]
+    return dictOut
+def get_info_time_off(dir_, excelHoliday, userInfo):
+    df = pandas.read_excel("%s\Config.xlsx"%dir_, sheet_name='Time-Off')
+    configInfo = {}
+    requester = df['Requester']
+    sDateRq = df['Start Date']
+    eDateRq = df['End Date']
+    workdays = df['Workdays']
+    sumRow = len(requester)
+    dictTimeOff = {'month': {}, 'week':{}}
+    for row in range (0, sumRow):
+        requester_ = ''
+        for usr in userInfo.keys():
+            if userInfo[usr][Enum.UserInfoConfig.FULL_NAME].strip() == requester[row].strip():
+                requester_ = usr.strip()
+        
+        lsWorkDay = getWorkDay(str(sDateRq[row]), str(eDateRq[row]), dir_, excelHoliday)
+        if len(lsWorkDay) == 0:
+            continue
+        else:
+            if not requester_ in dictTimeOff['week'].keys():
+                dictTimeOff['week'][requester_] = {}
+            if not requester_ in dictTimeOff['month'].keys():
+                dictTimeOff['month'][requester_] = {}
+                
+            for date_week in lsWorkDay:
+                y, m, d = toDate(str(date_week[0]))
+                month_ = '%s-%s'%(Enum.DateTime.LIST_MONTH[int(m)], y)
+                if not date_week[1] in dictTimeOff['week'][requester_].keys():
+                    dictTimeOff['week'][requester_][date_week[1]] = 0
+                if not month_ in dictTimeOff['month'][requester_].keys():
+                    dictTimeOff['month'][requester_][month_] = 0
+                    
+                if str(sDateRq[row]) == str(eDateRq[row]):
+                    hours = 0
+                    nstr = workdays[row][workdays[row].find("(")+1 : workdays[row].find(")")]
+                    str_ = nstr.replace('h', '').strip()
+                    hours = float(str_)
+                    dictTimeOff['week'][requester_][date_week[1]] += hours
+                    dictTimeOff['month'][requester_][month_] += hours
+                else:
+                    dictTimeOff['week'][requester_][date_week[1]] += 8
+                    dictTimeOff['month'][requester_][month_] += 8
+    return dictTimeOff
+    
+
 def get_end_start_week(tringDate):
     date_obj = datetime.datetime.strptime(tringDate, '%Y-%m-%d')
     y, m, d = toDate(date_obj.strftime("%Y-%m-%d"))
@@ -366,11 +488,91 @@ def get_month (strDate):
     return month
 
 def style_for_timesheet():
-    formatCell = 'align: wrap 0; pattern: pattern solid, fore-colour light_turquoise;  font: name Calibri, bold 0,height 240;' 
-    formatCell1 = 'align: wrap 0; pattern: pattern solid, fore-colour white;  font: name Calibri, bold 0,height 240;' 
+    formatCell = 'align: wrap 0; pattern: pattern solid, fore-colour light_turquoise;  font: name Calibri, bold 0,height 240; border: left thin, top thin, right thin, bottom thin;' 
+    formatCell1 = 'align: wrap 0; pattern: pattern solid, fore-colour white;  font: name Calibri, bold 0,height 240; border: left thin, top thin, right thin, bottom thin;' 
     styleCell = xlwt.easyxf(formatCell)
     styleCell1 = xlwt.easyxf(formatCell1)
     return styleCell, styleCell1
 
-# def getWorkWeekOfTask(fromdate, todate, dir_, excelHoliday, startDate, endDate):
-#     
+
+def get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeOff):
+    dictOut = {}
+#     pprint (userInfo)
+    weeklyHour = 0
+    for position in userInfoDict.keys():
+        for user_ in userInfoDict[position].keys():
+            if user_ in[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+                continue
+            else:
+                if user_ in userInfo.keys():
+                    
+                    if userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL] == '':
+                        continue
+                    else:
+                        detail = ''
+#                         print (position, user_, userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL])
+                        ls = userInfoDict[position][user_]['Total Week'][startWeekSendEmail]
+                        weeklyHour = ls[4]
+                        if userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL] not in dictOut.keys():
+                            dictOut[userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL]] = {}
+                        
+                        for sheet_ in userInfoDict[position][user_].keys():
+                            if sheet_ in[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+                                continue
+                            else:
+                                lsSheet = userInfoDict[position][user_][sheet_]['Total Week'][startWeekSendEmail]
+                                if lsSheet[0] != 0:
+                                    str__ = '%s(%s), '%(sheet_, lsSheet[0])
+                                    detail += str__
+                        dictOut[userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL]][user_] = [ls[2], ls[3], ls[2] + ls[3], ls[4], detail]
+    for user__ in userInfo.keys():
+        if userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL] == '':
+            continue
+        elif userInfo[user__][Enum.UserInfoConfig.IS_COUNT] == 1:
+            continue
+        else:
+            if userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL] not in dictOut.keys():
+                dictOut[userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL]] = {}
+            if user__ in dictOut[userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL]].keys():
+                continue
+            else:
+                if user__ in  dictTimeOff['week'].keys():
+                    if startWeekSendEmail in dictTimeOff['week'][user__].keys():
+                        dictOut[userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL]][user__] = [0, dictTimeOff['week'][user__][startWeekSendEmail], dictTimeOff['week'][user__][startWeekSendEmail], weeklyHour, '']
+                    else:
+                        dictOut[userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL]][user__] = [0, 0, 0, weeklyHour, '']
+                else:
+                    dictOut[userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL]][user__] = [0, 0, 0, weeklyHour, '']
+    
+    return dictOut
+
+def convert_nan_value(string):
+    out = ''
+    if string.strip() == 'nan':
+        out = ''
+    elif string.strip() == '':
+        out = ''
+    else:
+        out = string
+    return out
+#   
+def get_cc_mail(string_):
+    cc = ''
+    if string_.strip() == '':
+        return cc
+    else:
+        cc = string_.replace(',', ';')
+        return cc    
+    
+def is_skip_user(dictInfoUser, userInfo, user_):
+    if user_.strip() in userInfo.keys():
+        if userInfo[user_.strip()][Enum.UserInfoConfig.IS_COUNT] == 1:
+            return True
+    else:
+        if user_.strip() in dictInfoUser.keys():
+            if userInfo[dictInfoUser[user_.strip()]][Enum.UserInfoConfig.IS_COUNT] == 1:
+                return True
+    return False
+    
+    
+    
