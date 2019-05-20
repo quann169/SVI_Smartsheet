@@ -530,6 +530,7 @@ def get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeO
             continue
         elif userInfo[user__][Enum.UserInfoConfig.IS_COUNT] == 1:
             continue
+
         else:
             if userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL] not in dictOut.keys():
                 dictOut[userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL]] = {}
@@ -555,7 +556,7 @@ def convert_nan_value(string):
     else:
         out = string
     return out
-#   
+
 def get_cc_mail(string_):
     cc = ''
     if string_.strip() == '':
@@ -573,6 +574,4 @@ def is_skip_user(dictInfoUser, userInfo, user_):
             if userInfo[dictInfoUser[user_.strip()]][Enum.UserInfoConfig.IS_COUNT] == 1:
                 return True
     return False
-    
-    
     

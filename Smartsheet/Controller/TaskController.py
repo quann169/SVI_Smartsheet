@@ -24,15 +24,12 @@ class RowParsing():
 		sheets = smartsheet.sheets.list()
 		
 		dictSheetSms = {}
-		for sheetSmartsheet in sheets:
-			
+		for sheetSmartsheet in sheets:			
 			if sheetSmartsheet.name.lower() not in dictSheetSms.keys():
 				dictSheetSms[sheetSmartsheet.name.lower()] = sheetSmartsheet.name
 			else:
 				print ('[ERROR] Duplicate %s in smartsheet'%sheetSmartsheet.name)
 				sys.exit()
-# 			print(sheetSmartsheet.name)
-			
 		strOut = ''
 		listOut = []
 # 		print('out')
@@ -781,6 +778,7 @@ class Controllers():
 				
 				
 				
+
 	def send_mail(dir_, startWeekSendEmail, ccMail_, userInfo):
 		dictReport = Util.get_info_report(dir_)
 		for manage_ in dictReport.keys():
@@ -805,6 +803,8 @@ class Controllers():
 			mail.Body = ''
 			var = {}
 			var['sumRow'] = len(dictReport[manage_])
+			mail.Subject = 'Report Timesheet'
+			var = {}
 			var['INFO'] = dictReport[manage_]
 			systemFile1 = FileSystemLoader(dir_)
 			j2_env1 = Environment(loader=systemFile1, trim_blocks=True)
@@ -812,7 +812,7 @@ class Controllers():
 			str_ = run_template.render(var)
 			mail.HTMLBody = str_
 			 #this field is optional
-			
+
 		# To attach a file to the email (optional):
 # 		attachment  = "Path to the attachment"
 # 		mail.Attachments.Add(attachment)

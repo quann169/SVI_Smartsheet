@@ -93,6 +93,7 @@ def Run__():
 	ccMail_ = str(lsRow_[10])
 	ccMail = Util.get_cc_mail(ccMail_)
 # 	print (dateSendEmail, endDate)
+
 	i = datetime.datetime.now()
 	if dateSendEmail == '':
 		dateSendEmail = '%s-%s-%s'%(i.year, i.month, i.day)
@@ -202,7 +203,6 @@ def Run__():
 	startRow = Enum.HeaderExcelAndKeys.START_ROW
 	startColum = Enum.HeaderExcelAndKeys.START_COLUM
 	wb = Workbook()
-
 	colorDict, colorDictNoneBorder = Util.definedColor()
 	colorTextDict, colorTextDictNoneBorder = Util.definedColorText()
 	if listItems[1]['status'] == 1:
@@ -292,6 +292,7 @@ def Run__():
 		lsheader = ['Manager (Mail)', 'Resource', 'Working hours', 'Off work', 'Total', 'Weekly hours', 'Detail', 'Comment']
 		#colum, row
 		Controllers.printReportToExcel(sheetName, lsheader, dictToSendMail, startWeekSendEmail, startRow, startColum, colorDict, colorDictNoneBorder, userInfo)
+
 # 	try:
 # 		os.remove('%s\TimeSheet.xls'%(dir_))
 # 	except:

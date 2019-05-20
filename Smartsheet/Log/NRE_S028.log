@@ -1,0 +1,64 @@
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 1 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 16 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh to check on CDC tool availability, Line : 19 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: aChanh to check Son’s availability, Line : 20 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Savarti to send ftp link for file depository, Line : 21 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: Synthesis -> check post synthesis timing, Line : 23 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: P&R -> for area estimation, Line : 24 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: DFT insertion not need at this point, Line : 25 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: CDC check ( tool required), Line : 26 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: Use same PDK as previous project, Line : 27 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: Would like to finish project in 1.5 months, Line : 28 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: Next release in couple week, Line : 29 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Logistic – want layout resource on board asap also – prefer Son, Line : 30 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Thanh to adjust the asic2c final area utilization about 75 ~ 80%, Line : 32 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh to update the cell area of asic2c systhesis report, Line : 33 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: Velodyne approved to route up to MQ layer, Line : 34 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh to update Reg2out (-5.79ns) SDC  to ftp, Line : 36 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh to update Asic2c (new trial LEF) from current LEF + 325um Y dimension, Line : 37 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh to update timing paths in new released rtl/sdc, Line : 38 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh to check if Spyglass license is available, Line : 39 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: SDC: Can set multiply-cycle path for PnR purpose temporarily, Line : 41 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Keep scan-logic. SVI no need to try PnR without scan-logic, Line : 42 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Trial synthesis: SVI to try the #1, #2 in proposed utilization options from Larry, Line : 43 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: SVI to try PnR for proposed modified LEF, Line : 44 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 45 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 46 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: Errors with RTL/SDC, Larry will review and updated the cleaned version on May 8th, Line : 48 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh will share the constraint of clock gating/constant register info, Line : 49 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh will share logic from DIGITAL -> TAP -> TDO, Line : 50 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh will share combination & sequential and area percentage, Line : 51 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh will share the TAP verilog model, Line : 52 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh will share the custom timing path in asic2b, Line : 53 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Thanh to send timing report, Line : 55 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh to send the scan change length of latest release, Line : 56 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh to start to run CDC check, Line : 57 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 58 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 59 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: rtl_release_v2_04282019, Line : 87 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: rtl_release_v2_05122019, Line : 97 
+Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: rtl_release_v2_05122019.tar.gz, Line : 108 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 113 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 114 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 115 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 116 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 117 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 118 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 119 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 120 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 121 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 122 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 123 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 124 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 125 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 126 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 127 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 128 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 129 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 130 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 131 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 132 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 133 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 134 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 135 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: PHASE 2 (16/May ~ ), Line : 136 
