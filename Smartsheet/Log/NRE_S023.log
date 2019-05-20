@@ -1,0 +1,64 @@
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: NaN, Line : 1 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: 2nd Release package (the date which committed to Customer), Line : 5 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: 3rd Release package (the date which committed to Customer, Line : 6 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: io2c_odd, Line : 19 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: io2c_even, Line : 20 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: io_refcol, Line : 21 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: rwrow11a2d, Line : 23 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: rwrow11a2d_r, Line : 24 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: rwrow_ref_read, Line : 25 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: mcell, Line : 27 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: refrow_cmp, Line : 28 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: refrow_read, Line : 29 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: lrdwr, Line : 30 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: lcmp, Line : 31 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: refcol_ld, Line : 32 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: CTL, Line : 33 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: cmprow2r_odd, Line : 35 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: cmprow2r_even, Line : 36 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: cmprow_ref_read, Line : 37 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: PRI, Line : 38 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: henc10a, Line : 40 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: Generate lef for 5 instances, Line : 41 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: io_edge, Line : 56 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: io_edge_end, Line : 57 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: io_edge2m, Line : 58 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: ioctl, Line : 59 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: rwrowctl, Line : 61 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: rwrow_repeater, Line : 62 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: rwrow_edge, Line : 63 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: lcmpctl, Line : 65 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: refrow_cmp_gap, Line : 66 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: refrow_read_gap, Line : 67 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: refrow_cmp_pd, Line : 68 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: refcol_pd, Line : 69 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: lcmp_repeater, Line : 70 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: mcell_repeater, Line : 71 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: mcell_v_edge, Line : 72 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: mcell_h_edge, Line : 73 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: RWCTL, Line : 75 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: CCTL, Line : 76 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: PECTL, Line : 77 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: cmprow_edge, Line : 79 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: cmprow_repeater, Line : 80 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: pri32, Line : 82 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: prictl, Line : 83 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: pri_edge, Line : 84 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: romctl, Line : 86 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: henc_edge, Line : 87 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: Clean top DRC/LVS instance 512x160, Line : 88 
+Skip--Start date or End date is empty in Sheet name: NRE_S023, Task name: MEM, Line : 206 
+Skip--Start date or End date is empty in Sheet name: NRE_S023, Task name: IO, Line : 207 
+Skip--Start date or End date is empty in Sheet name: NRE_S023, Task name: RWROW, Line : 208 
+Skip--Start date or End date is empty in Sheet name: NRE_S023, Task name: CMPROW, Line : 209 
+Skip--Start date or End date is empty in Sheet name: NRE_S023, Task name: PE_ROM, Line : 210 
+Skip--Start date or End date is empty in Sheet name: NRE_S023, Task name: TOP cfg 512x160, Line : 211 
+Skip--Start date or End date is empty in Sheet name: NRE_S023, Task name: Hung to create proposal for compiler regression, Line : 214 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: Hung to calculation license, Line : 215 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: Plan & milestone for front-end compiler, Line : 216 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: Study metal RC for TCAM bit-cell (up to M5) and compare simulation result., Line : 218 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: Propose new layout for standard cells., Line : 219 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: Propose idea and methodology for EMIR at cell level., Line : 220 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: Create document for all the changes in structure for 7nm compiler to meet competitive performance., Line : 221 
+Skip--AssignTo is empty in Sheet name: NRE_S023, Task name: List out IR drop of all block not just CTL block, Line : 222 
+Skip--Start date or End date is empty in Sheet name: NRE_S023, Task name: aHa to request open new proj for pseudo dual-port improvement (Vui in-charge), Line : 223 

@@ -34,7 +34,7 @@ Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Thanh 
 Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh to send the scan change length of latest release, Line : 56 
 Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: Linh to start to run CDC check, Line : 57 
 Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 58 
-Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: NaN, Line : 59 
+Skip--AssignTo is empty in Sheet name: NRE_S028, Task name: ASIC2B_DFT_detail_work, Line : 59 
 Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: rtl_release_v2_04282019, Line : 87 
 Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: rtl_release_v2_05122019, Line : 97 
 Skip--Start date or End date is empty in Sheet name: NRE_S028, Task name: rtl_release_v2_05122019.tar.gz, Line : 108 

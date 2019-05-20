@@ -1,0 +1,77 @@
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: TSB provide PDK (T1a), Line : 3 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: TSB provide bitcell (T1b), Line : 4 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Performance improvement, Line : 190 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Dual rail short loop study, Line : 191 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Pi network for power measurement, Line : 192 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Calibrate power measurement of 2 configs, Line : 193 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Implement circuit change for 2 configs, Line : 194 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Generate top config for updating leaf cells, Line : 195 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Improve read/write cycle, Line : 196 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 1024x160, Line : 277 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 512x160, Line : 278 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 256x160, Line : 279 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 256x40, Line : 280 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 256x80, Line : 281 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 512x40, Line : 282 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 512x80, Line : 283 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 1024x40, Line : 284 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 1024x80, Line : 285 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 256x40, Line : 288 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 256x80, Line : 289 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 256x160, Line : 290 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 512x40, Line : 291 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 512x80, Line : 292 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 512x160, Line : 293 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 1024x40, Line : 294 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 1024x80, Line : 295 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 1024x160, Line : 296 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Setup QC, Line : 299 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 1024x160, Line : 301 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: 512x160, Line : 302 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Update CAD tool for PI generation, Line : 326 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Get the transfered work from Hung (16FFC TCAM compiler), Line : 336 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: PHASE 2: DO REGRESSION FOR ALL REMAINING RANGE, Line : 338 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: lrdwr_repeater_inv, Line : 373 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: lcmcptl_inv, Line : 374 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: lcmp_repeater_inv, Line : 375 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: refcol_gap_inv, Line : 376 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: edge cells, Line : 378 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: rwrowctl_inv, Line : 380 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: rwrowctl_end_inv, Line : 381 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: cmprowctl_nope_inv, Line : 383 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: cmprowctl_nope_end_inv, Line : 384 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: pectl9a_inv, Line : 386 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: prictl_inv, Line : 387 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: prictl_end_inv, Line : 388 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Clean DRC/LVS, Line : 390 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Build top layout, Line : 392 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Clean DRC/LVS, Line : 393 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: a16ffclltc111b_128x20ssw, Line : 462 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: a16ffclltc111b_128x40sm1w, Line : 463 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: a16ffclltc111b_128x80sm2w, Line : 464 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: a16ffclltc111b_128x160sm4w, Line : 465 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: a16ffclltc111b_256x20m1sw, Line : 466 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: a16ffclltc111b_512x20m2sw, Line : 467 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: a16ffclltc111b_1024x20m4sw, Line : 468 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: RC cell generator, Line : 472 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: PI schematic generator, Line : 473 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: LPE netlist generator (probe file), Line : 474 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Compile excel file, Line : 476 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Generate testbench, Line : 477 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Generate calculation tool (race), Line : 478 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Generate calculation tool (chz), Line : 479 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: NaN, Line : 481 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: NaN, Line : 482 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Switch level with simple function, Line : 534 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Model leaf cells, Line : 535 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Create testbench, Line : 536 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Run simulation and modify schematic, Line : 537 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Bitcell 2PSRAM 2 fin, Line : 539 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: NaN, Line : 540 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Circuit, Line : 542 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: Support create setup for current profile for TSB (28nm TCAM), Line : 553 
+Skip--AssignTo is empty in Sheet name: NRE_s005, Task name: NaN, Line : 554 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: LVL for instance 128x448 TCAM (28nm) between final release and test-chip release., Line : 557 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Create detail document for all the changes of TCAM between compiler and test-chip instances (16nm and 28nm), Line : 558 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Do not work on single architecture instances now, Line : 559 
+Skip--Start date or End date is empty in Sheet name: NRE_s005, Task name: Just focus on compiler flow for available instances, Line : 560 

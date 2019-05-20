@@ -1,0 +1,398 @@
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: sclib_rvt (BA chz), Line : 18 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: PFD delay chain design, Line : 74 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Investigate vdsat of pmos in new pdk (new task), Line : 103 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Calculate offset, Line : 119 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Rerun with PDK ss11, Line : 187 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cWDQSPinIO, Line : 189 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAwordTrain, Line : 256 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cMgtZQ & cCPHY_monitor, Line : 305 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Arate by 2 initial test case - 5 straight line, Line : 317 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDiffPinTxPHY, Line : 379 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPinTxLS, Line : 384 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPinTxIO, Line : 385 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eEsdCDM, Line : 386 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eEsdHBM, Line : 387 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDIFFPinIOPHY_mimcap, Line : 388 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDQPinTxIO, Line : 414 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cEsdHBM, Line : 415 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eEsdCDM, Line : 416 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: rx_dqs, Line : 417 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPinTxPHY, Line : 418 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDCDLPin, Line : 427 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPinTxLS, Line : 431 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPinTxIO, Line : 432 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: rx_dqs_top (same as rx_dqs), Line : 433 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eEsdCDM, Line : 434 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPinRxPHY, Line : 435 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: PCLK_propagation, Line : 454 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 487 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cClkPLLCore top connect & verification (black box), Line : 504 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPinTxLS, Line : 587 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: txiodrv3, Line : 589 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: txcode_logic, Line : 590 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Pre_driver, Line : 591 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Top routing & verify, Line : 592 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Test case idac_dcdl_test_dword, idac_dcdl_test_aword, Line : 608 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Re-sign off with real IDAC + RC + Near and Far at cDCDLPin (could just run at worst INL, DNL of first sign off with DC pbias), Line : 772 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: pull_down_ckt, Line : 802 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: pull_up_ckt, Line : 803 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPinTxLS, Line : 804 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPinTxIO, Line : 805 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: rx_dqs_top, Line : 806 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDCDLPin, Line : 808 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: top cell simulation, Line : 809 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDQSPhDet (include pPhDetR inside), Line : 810 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: pPhDetR, Line : 811 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: dqs_par_load, Line : 812 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: buf_x8_32_new, Line : 813 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: buff_tclk_par, Line : 814 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: PDK V1P0, Line : 817 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Re-run w/ PDK V1P1, Line : 818 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDIFFpinbuf, Line : 819 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDIFFPinIOPHY_mimcap, Line : 820 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Setup, Line : 821 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Performance and EMIR, Line : 822 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDQPinRxPHY, Line : 824 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPinTxPHY, Line : 825 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: rx_dqs, Line : 826 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDQPinTxIO, Line : 827 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAwordTrain, Line : 829 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: rx_dqs_top, Line : 830 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cWDQSPinIO, Line : 831 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPinRxPHY, Line : 832 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDiffPinTxPHY, Line : 833 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Timing check for top cell, Line : 834 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Power consumption, Line : 835 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: EMIR for top cell to check subckt, Line : 836 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Setup, Line : 837 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Perforamnce and EMIR, Line : 838 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAWORDIOPHY, Line : 839 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Full pvts, Line : 840 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Transient loop simulation, Line : 911 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Top level verification, Line : 938 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Full pvts, Line : 950 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cMgtBias_AdditionalBudgget, Line : 958 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Test case, Line : 975 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Atrateby2, Line : 987 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Atrateby2_aword, Line : 988 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Atrate, Line : 989 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Atrate_aword, Line : 990 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Preserver - Truong Hung, Line : 1014 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Preserver - Duc Duong, Line : 1016 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Preserver - Tan Vo, Line : 1019 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Preserver - Tuan Nguyen, Line : 1020 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Preserver - Khanh Le, Line : 1021 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Lup density fix, Line : 1045 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDWORDIOPHY, Line : 1046 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDWORDCmnPHY, Line : 1047 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDQBias, Line : 1048 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDQPinIOPHY_testcase, Line : 1049 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDQPinRxPHY, Line : 1050 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cErrPinIOPHY, Line : 1051 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: rx_dqs, Line : 1052 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: txiodrv3, Line : 1053 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: DWORDX2 feedback, Line : 1054 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Ant check, Line : 1055 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: EMIR fix, Line : 1056 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eESDRCClampIO1KV, Line : 1057 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eESDRCClampIO1KV, Line : 1059 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eESDRCClampIO1KV_short, Line : 1060 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eESDRCClampIO1KV_Horizontal, Line : 1061 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eESDRCClampCore1KV, Line : 1062 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eESDRCClampIO_1T, Line : 1063 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eESDRCClampIO_1C, Line : 1064 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eESDRCClampCore_1T, Line : 1065 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eESDRCClampCore_1C, Line : 1066 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Lup density fix, Line : 1068 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAWORDIOPHY, Line : 1069 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAWORDCmnPHY, Line : 1070 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cVerfGen + A/DWORDCmnPhy recheck, Line : 1071 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cVerfGen + A/DWORDCmnPhy recheck update, Line : 1072 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cVerfGen + A/DWORDCmnPhy recheck update, Line : 1073 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cCKEPinIOPHY, Line : 1074 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: intri + DELAY + cDCDLPin, Line : 1076 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cCKPinIOPHY, Line : 1077 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAWORDBias, Line : 1078 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAWORDX2 feedback, Line : 1079 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Ant check, Line : 1080 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cMGMT top connection, Line : 1083 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAWORDBias_replica, Line : 1086 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cMgtBias_buffers, Line : 1087 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: vddpbyr_amp, Line : 1090 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cMgtBias_ibgr_pll, Line : 1091 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cMgtBias_ibgr_zqcal, Line : 1092 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cMgtPLLReg, Line : 1093 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cMgtBGR, Line : 1094 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cMgtBias fix Clamp location, Line : 1095 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: modify cap for PLLReg, Line : 1096 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cMgtBias power enhance, verification, Line : 1097 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPLLVregPOR, Line : 1100 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: modify feedback, Line : 1102 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: 0.7 update, Line : 1103 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPLLPhMix, Line : 1104 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPLLVCOReg, Line : 1105 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: modify feedback, Line : 1107 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: 0.7 update, Line : 1108 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cClkPLLCore fb, Line : 1109 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Modify cap for PLL_LPF + cap_egm_unit_pll, Line : 1110 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cClkGlbFWP, Line : 1112 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: modify feedback, Line : 1115 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cClkCtrlSCnt, Line : 1116 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cClkCtrlSamp, Line : 1117 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: modify as feedback, Line : 1119 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: 0.7 update, Line : 1120 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: modify as feedback, Line : 1122 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: 0.7 update, Line : 1123 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: modify as feedback, Line : 1125 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: modify feedback, Line : 1128 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPhmix_fw, Line : 1129 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPhmix_bias, Line : 1130 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: CalPreDrvPD/PU200, Line : 1132 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cCalComp, Line : 1133 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cZQVref, Line : 1134 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: 0.7 update, Line : 1135 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cCPHY_monitor, Line : 1136 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDAPinIO, Line : 1138 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: AP mesh build, Line : 1139 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cGLOBAL feedback, Line : 1140 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Ant check, Line : 1141 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eESDRCClampCore1KV_short, Line : 1142 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: LUP 2.* fixing, Line : 1143 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: power pin adjust, Line : 1145 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: power pin adjust, Line : 1146 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: power pin adjust, Line : 1147 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: power pin adjust, Line : 1148 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cSubI, cSubQ, cClkGlbFWP, cClkGlbFBP, cPLLRst, Line : 1149 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cMgtPLLReg: R_iddq pull up, Line : 1150 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: tclkrclk, Line : 1153 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: ATRATEBY2_test, Line : 1154 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Vregen_grid_new, Line : 1155 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: bh_dw_vs_dqs, Line : 1156 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDQPinIO test case, Line : 1158 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: tclkrclk_aword, Line : 1159 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: ATRATEBY2_test_aword, Line : 1160 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Vregen_grid_new_AWORD, Line : 1161 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Add PWR grid to ARATE test case, Line : 1162 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Add PWR grid to bh_dq_dqs, Line : 1163 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: add PWR grid to tclkrclk, Line : 1164 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: glbclk_rclk, Line : 1165 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: glbclk_rclk feedback, Line : 1166 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: HBMPHY, Line : 1168 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: AP mesh define - IO area, Line : 1169 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Top final verification, Line : 1170 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: LUP fix, Line : 1171 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Floorplan to fix conflict, Line : 1173 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAWORDX2 mod for ZQ and CPHY, Line : 1174 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: eESDRCClampIO1KV_Horizontal, Line : 1175 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: CPHY, ZQ modify for sHBMPHY Top, Line : 1176 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: CHNLX4, Line : 1177 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Floorplan + Power routing + global routing + cHBMPHY Integration, Line : 1178 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: LEF update, Line : 1179 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Loc Ho, Line : 1181 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Son Dang, Line : 1182 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Trinh Le, Line : 1183 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Xuan Bui, Line : 1184 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Linh Cao, Line : 1185 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Thao Hoang, Line : 1186 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Mi Le, Line : 1187 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Dung Le, Line : 1188 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Hong Tran, Line : 1189 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cAWORDX2/cDWORDX2 - 1, Line : 1193 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cAWORDX2/cDWORDX2 - 2, Line : 1194 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cGlobal - 1, Line : 1195 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cGlobal - 2, Line : 1196 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cGlobal - 3, Line : 1197 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cGlobal - 4, Line : 1198 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Clkgen, Line : 1200 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: DWORD SI, Line : 1202 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: AWORD SI, Line : 1203 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Feasibility, Line : 1205 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cGlobal (clean up the setup and summary the report of 1st run e.g. violations identification on the layout, proposed how to fix the violation if possible), Line : 1206 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cDWORDX2 (clean up the setup and summary the report of 1st run e.g. violations identification on the layout, proposed how to fix the violation if possible), Line : 1207 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cAWORDX2 (clean up the setup and summary the report of 1st run e.g. violations identification on the layout, proposed how to fix the violation if possible), Line : 1208 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: DWORD SI, Line : 1210 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: AWORD SI, Line : 1211 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: EMIR TOP (PI with Totem), Line : 1212 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cAWORDX2/cDWORDX2 - 1, Line : 1214 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cAWORDX2/cDWORDX2 - 2, Line : 1215 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cGlobal - 1, Line : 1216 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cGlobal - 2, Line : 1217 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cGlobal - 3, Line : 1218 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cGlobal - 4, Line : 1219 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Add wrapper for cClkCtrl (additional task), Line : 1221 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Add wrapper for cClkCtrl (additional task), Line : 1222 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Add wrapper for cClkCtrl (additional task), Line : 1223 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Add wrapper for cClkCtrl (additional task), Line : 1224 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: txiodrv3, Line : 1226 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: dqs_gating balance delay, Line : 1227 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: TX_DCC balancing, Line : 1228 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cPLLPhMix, Line : 1229 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: BGR, Line : 1230 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: PLLReg, Line : 1231 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cMgt_ivco, Line : 1232 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: TX_DCC turnaround, Line : 1233 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAWORDBias, Line : 1234 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: tclkrclk/tclkrclk_aword clk tuning, Line : 1235 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1236 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Vrefgen_grid, Line : 1238 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: idrvoff, Line : 1239 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: pbias dword, Line : 1240 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: pbias aword, Line : 1241 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: tclkrclk, Line : 1242 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: tclkrclk_aword, Line : 1243 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cDWORDX2 + Clean DRC/LVS, Line : 1245 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cAWORDX2  + Clean DRC/LVS, Line : 1246 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cGLOBAL + Clean DRC/LVS, Line : 1247 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cGLOBAL, Line : 1249 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cDWORDCmnPHY + PinIOPHY MOM, Line : 1251 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: MIM in IO + CmnPHY area, Line : 1252 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Bump placement, Line : 1254 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: rework DRC LVS +density, Line : 1255 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: rework DRC LVS +density, Line : 1256 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: rework DRC LVS +density, Line : 1257 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: rework DRC LVS +density, Line : 1258 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Investigate ENV and report the item, Line : 1260 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Move critical cell for simulation, Line : 1261 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Clean 15LM daabase, Line : 1262 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Clean 15LM daabase, Line : 1263 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Clean 15LM daabase, Line : 1264 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Clean 15LM daabase, Line : 1265 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAWORDX2, Line : 1267 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDWORDX2, Line : 1268 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cGLOBAL, Line : 1269 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1270 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1271 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Tuan to check when layout complete the LVT sequential cell, Line : 1274 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Hung to double check with Sambit on the per of egv vs egu, Line : 1275 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Khanh to ask layout to make sure lvt size is same as rvt (best is to copy layout lvt to rvt and change layer name), Line : 1276 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Duc need start the v0.9 behavior loop sim on next Tuesday to give the LPF size to layout, Line : 1277 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Need to define schedule of cMgt_ivco_pllfbpm, Line : 1278 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Truong Hung to define cAwordbias, Line : 1279 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Need to make draft cAwordbias with margin for layout to start first, Line : 1280 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Duc need to check PLL loop with 2 cases:
+1. Use the big current of current iosc 
+2. Reduce iosc by 1.7 time to see if we can keep the same icp as badam, Line : 1282 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Hung to send the list of pLL sub-block need to do current measurement, Line : 1283 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Hung need to check the clamp design in SS, Line : 1284 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Tuan should switch to 100nm length for vddpr buffer, Line : 1285 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Hung check if it is ok if total width of 8um of CDM is ok to ESD, Line : 1286 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Notify Loc the new size of cDCDLPin, Line : 1287 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Truong Hung send the  current PLLReg load cap value, Line : 1288 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Sweep output load for cPLLVCOReg to evidence why we choose the cap load, Line : 1290 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Sweep output load for cMgtPLLReg to evidence why we choose the cap load, Line : 1291 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Truong Hung to investigate the vdsat trend vs nfin, nf, array?, length., Line : 1292 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Hung to notify customer that cPLLOsc_LS chz is impacted by pdk change (could not complete all speed, will confirm shematic of depend cells by using min and max chz number), Line : 1308 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Khanh to compare DQS's gating DFF btw badam (BA) and pista (sche and BA), Line : 1309 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Duc to update the schedule of Phmix and DCC (divide design phases and verification phase), Line : 1310 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Phi to run the power consumption of full cPLLOsc_LS with new pdk, Line : 1311 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Duc to work with layout to reduce the loading of cPLLPhmix Mux output to reduce power consumption, Line : 1312 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Phi team to take care the cMgt_ivco, Line : 1313 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Proposed approach to make sure the egv's tie high tie low pin of custom egv sclib, Line : 1315 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Phi to confirm  that he does not use custom egv_txio sclib, Line : 1316 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Truong Hung to confirm  that he does not use custom egv_txio sclib, Line : 1317 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Truong Hung to provide the report of cMgtPLLReg at 11lpp @ 3 cases, -10%, -5% big size, and -5% small size of p-pass, Line : 1318 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Van to find one more Layout engineer to start from Apr/B, Line : 1320 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Son, Loc to re-define un-reused cells to smartsheet, Line : 1321 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Tan to summary ESD, Line : 1323 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Hung find the min length of internal device in clamp, Line : 1324 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Phu to summary the size vs Design Rule, badam, and kesar, need to clean the 250V HBM IO/Core first. Need a PPT summary, Line : 1325 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Don;t skew the NAND in PhDet (will choose x1 and x2 then do BA to confirm), Line : 1326 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cPLLVCOReg, will use x3 ppass version, need to show PM vs Cload graph, Line : 1327 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Re-calculate worst timing of clock control with latest BA of sclib FF and INVs, Line : 1328 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Tuan to debug while the clk2q of DFF is bigger than badam, Line : 1329 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Sambit will consider/confirm with customer on cMgtCGR (TTG + Local Mismatch?), Line : 1331 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Sambit/Buran and team need to finalize the floorplan size by Apr 1, Line : 1332 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Loc to update the MIM cap values divided by 2 to Sambit, Line : 1333 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cDCDLPin decap is now 65% reducing in total mos area --> need to flag it up now, Line : 1335 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Re-run the cDCDLPin test case in badam at Max/Min speed, FF 125C, Line : 1336 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Model test case in pista schematic by actual RC extraction of the pbias bus, Line : 1337 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Update ESD slide with actual device size in play_0p7 in badam, Line : 1338 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Confirm if we need to support fdiv 64, Line : 1339 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Duc to re-run the CP settling times: Use real buffer from PFD and meas both up and down settling time, Line : 1340 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: BA need to run at FF Cmin, SS Cmax --> CONFIRMED, Line : 1341 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Phi needs to re-run Osc chz at FF Cmin and SS Cmax, Line : 1342 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Hung need to confirm that no need to run SF, FS at RCnom per SS request --> NO NEED, Line : 1343 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: NEED TO RUN cWordbias_replica, Line : 1344 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: NEED TO RUN THE ESD SIM FOR ALL ESD , and REPLICA ESD, Line : 1345 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: For BA 1st round, need to run at 5PVT worst and worst PVT at schematic levle, Line : 1346 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Compare cDCDL lvt vs rvt decap and provide the compare for the whole cDCDPins in A/Dword as we did in badam, Line : 1348 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Review the pbias noise, Line : 1349 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Hung to test nf, Line : 1350 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cDWORDX2 end day 07/01/19, Line : 1352 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cAWORDX2 end day 07/03/19, Line : 1353 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: cGlobal end day 07/03/19, Line : 1354 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: compare cDCDL lvt decap between pista and badam, Line : 1355 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cVregGen EM fix: propsosed new width to have 10% pass margin, Line : 1356 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Phi to confirm final schematic of VCO decap, Line : 1357 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Duc increase R to be same typical value as Badam and provide the new cap size that needs for having sam PM as badam, Line : 1358 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: LPF, PLLReg, VCOReg decap need to measure ESR at Conly and RC (rcworst, cbest) extraction corner. We expect the ESR of both case is same to ensure the decap routing, Line : 1360 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: cMgtBias_vddpr need to have hierachy for decap cell and go the same flow as LPF , PLLReg and VCOReg, Line : 1361 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Update Awordbias and Awordbias replica follow new current from Duc, Line : 1362 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Truong Hung to estimate when we can start the AI of BGR, Line : 1363 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Phi to setup ERC decks, Line : 1364 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: BIAS check for all cell in BA, Line : 1365 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Phi to check with Khanh to understand of 7/7 nfin for X8 INV, Line : 1366 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: VCO, Line : 1369 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Phmixer, Line : 1370 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Txiodrv3 (cDQPinIOPHY_Testcase), Line : 1371 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Check while Icp current is not a sum of iup and idown, Line : 1372 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: VCO, Line : 1374 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: INVx16, Line : 1375 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Tan to estimate worst timing of cClkCtrl with new FF report from Tuan, Line : 1376 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Phi to re-chz VCO with fix M2pitch layout and correct 2X loading INV (BA netlist from Khanh), Line : 1377 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Tuan to replace vddpr compensation cap by unit cap which has MIM cap in layout, Line : 1378 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Make sure in BA of vddpr, we will reduce compensation cap and add back the decap for bias (which was removed 1000 instance), Line : 1379 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Phi and Duc to run Perc 2kV for cGlobal and Datapath, Line : 1381 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Phu to update Calib decap size and provide the new instances to keep the same cap @ vdd/2 TT corner, Line : 1382 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Phu to submit cDCDLPin, Line : 1383 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Phu to send the BGR action, Line : 1384 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Duc to check vpump port in LPF layout (need to be at the res terminal), Line : 1385 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Phi to send the ERC warning, Line : 1387 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Phi to update data gclkrclk buffer (create different cell name to not change atrate buffer), Line : 1388 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Truong Hung to review if the MOM in the cDCDLCalib use min width and spacing or not?, Line : 1389 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Decap  of cDCDLPin will be in different hierachy and will do sim flow same as PLLReg, Line : 1390 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Cosim netlist send out, Line : 1391 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Hung and Tan to review the RMS poly in cSubI, Line : 1392 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Truong Hung to initial the BA v0.7 status, Line : 1393 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1394 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1395 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1396 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1397 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1398 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1399 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1400 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1401 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1402 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1403 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1404 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1405 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1406 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1407 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Make decision on laptop shipping to make them be available by March End, Line : 1410 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Van add additional cost due to 11nm pkd change, Line : 1411 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Just confirm layout v0p5 of cGlobal, cAwordx2, cDwordx2 (ESD will be moved to v0p7) --> HAS TO SUPPORT IN V0.5 AND GET ADDITIONAL RESOURCE, Line : 1412 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Hung to review the cGlobal schedule cell priority, Line : 1413 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Son to shrink layout v0p5 schedule to 1/Jun instead of 14/Jun, Line : 1415 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Van to confirm when Ly Hoang is available, Line : 1416 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Hung to review the MOM cap rule, Line : 1417 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Son to update cGlobal size according to Hung & Duc's update, Line : 1418 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Van to figure out how to manange the operating/management cost of managers in projects, Line : 1419 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: No-DRC size ESD check --> Need to compare size  with rule and PERC, Line : 1421 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Need to build 2 version of decap, one with full metal and one with less metal to preserve area for routing, Line : 1422 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Need to check VDDP is C4 or micro bump???? to see if we can relax, Line : 1423 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Need to update size of ESD based on schematic size scalling, Line : 1424 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Son to update schedule, replacing Son's tasks to Ly Hoang and Linh Tong, Line : 1426 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Son to work with Thanh on Ly Hoang and Linh Tong 's assignment, Line : 1427 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Loc to confirm with Trinh Le the DCDLPin Decap area, Line : 1429 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Linh Tong( replaces Anh Hoang) to start cPLLRst, Line : 1431 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Thanh Hoang to review cGLOBAL top connection and verification and plan power drop, Line : 1432 
+Skip--Start date or End date is empty in Sheet name: NRE_s027, Task name: Tuan to send email to Loc to request the decap hierarchy of cMgtBias_vddpr, Line : 1434 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Loc to review/signoff before confirm the completed cells to RB, Line : 1436 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Hung to initialize the BA v0p7 sheet as Badam, Line : 1437 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Loc to adjust Ly Hoang, Thao Hoang start date from 06/03 to reduce V0p5 LAY to 06/15 (70% confident level), Line : 1438 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Loc to help ensure the pwr and gnd pin location reflect the G1/G2 pwr grid from IO PHY G1/G2, Line : 1440 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Loc to help to ensure the pwr/gnd grid same as aWordbias as much as possible, Line : 1441 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Loc to estimate if we can make the cGlobal top level by June 10 while still need to support DLL decap. If not, what is additional resource we need???, Line : 1442 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: Loc to help arrange to see if any engineer can help to edit the LPF, PLLReg decap and VCOReg decap., Line : 1443 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1444 
+Skip--AssignTo is empty in Sheet name: NRE_s027, Task name: NaN, Line : 1445 

@@ -1,0 +1,96 @@
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: sdll_bias01 Update, Line : 70 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Mixer for 8-stages DLine, Line : 129 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Updated bias, Line : 132 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Update D-Line, Interpolator, Line : 133 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Top level DRC/LVS, Line : 134 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: NaN, Line : 135 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Share area estimation, Line : 138 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Evaluate the power between lvt and ulvt structure, Line : 139 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Provide the spec for Active current, Line : 140 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Update the Design Rule Documentation by 30/11/2018, Line : 141 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Double-check the PDK, Line : 142 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Decide which architecture w or w/o regulators, Line : 143 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh/Tuan to double-check the power simulation result., Line : 145 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh/Tuan to estimate the LPF-Cap and Charge-pump current to have Loop-BW smaller than 40MHz (Measuring Kvco)., Line : 146 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to report peak-current to estimate decap for without-regulator-arch., Line : 147 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: aChanh to estimate the regulator decaps value., Line : 148 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to check close-loop locking at slowest and fastest condition., Line : 149 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to update the % completion smartsheet., Line : 150 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh to estimate the digital DLL with 8-stages delay-line., Line : 151 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Trying the process variation compensation for bias control circuit, Line : 154 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: SVI to explore best way to generate DLL model for functional simulation: Verilog or top-level schematic, Line : 156 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Update preliminary specs for SSS, Line : 157 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: SSS to share voltage/current reference from SSS, Line : 158 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuning the BIAS circuit of Delay-line. Consider to investigate new delay-line structure., Line : 159 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuning PFD, Line : 160 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Verify performance of PFD+CP, Line : 162 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuning Current reference generator with 1.8V+BJT devices( low priority), Line : 163 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to draw layout floorplan, Line : 165 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to draw updated block-diagram, Line : 166 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh to update the layout floorplan,  the ctrl signals from the left side, Line : 168 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Hao to send layout review checklist to Thanh/aChanh, Line : 170 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh to update the signal name to review checklist, Line : 171 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to add top-cell simulation parameters, Line : 172 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to check sub-threshold, Line : 173 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: aChanh to send out the work list to Hao, Line : 176 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Hao to arrange tasks and resource according to aChanh's list, Line : 177 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh to handover to Hao, Tuan, Line : 178 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Hao and Tuan work on Spectra license, Line : 179 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to fine-tune switch in charge-pump, Line : 181 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: aChanh to check with Sony if there is PnR library, Line : 182 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Mi Le to start another structure of MUX, Line : 183 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to check-in all test-bench/schematic to SVN, Line : 184 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Lai to fine-tune zero-setup of DFF/Latch in Cal sampling, then find-out to target code of PSEL<> over PTV, Line : 185 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to write the measurement of Phase Error of PDF at cycle by cycle to detect the locking time, Line : 186 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Dung to handle AC chz for Op-amp, Line : 187 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to check with Thanh the reason of current Interpolator layout structure, Line : 188 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: We need to decide 1.8V in CP for more range of Vctrl in DR v0.5 --> aDuong to send-out initial schematic for simulation, Line : 189 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SVI to sum up simulation specs and targeted specs, then discuss on specs which could not be accomplished, Line : 191 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SSS will consider and provide the std_cell lib if possible by the end of next week, Line : 192 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Review the testbech/measurement --> consider to measure DCD by taking Min/Max from 10 cycles, Line : 194 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: aChanh to confirm the note "taken from the average" in spec, Line : 195 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: aChanh to notify the delay on DR1, Line : 196 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Full guarding both N/P region, Line : 198 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Put Poly AND to cut long Poly of PMOS/NMOS, Line : 199 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SVI to consider/check on EN & clk sync, Line : 201 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SVI to prepare false locked condition doc, Line : 202 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Hao to prepare docs to explain why harmonic lock happens, Line : 204 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: SVI to present schematic of false lock detection circuit, Line : 206 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: SVI to present post-layout KVCDL simulation result., Line : 207 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SSS would like to understand why SSLLL_v0p6 could not reach 5GHz, Line : 209 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SVI will present the ckt simulation result on next wkly mtg, Line : 210 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SSS would like to have timing chart to understand TDC cal, Line : 211 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SSS will provide power routing on Mar 28th, Line : 212 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to continue fine-tuning D-lines to have more margin for FFHHH (if 1.4x or 1.3x can be used instead of 1.5x). Current sim results can be showed-up to SSS in tomorrow meeting., Line : 214 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Document to confirm w/ SSS if Std is pre-shrink with L=33nm (post-shrinkable by ultra-density), Line : 215 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Optimize the number of clocks waiting for bias circuit stable in pcal ==> Force initial nbias/pbias at vdd/2 or cut down to 16 cyc, Line : 216 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to document schematic & waveform sim of Harmonic detection circuit è By Apr 2nd, Line : 217 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: NhutLe to update sim results with up-to-date layout of Bias/D-Line è By Apr 2nd, Line : 218 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: MiLe to try mirroring the interpolator (p-block) via Y-axis for hooking-up with D-Line, Line : 219 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: MyAnh to modify iref and fix dline drc, Line : 220 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: MiLe to modify Bias, Line : 221 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: MyAnh to modify pcaltop01, Line : 222 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh to propose layout plan, metal layers, Line : 224 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SSS will send email on power lines, Line : 226 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: DR will be shifted to Apr 17th, Line : 227 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: Final release will be shifted to end of Apr (26/Apr), Line : 228 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: SVI double check the HSpice environment, Line : 229 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Hao to confirm with SSS if CKOUTP/N duty cylce from 48 ~ 52, Line : 231 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Hao to prepare doc to explain the fix of False Lock Detection, Line : 232 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Thanh to prepare the question list on: the function of Skew block in Clock & Data lane; the availability of BGR, REG, Power & GND lane layouts, Line : 233 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: SVI to find the root cause of unbalance resolution CKOUTN@2.5GHz FSLLL, Line : 235 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: MiLe to complete the TOP LVS/DRC and check-in database to svn by ending of today, Apr 23rd, Line : 237 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Hao to review layout check-list & final DRC/LVS report., Line : 238 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Tuan to submit Top RCC LPE netlist by fast-spice (XA tool) to debug the issue @SSLLL corner. Then discuss with Hao when sim result is available., Line : 239 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Hao to confirm any risk on final release to a.Duong by ending of today Apr 23rd, VN time, Line : 240 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: DNL/INL Graphs of CKOUTP/N Resolutions, Line : 242 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: V1p0 KVCDL , especially consider the margin delay at @SSLLL, Line : 243 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Review IR Drop Results, Line : 244 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Review Updated Schematic of Bias for 0.5G-1G Freq Range, Line : 245 
+Skip--Start date or End date is empty in Sheet name: NRE_s020_SDLL, Task name: Study 8-Stages Dline, Line : 246 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: antclf, Line : 248 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: ppin,pinf_log, Line : 249 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: PrimetimeSI   (.cdb), Line : 250 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: NaN, Line : 251 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: NaN, Line : 252 
+Skip--AssignTo is empty in Sheet name: NRE_s020_SDLL, Task name: NaN, Line : 253 
