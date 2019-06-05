@@ -298,12 +298,14 @@ def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser, limit, us
                 continue
             else:
                 total2 += dictTotal[keyOfDict][Enum.HeaderExcelAndKeys.TOTAL_WEEK][week][0]
-        
+
         if not sheetOrUser:
             offHour = 0
             if user__ in dictTimeOff['week'].keys():
+                
                 if week in dictTimeOff['week'][user__].keys():
                      offHour = dictTimeOff['week'][user__][week]
+            
             color2, hour_ = CompareAndSelectColorToPrintExcel(total2, weeks[1], offHour)
             dictWorkWeek[week] = [hour_, color2, total2,  offHour, weeks[1]]
         else:

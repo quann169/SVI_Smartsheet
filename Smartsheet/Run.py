@@ -11,6 +11,7 @@ import os, re
 import time
 import shutil
 from pprint import pprint
+import pandas
 
 
 def Run__():
@@ -44,30 +45,84 @@ def Run__():
 	sheet1.cell_value(0, 0)
 	print('Start get info from Config.xlsx')
 	excelHoliday = Util.get_info_excel(dir_)
-
-	#get info of user
-	for row_ in range(Enum.UserInfoConfig.ROW_GET_USER_INFO, sheet1.nrows):
-		lsRow = sheet1.row_values(row_)
-		userInfo[lsRow[1]] = {}
-		userInfo[lsRow[1]][Enum.UserInfoConfig.TYPE] = lsRow[3].strip()
-		userInfo[lsRow[1]][Enum.UserInfoConfig.ROLE] = lsRow[4].strip()
-		userInfo[lsRow[1]][Enum.UserInfoConfig.FULL_NAME] = lsRow[2].strip()
-		userInfo[lsRow[1]][Enum.UserInfoConfig.MANAGER_EMAIL] = lsRow[6].strip()
-		userInfo[lsRow[1]][Enum.UserInfoConfig.IS_COUNT] = int(float(str(lsRow[7]).strip()))
-		lsM = re.findall('\S+@\S+', str(lsRow[5].strip()))
-		if len(lsM) != 0:
-			userInfo[lsRow[1]][Enum.UserInfoConfig.MAIL] = lsM[0].replace(',', '')
-		else:
-			userInfo[lsRow[1]][Enum.UserInfoConfig.MAIL] = ''
-		
-		listOtherInfo = lsRow[5]. split(',')
-		for id1 in range(0, len(listOtherInfo)):
-			listOtherInfo[id1] = listOtherInfo[id1].strip()
-		if not (lsRow[1].lower() in listOtherInfo):
-			listOtherInfo.append(lsRow[1].lower())
-		userInfo[lsRow[1]][Enum.UserInfoConfig.LIST_MAIL] = listOtherInfo
+	
+	df = pandas.read_excel(staff_path, sheet_name='Staff')
+	df = {x.strip(): v  for x, v in df.items()}
+	configInfo = {}
+	columResource = df[Enum.UserInfoConfig.RESOURCE]
+	columFullName = df[Enum.UserInfoConfig.FULL_NAME]
+	columType = df[Enum.UserInfoConfig.TYPE]
+	columRole = df[Enum.UserInfoConfig.ROLE]
+	columOtherInfo = df[Enum.UserInfoConfig.LIST_MAIL]
+	columMail = df[Enum.UserInfoConfig.MANAGER_EMAIL]
+	columExclude = df[Enum.UserInfoConfig.EXCLUDE]
+	
+		#get info of user
+	for row_ in range(0, len(columResource)):
+		lsRow = ['', str(columResource[row_]), str(columFullName[row_]), str(columType[row_]), str(columRole[row_]), str(columOtherInfo[row_]), str(columMail[row_]), str(columExclude[row_])]
+		if (lsRow[1].strip() != ''):
+			if (lsRow[1].strip() in userInfo.keys()):
+				print ('Duplicate Resource %s,  line %s in Config.xlsx'%(lsRow[1].strip(), row_ + 2))
+				sys.exit()
+			userInfo[lsRow[1].strip()] = {}
+			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.TYPE] = lsRow[3].strip()
+			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.ROLE] = lsRow[4].strip()
+			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.FULL_NAME] = lsRow[2].strip()
+			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MANAGER_EMAIL] = lsRow[6].strip()
+			try:
+				s = float(str(lsRow[7]).strip())
+			except:
+				print ('[ERROR] Invalid format data  %s: Exclude is 1 or 0'%(lsRow[1].strip()))
+				sys.exit()
+			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.IS_COUNT] = int(float(str(lsRow[7]).strip()))
+			lsM = re.findall('\S+@\S+', str(lsRow[5].strip()))
+			if len(lsM) != 0:
+				userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MAIL] = lsM[0].replace(',', '')
+			else:
+				userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MAIL] = ''
+			listOtherInfo = lsRow[5]. split(',')
+			for id1 in range(0, len(listOtherInfo)):
+				listOtherInfo[id1] = listOtherInfo[id1].strip()
+			if not (lsRow[1].strip().lower() in listOtherInfo):
+				listOtherInfo.append(lsRow[1].lower())
+			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.LIST_MAIL] = listOtherInfo
+# 			print (userInfo.keys())
 	print('Config ' + str(len(userInfo)) + ' user ')
-	#--------------------------------------------
+	
+	
+	
+# 	#get info of user
+# 	for row_ in range(Enum.UserInfoConfig.ROW_GET_USER_INFO, sheet1.nrows):
+# 		lsRow = sheet1.row_values(row_)
+# 		if (lsRow[1].strip() != ''):
+# 			if (lsRow[1].strip() in userInfo.keys()):
+# 				print ('Duplicate Resource %s,  line %s in Config.xlsx'%(lsRow[1].strip(), row_ + 1))
+# 				sys.exit()
+# 			userInfo[lsRow[1].strip()] = {}
+# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.TYPE] = lsRow[3].strip()
+# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.ROLE] = lsRow[4].strip()
+# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.FULL_NAME] = lsRow[2].strip()
+# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MANAGER_EMAIL] = lsRow[6].strip()
+# 			try:
+# 				s = float(str(lsRow[7]).strip())
+# 			except:
+# 				print ('[ERROR] Invalid format data  %s: Exclude is 1 or 0'%(lsRow[1].strip()))
+# 				sys.exit()
+# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.IS_COUNT] = int(float(str(lsRow[7]).strip()))
+# 			lsM = re.findall('\S+@\S+', str(lsRow[5].strip()))
+# 			if len(lsM) != 0:
+# 				userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MAIL] = lsM[0].replace(',', '')
+# 			else:
+# 				userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MAIL] = ''
+# 			listOtherInfo = lsRow[5]. split(',')
+# 			for id1 in range(0, len(listOtherInfo)):
+# 				listOtherInfo[id1] = listOtherInfo[id1].strip()
+# 			if not (lsRow[1].strip().lower() in listOtherInfo):
+# 				listOtherInfo.append(lsRow[1].lower())
+# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.LIST_MAIL] = listOtherInfo
+# # 			print (userInfo.keys())
+# 	print('Config ' + str(len(userInfo)) + ' user ')
+# 	#--------------------------------------------
 	
 	#get time off
 	dictTimeOff = Util.get_info_time_off(dir_, excelHoliday, userInfo)
@@ -193,8 +248,9 @@ def Run__():
 # for item in ListItems:
 
 	userInfoDict_, sheetInfoDict_, sheetInfoDict2_ = RowParsing.getAllSheetAndWorkTimeOfUser(ListSheetFilter, ListUserFilter, startDate, endDate, userInfo, dictInfoUser, Sheet, dir_, excelHoliday, dictTimeOff)
-
+	
 	userInfoDict, sheetInfoDict = RowParsing.caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict_, sheetInfoDict_, dir_, excelHoliday, dictTimeOff)
+# 	pprint(userInfoDict['Jr. Engineer - LAY']['Anh Hoang'])
 # 	pprint(userInfoDict)
 # 	asd
 	dictToSendMail = Util.get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeOff)

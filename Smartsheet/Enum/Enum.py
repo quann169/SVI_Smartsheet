@@ -9,8 +9,10 @@ class Header():
 	ALLOCATION = "Allocation"
 
 class UserInfoConfig():
+	RESOURCE = 'Resource'
 	POSITION = 'Position'
-	LIST_MAIL = 'Other info'
+	LIST_MAIL = 'Other Info'
+	EXCLUDE = 'Exclude'
 	SENIORITY_LEVEL = 'Seniority level'
 	TYPE = 'Type'
 	ROLE = 'Role'

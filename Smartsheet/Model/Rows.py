@@ -39,6 +39,7 @@ class Row():
 		else:
 			info[Enum.GenSmartsheet.SIBLING_ID] = ''
 		info['info'] = Row.getInfoInRow(row[Enum.GenSmartsheet.CELLS], dictHeader, count)
+		
 		return info
 		
 	#find empty row 

@@ -1,4 +1,5 @@
 import sys, re
+
 sys.path.append('..')
 import smartsheet
 from simple_smartsheet import Smartsheet
@@ -20,9 +21,15 @@ class RowParsing():
 # 		print('saaa')
 		listSheetConfigReplace = []
 		TOKEN = Enum.GenSmartsheet.TOKEN
-		smartsheet = Smartsheet(TOKEN)
-		sheets = smartsheet.sheets.list()
-		
+		loop = True
+		while loop:
+			try:
+				smartsheet = Smartsheet(TOKEN)
+				sheets = smartsheet.sheets.list()
+				loop = False
+			except:
+				print ('Connecting again after 10 seconds')
+				time.sleep(10)
 		dictSheetSms = {}
 		for sheetSmartsheet in sheets:			
 			if sheetSmartsheet.name.lower() not in dictSheetSms.keys():
@@ -53,9 +60,17 @@ class RowParsing():
 	def checkHeaderExistInSheet(sheetName, listHeader):
 		
 		TOKEN = Enum.GenSmartsheet.TOKEN
-		smartsheet = Smartsheet(TOKEN)
-		sheet = smartsheet.sheets.get(sheetName)
-		sheetInfo = sheet.columns
+		loop = True
+		while loop:
+			try:
+				smartsheet = Smartsheet(TOKEN)
+				sheet = smartsheet.sheets.get(sheetName)
+				sheetInfo = sheet.columns
+				loop = False
+			except:
+				print ('Connecting again after 10 seconds')
+				time.sleep(10)
+
 		
 # 		if sheetName == 'NRE_ECC_CPL':
 # 			pprint (sheetInfo)
@@ -84,12 +99,18 @@ class RowParsing():
 	#connect to smartsheet
 	def connectSmartsheet(sheet_name):
 		TOKEN = Enum.GenSmartsheet.TOKEN
-		try:
-			smartsheet = Smartsheet(TOKEN)
-		except:
-			print ('Connect to %s error'%sheet_name)
-		sheet = smartsheet.sheets.get(sheet_name)
-		allRows = sheet.rows
+		loop = True
+		while loop:
+			try:
+				smartsheet = Smartsheet(TOKEN)
+				sheet = smartsheet.sheets.get(sheet_name)
+				allRows = sheet.rows
+				loop = False
+			except:
+				print ('Connecting again after 10 seconds')
+				time.sleep(10)
+			
+		
 		return allRows, sheet
 
 	#convert row's data  to dictionary with key=id, value = {id: '', info: {}, parent_id: '',sibling_id: ''}
@@ -99,6 +120,7 @@ class RowParsing():
 		count = 1
 		totalRow = len(allRows)
 		for row in allRows:
+
 # 			if ((count % 200) == 0 and count != 0):
 # 				print ('%s: Parse lines %s of %s line' %(sheet_name, count, totalRow))
 # 			if (Row.isRowEmpty(row) == 1):
@@ -122,15 +144,18 @@ class RowParsing():
 			countSkipRow = 0
 			countRowParent = 0
 			dictRows = RowParsing.getAllDataOfSheet(sheetName, sheets_)
+			
 			listParentId = Row.getParentId(dictRows)
+			
 			count2 = 0
-			for row in dictRows:
+			for row in dictRows.keys():
 				totalRow = len(dictRows)
 				if ((count2 % 200) == 0 and count2 != 0):
 					print ('%s: Parse lines %s of %s line' %(sheetName, count2, totalRow))
 				user___ = dictRows[row]['info'][Enum.Header.ASSIGNED_TO].split(',')
 				users = user___[0]
 				isSkip = Util.is_skip_user(dictInfoUser, userInfo, users)
+# 				pprint (row)
 				#pick task is not a parent task
 				if not (dictRows[row][Enum.GenSmartsheet.ID]  in listParentId):
 					if dictRows[row]['info'][Enum.Header.ASSIGNED_TO] == 'NaN':
@@ -142,7 +167,6 @@ class RowParsing():
 						countSkipRow += 1
 						continue
 					else:
-						
 						startToEndDay = []
 						if dictRows[row]['info'][Enum.Header.ALLOCATION] == 'NaN':
 							dictRows[row]['info'][Enum.Header.ALLOCATION] = 0
@@ -253,9 +277,12 @@ class RowParsing():
 									else:
 										for dayOfWeek in UserInfoDict[position_][user][sheetName][week]:
 											if str(date2) == dayOfWeek[0]:
-	 
-												allocaton = float(dictRows[row]['info'][Enum.Header.ALLOCATION])
-	 
+# 												pprint (dictRows[row]['info'])
+												try:
+													allocaton = float(dictRows[row]['info'][Enum.Header.ALLOCATION])
+												except:
+													print ('[ERROR] Invalid format data: Allocation %s'%(dictRows[row]['info'][Enum.Header.ALLOCATION]))
+													sys.exit()
 												dayOfWeek[1] += allocaton*8
 																					
 								for week2 in sheetInfoDict[sheetName][position_][user]:
@@ -285,7 +312,7 @@ class RowParsing():
 											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['workWeek'] = Util.get_week_number(wday[0])
 											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['workHour'] = [0,'']
 										week___ = Util.get_end_start_week(date2)[1]
-										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][0] += 8*float(dictRows[row]['info'][Enum.Header.ALLOCATION])
+										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][0] += round(8*float(dictRows[row]['info'][Enum.Header.ALLOCATION]), 4)
 										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['totalHour'] += 8
 										currentHour = sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][0]
 										totalHour = sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['totalHour']
@@ -299,14 +326,14 @@ class RowParsing():
 										if not (m in sheetInfoDict2[sheetName][position_][user][task_name]['month'].keys()):
 											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m] = {}
 											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['totalHour'] = 0
- 			
+
 											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['startMonth'] = Util.get_end_start_month('%s-%s'%(wmonth[1], wmonth[0]))[0]
 											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['endMonth'] = Util.get_end_start_month('%s-%s'%(wmonth[1], wmonth[0]))[1]
 			# 									sheetInfoDict2[sheetName][position_][user][task_name]['month'][monthTask[0]]['workMonth'] = {}
 											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['workHour'] = [0, '']
  									
  										
-										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][0] += 8*float(dictRows[row]['info'][Enum.Header.ALLOCATION])
+										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][0] += round(8*float(dictRows[row]['info'][Enum.Header.ALLOCATION]), 4)
 										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['totalHour'] += 8
 										currentHour2 = sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][0]
 										totalHour2 = sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['totalHour']
@@ -319,8 +346,9 @@ class RowParsing():
 				logname = '%s\Log\%s.log' %(dir_, sheetName)
 				print('Skip %s row in %s' %(countSkipRow, sheetName))
 				print('Created  %s: skip row in %s' %(logname, sheetName))
-				f = open(logname, "w")
-				f.write(strlog)
+				f = open(logname, "w", encoding='utf-8')
+ 
+				f.write(str(strlog))
 				f.close()
 			time2_ = time.time()
 			print('Parsing %s done: %s' %(sheetName, Util.getTimeRun(time1_, time2_)))
