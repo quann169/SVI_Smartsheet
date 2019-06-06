@@ -3,15 +3,15 @@ from Controller.TaskController import *
 from Enum import Enum
 from Utils import Util
 import pathlib
-import xlwt
-import xlrd
-from xlwt import Workbook 
+from src_3rd import  xlwt
+from  src_3rd import xlrd
+from src_3rd.xlwt import Workbook 
 import sys
 import os, re
 import time
 import shutil
 from pprint import pprint
-import pandas
+from src_3rd import pandas
 
 
 def Run__():
