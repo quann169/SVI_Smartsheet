@@ -1,7 +1,7 @@
 import datetime
-from Controller.TaskController import *
-from Enum import Enum
-from Utils import Util
+from src.svi.Controller.TaskController import *
+from src.svi.Enum import Enum
+from src.svi.Utils import Util
 import pathlib
 from src_3rd import  xlwt
 from  src_3rd import xlrd
@@ -12,10 +12,12 @@ import time
 import shutil
 from pprint import pprint
 from src_3rd import pandas
+import getpass
 
 
 def Run__():
 	time1 = time.time()
+
 	print('Start time: %s' %(str(datetime.datetime.now())))
 	print("------------------------------------------------------------------------------")
 	
@@ -37,7 +39,7 @@ def Run__():
 	listItems = {1 : {}, 2 : {}, 3 : {}, 4 : {}, 5: {}, 6:{}}
 	startDate = ''
 	endDate = ''
-	
+	currentUser = getpass.getuser()
 	dictInfoUser = {}
 	lsSheetKey = [Enum.Header.TASK_NAME, Enum.Header.DURATION, Enum.Header.START_DATE, Enum.Header.END_DATE, Enum.Header.ASSIGNED_TO, Enum.Header.COMPLETE, Enum.Header.ALLOCATION]
 	Sheet = {}
@@ -262,7 +264,7 @@ def Run__():
 	colorDict, colorDictNoneBorder = Util.definedColor()
 	colorTextDict, colorTextDictNoneBorder = Util.definedColorText()
 	if listItems[1]['status'] == 1:
-		print("Running  Item I001 - Caculate work time and filter all sheet of user by week")
+		print("Running  Item I001 - Caculate working time and filter all sheet of user by week")
 		
 		showDetail = listItems[1]['show detail']
 		sheetName = wb.add_sheet('Weekly Resource')
@@ -274,7 +276,7 @@ def Run__():
 		print("------------------------------------------------------------------------------")
 # 		
 	if listItems[2]['status'] == 1:
-		print("Running  Item I002 - Caculate work time and filter all sheet of user by month")
+		print("Running  Item I002 - Caculate working time and filter all sheet of user by month")
 	
 		showDetail = listItems[2]['show detail']
 		sheetName = wb.add_sheet('Monthly Resource')
@@ -286,7 +288,7 @@ def Run__():
 		print("------------------------------------------------------------------------------")
 	if listItems[3]['status'] == 1:
 		
-		print("Running  Item I003 - Caculate work time and filter all user of sheet by week")
+		print("Running  Item I003 - Caculate working time and filter all user of sheet by week")
 		sheetName = wb.add_sheet('Weekly Project')
 		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'week', dir_, excelHoliday, False)
 		#colum, row
@@ -296,7 +298,7 @@ def Run__():
 		print("------------------------------------------------------------------------------")
 	if listItems[4]['status'] == 1:
 		
-		print("Running  Item I004 - Caculate work time and filter all user of sheet by month")
+		print("Running  Item I004 - Caculate working time and filter all user of sheet by month")
 		
 		sheetName = wb.add_sheet('Monthly Project')
 		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month', dir_, excelHoliday, False)
@@ -307,7 +309,7 @@ def Run__():
 		print("------------------------------------------------------------------------------")
 	if listItems[5]['status'] == 1:
  		
-		print("Running  Item I005 - Caculate work time and filter all user of sheet by week (new format)")
+		print("Running  Item I005 - Caculate working time and filter all user of sheet by week (new format)")
  		
 		sheetName = wb.add_sheet('Weekly Project (new)')
 		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'week', dir_, excelHoliday, True)
@@ -318,7 +320,7 @@ def Run__():
 		print("------------------------------------------------------------------------------")
 	if listItems[6]['status'] == 1:
  		
-		print("Running  Item I006 - Caculate work time and filter all user of sheet by month (new format)")
+		print("Running  Item I006 - Caculate working time and filter all user of sheet by month (new format)")
  		
 		sheetName = wb.add_sheet('Monthly Project (new)')
 		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month', dir_, excelHoliday, True)
@@ -345,7 +347,7 @@ def Run__():
 	if True:
 		print("Creating Report Timesheet")
 		sheetName = wb.add_sheet('Report')
-		lsheader = ['Manager (Mail)', 'Resource', 'Working hours', 'Off work', 'Total', 'Weekly hours', 'Detail', 'Comment']
+		lsheader = ['Manager (Mail)', 'Resource', 'Working hours', 'Off work', 'Total', 'Detail', 'Comment']
 		#colum, row
 		Controllers.printReportToExcel(sheetName, lsheader, dictToSendMail, startWeekSendEmail, startRow, startColum, colorDict, colorDictNoneBorder, userInfo)
 
@@ -356,21 +358,23 @@ def Run__():
 	try:
 		wb.save('%s\TimeSheet.xls'%(dir_))
 		os.system('start %s\TimeSheet.xls'%(dir_))
-		
+		print('Timesheets report will be get info in sheet Report of file TimeSheet.xls!')
+		print('Please review results before confirm to send mail!')
 	except:
 		print('Error to save TimeSheet.xls')
 		sys.exit()
-	send_ = False
-	while True:
-		confirm_ = input("Do you want to send report [Yes/No]: ") 
-		confirm_ = confirm_.strip()
-		if confirm_.lower() == 'yes':
-			send_ = True
-			break
-		if confirm_.lower() == 'no':
-			break
-	if send_:
-		Controllers.send_mail(dir_, startWeekSendEmail, ccMail, userInfo)
+	if currentUser in Enum.UserInfoConfig.LIST_USER_SEND_MAIL:
+		send_ = False
+		while True:
+			confirm_ = input("Confirm to send mail [Yes/No]: ") 
+			confirm_ = confirm_.strip()
+			if confirm_.lower() == 'yes':
+				send_ = True
+				break
+			if confirm_.lower() == 'no':
+				break
+		if send_:
+			Controllers.send_mail(dir_, startWeekSendEmail, ccMail, userInfo)
 	time3 = time.time()
 	print('Time to run all: %s' %(Util.getTimeRun(time1, time3)))
 
