@@ -509,7 +509,7 @@ def get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeO
             else:
                 if user_ in userInfo.keys():
                     
-                    if userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL] == '':
+                    if userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL].strip() in['', 'nan']:
                         continue
                     else:
                         
@@ -540,7 +540,7 @@ def get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeO
                                 dictOut[managerMailOfUser.strip()][user_] = ['skip', 'skip','skip', 'skip', 'skip']
 
     for user__ in userInfo.keys():
-        if userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL] == '':
+        if userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL].strip() in ['', 'nan']:
             continue
 #         elif userInfo[user__][Enum.UserInfoConfig.IS_COUNT] == 1:
 #             continue

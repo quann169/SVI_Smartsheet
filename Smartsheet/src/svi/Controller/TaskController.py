@@ -14,8 +14,8 @@ from pprint import pprint
 from src_3rd import xlwt
 from src_3rd.jinja2 import Environment
 from src_3rd.jinja2.loaders import FileSystemLoader
-import src_3rd.win32com.client as win32
-
+import win32com.client as win32
+import pywintypes
 class RowParsing():
 	def checkSheetConfigIsExist(listSheetConfig, Sheet):
 		SheetEdit = {}
@@ -786,7 +786,7 @@ class Controllers():
 			columIndex += 1
 		rowIndex += 1
 		columIndex = startColum
-		styleCell_, styleCell__ = Util.style_for_timesheet()
+		styleCell__, styleCell_ = Util.style_for_timesheet()
 		for manage in dictToSendMail.keys():
 			for user_ in dictToSendMail[manage].keys():
 				if ((dictToSendMail[manage][user_][0] != 'skip') and (dictToSendMail[manage][user_][1] != 'skip')):
@@ -852,7 +852,10 @@ class Controllers():
 # 		attachment  = "Path to the attachment"
 # 		mail.Attachments.Add(attachment)
 # 			print(ccMail, manage_, )
-			mail.Send()
-			print('Send mail to %s'%manage_)
-			
+			try:
+				mail.Send()
+				print('Send mail to %s'%manage_)
+			except pywintypes.com_error as e:
+				print('[error] %s'%e)
+				sys.exit
 			
