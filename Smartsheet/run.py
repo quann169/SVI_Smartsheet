@@ -34,7 +34,7 @@ def Run__():
 	try:
 		wb = xlrd.open_workbook(staff_path)
 	except IOError as e:
-		print(e)
+		print('[Error] %s'%e)
 		sys.exit()
 	listItems = {1 : {}, 2 : {}, 3 : {}, 4 : {}, 5: {}, 6:{}}
 	startDate = ''
@@ -92,43 +92,9 @@ def Run__():
 	print('Config ' + str(len(userInfo)) + ' user ')
 	
 	
-	
-# 	#get info of user
-# 	for row_ in range(Enum.UserInfoConfig.ROW_GET_USER_INFO, sheet1.nrows):
-# 		lsRow = sheet1.row_values(row_)
-# 		if (lsRow[1].strip() != ''):
-# 			if (lsRow[1].strip() in userInfo.keys()):
-# 				print ('Duplicate Resource %s,  line %s in Config.xlsx'%(lsRow[1].strip(), row_ + 1))
-# 				sys.exit()
-# 			userInfo[lsRow[1].strip()] = {}
-# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.TYPE] = lsRow[3].strip()
-# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.ROLE] = lsRow[4].strip()
-# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.FULL_NAME] = lsRow[2].strip()
-# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MANAGER_EMAIL] = lsRow[6].strip()
-# 			try:
-# 				s = float(str(lsRow[7]).strip())
-# 			except:
-# 				print ('[ERROR] Invalid format data  %s: Exclude is 1 or 0'%(lsRow[1].strip()))
-# 				sys.exit()
-# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.IS_COUNT] = int(float(str(lsRow[7]).strip()))
-# 			lsM = re.findall('\S+@\S+', str(lsRow[5].strip()))
-# 			if len(lsM) != 0:
-# 				userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MAIL] = lsM[0].replace(',', '')
-# 			else:
-# 				userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MAIL] = ''
-# 			listOtherInfo = lsRow[5]. split(',')
-# 			for id1 in range(0, len(listOtherInfo)):
-# 				listOtherInfo[id1] = listOtherInfo[id1].strip()
-# 			if not (lsRow[1].strip().lower() in listOtherInfo):
-# 				listOtherInfo.append(lsRow[1].lower())
-# 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.LIST_MAIL] = listOtherInfo
-# # 			print (userInfo.keys())
-# 	print('Config ' + str(len(userInfo)) + ' user ')
-# 	#--------------------------------------------
-	
 	#get time off
 	dictTimeOff = Util.get_info_time_off(dir_, excelHoliday, userInfo)
-# 	pprint (dictTimeOff)
+
 
 
 	#get item
@@ -149,7 +115,7 @@ def Run__():
 	dateSendEmail = str(lsRow_[9])
 	ccMail_ = str(lsRow_[10])
 	ccMail = Util.get_cc_mail(ccMail_)
-# 	print (dateSendEmail, endDate)
+
 
 	i = datetime.datetime.now()
 	if dateSendEmail == '':
@@ -228,6 +194,7 @@ def Run__():
 	
 	strOutS, lsSheet, sheetEdit = rowObj.checkSheetConfigIsExist(ListSheetFilter, Sheet)
 	ListSheetFilter = lsSheet
+	
 	Sheet = sheetEdit
 	if len(strOutS):
 		print('Config Error: Not exist in Smartsheet - Sheet name: ' + strOutS)

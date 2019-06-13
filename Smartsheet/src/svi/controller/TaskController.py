@@ -15,7 +15,7 @@ import xlwt
 from jinja2 import Environment
 from jinja2.loaders import FileSystemLoader
 from win32com import client
-from win32ctypes.pywin32 import pywintypes
+import pywintypes
 class RowParsing():
 	def __init__(self):
 		self.row = Row()
@@ -68,13 +68,14 @@ class RowParsing():
 		while loop:
 			try:
 				smartsheet = Smartsheet(TOKEN)
+				
 				sheet = smartsheet.sheets.get(sheetName)
 				sheetInfo = sheet.columns
 				loop = False
 			except:
 				print ('Connecting again after 10 seconds')
 				time.sleep(10)
-
+		
 		
 # 		if sheetName == 'NRE_ECC_CPL':
 # 			pprint (sheetInfo)
@@ -83,9 +84,9 @@ class RowParsing():
 		lHeader = []
 		lsHSheet = []
 		for col in sheetInfo:
-			lsHSheet.append(col[Enum.GenSmartsheet.TITLE])
+			lsHSheet.append(col.title)
 			#remove % in header
-			headerName_ = col[Enum.GenSmartsheet.TITLE].replace('%', '')
+			headerName_ = col.title.replace('%', '')
 			headerName = headerName_.strip()
 			lHeader.append(headerName)
 		strOut = ''
@@ -113,25 +114,26 @@ class RowParsing():
 			except:
 				print ('Connecting again after 10 seconds')
 				time.sleep(10)
-			
+
 		
 		return allRows, sheet
 
 	#convert row's data  to dictionary with key=id, value = {id: '', info: {}, parent_id: '',sibling_id: ''}
 	def getAllDataOfSheet(self, sheet_name, sheets_):
 		allRows, sheet = self.connectSmartsheet(sheet_name)
+		
 		dictRows = {}
 		count = 1
 		totalRow = len(allRows)
 		for row in allRows:
-
+			
 # 			if ((count % 200) == 0 and count != 0):
 # 				print ('%s: Parse lines %s of %s line' %(sheet_name, count, totalRow))
 # 			if (self.rowisRowEmpty(row) == 1):
 			dictheader = sheets_[sheet_name]
 			dictHeaderOut = self.row.getHeaders(sheet_name, sheet, dictheader)
 			dictRow= self.row.getDataRow(row, dictHeaderOut, count)
-			dictRows[row['id']] = dictRow
+			dictRows[row.id] = dictRow
 			count += 1
 		return dictRows
 
@@ -149,7 +151,6 @@ class RowParsing():
 			countRowParent = 0
 			
 			dictRows = self.getAllDataOfSheet(sheetName, sheets_)
-			
 			listParentId = self.row.getParentId(dictRows)
 			
 			count2 = 0
@@ -160,7 +161,6 @@ class RowParsing():
 				user___ = dictRows[row]['info'][Enum.Header.ASSIGNED_TO].split(',')
 				users = user___[0]
 				isSkip = Util.is_skip_user(dictInfoUser, userInfo, users)
-# 				pprint (row)
 				#pick task is not a parent task
 				if not (dictRows[row][Enum.GenSmartsheet.ID]  in listParentId):
 					if dictRows[row]['info'][Enum.Header.ASSIGNED_TO] == 'NaN':

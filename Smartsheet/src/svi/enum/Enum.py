@@ -25,7 +25,7 @@ class UserInfoConfig():
 	ROW_GET_SHEET = 7
 	ROW_GET_USER_INFO = 2
 	COLUM_GET_STATUS = 1
-	LIST_USER_SEND_MAIL = ['vantran', 'phuongtruong', 'toannguyen']
+	LIST_USER_SEND_MAIL = ['vantran', 'phuongtruong']
 	
 class GenSmartsheet():
 	TOKEN = "nls2smz4rzdckgfp9pcem9sg8y"

@@ -10,8 +10,9 @@ sys.path.append('..')
 from svi.enum import Enum
 from pprint import pprint
 from dateutil.relativedelta import relativedelta
-def toDate(strg):
-   
+def toDate(strg_):
+    strg = str(strg_)
+
     try:
         objDate = datetime.datetime.strptime(strg, '%Y-%m-%d')
     except:

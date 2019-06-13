@@ -12,10 +12,10 @@ class Row():
 		for colum in cells:
 			if index in dictHeader.keys():
 				value = 'NaN'
-				if (Enum.GenSmartsheet.DISPLAY_VALUE in colum) and not ('%' in colum[Enum.GenSmartsheet.DISPLAY_VALUE]):
-					value = colum[Enum.GenSmartsheet.DISPLAY_VALUE]
-				elif Enum.GenSmartsheet.VALUE in colum:
-					value = colum[Enum.GenSmartsheet.VALUE]
+				if (colum.display_value != None) and not ('%' in colum.display_value):
+					value = colum.display_value
+				elif colum.value != None:
+					value = colum.value
 				if value == '':
 					value = 'NaN'
 				dictInfo[dictHeader[index]] = value
@@ -29,17 +29,18 @@ class Row():
 	#get all info of all row (dictionary)
 	def getDataRow(self, row, dictHeader, count):
 		info = {}
-		info[Enum.GenSmartsheet.ID] = row[Enum.GenSmartsheet.ID]
-		if Enum.GenSmartsheet.PARENT_ID in row:
-			info[Enum.GenSmartsheet.PARENT_ID] = row[Enum.GenSmartsheet.PARENT_ID]
+		info[Enum.GenSmartsheet.ID] = row.id
+
+		if row.parent_id != None:
+			info[Enum.GenSmartsheet.PARENT_ID] = row.parent_id
 		else:
 			info[Enum.GenSmartsheet.PARENT_ID] = ''
 		
-		if Enum.GenSmartsheet.SIBLING_ID in row:
-			info[Enum.GenSmartsheet.SIBLING_ID] = row[Enum.GenSmartsheet.SIBLING_ID]
+		if row.sibling_id:
+			info[Enum.GenSmartsheet.SIBLING_ID] = row.sibling_id
 		else:
 			info[Enum.GenSmartsheet.SIBLING_ID] = ''
-		info['info'] = self.getInfoInRow(row[Enum.GenSmartsheet.CELLS], dictHeader, count)
+		info['info'] = self.getInfoInRow(row.cells, dictHeader, count)
 		
 		return info
 		
@@ -65,7 +66,7 @@ class Row():
 		index = 0
 		# listIndex = []
 		for title in Datacolums:
-			headerName_ = title[Enum.GenSmartsheet.TITLE].replace('%', '')
+			headerName_ = title.title.replace('%', '')
 			headerName = headerName_.strip()
 			if headerName in dictHeaderConfig.values():
 				for key, value in dictHeaderConfig.items():
