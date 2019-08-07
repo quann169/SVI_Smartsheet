@@ -159,10 +159,10 @@ def CompareAndSelectColorToPrintExcel(currentHour_, totalHour, offHour):
         return color, totalHour
     elif currentHour < totalHour:
         color = Enum.WorkHourColor.IS_LESS
-        return color, currentHour_
+        return color, currentHour
     else:
         color = Enum.WorkHourColor.IS_EQUAL
-        return color, currentHour_
+        return color, currentHour
 
 def definedColor():
     colorDict = {}
@@ -299,11 +299,10 @@ def cacutlateTotal(listMonth, listWeek, dictTotal, color, sheetOrUser, limit, us
                 continue
             else:
                 total2 += dictTotal[keyOfDict][Enum.HeaderExcelAndKeys.TOTAL_WEEK][week][0]
-
+        
         if not sheetOrUser:
             offHour = 0
             if user__ in dictTimeOff['week'].keys():
-                
                 if week in dictTimeOff['week'][user__].keys():
                      offHour = dictTimeOff['week'][user__][week]
             
@@ -548,10 +547,11 @@ def get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeO
 
         else:
             lsManagerMailOfUser_ = get_manager_mail_of_user(userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL])
-            
 #             if user__ in dictOut[userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL]].keys():
 #                 continue
             for managerMailOfUser_ in lsManagerMailOfUser_:
+                if managerMailOfUser_.strip() not in dictOut.keys():
+                    dictOut[managerMailOfUser_.strip()] = {}
                 if user__ in dictOut[managerMailOfUser_.strip()].keys():
                     continue
                 else:

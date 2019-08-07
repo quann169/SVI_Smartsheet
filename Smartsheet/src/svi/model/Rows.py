@@ -12,10 +12,35 @@ class Row():
 		for colum in cells:
 			if index in dictHeader.keys():
 				value = 'NaN'
+				
+# 				print (dictHeader[index], colum.display_value, colum.value)
 				if (colum.display_value != None) and not ('%' in colum.display_value):
 					value = colum.display_value
+				elif (colum.display_value != None) and ('%' in colum.display_value) and dictHeader[index] == 'Allocation':
+					numStr_ = colum.display_value.strip()
+					numStr = numStr_.replace('%', '')
+					try:
+						value = float(numStr)/100
+					except:
+						print ("Invalid format data: Header %s value %s"%(dictHeader[index], colum.display_value))
+						value = 0
+# 					print (numStr_, value)
 				elif colum.value != None:
-					value = colum.value
+					if not ('%' in str(colum.value)):
+						value = colum.value
+					elif ('%' in colum.value) and dictHeader[index] == 'Allocation':
+						numStr_2 = colum.value.strip()
+						numStr2 = numStr_2.replace('%', '')
+						try:
+							value = float(numStr2)/100
+						except:
+							print ("Invalid format data: Header %s value %s"%(dictHeader[index], colum.value))
+							value = 0
+					else:
+						value = colum.value
+# 				print (dictHeader[index], colum.value, colum.display_value, value)
+# 				if dictHeader[index] == 'Allocation':
+# 					print (value, colum.display_value, colum.value, 'ssss')
 				if value == '':
 					value = 'NaN'
 				dictInfo[dictHeader[index]] = value
@@ -74,7 +99,11 @@ class Row():
 					headerName1_ = value.replace('%', '')
 					headerName1 = headerName1_.strip()
 					if headerName1 == headerName:
-						dictHeader[index] = key
+						if key in dictHeader.values():
+							print ('Duplicate colum %s in sheet name %s'%(key, sheet_name))
+							sys.exit()
+						else:
+							dictHeader[index] = key
 						# listHeader.append(key)
 						# listIndex.append(index)
 				# print(listHeader, index)

@@ -1,5 +1,5 @@
 import sys, re
-
+from decimal import Decimal
 # sys.path.append('../')
 
 import smartsheet
@@ -151,6 +151,7 @@ class RowParsing():
 			countRowParent = 0
 			
 			dictRows = self.getAllDataOfSheet(sheetName, sheets_)
+# 			pprint(dictRows)
 			listParentId = self.row.getParentId(dictRows)
 			
 			count2 = 0
@@ -161,6 +162,7 @@ class RowParsing():
 				user___ = dictRows[row]['info'][Enum.Header.ASSIGNED_TO].split(',')
 				users = user___[0]
 				isSkip = Util.is_skip_user(dictInfoUser, userInfo, users)
+				count2 += 1
 				#pick task is not a parent task
 				if not (dictRows[row][Enum.GenSmartsheet.ID]  in listParentId):
 					if dictRows[row]['info'][Enum.Header.ASSIGNED_TO] == 'NaN':
@@ -172,6 +174,7 @@ class RowParsing():
 # 						countSkipRow += 1
 # 						continue
 					else:
+# 						print (dictRows[row]['info'][Enum.Header.ALLOCATION])
 						startToEndDay = []
 						if dictRows[row]['info'][Enum.Header.ALLOCATION] == 'NaN':
 							dictRows[row]['info'][Enum.Header.ALLOCATION] = 0
@@ -290,7 +293,10 @@ class RowParsing():
 												except:
 													print ('[ERROR] Invalid format data: Allocation %s'%(dictRows[row]['info'][Enum.Header.ALLOCATION]))
 													sys.exit()
+												
 												dayOfWeek[1] += allocaton*8
+												dayOfWeek[1] = round(dayOfWeek[1], 4)
+# 												print (allocaton, ' - ', dayOfWeek[1])
 								
 								if not isSkip:													
 									for week2 in sheetInfoDict[sheetName][position_][user]:
@@ -301,6 +307,8 @@ class RowParsing():
 												if str(date2) == dayOfWeek2[0]:
 													allocaton2 = float(dictRows[row]['info'][Enum.Header.ALLOCATION])
 													dayOfWeek2[1] += allocaton2*8
+													dayOfWeek2[1] = round(dayOfWeek2[1], 4)
+# 													print ('sad')
 								if not isSkip:	
 									if not ( task_name in sheetInfoDict2[sheetName][position_][user].keys()):
 										sheetInfoDict2[sheetName][position_][user][task_name] = {}
@@ -348,7 +356,7 @@ class RowParsing():
 											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour2, totalHour2, 0)[0]
 				else:
 					countRowParent += 1
-				count2 += 1
+				
 			print('Skip (not save into log) %s parent task in %s' %(countRowParent, sheetName))
 			if len(strlog):
 				logname = '%s\Log\%s.log' %(dir_, sheetName)
@@ -361,6 +369,7 @@ class RowParsing():
 			time2_ = time.time()
 			print('Parsing %s done: %s' %(sheetName, Util.getTimeRun(time1_, time2_)))
 			print('------------------------------------------------------------------------------')
+# 		pprint (UserInfoDict)
 		return UserInfoDict, sheetInfoDict, sheetInfoDict2
 	
 	def caculateWorkTimeAndAddInfo(self, startDate, endDate, userInfoDict, sheetInfoDict, dir_, excelHoliday, dictTimeOff):
@@ -580,6 +589,14 @@ class Controllers():
 		startRow, startColum = (0, 0)
 		rowIndex = startRow
 		columIndex = startColum
+# 		date_xf = easyxf(num_format_str='DD/MM/YYYY') # sets date format in Excel
+# 		data = [list(n) for n in cursor.fetchall()]
+# 		for row_index, row_contents in enumerate(data):
+# 		    for column_index, cell_value in enumerate(row_contents):
+# 		        if isinstance(cell_value, datetime.date):
+# 		            sheet1.write(row_index+1, column_index, cell_value, date_xf)
+# 		        else:
+# 		            sheet1.write(row_index+1, column_index, cell_value)
 		formatHead = 'align: wrap 0; pattern: pattern solid, fore-colour grey25; border: left thin, top thin, right thin, bottom thin, bottom-color gray25, top-color gray25, left-color gray25, right-color gray25; font: name Calibri, bold 0,height 240;' 
 		styleHeader = xlwt.easyxf(formatHead)
 		for head1 in lsheader:
