@@ -13,7 +13,7 @@ import shutil
 from pprint import pprint
 from src_3rd import pandas
 import getpass
-
+from decimal import Decimal
 
 def Run__():
 	time1 = time.time()
@@ -28,7 +28,7 @@ def Run__():
 		shutil.rmtree(dir_ + '\Log')
 		os.makedirs(dir_ + '\Log')
 	 #open config file
-	staff_path = ("%s\config.xlsx"%(dir_)) 
+	staff_path = ("%s\config.xlsx"%(dir_))
 	userInfo = {}
 	print('Config file is %s' %(staff_path))
 	try:
@@ -71,18 +71,19 @@ def Run__():
 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.ROLE] = lsRow[4].strip()
 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.FULL_NAME] = lsRow[2].strip()
 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MANAGER_EMAIL] = lsRow[6].strip()
+			excludeVal = 0
 			try:
-				s = float(str(lsRow[7]).strip())
+				excludeVal = int(Decimal(str(lsRow[7]).strip()))
 			except:
-				print ('[ERROR] Invalid format data  %s: Exclude is 1 or 0'%(lsRow[1].strip()))
-				sys.exit()
-			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.IS_COUNT] = int(float(str(lsRow[7]).strip()))
+				excludeVal = 0
+			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.IS_COUNT] = excludeVal
 			lsM = re.findall('\S+@\S+', str(lsRow[5].strip()))
 			if len(lsM) != 0:
 				userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MAIL] = lsM[0].replace(',', '')
 			else:
 				userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MAIL] = ''
-			listOtherInfo = lsRow[5]. split(',')
+			string_ = lsRow[5].replace(';', ',')
+			listOtherInfo = string_. split(',')
 			for id1 in range(0, len(listOtherInfo)):
 				listOtherInfo[id1] = listOtherInfo[id1].strip()
 			if not (lsRow[1].strip().lower() in listOtherInfo):
@@ -94,8 +95,8 @@ def Run__():
 	
 	#get time off
 	dictTimeOff = Util.get_info_time_off(dir_, excelHoliday, userInfo)
-
-
+	
+	
 
 	#get item
 	sheet2 = wb.sheet_by_name('Config')	
@@ -115,7 +116,7 @@ def Run__():
 	dateSendEmail = str(lsRow_[9])
 	ccMail_ = str(lsRow_[10])
 	ccMail = Util.get_cc_mail(ccMail_)
-
+	
 
 	i = datetime.datetime.now()
 	if dateSendEmail == '':
@@ -190,7 +191,7 @@ def Run__():
 	print('Config ' + str(len(ListSheetFilter)) + ' sheet: ' + ', '.join(ListSheetFilter))
 		
 		#check config Sheet name
-	rowObj = RowParsing()
+	rowObj = RowParsing(dir_)
 	
 	strOutS, lsSheet, sheetEdit = rowObj.checkSheetConfigIsExist(ListSheetFilter, Sheet)
 	ListSheetFilter = lsSheet

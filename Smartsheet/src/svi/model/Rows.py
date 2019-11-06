@@ -2,6 +2,7 @@ import sys
 # sys.path.append('..')
 from svi.enum import Enum
 from pprint import pprint
+from decimal import Decimal
 class Row():
 	def __init__(self):
 		pass
@@ -20,7 +21,7 @@ class Row():
 					numStr_ = colum.display_value.strip()
 					numStr = numStr_.replace('%', '')
 					try:
-						value = float(numStr)/100
+						value = Decimal(numStr)/100
 					except:
 						print ("Invalid format data: Header %s value %s"%(dictHeader[index], colum.display_value))
 						value = 0
@@ -32,7 +33,7 @@ class Row():
 						numStr_2 = colum.value.strip()
 						numStr2 = numStr_2.replace('%', '')
 						try:
-							value = float(numStr2)/100
+							value = Decimal(numStr2)/100
 						except:
 							print ("Invalid format data: Header %s value %s"%(dictHeader[index], colum.value))
 							value = 0

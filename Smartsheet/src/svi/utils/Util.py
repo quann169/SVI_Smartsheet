@@ -10,6 +10,14 @@ sys.path.append('..')
 from svi.enum import Enum
 from pprint import pprint
 from dateutil.relativedelta import relativedelta
+from decimal import Decimal
+from email.mime.text import MIMEText
+from email.mime.multipart  import MIMEMultipart
+import socket
+import getpass
+
+from subprocess import Popen, PIPE, CalledProcessError, STDOUT, check_call
+
 def toDate(strg_):
     strg = str(strg_)
 
@@ -25,7 +33,7 @@ def toDate(strg_):
                 try:
                     objDate = datetime.datetime.strptime(strg, '%m/%d/%Y')
                 except:
-                    print("Other Date time format")
+                    print("Other Date time format: %s"%strg)
                     sys.exit()
     year = objDate.year
     month = objDate.month
@@ -417,12 +425,14 @@ def get_info_report(dir_):
 def get_info_time_off(dir_, excelHoliday, userInfo):
     df = pandas.read_excel("%s\Config.xlsx"%dir_, sheet_name='Time-Off')
     configInfo = {}
+    id = df['ID']
     requester = df['Requester']
     sDateRq = df['Start Date']
     eDateRq = df['End Date']
     workdays = df['Workdays']
     sumRow = len(requester)
     dictTimeOff = {'month': {}, 'week':{}}
+    listID = []
     for row in range (0, sumRow):
         requester_ = ''
         for usr in userInfo.keys():
@@ -433,29 +443,33 @@ def get_info_time_off(dir_, excelHoliday, userInfo):
         if len(lsWorkDay) == 0:
             continue
         else:
-            if not requester_ in dictTimeOff['week'].keys():
-                dictTimeOff['week'][requester_] = {}
-            if not requester_ in dictTimeOff['month'].keys():
-                dictTimeOff['month'][requester_] = {}
-                
-            for date_week in lsWorkDay:
-                y, m, d = toDate(str(date_week[0]))
-                month_ = '%s-%s'%(Enum.DateTime.LIST_MONTH[int(m)], y)
-                if not date_week[1] in dictTimeOff['week'][requester_].keys():
-                    dictTimeOff['week'][requester_][date_week[1]] = 0
-                if not month_ in dictTimeOff['month'][requester_].keys():
-                    dictTimeOff['month'][requester_][month_] = 0
+            if str(id[row]) in listID:
+                continue
+            else:
+                if not requester_ in dictTimeOff['week'].keys():
+                    dictTimeOff['week'][requester_] = {}
+                if not requester_ in dictTimeOff['month'].keys():
+                    dictTimeOff['month'][requester_] = {}
                     
-                if str(sDateRq[row]) == str(eDateRq[row]):
-                    hours = 0
-                    nstr = workdays[row][workdays[row].find("(")+1 : workdays[row].find(")")]
-                    str_ = nstr.replace('h', '').strip()
-                    hours = float(str_)
-                    dictTimeOff['week'][requester_][date_week[1]] += hours
-                    dictTimeOff['month'][requester_][month_] += hours
-                else:
-                    dictTimeOff['week'][requester_][date_week[1]] += 8
-                    dictTimeOff['month'][requester_][month_] += 8
+                for date_week in lsWorkDay:
+                    y, m, d = toDate(str(date_week[0]))
+                    month_ = '%s-%s'%(Enum.DateTime.LIST_MONTH[int(m)], y)
+                    if not date_week[1] in dictTimeOff['week'][requester_].keys():
+                        dictTimeOff['week'][requester_][date_week[1]] = 0
+                    if not month_ in dictTimeOff['month'][requester_].keys():
+                        dictTimeOff['month'][requester_][month_] = 0
+                        
+                    if str(sDateRq[row]) == str(eDateRq[row]):
+                        hours = 0
+                        nstr = workdays[row][workdays[row].find("(")+1 : workdays[row].find(")")]
+                        str_ = nstr.replace('h', '').strip()
+                        hours = Decimal(str_)
+                        dictTimeOff['week'][requester_][date_week[1]] += hours
+                        dictTimeOff['month'][requester_][month_] += hours
+                    else:
+                        dictTimeOff['week'][requester_][date_week[1]] += 8
+                        dictTimeOff['month'][requester_][month_] += 8
+                    listID.append(str(id[row]))
     return dictTimeOff
     
 
@@ -500,6 +514,9 @@ def style_for_timesheet():
 
 def get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeOff):
     dictOut = {}
+    other = get_other_info_to_find_user_name(userInfo)
+    
+#     print (userInfoDict)
 #     pprint (userInfo)
     weeklyHour = 0
     for position in userInfoDict.keys():
@@ -507,8 +524,7 @@ def get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeO
             if user_ in[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
                 continue
             else:
-                if user_ in userInfo.keys():
-                    
+                if user_ in userInfo.keys() or user_ in other.keys():
                     if userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL].strip() in['', 'nan']:
                         continue
                     else:
@@ -522,7 +538,7 @@ def get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeO
                             detail = ''
                             if managerMailOfUser.strip() not in dictOut.keys():
                                 dictOut[managerMailOfUser.strip()] = {}
-                            
+
                             for sheet_ in userInfoDict[position][user_].keys():
                                 if sheet_ in[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
                                     continue
@@ -531,14 +547,16 @@ def get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeO
                                     if lsSheet[0] != 0:
                                         str__ = '%s(%s), '%(sheet_, lsSheet[0])
                                         detail += str__
-                 
-                            if (float(ls[2]) + float(ls[3])) != float(ls[4]):
+                            if user_ not in userInfo.keys() and user_ in other.keys():
+                                user_ = other[user_]
+                                
+                            if (Decimal(ls[2]) + Decimal(ls[3])) != Decimal(ls[4]):
     #                             if userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL] not in dictOut.keys():
     #                                 dictOut[userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL]] = {}
                                 dictOut[managerMailOfUser.strip()][user_] = [ls[2], ls[3], ls[2] + ls[3], ls[4], detail]
                             else:
                                 dictOut[managerMailOfUser.strip()][user_] = ['skip', 'skip','skip', 'skip', 'skip']
-
+    
     for user__ in userInfo.keys():
         if userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL].strip() in ['', 'nan']:
             continue
@@ -557,7 +575,7 @@ def get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeO
                 else:
                     if user__ in  dictTimeOff['week'].keys():
                         if startWeekSendEmail in dictTimeOff['week'][user__].keys():
-                            if float(dictTimeOff['week'][user__][startWeekSendEmail]) != float(weeklyHour):
+                            if Decimal(dictTimeOff['week'][user__][startWeekSendEmail]) != Decimal(weeklyHour):
                                 if managerMailOfUser_.strip() not in dictOut.keys():
                                     dictOut[managerMailOfUser_.strip()] = {}
                                 dictOut[managerMailOfUser_.strip()][user__] = [0, dictTimeOff['week'][user__][startWeekSendEmail], dictTimeOff['week'][user__][startWeekSendEmail], weeklyHour, '']
@@ -606,3 +624,9 @@ def get_manager_mail_of_user(string_):
     listMail = string.split(',')
     return listMail
 
+def get_other_info_to_find_user_name(userInfo):
+    out = {}
+    for user in userInfo.keys():
+        for other_name in userInfo[user]['Other Info']:
+            out[other_name] = user
+    return out
