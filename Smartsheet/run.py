@@ -146,13 +146,20 @@ def Run__():
 		#check config show detail------------
 	lsRow2_ = sheet2.row_values(Enum.UserInfoConfig.ROW_GET_SHOW_DETAIL)
 	for j in range(Enum.UserInfoConfig.COLUM_GET_STATUS, Enum.UserInfoConfig.COLUM_GET_STATUS + 2):
-		if lsRow2_[j].lower() == 'yes':
-			listItems[j]['show detail'] = 1
-		elif lsRow2_[j].lower() == 'no':
-			listItems[j]['show detail'] = 0
-		else:
-			print('Config Error: Select "Show detail" must be yes or no, not be ' + lsRow2_[j])
-			sys.exit()
+		ls_detail = lsRow2_[j].lower().split(',')
+		listItems[j]['show detail'] = 1
+		listItems[j]['limit'] = False
+		try:
+			if ls_detail[0].strip() == 'no':
+				listItems[j]['show detail'] = 0
+		except:
+			pass
+		try:
+			if ls_detail[1].strip() == 'limit':
+				listItems[j]['limit'] = True
+		except:
+			pass
+		
 	for item in listItems:
 		if listItems[item]['status']:
 			if (item in [1,2]) and (listItems[item]['show detail']):
@@ -226,7 +233,7 @@ def Run__():
 # 	pprint(userInfoDict)
 # 	asd
 	dictToSendMail = Util.get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeOff)
-# 	pprint (dictToSendMail)
+# 	dictToSendMail = {}
 # 	asd
 	startRow = Enum.HeaderExcelAndKeys.START_ROW
 	startColum = Enum.HeaderExcelAndKeys.START_COLUM
@@ -234,50 +241,52 @@ def Run__():
 	colorDict, colorDictNoneBorder = Util.definedColor()
 	colorTextDict, colorTextDictNoneBorder = Util.definedColorText()
 	controlObj = Controllers()
+	
 	if listItems[1]['status'] == 1:
 		print("Running  Item I001 - Caculate working time and filter all sheet of user by week")
 		
 		showDetail = listItems[1]['show detail']
 		sheetName = wb.add_sheet('Weekly Resource')
+		is_limit = listItems[1]['limit']
 		lsheader = Util.headerToPrintExcel(1, startDate, endDate, 'week', dir_, excelHoliday, False)
 		#colum, row
 		getBy = Enum.HeaderExcelAndKeys.TOTAL_WEEK
-		controlObj.printDictToExcel(sheetName, lsheader, userInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail)
+		controlObj.printDictToExcel(sheetName, lsheader, userInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail, is_limit)
 		print("Running  Item I001 done")
 		print("------------------------------------------------------------------------------")
 # 		
 	if listItems[2]['status'] == 1:
 		print("Running  Item I002 - Caculate working time and filter all sheet of user by month")
-	
+		is_limit = listItems[2]['limit']
 		showDetail = listItems[2]['show detail']
 		sheetName = wb.add_sheet('Monthly Resource')
 		lsheader = Util.headerToPrintExcel(1, startDate, endDate, 'month', dir_, excelHoliday, False)
 		#colum, row
 		getBy = Enum.HeaderExcelAndKeys.TOTAL_MONTH
-		controlObj.printDictToExcel(sheetName, lsheader, userInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail)	
+		controlObj.printDictToExcel(sheetName, lsheader, userInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail, is_limit)	
 		print("Running  Item I002 done")
 		print("------------------------------------------------------------------------------")
-	if listItems[3]['status'] == 1:
-		
-		print("Running  Item I003 - Caculate working time and filter all user of sheet by week")
-		sheetName = wb.add_sheet('Weekly Project')
-		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'week', dir_, excelHoliday, False)
-		#colum, row
-		getBy = Enum.HeaderExcelAndKeys.TOTAL_WEEK
-		controlObj.printDictToExcel(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, 1)
-		print("Running  Item I003 done")
-		print("------------------------------------------------------------------------------")
-	if listItems[4]['status'] == 1:
-		
-		print("Running  Item I004 - Caculate working time and filter all user of sheet by month")
-		
-		sheetName = wb.add_sheet('Monthly Project')
-		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month', dir_, excelHoliday, False)
-		#colum, row
-		getBy = Enum.HeaderExcelAndKeys.TOTAL_MONTH
-		controlObj.printDictToExcel(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, 1)
-		print("Running  Item I004 done")
-		print("------------------------------------------------------------------------------")
+# 	if listItems[3]['status'] == 1:
+# 		
+# 		print("Running  Item I003 - Caculate working time and filter all user of sheet by week")
+# 		sheetName = wb.add_sheet('Weekly Project')
+# 		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'week', dir_, excelHoliday, False)
+# 		#colum, row
+# 		getBy = Enum.HeaderExcelAndKeys.TOTAL_WEEK
+# 		controlObj.printDictToExcel(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, 1)
+# 		print("Running  Item I003 done")
+# 		print("------------------------------------------------------------------------------")
+# 	if listItems[4]['status'] == 1:
+# 		
+# 		print("Running  Item I004 - Caculate working time and filter all user of sheet by month")
+# 		
+# 		sheetName = wb.add_sheet('Monthly Project')
+# 		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month', dir_, excelHoliday, False)
+# 		#colum, row
+# 		getBy = Enum.HeaderExcelAndKeys.TOTAL_MONTH
+# 		controlObj.printDictToExcel(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, 1)
+# 		print("Running  Item I004 done")
+# 		print("------------------------------------------------------------------------------")
 	if listItems[5]['status'] == 1:
  		
 		print("Running  Item I005 - Caculate working time and filter all user of sheet by week (new format)")

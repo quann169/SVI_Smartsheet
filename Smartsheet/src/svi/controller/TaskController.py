@@ -446,7 +446,8 @@ class RowParsing():
 class Controllers():
 	def __init__(self):
 		pass
-	def printDictToExcel(self, sheetName, lsheader, dictToPrint, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail):
+	def printDictToExcel(self, sheetName, lsheader, dictToPrint, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail, is_limit=False):
+# 		pprint(dictToPrint)
 		rowIndex = startRow
 		columIndex = startColum
 		for head1 in lsheader:
@@ -574,8 +575,15 @@ class Controllers():
 									for head4 in lsheader:
 										value3 = 0
 										if count3 > 3:
+											max_value = dictToPrint[keyLV1][keyLV2][getBy][head4[0]][0]
+											max_value_st = dictToPrint[keyLV1][keyLV2][getBy][head4[0]][1]
 											value3 = dictToPrint[keyLV1][keyLV2][keyLV3][getBy][head4[0]][0]
 											st3 = dictToPrint[keyLV1][keyLV2][keyLV3][getBy][head4[0]][1]
+# 											print (keyLV3, value3, st3, max_value, max_value_st)
+											if is_limit:
+												if value3 > max_value:
+													value3 = max_value
+												
 										else:
 											if head4[0] in [Enum.HeaderExcelAndKeys.TYPE]:
 												value3 = dictToPrint[keyLV1][keyLV2][keyLV3][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][0]
@@ -584,8 +592,12 @@ class Controllers():
 												value3 = dictToPrint[keyLV1][keyLV2][keyLV3][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][0]
 												st3 = dictToPrint[keyLV1][keyLV2][keyLV3][Enum.HeaderExcelAndKeys.SENIORITY_POSITION][1]
 											else:
+												
+												
+												
 												value3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][0]
 												st3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][1]
+
 
 # 											value3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][0]
 # 											st3 = dictToPrint[keyLV1][keyLV2][keyLV3][head4[0]][1]

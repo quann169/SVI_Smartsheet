@@ -172,6 +172,23 @@ def CompareAndSelectColorToPrintExcel(currentHour_, totalHour, offHour):
         color = Enum.WorkHourColor.IS_EQUAL
         return color, currentHour
 
+def CompareAndSelectColorToPrintExcel2(currentHour_, totalHour, offHour, isSheet):
+    color = ''
+    currentHour = currentHour_ + offHour
+    if isSheet:
+        out = currentHour_
+    else:
+        out = currentHour
+    if out > totalHour:
+        color = Enum.WorkHourColor.IS_GREATER
+        return color, totalHour
+    elif out < totalHour:
+        color = Enum.WorkHourColor.IS_LESS
+        return color, out
+    else:
+        color = Enum.WorkHourColor.IS_EQUAL
+        return color, out
+    
 def definedColor():
     colorDict = {}
     colorDictNoneBorder = {}
@@ -235,7 +252,7 @@ def caculateWorkWeekFromListWorkDay(listWeek, startDate, endDate, dictWeek, colo
                     offHour = dictTimeOff['week'][user__][week[0]]
             
 #             
-            color, hour_ = CompareAndSelectColorToPrintExcel(workTime, week[1], offHour)
+            color, hour_ = CompareAndSelectColorToPrintExcel2(workTime, week[1], offHour, sheetOrUser)
             workColor = [hour_, color, workTime, offHour, week[1]]
         else:
             workColor = [workTime, color]
@@ -266,7 +283,7 @@ def caculateWorkMonthFromListWorkDay(listMonth, listWeek,  startDate, endDate, d
                     
 #             
 
-            color, hour_ = CompareAndSelectColorToPrintExcel(workTime, month[2], offHour)
+            color, hour_ = CompareAndSelectColorToPrintExcel2(workTime, month[2], offHour, sheetOrUser)
             workColor = [hour_, color, workTime,  offHour, month[2]]
         else:
             workColor = [workTime, color]
