@@ -39,18 +39,20 @@ def toDate(strg_):
     month = objDate.month
     day = objDate.day
     return year, month, day
-def check_valid_send_email_date(startDate, endDate, dateSendEmail):
+def check_valid_send_email_date(startDate, endDate, list_date):
+    
     sy, sm, sd = toDate(startDate)
     ey, em, ed = toDate(endDate)
-    dy, dm, dd = toDate(dateSendEmail)
-    start = datetime.datetime(day = sd, month = sm, year = sy)
-    end = datetime.datetime(day = ed, month = em, year = ey)
-    copare = datetime.datetime(day = dd, month = dm ,year = dy)
-    if start <= copare <= end:
-        pass
-    else:
-        print ("[ERROR] %s out of range (%s - %s)"%(dateSendEmail, startDate, endDate))
-        sys.exit()
+    for date_ in list_date:
+        dy, dm, dd = toDate(date_.strip())
+        start = datetime.datetime(day = sd, month = sm, year = sy)
+        end = datetime.datetime(day = ed, month = em, year = ey)
+        copare = datetime.datetime(day = dd, month = dm ,year = dy)
+        if start <= copare <= end:
+            pass
+        else:
+            print ("[ERROR] %s out of range (%s - %s)"%(date_.strip(), startDate, endDate))
+            sys.exit()
     
 def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
@@ -108,6 +110,30 @@ def getWorkWeek(fromdate, todate, dir_, excelHoliday):
     for emptyW in listWeek:
         if not (emptyW[1]):
             listWeek.remove(emptyW)
+    return listWeek
+
+#[week, ...]
+def getWorkWeek2(fromdate, todate, dir_, excelHoliday):
+    sy, sm, sd = toDate(fromdate)
+    ey, em, ed = toDate(todate)
+    listWeek = []
+    start_date = datetime.date(sy, sm, sd)
+    end_date = datetime.date(ey, em, ed)
+    for date in daterange(start_date, end_date):
+        y, m, d = toDate(date.strftime("%Y-%m-%d"))
+        y_m_d = '%s-%s-%s'%(y, m, d)
+        startWeek = None
+        if (calendar.day_name[calendar.weekday(y,m,d)] != Enum.DateTime.START_WEEK) and (listWeek == []):
+            day = datetime.date(y, m, d)
+#             days = np.busday_count(start, end)
+            startWeek = day - datetime.timedelta(days=day.weekday())
+        if (calendar.day_name[calendar.weekday(y,m,d)] == Enum.DateTime.START_WEEK):
+            startWeek = datetime.date(y, m, d)
+            
+        if startWeek not in listWeek and startWeek:
+            listWeek.append(str(startWeek))
+        
+    
     return listWeek
 
 # # [[momth, year, total hour work],...]
@@ -404,33 +430,51 @@ def get_info_excel(dir_):
         excelHoliday.append('%s-%s-%s'%(y, m, d))
     return excelHoliday
 
-def get_info_report(dir_):
-    df = pandas.read_excel("%s\TimeSheet.xls"%dir_, sheet_name='Report')
-    manager_ = df['Manager (Mail)']
-    resource_ = df['Resource']
-    workingH_ = df['Working hours']
-    offW_ = df['Off work']
-    total_ = df['Total']
-#     weeklyH_ = df['Weekly hours']
-    detail_ = df['Detail']
-    comment_ = df['Comment']
-    len_ = len(manager_)
+def get_ignore_task(dir_):
+    try:
+        df = pandas.read_excel("%s\Config.xlsx"%dir_, sheet_name='Ignore Task')
+        task_name = df['Task Name']
+        ignore_task = []
+        for name in task_name:
+            if str(name).strip().lower() != 'nan' and str(name).strip() != '' :
+                ignore_task.append(str(name).strip())
+        return ignore_task
+    except Exception as e:
+        print (e)
+        sys.exit()
+    return ignore_task
+
+def get_info_report(dir_, startWeekSendEmail):
     dictOut = {}
-    for index in range (0, len_):
-        mn = convert_nan_value(str(manager_[index]))
-        if mn != '':
-            if mn not in dictOut.keys():
-                dictOut[manager_[index]] = []
-            rs = convert_nan_value(str(resource_[index]))    
-            wk = convert_nan_value(str(workingH_[index]))  
-            off = convert_nan_value(str(offW_[index]))
-            to = convert_nan_value(str(total_[index]))
-#             we = convert_nan_value(str(weeklyH_[index]))
-            we = '0'
-            de = convert_nan_value(str(detail_[index]))
-            co = convert_nan_value(str(comment_[index]))
-                
-            dictOut[manager_[index]].append([rs, wk, off, to, we, de, co])
+    for report_week in startWeekSendEmail:
+        df = pandas.read_excel("%s\TimeSheet.xls"%dir_, sheet_name='Report_%s'%report_week)
+        manager_ = df['Manager (Mail)']
+        resource_ = df['Resource']
+        workingH_ = df['Working hours']
+        offW_ = df['Off work']
+        total_ = df['Total']
+    #     weeklyH_ = df['Weekly hours']
+        detail_ = df['Detail']
+        comment_ = df['Comment']
+        len_ = len(manager_)
+        for index in range (0, len_):
+            mn = convert_nan_value(str(manager_[index]))
+            if mn != '':
+                if mn not in dictOut.keys():
+                    dictOut[manager_[index]] = {}
+                if report_week not in dictOut[manager_[index]].keys():
+                    dictOut[manager_[index]][report_week] = []
+                    
+                rs = convert_nan_value(str(resource_[index]))    
+                wk = convert_nan_value(str(workingH_[index]))  
+                off = convert_nan_value(str(offW_[index]))
+                to = convert_nan_value(str(total_[index]))
+    #             we = convert_nan_value(str(weeklyH_[index]))
+                we = '0'
+                de = convert_nan_value(str(detail_[index]))
+                co = convert_nan_value(str(comment_[index]))
+                    
+                dictOut[manager_[index]][report_week].append([rs, wk, off, to, we, de, co])
 #         dictOut[manager_[index]]['Resource'] = resource_[index]
 #         dictOut[manager_[index]]['Working hours'] = workingH_[index]
 #         dictOut[manager_[index]]['Off work'] = offW_[index]
@@ -452,10 +496,12 @@ def get_info_time_off(dir_, excelHoliday, userInfo):
     listID = []
     for row in range (0, sumRow):
         requester_ = ''
-        for usr in userInfo.keys():
-            if userInfo[usr][Enum.UserInfoConfig.FULL_NAME].strip() == requester[row].strip():
-                requester_ = usr.strip()
-        
+        if requester[row].strip() in userInfo.keys():
+            requester_ = requester[row].strip()
+        else:
+            for usr in userInfo.keys():
+                if userInfo[usr][Enum.UserInfoConfig.FULL_NAME].strip() == requester[row].strip():
+                    requester_ = usr.strip()
         lsWorkDay = getWorkDay(str(sDateRq[row]), str(eDateRq[row]), dir_, excelHoliday)
         if len(lsWorkDay) == 0:
             continue
@@ -490,19 +536,34 @@ def get_info_time_off(dir_, excelHoliday, userInfo):
     return dictTimeOff
     
 
-def get_end_start_week(tringDate):
-    date_obj = datetime.datetime.strptime(tringDate, '%Y-%m-%d')
-    y, m, d = toDate(date_obj.strftime("%Y-%m-%d"))
-    y_m_d = '%s-%s-%s'%(y, m, d)
-    startWeek = None
-    if calendar.day_name[calendar.weekday(y,m,d)] == Enum.DateTime.START_WEEK:
-        startWeek = datetime.date(y, m, d)
+def get_end_start_week(list_date):
+    is_list = False
+    if isinstance(list_date, list):
+        is_list = True
     else:
-        day = datetime.date(y, m, d)
-#             days = np.busday_count(start, end)
-        startWeek = day - datetime.timedelta(days=day.weekday())
-    endWeek = startWeek + datetime.timedelta(days=6)
-    return str(endWeek), str(startWeek)
+        list_date = [list_date]
+    start_date = []
+    end_date   = []
+    for tringDate in list_date:
+        date_obj = datetime.datetime.strptime(tringDate.strip(), '%Y-%m-%d')
+        y, m, d = toDate(date_obj.strftime("%Y-%m-%d"))
+        y_m_d = '%s-%s-%s'%(y, m, d)
+        startWeek = None
+        if calendar.day_name[calendar.weekday(y,m,d)] == Enum.DateTime.START_WEEK:
+            startWeek = datetime.date(y, m, d)
+        else:
+            day = datetime.date(y, m, d)
+    #             days = np.busday_count(start, end)
+            startWeek = day - datetime.timedelta(days=day.weekday())
+        endWeek = startWeek + datetime.timedelta(days=6)
+        if startWeek not in start_date:
+            start_date.append(str(startWeek))
+        if endWeek not in end_date:
+            end_date.append(str(endWeek))
+        if not is_list:
+            return str(endWeek), str(startWeek)
+    return end_date, start_date
+
 def get_end_start_month(tringDate_):
     tringDate = tringDate_ + '-01'
     date_obj = datetime.datetime.strptime(tringDate, '%Y-%m-%d')
@@ -530,84 +591,74 @@ def style_for_timesheet():
 
 
 def get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeOff):
-    dictOut = {}
-    other = get_other_info_to_find_user_name(userInfo)
-    
-#     print (userInfoDict)
-#     pprint (userInfo)
-    weeklyHour = 0
-    for position in userInfoDict.keys():
-        for user_ in userInfoDict[position].keys():
-            if user_ in[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
-                continue
-            else:
-                if user_ in userInfo.keys() or user_ in other.keys():
-                    if userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL].strip() in['', 'nan']:
-                        continue
-                    else:
-                        
-                        lsManagerMailOfUser = get_manager_mail_of_user(userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL])
-                        
-#                         print (position, user_, userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL])
-                        ls = userInfoDict[position][user_]['Total Week'][startWeekSendEmail]
-                        weeklyHour = ls[4]
-                        for managerMailOfUser in lsManagerMailOfUser:
-                            detail = ''
-                            if managerMailOfUser.strip() not in dictOut.keys():
-                                dictOut[managerMailOfUser.strip()] = {}
-
-                            for sheet_ in userInfoDict[position][user_].keys():
-                                if sheet_ in[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
-                                    continue
-                                else:
-                                    lsSheet = userInfoDict[position][user_][sheet_]['Total Week'][startWeekSendEmail]
-                                    if lsSheet[0] != 0:
-                                        str__ = '%s(%s), '%(sheet_, lsSheet[0])
-                                        detail += str__
-                            if user_ not in userInfo.keys() and user_ in other.keys():
-                                user_ = other[user_]
-                                
-                            if (Decimal(ls[2]) + Decimal(ls[3])) != Decimal(ls[4]):
-    #                             if userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL] not in dictOut.keys():
-    #                                 dictOut[userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL]] = {}
-                                dictOut[managerMailOfUser.strip()][user_] = [ls[2], ls[3], ls[2] + ls[3], ls[4], detail]
-                            else:
-                                dictOut[managerMailOfUser.strip()][user_] = ['skip', 'skip','skip', 'skip', 'skip']
-    
-    for user__ in userInfo.keys():
-        if userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL].strip() in ['', 'nan']:
-            continue
-#         elif userInfo[user__][Enum.UserInfoConfig.IS_COUNT] == 1:
-#             continue
-
-        else:
-            lsManagerMailOfUser_ = get_manager_mail_of_user(userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL])
-#             if user__ in dictOut[userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL]].keys():
-#                 continue
-            for managerMailOfUser_ in lsManagerMailOfUser_:
-                if managerMailOfUser_.strip() not in dictOut.keys():
-                    dictOut[managerMailOfUser_.strip()] = {}
-                if user__ in dictOut[managerMailOfUser_.strip()].keys():
+    result = {}
+    for report_week in startWeekSendEmail:
+        dictOut = {}
+        other = get_other_info_to_find_user_name(userInfo)
+        weeklyHour = 0
+        for position in userInfoDict.keys():
+            for user_ in userInfoDict[position].keys():
+                if user_ in[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
                     continue
                 else:
-                    if user__ in  dictTimeOff['week'].keys():
-                        if startWeekSendEmail in dictTimeOff['week'][user__].keys():
-                            if Decimal(dictTimeOff['week'][user__][startWeekSendEmail]) != Decimal(weeklyHour):
+                    if user_ in userInfo.keys() or user_ in other.keys():
+                        if userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL].strip() in['', 'nan']:
+                            continue
+                        else:
+                            lsManagerMailOfUser = get_manager_mail_of_user(userInfo[user_][Enum.UserInfoConfig.MANAGER_EMAIL])
+                            ls = userInfoDict[position][user_]['Total Week'][report_week]
+                            weeklyHour = ls[4]
+                            for managerMailOfUser in lsManagerMailOfUser:
+                                detail = ''
+                                if managerMailOfUser.strip() not in dictOut.keys():
+                                    dictOut[managerMailOfUser.strip()] = {}
+    
+                                for sheet_ in userInfoDict[position][user_].keys():
+                                    if sheet_ in[Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+                                        continue
+                                    else:
+                                        lsSheet = userInfoDict[position][user_][sheet_]['Total Week'][report_week]
+                                        if lsSheet[0] != 0:
+                                            str__ = '%s(%s), '%(sheet_, lsSheet[0])
+                                            detail += str__
+                                if user_ not in userInfo.keys() and user_ in other.keys():
+                                    user_ = other[user_]
+                                    
+                                if (Decimal(ls[2]) + Decimal(ls[3])) != Decimal(ls[4]):
+                                    dictOut[managerMailOfUser.strip()][user_] = [ls[2], ls[3], ls[2] + ls[3], ls[4], detail]
+                                else:
+                                    dictOut[managerMailOfUser.strip()][user_] = ['skip', 'skip','skip', 'skip', 'skip']
+        
+        for user__ in userInfo.keys():
+            if userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL].strip() in ['', 'nan']:
+                continue
+    
+            else:
+                lsManagerMailOfUser_ = get_manager_mail_of_user(userInfo[user__][Enum.UserInfoConfig.MANAGER_EMAIL])
+                for managerMailOfUser_ in lsManagerMailOfUser_:
+                    if managerMailOfUser_.strip() not in dictOut.keys():
+                        dictOut[managerMailOfUser_.strip()] = {}
+                    if user__ in dictOut[managerMailOfUser_.strip()].keys():
+                        continue
+                    else:
+                        if user__ in  dictTimeOff['week'].keys():
+                            if report_week in dictTimeOff['week'][user__].keys():
+                                if Decimal(dictTimeOff['week'][user__][report_week]) != Decimal(weeklyHour):
+                                    if managerMailOfUser_.strip() not in dictOut.keys():
+                                        dictOut[managerMailOfUser_.strip()] = {}
+                                    dictOut[managerMailOfUser_.strip()][user__] = [0, dictTimeOff['week'][user__][report_week], dictTimeOff['week'][user__][report_week], weeklyHour, '']
+                                else:
+                                    continue
+                            else:
                                 if managerMailOfUser_.strip() not in dictOut.keys():
                                     dictOut[managerMailOfUser_.strip()] = {}
-                                dictOut[managerMailOfUser_.strip()][user__] = [0, dictTimeOff['week'][user__][startWeekSendEmail], dictTimeOff['week'][user__][startWeekSendEmail], weeklyHour, '']
-                            else:
-                                continue
+                                dictOut[managerMailOfUser_.strip()][user__] = [0, 0, 0, weeklyHour, '']
                         else:
                             if managerMailOfUser_.strip() not in dictOut.keys():
                                 dictOut[managerMailOfUser_.strip()] = {}
                             dictOut[managerMailOfUser_.strip()][user__] = [0, 0, 0, weeklyHour, '']
-                    else:
-                        if managerMailOfUser_.strip() not in dictOut.keys():
-                            dictOut[managerMailOfUser_.strip()] = {}
-                        dictOut[managerMailOfUser_.strip()][user__] = [0, 0, 0, weeklyHour, '']
-#     pprint (dictOut)
-    return dictOut
+        result[report_week] = dictOut
+    return result
 
 def convert_nan_value(string):
     out = ''
@@ -647,3 +698,94 @@ def get_other_info_to_find_user_name(userInfo):
         for other_name in userInfo[user]['Other Info']:
             out[other_name] = user
     return out
+
+def read_template(file_name, add_info):
+    config_params = {}
+ 
+    sys.argv = [file_name, add_info]
+    
+#     execfile(file_name, config_params)
+    exec(open(file_name).read(), config_params)
+         
+    if '__doc__' in config_params:
+        del config_params['__doc__']
+    if '__builtins__' in config_params:
+        del config_params['__builtins__']
+ 
+    config_params = parse_dict(config_params)
+    return config_params
+
+def parse_dict(init, lkey=''):
+    ret = {}
+    for rkey, val in init.items():
+        key = lkey + rkey
+        if isinstance(val, dict) and rkey in ["allVars"]:
+            ret.update(parse_dict(val, ""))
+        else:
+            ret[key] = val
+    # print ret
+    return re
+
+def check_string_content_string(list_key_define_real_proj , string, list_key_define_rnd_proj, list_key_define_pre_sale_proj, list_key_define_post_sale_proj):
+    result = 0
+    if len(list_key_define_real_proj):
+        for elm in list_key_define_real_proj:
+            index = elm.find('*')
+            if index == -1:
+                if elm == string:
+                    result = 1
+                    break
+            else:
+                text = elm[:index]
+                if string.startswith(text):
+                    result = 1
+                    break
+    else:
+        result = 1
+    if not result:
+        if len(list_key_define_rnd_proj):
+            for elm in list_key_define_rnd_proj:
+                index = elm.find('*')
+                if index == -1:
+                    if elm == string:
+                        result = 3
+                        break
+                else:
+                    text = elm[:index]
+                    if string.startswith(text):
+                        result = 3
+                        break
+        else:
+            result = 3
+    if not result:
+        if len(list_key_define_pre_sale_proj):
+            for elm in list_key_define_pre_sale_proj:
+                index = elm.find('*')
+                if index == -1:
+                    if elm == string:
+                        result = 4
+                        break
+                else:
+                    text = elm[:index]
+                    if string.startswith(text):
+                        result = 4
+                        break
+        else:
+            result = 4
+    if not result:
+        if len(list_key_define_post_sale_proj):
+            for elm in list_key_define_post_sale_proj:
+                index = elm.find('*')
+                if index == -1:
+                    if elm == string:
+                        result = 5
+                        break
+                else:
+                    text = elm[:index]
+                    if string.startswith(text):
+                        result = 5
+                        break
+        else:
+            result = 5
+    return result
+            

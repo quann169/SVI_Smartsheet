@@ -9,7 +9,7 @@ from svi.model.Rows import Row
 from svi.enum import Enum
 from svi.utils import Util
 import datetime
-import time
+import time, stat
 from pprint import pprint
 import xlwt
 from jinja2 import Environment
@@ -40,13 +40,13 @@ class RowParsing():
 		TOKEN = self.token
 		loop = True
 		while loop:
-			try:
-				smartsheet = Smartsheet(TOKEN)
-				sheets = smartsheet.sheets.list()
-				loop = False
-			except:
-				print ('Connecting again after 10 seconds')
-				time.sleep(10)
+# 			try:
+			smartsheet = Smartsheet(TOKEN)
+			sheets = smartsheet.sheets.list()
+			loop = False
+# 			except:
+# 				print ('Connecting again after 10 seconds')
+# 				time.sleep(10)
 		dictSheetSms = {}
 		
 		for sheetSmartsheet in sheets:
@@ -57,15 +57,9 @@ class RowParsing():
 				sys.exit()
 		strOut = ''
 		listOut = []
-# 		print('out')
-# 		for sheetConfig in listSheetConfig:
-# 			if not (sheetConfig in listSheetSms):
-# 				listOut.append(sheetConfig)
-# 		strOut = ', '.join(listOut)
 		
 		for index_ in range(0, len(listSheetConfig)):
 			if not (listSheetConfig[index_].lower() in dictSheetSms.keys()):
-# 				pprint (dictSheetSms.keys())
 				listOut.append(listSheetConfig[index_])
 			else:
 				listSheetConfigReplace.append(dictSheetSms[listSheetConfig[index_].lower()])
@@ -90,11 +84,6 @@ class RowParsing():
 				print ('Connecting again after 10 seconds')
 				time.sleep(10)
 		
-		
-# 		if sheetName == 'NRE_ECC_CPL':
-# 			pprint (sheetInfo)
-# 			asd
-		# For each column, print Id and Title.
 		lHeader = []
 		lsHSheet = []
 		for col in sheetInfo:
@@ -106,7 +95,6 @@ class RowParsing():
 		strOut = ''
 		listOut = []
 
-# 		print('Header of %s: %s' %(sheetName, ', '.join(lsHSheet)))
 		for hConfig in listHeader:
 			if not(hConfig in lHeader):
 				listOut.append(hConfig)
@@ -128,46 +116,76 @@ class RowParsing():
 			except:
 				print ('Connecting again after 10 seconds')
 				time.sleep(10)
-
-		
 		return allRows, sheet
+	
+	#connect to smartsheet
+	def getLastModifiedOfSheet(self, sheet_name):
+		TOKEN = self.token
+		loop = True
+		while loop:
+			try:
+				smartsheet = Smartsheet(TOKEN)
+				sheet = smartsheet.sheets.get(sheet_name)
+				last_modified = sheet.modified_at
+				loop = False
+			except:
+				print ('Connecting again after 10 seconds')
+				time.sleep(10)
+		return str(last_modified)
 
 	#convert row's data  to dictionary with key=id, value = {id: '', info: {}, parent_id: '',sibling_id: ''}
-	def getAllDataOfSheet(self, sheet_name, sheets_):
+	def getAllDataOfSheet(self, sheet_name, sheets_, ignore_task):
 		allRows, sheet = self.connectSmartsheet(sheet_name)
-		
 		dictRows = {}
 		count = 1
 		totalRow = len(allRows)
+		list_task_ignore= []
+		list_id_ignore = []
 		for row in allRows:
-			
-# 			if ((count % 200) == 0 and count != 0):
-# 				print ('%s: Parse lines %s of %s line' %(sheet_name, count, totalRow))
-# 			if (self.rowisRowEmpty(row) == 1):
 			dictheader = sheets_[sheet_name]
 			dictHeaderOut = self.row.getHeaders(sheet_name, sheet, dictheader)
-			dictRow= self.row.getDataRow(row, dictHeaderOut, count)
-			dictRows[row.id] = dictRow
+			dictRow= self.row.getDataRow(row, dictHeaderOut, count, ignore_task, list_task_ignore, list_id_ignore)
+			if dictRow != None:
+				if dictRow[Enum.GenSmartsheet.PARENT_ID] != '':
+					try:
+						list_task_ignore.append(dictRows[dictRow[Enum.GenSmartsheet.PARENT_ID]]['info'][Enum.Header.TASK_NAME])
+						dictRows.pop(dictRow[Enum.GenSmartsheet.PARENT_ID], None)
+					except KeyError as e:
+						pass
+							
+				dictRows[row.id] = dictRow
 			count += 1
 		return dictRows
 
-	def getAllSheetAndWorkTimeOfUser(self, listSheet, ListUser, startDate, endDate, userInfo, dictInfoUser, sheets_, dir_, excelHoliday, dictTimeOff):
+	def getAllSheetAndWorkTimeOfUser(self, listSheet, ListUser, startDate, endDate, userInfo, dictInfoUser, sheets_, dir_, excelHoliday, dictTimeOff, ignore_task):
 
 		UserInfoDict = {}
 		sheetInfoDict = {}
 		sheetInfoDict2 = {}
+		listWorkDay1 = Util.getWorkDay(startDate, endDate, dir_, excelHoliday)
+		listWorkDay = Util.getWorkDay(startDate, endDate, dir_, excelHoliday)
+		listWorkMonth = Util.getWorkMonth(startDate, endDate, dir_, excelHoliday)
 		#add data into UserInfoDict
 		for sheetName in listSheet:
 			strlog = ''
 			time1_ = time.time()
-			print('Start parsing %s........' %(sheetName))
+			
 			countSkipRow = 0
 			countRowParent = 0
+			last_modified_ = self.getLastModifiedOfSheet(sheetName)
+			last_modified_2 = filter(None, re.split(' |\-|\+|\:|\;', last_modified_))
+			last_modified_2c = '_'.join(last_modified_2)
+			cache_path = os.path.join(dir_, 'Cache')
+			sheet_cache_path = os.path.join(cache_path, sheetName)
+			file_cache_path = os.path.join(sheet_cache_path, '%s.py'%(last_modified_2c))
+			dictRows = self.getAllDataOfSheet(sheetName, sheets_, ignore_task)
 			
-			dictRows = self.getAllDataOfSheet(sheetName, sheets_)
+
+			
+			print('Start parsing %s........' %(sheetName))
 # 			pprint(dictRows)
-			listParentId = self.row.getParentId(dictRows)
-			
+# 			listParentId = self.row.getParentId(dictRows, ignore_task)
+# 			pprint(dictRows)
 			count2 = 0
 			for row in dictRows.keys():
 				totalRow = len(dictRows)
@@ -176,214 +194,209 @@ class RowParsing():
 				user___ = dictRows[row]['info'][Enum.Header.ASSIGNED_TO].split(',')
 				users = user___[0]
 				isSkip = Util.is_skip_user(dictInfoUser, userInfo, users)
+				skip_id = []
+# 				print (dictRows[row]['info'][Enum.Header.TASK_NAME])
 				count2 += 1
 				#pick task is not a parent task
-				if not (dictRows[row][Enum.GenSmartsheet.ID]  in listParentId):
-					if dictRows[row]['info'][Enum.Header.ASSIGNED_TO] == 'NaN':
-						strlog += 'Skip--AssignTo is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE])
-						countSkipRow += 1
-						continue
-# 					elif isSkip:
-# 						strlog += 'Skip--AssignTo is skip in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE])
+# 				if not (dictRows[row][Enum.GenSmartsheet.ID]  in listParentId):
+				if dictRows[row]['info'][Enum.Header.ASSIGNED_TO] == 'NaN':
+# 						strlog += 'Skip--AssignTo is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE])
 # 						countSkipRow += 1
-# 						continue
+					continue
+				else:
+					startToEndDay = []
+					if dictRows[row]['info'][Enum.Header.ALLOCATION] == 'NaN':
+						dictRows[row]['info'][Enum.Header.ALLOCATION] = 0
+					if (dictRows[row]['info'][Enum.Header.START_DATE] == 'NaN') or (dictRows[row]['info'][Enum.Header.END_DATE] == "NaN"):
+# 							strlog += 'Skip--Start date or End date is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE])
+# 							countSkipRow += 1
+						continue
 					else:
-# 						print (dictRows[row]['info'][Enum.Header.ALLOCATION])
-						startToEndDay = []
-						if dictRows[row]['info'][Enum.Header.ALLOCATION] == 'NaN':
-							dictRows[row]['info'][Enum.Header.ALLOCATION] = 0
-						if (dictRows[row]['info'][Enum.Header.START_DATE] == 'NaN') or (dictRows[row]['info'][Enum.Header.END_DATE] == "NaN"):
-							strlog += 'Skip--Start date or End date is empty in Sheet name: %s, Task name: %s, Line : %s \n' %(sheetName, dictRows[row]['info'][Enum.Header.TASK_NAME], dictRows[row]['info'][Enum.GenSmartsheet.LINE])
-							countSkipRow += 1
-							continue
+						syear, smonth, sday = Util.toDate(dictRows[row]['info'][Enum.Header.START_DATE])
+						eyear, emonth, eday = Util.toDate(dictRows[row]['info'][Enum.Header.END_DATE])
+						start_dt = datetime.date(syear, smonth, sday)
+						end_dt = datetime.date(eyear, emonth, eday)
+# 							listWorkDay1 = Util.getWorkDay(startDate, endDate, dir_, excelHoliday)
+						for date_ in Util.daterange(start_dt, end_dt):
+							for wday in listWorkDay1:
+								if wday[0] == str(date_):
+									startToEndDay.append(str(date_))
+					if len(startToEndDay) == 0:
+						continue
+					else:
+						position_ = ''
+						user = ''
+						if ((users not in userInfo.keys()) and (users not in dictInfoUser.keys())):
+							position_ = 'N/A'
+							user = users
 						else:
-							syear, smonth, sday = Util.toDate(dictRows[row]['info'][Enum.Header.START_DATE])
-							eyear, emonth, eday = Util.toDate(dictRows[row]['info'][Enum.Header.END_DATE])
-							start_dt = datetime.date(syear, smonth, sday)
-							end_dt = datetime.date(eyear, emonth, eday)
-							listWorkDay1 = Util.getWorkDay(startDate, endDate, dir_, excelHoliday)
-							for date_ in Util.daterange(start_dt, end_dt):
-								for wday in listWorkDay1:
-									if wday[0] == str(date_):
-										startToEndDay.append(str(date_))
-# 						print(startToEndDay, syear, smonth, sday, eyear, emonth, eday)
-						if len(startToEndDay) == 0:
-							continue
-						else:
-							position_ = ''
-							user = ''
-							if ((users not in userInfo.keys()) and (users not in dictInfoUser.keys())):
-								position_ = 'N/A'
-								user = users
+							if users in dictInfoUser.keys():
+								user = dictInfoUser[users]
 							else:
-								if users in dictInfoUser.keys():
-									user = dictInfoUser[users]
+								if users in userInfo.keys():
+									user = users
+							position_ = '%s - %s' %(userInfo[user][Enum.UserInfoConfig.TYPE], userInfo[user][Enum.UserInfoConfig.ROLE])
+						task_name = dictRows[row]['info'][Enum.Header.TASK_NAME]
+						#create empty dict for user key = position
+						if not (position_ in UserInfoDict.keys()):
+							UserInfoDict[position_] = {}
+							Util.createDict(UserInfoDict[position_], '', '', position_, Enum.WorkHourColor.IS_POSITION, Enum.WorkHourColor.IS_POSITION, Enum.WorkHourColor.IS_POSITION)
+						#create empty dict for position key = username
+						if not(user in UserInfoDict[position_].keys()):
+							UserInfoDict[position_][user] = {}
+							Util.createDict(UserInfoDict[position_][user], '', user, '', Enum.WorkHourColor.IS_USER_NAME, Enum.WorkHourColor.IS_USER_NAME, Enum.WorkHourColor.BACK_GROUND)
+						#create empty dict for user key = position	
+						if not (sheetName in UserInfoDict[position_][user].keys()):
+							UserInfoDict[position_][user][sheetName] = {}
+							Util.createDict(UserInfoDict[position_][user][sheetName], sheetName, '', '', Enum.WorkHourColor.IS_SHEET_NAME, Enum.WorkHourColor.BACK_GROUND, Enum.WorkHourColor.BACK_GROUND)
+						#create empty dict for user key = position
+						if not isSkip:
+							if not(sheetName  in sheetInfoDict.keys()):
+								sheetInfoDict[sheetName] = {}
+								Util.createDict(sheetInfoDict[sheetName], sheetName, '', '', Enum.WorkHourColor.IS_SHEET_NAME, Enum.WorkHourColor.IS_SHEET_NAME, Enum.WorkHourColor.IS_SHEET_NAME)
+							#create empty dict for user key = position
+							if not (position_ in sheetInfoDict[sheetName].keys()):
+								sheetInfoDict[sheetName][position_] = {}
+								Util.createDict(sheetInfoDict[sheetName][position_], '', '', position_, Enum.WorkHourColor.BACK_GROUND, Enum.WorkHourColor.IS_POSITION, Enum.WorkHourColor.IS_POSITION)
+							#create empty dict for position key = username
+							if not(user in sheetInfoDict[sheetName][position_].keys()):
+								sheetInfoDict[sheetName][position_][user] = {}
+								Util.createDict(sheetInfoDict[sheetName][position_][user], '', user, '', Enum.WorkHourColor.BACK_GROUND, Enum.WorkHourColor.IS_USER_NAME, Enum.WorkHourColor.BACK_GROUND)
+						#create empty dict for user key = position
+						try:
+							unuse = sheetInfoDict2[sheetName]
+						except KeyError:
+							sheetInfoDict2[sheetName] = {}
+# 							if not(sheetName  in sheetInfoDict2.keys()):
+# 								sheetInfoDict2[sheetName] = {}
+							
+						#create empty dict for user key = position
+						try:
+							unuse = sheetInfoDict2[sheetName][position_]
+						except KeyError:
+							sheetInfoDict2[sheetName][position_] = {}
+# 							if not (position_ in sheetInfoDict2[sheetName].keys()):
+# 								sheetInfoDict2[sheetName][position_] = {}
+								
+						#create empty dict for position key = username
+						try:
+							unuse = sheetInfoDict2[sheetName][position_][user]
+						except:
+							sheetInfoDict2[sheetName][position_][user] = {}
+# 							if not(user in sheetInfoDict2[sheetName][position_].keys()):
+# 								sheetInfoDict2[sheetName][position_][user] = {}
+						if task_name in sheetInfoDict2[sheetName][position_][user].keys():
+							i = 1
+							while True:
+								task_name2 =  task_name +'(' + str(i) + ')'
+								if not(task_name2 in sheetInfoDict2[sheetName][position_][user].keys()):
+									task_name = task_name2
+									
+									break
 								else:
-									if users in userInfo.keys():
-										user = users
-								position_ = '%s - %s' %(userInfo[user][Enum.UserInfoConfig.TYPE], userInfo[user][Enum.UserInfoConfig.ROLE])
-							task_name = dictRows[row]['info'][Enum.Header.TASK_NAME]
-							#create empty dict for user key = position
-							if not (position_ in UserInfoDict.keys()):
-								UserInfoDict[position_] = {}
-								Util.createDict(UserInfoDict[position_], '', '', position_, Enum.WorkHourColor.IS_POSITION, Enum.WorkHourColor.IS_POSITION, Enum.WorkHourColor.IS_POSITION)
-							#create empty dict for position key = username
-							if not(user in UserInfoDict[position_].keys()):
-								UserInfoDict[position_][user] = {}
-								Util.createDict(UserInfoDict[position_][user], '', user, '', Enum.WorkHourColor.IS_USER_NAME, Enum.WorkHourColor.IS_USER_NAME, Enum.WorkHourColor.BACK_GROUND)
-							#create empty dict for user key = position	
-							if not (sheetName in UserInfoDict[position_][user].keys()):
-								UserInfoDict[position_][user][sheetName] = {}
-								Util.createDict(UserInfoDict[position_][user][sheetName], sheetName, '', '', Enum.WorkHourColor.IS_SHEET_NAME, Enum.WorkHourColor.BACK_GROUND, Enum.WorkHourColor.BACK_GROUND)
-							#create empty dict for user key = position
-							if not isSkip:
-								if not(sheetName  in sheetInfoDict.keys()):
-									sheetInfoDict[sheetName] = {}
-									Util.createDict(sheetInfoDict[sheetName], sheetName, '', '', Enum.WorkHourColor.IS_SHEET_NAME, Enum.WorkHourColor.IS_SHEET_NAME, Enum.WorkHourColor.IS_SHEET_NAME)
-								#create empty dict for user key = position
-								if not (position_ in sheetInfoDict[sheetName].keys()):
-									sheetInfoDict[sheetName][position_] = {}
-									Util.createDict(sheetInfoDict[sheetName][position_], '', '', position_, Enum.WorkHourColor.BACK_GROUND, Enum.WorkHourColor.IS_POSITION, Enum.WorkHourColor.IS_POSITION)
-								#create empty dict for position key = username
-								if not(user in sheetInfoDict[sheetName][position_].keys()):
-									sheetInfoDict[sheetName][position_][user] = {}
-									Util.createDict(sheetInfoDict[sheetName][position_][user], '', user, '', Enum.WorkHourColor.BACK_GROUND, Enum.WorkHourColor.IS_USER_NAME, Enum.WorkHourColor.BACK_GROUND)
-							#create empty dict for user key = position
-							if not(sheetName  in sheetInfoDict2.keys()):
-								sheetInfoDict2[sheetName] = {}
- 							
-							#create empty dict for user key = position
-							if not (position_ in sheetInfoDict2[sheetName].keys()):
-								sheetInfoDict2[sheetName][position_] = {}
- 								
-							#create empty dict for position key = username
-							if not(user in sheetInfoDict2[sheetName][position_].keys()):
-								sheetInfoDict2[sheetName][position_][user] = {}
-							if task_name in sheetInfoDict2[sheetName][position_][user].keys():
-								i = 1
-								while True:
-									task_name2 =  task_name +'(' + str(i) + ')'
-									if not(task_name2 in sheetInfoDict2[sheetName][position_][user].keys()):
-										task_name = task_name2
-										
-										break
-									else:
-										i = i + 1	
-							
-							
-							
-# 							print(sheetInfoDict2[sheetName][position_][user][task_name]['week'].keys(), sheetInfoDict2[sheetName][position_][user][task_name]['month'].keys(), task_name, user, listWorkWeekOfTask, dictRows[row]['info'][Enum.Header.START_DATE], dictRows[row]['info'][Enum.Header.END_DATE])
-							#get work day of 1 task, Mon to Fri
-							for date2 in startToEndDay:
-								listWorkDay = Util.getWorkDay(startDate, endDate, dir_, excelHoliday)
-								listWorkMonth = Util.getWorkMonth(startDate, endDate, dir_, excelHoliday)
-								for weeks in listWorkDay:
-									if not (weeks[1] in UserInfoDict[position_][user][sheetName].keys()):
-										UserInfoDict[position_][user][sheetName][weeks[1]] = []
+									i = i + 1	
+						#get work day of 1 task, Mon to Fri
+						for date2 in startToEndDay:
+# 								listWorkDay = Util.getWorkDay(startDate, endDate, dir_, excelHoliday)
+# 								listWorkMonth = Util.getWorkMonth(startDate, endDate, dir_, excelHoliday)
+							for weeks in listWorkDay:
+								if not (weeks[1] in UserInfoDict[position_][user][sheetName].keys()):
+									UserInfoDict[position_][user][sheetName][weeks[1]] = []
+									for days in listWorkDay:
+										if days[1] == weeks[1]:
+											info = [days[0], 0]
+											UserInfoDict[position_][user][sheetName][days[1]].append(info)
+								if not isSkip:									
+									if not (weeks[1] in sheetInfoDict[sheetName][position_][user].keys()):
 
-
-										for days in listWorkDay:
-											if days[1] == weeks[1]:
-												info = [days[0], 0]
-												UserInfoDict[position_][user][sheetName][days[1]].append(info)
-									if not isSkip:									
-										if not (weeks[1] in sheetInfoDict[sheetName][position_][user].keys()):
+										sheetInfoDict[sheetName][position_][user][weeks[1]] = []
+										for days2 in listWorkDay:
+											if days2[1] == weeks[1]:
+												info2 = [days2[0], 0]
+												sheetInfoDict[sheetName][position_][user][days2[1]].append(info2)
 	
-											sheetInfoDict[sheetName][position_][user][weeks[1]] = []
-											for days2 in listWorkDay:
-												if days2[1] == weeks[1]:
-													info2 = [days2[0], 0]
-													sheetInfoDict[sheetName][position_][user][days2[1]].append(info2)
-		
-								for week in UserInfoDict[position_][user][sheetName]:
-									if week in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+							for week in UserInfoDict[position_][user][sheetName]:
+								if week in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+									continue
+								else:
+									for dayOfWeek in UserInfoDict[position_][user][sheetName][week]:
+										if str(date2) == dayOfWeek[0]:
+											try:
+												allocaton = Decimal(dictRows[row]['info'][Enum.Header.ALLOCATION])
+											except:
+												print ('[ERROR] Invalid format data: Allocation %s'%(dictRows[row]['info'][Enum.Header.ALLOCATION]))
+												sys.exit()
+											dayOfWeek[1] += allocaton*8
+											dayOfWeek[1] = round(dayOfWeek[1], 2)
+							
+							if not isSkip:													
+								for week2 in sheetInfoDict[sheetName][position_][user]:
+									if week2 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
 										continue
 									else:
-										for dayOfWeek in UserInfoDict[position_][user][sheetName][week]:
-											if str(date2) == dayOfWeek[0]:
-# 												pprint (dictRows[row]['info'])
-												try:
-													allocaton = Decimal(dictRows[row]['info'][Enum.Header.ALLOCATION])
-												except:
-													print ('[ERROR] Invalid format data: Allocation %s'%(dictRows[row]['info'][Enum.Header.ALLOCATION]))
-													sys.exit()
-												
-												dayOfWeek[1] += allocaton*8
-												dayOfWeek[1] = round(dayOfWeek[1], 2)
-# 												print (allocaton, ' - ', dayOfWeek[1])
-								
-								if not isSkip:													
-									for week2 in sheetInfoDict[sheetName][position_][user]:
-										if week2 in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
-											continue
-										else:
-											for dayOfWeek2 in sheetInfoDict[sheetName][position_][user][week2]:
-												if str(date2) == dayOfWeek2[0]:
-													allocaton2 = Decimal(dictRows[row]['info'][Enum.Header.ALLOCATION])
-													dayOfWeek2[1] += allocaton2*8
-													dayOfWeek2[1] = round(dayOfWeek2[1], 2)
-# 													print ('sad')
+										for dayOfWeek2 in sheetInfoDict[sheetName][position_][user][week2]:
+											if str(date2) == dayOfWeek2[0]:
+												allocaton2 = Decimal(dictRows[row]['info'][Enum.Header.ALLOCATION])
+												dayOfWeek2[1] += allocaton2*8
+												dayOfWeek2[1] = round(dayOfWeek2[1], 2)
 # 								if not isSkip:	
-								if not ( task_name in sheetInfoDict2[sheetName][position_][user].keys()):
-									sheetInfoDict2[sheetName][position_][user][task_name] = {}
-# 									pprint(sheetInfoDict2)
-									sheetInfoDict2[sheetName][position_][user][task_name][Enum.Header.START_DATE] = '%s-%s-%s'%(Util.toDate(dictRows[row]['info'][Enum.Header.START_DATE]))
-									sheetInfoDict2[sheetName][position_][user][task_name][Enum.Header.END_DATE] = '%s-%s-%s'%(Util.toDate(dictRows[row]['info'][Enum.Header.END_DATE]))
-									sheetInfoDict2[sheetName][position_][user][task_name]['week'] = {}
-									sheetInfoDict2[sheetName][position_][user][task_name]['allocation'] = str(int(Decimal(dictRows[row]['info'][Enum.Header.ALLOCATION])*100)) + '%'
-									sheetInfoDict2[sheetName][position_][user][task_name]['month'] = {}
-								for wday in listWorkDay:
-									if wday[0] == date2:
-										if not (wday[1] in sheetInfoDict2[sheetName][position_][user][task_name]['week'].keys()):
-											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]] = {}
-											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['totalHour'] = 0
-											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['startWeek'] = wday[1]
-											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['endWeek'] = Util.get_end_start_week(wday[0])[0]
-											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['workWeek'] = Util.get_week_number(wday[0])
-											sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['workHour'] = [0,'']
-										week___ = Util.get_end_start_week(date2)[1]
-										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][0] += round(8*Decimal(dictRows[row]['info'][Enum.Header.ALLOCATION]), 2)
-										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['totalHour'] += 8
-										currentHour = sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][0]
-										totalHour = sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['totalHour']
-										sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour, totalHour, 0)[0]
- 																									
-								for wmonth in listWorkMonth:
-									y_, m_, d_ = Util.toDate(date2)
-									m_ = '%s/%s'%(m_, y_)
-									m = '%s/%s'%(wmonth[0], wmonth[1])
-									if (m == m_):
-										if not (m in sheetInfoDict2[sheetName][position_][user][task_name]['month'].keys()):
-											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m] = {}
-											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['totalHour'] = 0
+							if not ( task_name in sheetInfoDict2[sheetName][position_][user].keys()):
+								sheetInfoDict2[sheetName][position_][user][task_name] = {}
+								sheetInfoDict2[sheetName][position_][user][task_name][Enum.Header.START_DATE] = '%s-%s-%s'%(Util.toDate(dictRows[row]['info'][Enum.Header.START_DATE]))
+								sheetInfoDict2[sheetName][position_][user][task_name][Enum.Header.END_DATE] = '%s-%s-%s'%(Util.toDate(dictRows[row]['info'][Enum.Header.END_DATE]))
+								sheetInfoDict2[sheetName][position_][user][task_name]['week'] = {}
+								sheetInfoDict2[sheetName][position_][user][task_name]['allocation'] = str(int(Decimal(dictRows[row]['info'][Enum.Header.ALLOCATION])*100)) + '%'
+								sheetInfoDict2[sheetName][position_][user][task_name]['month'] = {}
+							for wday in listWorkDay:
+								if wday[0] == date2:
+									if not (wday[1] in sheetInfoDict2[sheetName][position_][user][task_name]['week'].keys()):
+										sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]] = {}
+										sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['totalHour'] = 0
+										sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['startWeek'] = wday[1]
+										sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['endWeek'] = Util.get_end_start_week(wday[0])[0]
+										sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['workWeek'] = Util.get_week_number(wday[0])
+										sheetInfoDict2[sheetName][position_][user][task_name]['week'][wday[1]]['workHour'] = [0,'']
+									week___ = Util.get_end_start_week(date2)[1]
+									sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][0] += round(8*Decimal(dictRows[row]['info'][Enum.Header.ALLOCATION]), 2)
+									sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['totalHour'] += 8
+									currentHour = sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][0]
+									totalHour = sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['totalHour']
+									sheetInfoDict2[sheetName][position_][user][task_name]['week'][week___]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour, totalHour, 0)[0]
+																									
+							for wmonth in listWorkMonth:
+								y_, m_, d_ = Util.toDate(date2)
+								m_ = '%s/%s'%(m_, y_)
+								m = '%s/%s'%(wmonth[0], wmonth[1])
+								if (m == m_):
+									if not (m in sheetInfoDict2[sheetName][position_][user][task_name]['month'].keys()):
+										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m] = {}
+										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['totalHour'] = 0
 
-											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['startMonth'] = Util.get_end_start_month('%s-%s'%(wmonth[1], wmonth[0]))[0]
-											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['endMonth'] = Util.get_end_start_month('%s-%s'%(wmonth[1], wmonth[0]))[1]
-			# 									sheetInfoDict2[sheetName][position_][user][task_name]['month'][monthTask[0]]['workMonth'] = {}
-											sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['workHour'] = [0, '']
- 									
- 										
-										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][0] += round(8*Decimal(dictRows[row]['info'][Enum.Header.ALLOCATION]), 2)
-										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['totalHour'] += 8
-										currentHour2 = sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][0]
-										totalHour2 = sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['totalHour']
-										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour2, totalHour2, 0)[0]
-				else:
-					countRowParent += 1
+										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['startMonth'] = Util.get_end_start_month('%s-%s'%(wmonth[1], wmonth[0]))[0]
+										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['endMonth'] = Util.get_end_start_month('%s-%s'%(wmonth[1], wmonth[0]))[1]
+										sheetInfoDict2[sheetName][position_][user][task_name]['month'][m]['workHour'] = [0, '']
+									sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][0] += round(8*Decimal(dictRows[row]['info'][Enum.Header.ALLOCATION]), 2)
+									sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['totalHour'] += 8
+									currentHour2 = sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][0]
+									totalHour2 = sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['totalHour']
+									sheetInfoDict2[sheetName][position_][user][task_name]['month'][m_]['workHour'][1] = Util.CompareAndSelectColorToPrintExcel(currentHour2, totalHour2, 0)[0]
+# 				else:
+# 					countRowParent += 1
 				
-			print('Skip (not save into log) %s parent task in %s' %(countRowParent, sheetName))
+# 			print('Skip (not save into log) %s parent task in %s' %(countRowParent, sheetName))
 			if len(strlog):
 				logname = '%s\Log\%s.log' %(dir_, sheetName)
 				print('Skip %s row in %s' %(countSkipRow, sheetName))
 				print('Created  %s: skip row in %s' %(logname, sheetName))
 				f = open(logname, "w", encoding='utf-8')
- 
 				f.write(str(strlog))
 				f.close()
 			time2_ = time.time()
 			print('Parsing %s done: %s' %(sheetName, Util.getTimeRun(time1_, time2_)))
 			print('------------------------------------------------------------------------------')
-# 		pprint (UserInfoDict)
+			
+			
+		
 		return UserInfoDict, sheetInfoDict, sheetInfoDict2
 	
 	def caculateWorkTimeAndAddInfo(self, startDate, endDate, userInfoDict, sheetInfoDict, dir_, excelHoliday, dictTimeOff):
@@ -615,14 +628,7 @@ class Controllers():
 		startRow, startColum = (0, 0)
 		rowIndex = startRow
 		columIndex = startColum
-# 		date_xf = easyxf(num_format_str='DD/MM/YYYY') # sets date format in Excel
-# 		data = [list(n) for n in cursor.fetchall()]
-# 		for row_index, row_contents in enumerate(data):
-# 		    for column_index, cell_value in enumerate(row_contents):
-# 		        if isinstance(cell_value, datetime.date):
-# 		            sheet1.write(row_index+1, column_index, cell_value, date_xf)
-# 		        else:
-# 		            sheet1.write(row_index+1, column_index, cell_value)
+
 		formatHead = 'align: wrap 0; pattern: pattern solid, fore-colour grey25; border: left thin, top thin, right thin, bottom thin, bottom-color gray25, top-color gray25, left-color gray25, right-color gray25; font: name Calibri, bold 0,height 240;' 
 		styleHeader = xlwt.easyxf(formatHead)
 		for head1 in lsheader:
@@ -675,9 +681,6 @@ class Controllers():
 								sheetName.write(rowIndex, columIndex + 5, sheet_, styleCell)
 								sheetName.write(rowIndex, columIndex, position_, styleCell)
 								sheetName.write(rowIndex, columIndex + 7, user_, styleCell)
-# 								cwidth = sheetName.col(6).width
-# 								if (len(task_)*367) > cwidth:  
-# 									sheetName.col(6).width = (len(task_)*367)
 								sheetName.write(rowIndex, columIndex + 6, task_, styleCell)
 								allocation_ = sheetInfoDict2_[sheet_][position_][user_][task_]['allocation']
 								sheetName.write(rowIndex, columIndex + 8, allocation_, styleCell)
@@ -861,49 +864,181 @@ class Controllers():
 				
 
 	def send_mail(self, dir_, startWeekSendEmail, ccMail_, userInfo):
-		dictReport = Util.get_info_report(dir_)
-		
-		for manage_ in dictReport.keys():
-			outlook = client.Dispatch('outlook.application')
-			mail = outlook.CreateItem(0)
-			mail.To = manage_
-			lsCC = []
-			for user in dictReport[manage_]:
-# 				if float(user[3]) != float(user[4]):
-				if user[0].strip() != '':
-					for usr in userInfo.keys():
-						if userInfo[usr][Enum.UserInfoConfig.FULL_NAME].strip() == user[0].strip():
-							mailCC = userInfo[usr][Enum.UserInfoConfig.MAIL].strip()
-							if mailCC != '':
-								lsCC.append(mailCC)
-			ccMail = ''						
-			if len(lsCC):
-				ccMail = ccMail_ + '; ' + '; '.join(lsCC)
-			mail.Subject = 'Report Timesheet (%s)'%startWeekSendEmail
-			print ('Mail CC is %s'%ccMail)
-			mail.CC = ccMail
-			mail.Body = ''
-			var = {}
-			var['sumRow'] = len(dictReport[manage_])
-			mail.Subject = 'Report Timesheet'
-			var['INFO'] = dictReport[manage_]
-			var['week'] = startWeekSendEmail
-			systemFile1 = FileSystemLoader(dir_)
-			j2_env1 = Environment(loader=systemFile1, trim_blocks=True)
-			run_template = j2_env1.get_template("report.html")
-			str_ = run_template.render(var)
-			mail.HTMLBody = str_
-# 			print (ccMail, manage_)
-			 #this field is optional
+# 		for report_week in startWeekSendEmail:
+			dictReport = Util.get_info_report(dir_, startWeekSendEmail)
+			for manage_ in dictReport.keys():
+				outlook = client.Dispatch('outlook.application')
+				mail = outlook.CreateItem(0)
+				mail.To = manage_
+				lsCC = []
+				rptWeek = []
+				for report_week in dictReport[manage_].keys():
+					rptWeek.append(report_week)
+					for user in dictReport[manage_][report_week]:
+		# 				if float(user[3]) != float(user[4]):
+						if user[0].strip() != '':
+							for usr in userInfo.keys():
+								if userInfo[usr][Enum.UserInfoConfig.FULL_NAME].strip() == user[0].strip():
+									mailCC = userInfo[usr][Enum.UserInfoConfig.MAIL].strip()
+									if mailCC != '' and mailCC not in lsCC:
+										lsCC.append(mailCC)
+				ccMail = ''						
+				if len(lsCC):
+					ccMail = ccMail_ + '; ' + '; '.join(lsCC)
+				mail.Subject = 'Report Timesheet'
+				print ('Mail CC is %s'%ccMail)
+				mail.CC = ccMail
+				mail.Body = ''
+				var = {}
+# 				var['sumRow'] = len(dictReport[manage_])
+				mail.Subject = 'Report Timesheet'
+				var['INFO'] = dictReport[manage_]
+				var['week'] = ', '.join(rptWeek)
+				systemFile1 = FileSystemLoader(dir_)
+				j2_env1 = Environment(loader=systemFile1, trim_blocks=True)
+				run_template = j2_env1.get_template("report.html")
+				str_ = run_template.render(var)
+				mail.HTMLBody = str_
+ 				
+				try:
+					mail.Send()
+					print('Send mail to %s'%manage_)
+				except pywintypes.error as e:
+					print('[error] %s'%e)
+					sys.exit
 
-		# To attach a file to the email (optional):
-# 		attachment  = "Path to the attachment"
-# 		mail.Attachments.Add(attachment)
-# 			print(ccMail, manage_, )
-			try:
-				mail.Send()
-				print('Send mail to %s'%manage_)
-			except pywintypes.error as e:
-				print('[error] %s'%e)
-				sys.exit
-			
+	
+	
+	
+	def createResourceCompareWorkingHourBetweenTrainingAndRealProjectByWeekly(self, sheetName, userInfoDict, getBy, userInfo, startDate, endDate, dir_, excelHoliday, colorDict, colorDictNoneBorder, mail_to_user_name, list_key_define_real_proj, list_key_define_rnd_proj, dictTimeOff, list_key_define_pre_sale_proj, list_key_define_post_sale_proj):
+		listWeek = Util.getWorkWeek(startDate, endDate, dir_, excelHoliday)
+		listWeek2 = Util.getWorkWeek2(startDate, endDate, dir_, excelHoliday)
+		dict = {}
+		list_header = ['DM', 'Engineer', 'Level', 'Field']
+		for position in userInfoDict:
+			for user_name in userInfoDict[position]:
+				if user_name not in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+					try:
+						manager_mail = userInfo[user_name]['Manager (Mail)']
+					except KeyError:
+						manager_mail = 'NA'
+					try:
+						role = userInfo[user_name]['Role']
+					except KeyError:
+						role = 'NA'
+					try:
+						unuse = dict[manager_mail]
+					except KeyError:
+						dict[manager_mail] = {}
+					try:
+						unuse = dict[manager_mail][role]
+					except KeyError:
+						dict[manager_mail][role] = {}
+					try:
+						unuse = dict[manager_mail][role][user_name]
+					except KeyError:
+						dict[manager_mail][role][user_name] = {}
+						
+					for sheet_name in userInfoDict[position][user_name]:
+						if sheet_name not in [Enum.HeaderExcelAndKeys.SHEET_NAME, Enum.HeaderExcelAndKeys.USER_NAME, Enum.HeaderExcelAndKeys.SENIORITY_POSITION, Enum.HeaderExcelAndKeys.TOTAL_MONTH, Enum.HeaderExcelAndKeys.TOTAL_WEEK]:
+# 							list_real_project_keys = list_key_define_real_proj
+							is_real_project = Util.check_string_content_string(list_key_define_real_proj , sheet_name, list_key_define_rnd_proj, list_key_define_pre_sale_proj, list_key_define_post_sale_proj)
+							for week in userInfoDict[position][user_name][sheet_name][getBy]:
+								if week in listWeek2:
+									for elm_ in listWeek:
+										max_hour = 0
+										if week == elm_[0]:
+											max_hour = elm_[1]
+											break
+									try:
+										unuse = dict[manager_mail][role][user_name][week]
+									except KeyError:
+										#0-> training, 1-> real, 2-> max hour, 3->rnd, 4->pre-sale, 5->post-sale
+										dict[manager_mail][role][user_name][week] = [0, 0, max_hour, 0, 0, 0]
+									dict[manager_mail][role][user_name][week][is_real_project] += userInfoDict[position][user_name][sheet_name][getBy][week][0]
+									if week not in list_header:
+										list_header.append(week)
+								
+		rowIndex = 0
+		columIndex = 0
+		command = 'align: wrap 0, horiz center; pattern: pattern solid, fore-colour orange; border: left thin, top thin, right thin, bottom thin, bottom-color gray25, top-color gray25, left-color gray25, right-color gray25; font: name Calibri, bold 0,height 240;'
+		style_orange = xlwt.easyxf(command)
+# 		style_orange = Util.selectColorToPrint('orange', colorDict, colorDictNoneBorder)
+		style_light_turquoise = Util.selectColorToPrint('light_turquoise', colorDict, colorDictNoneBorder)
+		style_ice_blue = Util.selectColorToPrint('ice_blue', colorDict, colorDictNoneBorder)
+		style_lime = Util.selectColorToPrint('lime', colorDict, colorDictNoneBorder)
+		style_orange2 = Util.selectColorToPrint('orange', colorDict, colorDictNoneBorder)
+		sheetName.col(0).width = 256 * 25
+		sheetName.col(1).width = 256 * 25
+		sheetName.col(2).width = 256 * 11
+		sheetName.col(3).width = 256 * 11
+		for index_ in range(0, len(list_header)):
+			if index_ < 4:
+				sheetName.write_merge(rowIndex, rowIndex + 1, columIndex, columIndex, list_header[index_], style_orange)
+				columIndex += 1
+			else:
+				sheetName.write_merge(rowIndex, rowIndex, columIndex, columIndex + 5, list_header[index_], style_orange)
+				sheetName.write(rowIndex + 1, columIndex, 'NWH', style_lime)
+				columIndex += 1
+				sheetName.write(rowIndex + 1, columIndex, 'NRE*', style_ice_blue)
+				columIndex += 1
+				sheetName.write(rowIndex + 1, columIndex, 'RnD*', style_lime)
+				columIndex += 1
+				sheetName.write(rowIndex + 1, columIndex, 'Pre-sale', style_ice_blue)
+				columIndex += 1
+				sheetName.write(rowIndex + 1, columIndex, 'Post-sale', style_lime)
+				columIndex += 1
+				sheetName.write(rowIndex + 1, columIndex, 'TRN', style_light_turquoise)
+				columIndex += 1
+		rowIndex += 2
+		columIndex = 0
+		
+		for manager_mail2 in dict:
+			for role2 in dict[manager_mail2]:
+				for user_name2 in dict[manager_mail2][role2]:
+					try:
+						sheetName.write(rowIndex, columIndex, mail_to_user_name[manager_mail2])
+					except KeyError:
+						sheetName.write(rowIndex, columIndex, 'NA')
+					columIndex += 1
+					sheetName.write(rowIndex, columIndex, user_name2)
+					columIndex += 1
+					try:
+						level = userInfo[user_name2][Enum.UserInfoConfig.TYPE]
+					except KeyError:
+						level = 'NA'
+					sheetName.write(rowIndex, columIndex, level)
+					columIndex += 1
+					
+					sheetName.write(rowIndex, columIndex, role2)
+					columIndex += 1
+					for week2 in dict[manager_mail2][role2][user_name2]:
+						maxhour = dict[manager_mail2][role2][user_name2][week2][2]
+						real_proj_hour = dict[manager_mail2][role2][user_name2][week2][1]
+						rnd_proj_hour = dict[manager_mail2][role2][user_name2][week2][3]
+						pre_sale_proj_hour = dict[manager_mail2][role2][user_name2][week2][4]
+						post_sale_proj_hour = dict[manager_mail2][role2][user_name2][week2][5]
+						other_hour = dict[manager_mail2][role2][user_name2][week2][0]
+						time_off	= 0
+						if user_name2 in dictTimeOff['week'] and week2 in dictTimeOff['week'][user_name2]:
+							time_off = dictTimeOff['week'][user_name2][week2]
+						none_working_hour = maxhour - (real_proj_hour + rnd_proj_hour + other_hour + time_off + pre_sale_proj_hour + post_sale_proj_hour)
+						if none_working_hour < 0:
+							none_working_hour = 0
+							sheetName.write(rowIndex, columIndex, none_working_hour, style_orange2)
+						else:
+							sheetName.write(rowIndex, columIndex, none_working_hour)
+						columIndex += 1
+						sheetName.write(rowIndex, columIndex, real_proj_hour)
+						columIndex += 1
+						sheetName.write(rowIndex, columIndex, rnd_proj_hour)
+						columIndex += 1
+						sheetName.write(rowIndex, columIndex, pre_sale_proj_hour)
+						columIndex += 1
+						sheetName.write(rowIndex, columIndex, post_sale_proj_hour)
+						columIndex += 1
+						sheetName.write(rowIndex, columIndex, other_hour)
+						columIndex += 1
+						
+					rowIndex += 1
+					columIndex = 0

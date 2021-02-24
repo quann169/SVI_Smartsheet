@@ -14,7 +14,7 @@ from pprint import pprint
 from src_3rd import pandas
 import getpass
 from decimal import Decimal
-
+from win32com.client import DispatchEx
 def Run__():
 	time1 = time.time()
 
@@ -27,6 +27,8 @@ def Run__():
 	except:
 		shutil.rmtree(dir_ + '\Log')
 		os.makedirs(dir_ + '\Log')
+	if not os.path.exists(dir_ + '\Cache'):
+		os.makedirs(dir_ + '\Cache')
 	 #open config file
 	staff_path = ("%s\config.xlsx"%(dir_))
 	userInfo = {}
@@ -36,7 +38,7 @@ def Run__():
 	except IOError as e:
 		print('[Error] %s'%e)
 		sys.exit()
-	listItems = {1 : {}, 2 : {}, 3 : {}, 4 : {}, 5: {}, 6:{}}
+	listItems = {1 : {}, 2 : {}, 3 : {}, 4 : {}}
 	startDate = ''
 	endDate = ''
 	currentUser = getpass.getuser()
@@ -47,7 +49,7 @@ def Run__():
 	sheet1.cell_value(0, 0)
 	print('Start get info from Config.xlsx')
 	excelHoliday = Util.get_info_excel(dir_)
-	
+	ignore_task = Util.get_ignore_task(dir_)
 	df = pandas.read_excel(staff_path, sheet_name='Staff')
 	df = {x.strip(): v  for x, v in df.items()}
 	configInfo = {}
@@ -58,10 +60,11 @@ def Run__():
 	columOtherInfo = df[Enum.UserInfoConfig.LIST_MAIL]
 	columMail = df[Enum.UserInfoConfig.MANAGER_EMAIL]
 	columExclude = df[Enum.UserInfoConfig.EXCLUDE]
-	
+	columEngLevel = df[Enum.UserInfoConfig.ENG_LEVEL]
 		#get info of user
+	mail_to_user_name = {}
 	for row_ in range(0, len(columResource)):
-		lsRow = ['', str(columResource[row_]), str(columFullName[row_]), str(columType[row_]), str(columRole[row_]), str(columOtherInfo[row_]), str(columMail[row_]), str(columExclude[row_])]
+		lsRow = ['', str(columResource[row_]), str(columFullName[row_]), str(columType[row_]), str(columRole[row_]), str(columOtherInfo[row_]), str(columMail[row_]), str(columExclude[row_]), str(columEngLevel[row_])]
 		if (lsRow[1].strip() != ''):
 			if (lsRow[1].strip() in userInfo.keys()):
 				print ('Duplicate Resource %s,  line %s in Config.xlsx'%(lsRow[1].strip(), row_ + 2))
@@ -71,6 +74,7 @@ def Run__():
 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.ROLE] = lsRow[4].strip()
 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.FULL_NAME] = lsRow[2].strip()
 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MANAGER_EMAIL] = lsRow[6].strip()
+			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.ENG_LEVEL] = lsRow[8].strip()
 			excludeVal = 0
 			try:
 				excludeVal = int(Decimal(str(lsRow[7]).strip()))
@@ -79,7 +83,10 @@ def Run__():
 			userInfo[lsRow[1].strip()][Enum.UserInfoConfig.IS_COUNT] = excludeVal
 			lsM = re.findall('\S+@\S+', str(lsRow[5].strip()))
 			if len(lsM) != 0:
-				userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MAIL] = lsM[0].replace(',', '')
+				mail__ = lsM[0].replace(',', '')
+				mail__ = mail__.replace(';', '')
+				userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MAIL] = mail__
+				mail_to_user_name[mail__] = lsRow[1].strip()
 			else:
 				userInfo[lsRow[1].strip()][Enum.UserInfoConfig.MAIL] = ''
 			string_ = lsRow[5].replace(';', ',')
@@ -99,31 +106,57 @@ def Run__():
 	
 
 	#get item
-	sheet2 = wb.sheet_by_name('Config')	
-	lsRow_ = sheet2.row_values(Enum.UserInfoConfig.ROW_GET_STATUS_AND_START_END_DATE)
-	for i in range(Enum.UserInfoConfig.COLUM_GET_STATUS, Enum.UserInfoConfig.COLUM_GET_STATUS + 6):
+	sheet2 = wb.sheet_by_name('Option')	
+	if  sheet2.row_values(0)[3].lower().strip() == 'yes':
+		listItems[1]['status'] = 1
+	else:
+		listItems[1]['status'] = 0
+	if  sheet2.row_values(2)[3].lower().strip() == 'yes':
+		listItems[2]['status'] = 1
+	else:
+		listItems[2]['status'] = 0
+	
+	if  sheet2.row_values(4)[3].lower().strip() == 'yes':
+		listItems[3]['status'] = 1
+	else:
+		listItems[3]['status'] = 0
 		
-		#check config status------------
-		if lsRow_[i].lower() == 'yes':
-			listItems[i]['status'] = 1
-		elif lsRow_[i].lower() == 'no':
-			listItems[i]['status'] = 0
-		else:
-			print('Config Error: Select "Run" must be yes or no, not be ' + lsRow_[i])
-			sys.exit()
-	startDate = str(lsRow_[7])
-	endDate = str(lsRow_[8])
-	dateSendEmail = str(lsRow_[9])
-	ccMail_ = str(lsRow_[10])
+	if  sheet2.row_values(5)[3].lower().strip() == 'yes':
+		listItems[4]['status'] = 1
+	else:
+		listItems[4]['status'] = 0
+		
+	startDate = str(sheet2.row_values(6)[3])
+	endDate = str(sheet2.row_values(7)[3])
+	startDate_2 = str(sheet2.row_values(14)[3])
+	endDate_2 = str(sheet2.row_values(15)[3])
+	dateSendEmail = str(sheet2.row_values(8)[3]).split(',')
+	ccMail_ = str(sheet2.row_values(9)[3])
 	ccMail = Util.get_cc_mail(ccMail_)
-	
-
+	list_proj1 = (sheet2.row_values(10)[3]).split(',')
+	list_proj2 = (sheet2.row_values(11)[3]).split(',')
+	list_proj3 = (sheet2.row_values(12)[3]).split(',')
+	list_proj4 = (sheet2.row_values(13)[3]).split(',')
+	list_key_define_real_proj = []
+	list_key_define_rnd_proj = []
+	list_key_define_pre_sale_proj = []
+	list_key_define_post_sale_proj = []
+	for element_  in list_proj1:
+		list_key_define_real_proj.append(element_.strip())
+	for element_2  in list_proj2:
+		list_key_define_rnd_proj.append(element_2.strip())
+	for element_  in list_proj3:
+		list_key_define_pre_sale_proj.append(element_.strip())
+	for element_2  in list_proj4:
+		list_key_define_post_sale_proj.append(element_2.strip())
 	i = datetime.datetime.now()
-	if dateSendEmail == '':
-		dateSendEmail = '%s-%s-%s'%(i.year, i.month, i.day)
+	if not (dateSendEmail):
+		dateSendEmail = ['%s-%s-%s'%(i.year, i.month, i.day)]
 	Util.check_valid_send_email_date(startDate, endDate, dateSendEmail)
+	Util.check_valid_send_email_date(startDate, endDate, [startDate_2])
+	Util.check_valid_send_email_date(startDate, endDate, [endDate_2])
 	endWeekSendEmail, startWeekSendEmail = Util.get_end_start_week(dateSendEmail)
-	
+	startWeekSendEmail.sort()
 	
 		#check config start, end date------------
 	try:
@@ -136,44 +169,79 @@ def Run__():
 	except:
 		print('Config Error:: Format end date error: ' + endDate)
 		sys.exit()	
-	
+	try:
+		objDateS2 = datetime.datetime.strptime(startDate_2, '%Y-%m-%d')
+	except:
+		print('Config Error:: Format start date error: ' + startDate_2)
+		sys.exit()
+	try:
+		objDateE2 = datetime.datetime.strptime(endDate_2, '%Y-%m-%d')
+	except:
+		print('Config Error:: Format end date error: ' + endDate_2)
+		sys.exit()	
 	sy, sm, sd = Util.toDate(startDate)
 	ey, em, ed = Util.toDate(endDate)
 	if datetime.datetime(ey, em, ed) <= datetime.datetime(sy, sm, sd):
 		print('Config Error: End date is previou day of start date: Start date: %s - End date: %s' %(startDate, endDate))
 		sys.exit()
+	
+	sy_2, sm_2, sd_2 = Util.toDate(startDate_2)
+	ey_2, em_2, ed_2 = Util.toDate(endDate_2)
+	if datetime.datetime(ey_2, em_2, ed_2) <= datetime.datetime(sy_2, sm_2, sd_2):
+		print('Config Error: End date is previou day of start date: Start date: %s - End date: %s' %(startDate_2, endDate_2))
+		sys.exit()
 		
 		#check config show detail------------
 	lsRow2_ = sheet2.row_values(Enum.UserInfoConfig.ROW_GET_SHOW_DETAIL)
-	for j in range(Enum.UserInfoConfig.COLUM_GET_STATUS, Enum.UserInfoConfig.COLUM_GET_STATUS + 2):
-		ls_detail = lsRow2_[j].lower().split(',')
-		listItems[j]['show detail'] = 1
-		listItems[j]['limit'] = False
-		try:
-			if ls_detail[0].strip() == 'no':
-				listItems[j]['show detail'] = 0
-		except:
-			pass
-		try:
-			if ls_detail[1].strip() == 'limit':
-				listItems[j]['limit'] = True
-		except:
-			pass
-		
+
+	ls_detail = sheet2.row_values(1)[3].lower().split(',')
+	listItems[1]['show detail'] = 1
+	listItems[1]['limit'] = False
+	try:
+		if ls_detail[0].strip() == 'no':
+			listItems[1]['show detail'] = 0
+	except:
+		pass
+	try:
+		if ls_detail[1].strip() == 'limit':
+			listItems[1]['limit'] = True
+	except:
+		pass
+	
+	ls_detail = sheet2.row_values(3)[3].lower().split(',')
+	listItems[2]['show detail'] = 1
+	listItems[2]['limit'] = False
+	try:
+		if ls_detail[0].strip() == 'no':
+			listItems[2]['show detail'] = 0
+	except:
+		pass
+	try:
+		if ls_detail[1].strip() == 'limit':
+			listItems[2]['limit'] = True
+	except:
+		pass
+	
+	
+	
+	
+	
 	for item in listItems:
 		if listItems[item]['status']:
 			if (item in [1,2]) and (listItems[item]['show detail']):
 				print('Select item ' + str(item) + ' and show detail')
 			else:
 				print('Select item ' + str(item))
-	print('config Week to Report is: ' + startWeekSendEmail)
+
+	print('config Week to Report is: ' + str(startWeekSendEmail))
 	print('Config start date is: ' + startDate)
 	print('Config end date is: ' + endDate)
 	#--------------------------------------
 	
 	#get sheet dict
-	for row___ in range(Enum.UserInfoConfig.ROW_GET_SHEET, sheet2.nrows):
-		lsRow__ = sheet2.row_values(row___)
+	sheet3 = wb.sheet_by_name('Sheet')	
+	for row___ in range(Enum.UserInfoConfig.ROW_GET_SHEET, sheet3.nrows):
+		lsRow__ = sheet3.row_values(row___)
 		Sheet[lsRow__[1]] ={}
 		for j in range(1, 9):
 			for index in range(0,len(lsSheetKey)):
@@ -181,7 +249,6 @@ def Run__():
 				headerName_ = lsRow__[index + 2].replace('%', '')
 				headerName = headerName_.strip()
 				Sheet[lsRow__[1]][lsSheetKey[index]] = headerName
-	
 	
 	for user__ in userInfo:
 		if len(userInfo[user__][Enum.UserInfoConfig.LIST_MAIL]) != 0:
@@ -212,7 +279,6 @@ def Run__():
 	for sheetN in ListSheetFilter:
 		lsHeader = []
 		for head__ in Sheet[sheetN].values():
-			
 			lsHeader.append(head__)
 # 		print(lsHeader)
 		strOutH = rowObj.checkHeaderExistInSheet(sheetN, lsHeader)
@@ -226,21 +292,18 @@ def Run__():
 
 # for item in ListItems:
 
-	userInfoDict_, sheetInfoDict_, sheetInfoDict2_ = rowObj.getAllSheetAndWorkTimeOfUser(ListSheetFilter, ListUserFilter, startDate, endDate, userInfo, dictInfoUser, Sheet, dir_, excelHoliday, dictTimeOff)
+	userInfoDict_, sheetInfoDict_, sheetInfoDict2_ = rowObj.getAllSheetAndWorkTimeOfUser(ListSheetFilter, ListUserFilter, startDate, endDate, userInfo, dictInfoUser, Sheet, dir_, excelHoliday, dictTimeOff, ignore_task)
 	
 	userInfoDict, sheetInfoDict = rowObj.caculateWorkTimeAndAddInfo(startDate, endDate, userInfoDict_, sheetInfoDict_, dir_, excelHoliday, dictTimeOff)
-# 	pprint(userInfoDict['Jr. Engineer - LAY']['Anh Hoang'])
-# 	pprint(userInfoDict)
-# 	asd
 	dictToSendMail = Util.get_user_great_or_less(userInfoDict, startWeekSendEmail, userInfo, dictTimeOff)
-# 	dictToSendMail = {}
-# 	asd
 	startRow = Enum.HeaderExcelAndKeys.START_ROW
 	startColum = Enum.HeaderExcelAndKeys.START_COLUM
 	wb = Workbook()
 	colorDict, colorDictNoneBorder = Util.definedColor()
 	colorTextDict, colorTextDictNoneBorder = Util.definedColorText()
 	controlObj = Controllers()
+	
+	
 	
 	if listItems[1]['status'] == 1:
 		print("Running  Item I001 - Caculate working time and filter all sheet of user by week")
@@ -266,30 +329,9 @@ def Run__():
 		controlObj.printDictToExcel(sheetName, lsheader, userInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, showDetail, is_limit)	
 		print("Running  Item I002 done")
 		print("------------------------------------------------------------------------------")
-# 	if listItems[3]['status'] == 1:
-# 		
-# 		print("Running  Item I003 - Caculate working time and filter all user of sheet by week")
-# 		sheetName = wb.add_sheet('Weekly Project')
-# 		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'week', dir_, excelHoliday, False)
-# 		#colum, row
-# 		getBy = Enum.HeaderExcelAndKeys.TOTAL_WEEK
-# 		controlObj.printDictToExcel(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, 1)
-# 		print("Running  Item I003 done")
-# 		print("------------------------------------------------------------------------------")
-# 	if listItems[4]['status'] == 1:
-# 		
-# 		print("Running  Item I004 - Caculate working time and filter all user of sheet by month")
-# 		
-# 		sheetName = wb.add_sheet('Monthly Project')
-# 		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month', dir_, excelHoliday, False)
-# 		#colum, row
-# 		getBy = Enum.HeaderExcelAndKeys.TOTAL_MONTH
-# 		controlObj.printDictToExcel(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder, 1)
-# 		print("Running  Item I004 done")
-# 		print("------------------------------------------------------------------------------")
-	if listItems[5]['status'] == 1:
+	if listItems[3]['status'] == 1:
  		
-		print("Running  Item I005 - Caculate working time and filter all user of sheet by week (new format)")
+		print("Running  Item I005 - Caculate working time and filter all user of sheet by week ")
  		
 		sheetName = wb.add_sheet('Weekly Project (new)')
 		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'week', dir_, excelHoliday, True)
@@ -298,9 +340,8 @@ def Run__():
 		controlObj.printDictToExcelByProjectNew(sheetName, lsheader, sheetInfoDict, startRow, startColum, getBy, colorDict, colorDictNoneBorder)
 		print("Running  Item I005 done")
 		print("------------------------------------------------------------------------------")
-	if listItems[6]['status'] == 1:
- 		
-		print("Running  Item I006 - Caculate working time and filter all user of sheet by month (new format)")
+	if listItems[4]['status'] == 1:
+		print("Running  Item I006 - Caculate working time and filter all user of sheet by month")
  		
 		sheetName = wb.add_sheet('Monthly Project (new)')
 		lsheader = Util.headerToPrintExcel(0, startDate, endDate, 'month', dir_, excelHoliday, True)
@@ -326,24 +367,33 @@ def Run__():
 		
 	if True:
 		print("Creating Report Timesheet")
-		sheetName = wb.add_sheet('Report')
-		lsheader = ['Manager (Mail)', 'Resource', 'Working hours', 'Off work', 'Total', 'Detail', 'Comment']
+		for report_week in dictToSendMail:
+			sheetName = wb.add_sheet('Report_%s'%report_week)
+			lsheader = ['Manager (Mail)', 'Resource', 'Working hours', 'Off work', 'Total', 'Detail', 'Comment']
+			#colum, row
+			controlObj.printReportToExcel(sheetName, lsheader, dictToSendMail[report_week], startWeekSendEmail, startRow, startColum, colorDict, colorDictNoneBorder, userInfo)
+	
+	
+	###############
+	if True:
+		print("Create Weekly Resource 2")
+		
+		sheetName = wb.add_sheet('Weekly resource 2')
 		#colum, row
-		controlObj.printReportToExcel(sheetName, lsheader, dictToSendMail, startWeekSendEmail, startRow, startColum, colorDict, colorDictNoneBorder, userInfo)
+		getBy = Enum.HeaderExcelAndKeys.TOTAL_WEEK
+		controlObj.createResourceCompareWorkingHourBetweenTrainingAndRealProjectByWeekly(sheetName, userInfoDict, getBy, userInfo, startDate_2, endDate_2, dir_, excelHoliday, colorDict, colorDictNoneBorder, mail_to_user_name, list_key_define_real_proj, list_key_define_rnd_proj, dictTimeOff, list_key_define_pre_sale_proj, list_key_define_post_sale_proj)
+		print("------------------------------------------------------------------------------")
 
-# 	try:
-# 		os.remove('%s\TimeSheet.xls'%(dir_))
-# 	except:
-# 		print('Error to remove TimeSheet.xls')
 	try:
 		wb.save('%s\TimeSheet.xls'%(dir_))
+
 		os.system('start %s\TimeSheet.xls'%(dir_))
 		print('Timesheets report will be get info in sheet Report of file TimeSheet.xls!')
 		print('Please review results before confirm to send mail!')
-	except:
+	except KeyError:
 		print('Error to save TimeSheet.xls')
 		sys.exit()
-	if currentUser in Enum.UserInfoConfig.LIST_USER_SEND_MAIL:
+	if currentUser in Enum.UserInfoConfig.LIST_USER_SEND_MAIL :
 		send_ = False
 		while True:
 			confirm_ = input("Confirm to send mail [Yes/No]: ") 

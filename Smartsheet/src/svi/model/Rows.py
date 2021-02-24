@@ -53,22 +53,32 @@ class Row():
 		return dictInfo
 		
 	#get all info of all row (dictionary)
-	def getDataRow(self, row, dictHeader, count):
+	def getDataRow(self, row, dictHeader, count, ignore_task, list_task_ignore, list_id_ignore):
 		info = {}
+		skip = False
+		info['info'] = self.getInfoInRow(row.cells, dictHeader, count)
+		if info['info'][Enum.Header.TASK_NAME].strip() in ignore_task:
+			list_task_ignore.append(info['info'][Enum.Header.TASK_NAME].strip())
+			list_id_ignore.append(row.id)
+			skip = True
+		if row.parent_id in list_id_ignore:
+			list_task_ignore.append(info['info'][Enum.Header.TASK_NAME].strip())
+			list_id_ignore.append(row.id)
+			skip = True
+		if skip:
+			return None
+		
 		info[Enum.GenSmartsheet.ID] = row.id
-
 		if row.parent_id != None:
 			info[Enum.GenSmartsheet.PARENT_ID] = row.parent_id
 		else:
 			info[Enum.GenSmartsheet.PARENT_ID] = ''
-		
+ 		
 		if row.sibling_id:
 			info[Enum.GenSmartsheet.SIBLING_ID] = row.sibling_id
 		else:
 			info[Enum.GenSmartsheet.SIBLING_ID] = ''
-		info['info'] = self.getInfoInRow(row.cells, dictHeader, count)
-		
-		return info
+		return info 
 		
 	#find empty row 
 	def isRowEmpty(self, row):
@@ -122,11 +132,18 @@ class Row():
 		return st
 	
 	#list parrent id
-	def getParentId(self, dictRows):
+	def getParentId(self, dictRows, ignore_task):
 		lists = []
+		list_ignore_id = []
+# 		print (dictRows[row]['info'][Enum.Header.TASK_NAME])
 		for row in dictRows:
 			if (dictRows[row][Enum.GenSmartsheet.PARENT_ID] != '') and not (dictRows[row][Enum.GenSmartsheet.PARENT_ID] in lists) :
 				lists.append(dictRows[row][Enum.GenSmartsheet.PARENT_ID])
+				
+# 				try:
+# 				    del dictRows[row]
+# 				except KeyError:
+# 				    pass
 		return lists
 	
 	
