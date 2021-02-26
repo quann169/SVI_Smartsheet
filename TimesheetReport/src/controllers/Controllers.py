@@ -5,8 +5,13 @@ Created on Feb 22, 2021
 '''
 from src.models.smartsheet.SmartsheetModel import Sheet, Task, SmartSheets
 from src.models.database.DatabaseModel import Configuration, Task, FinalTask
-from src.commons.Enums import DbHeader, DbTable
+from src.commons.Enums import DbHeader, DbTable, ExcelHeader, SettingKeys
+from src.commons.Message import MsgError, MsgWarning, Msg
+from src.commons.Utils import CommonUtils as utils
 from pprint import pprint
+import pandas as pd
+import os, sys
+import config
 
 
 class Controllers:
@@ -82,7 +87,75 @@ class Controllers:
                 config_obj.set_attr(sheet_id            = sheet_id,
                                     latest_modified     = latest_modified)
                 config_obj.update_latest_modified_of_sheet()
+    
+    def import_timeoff(self, file_name):
+        try:
+            file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
+            df          = pd.read_excel (file_path, sheet_name='Time-Off')
+            
+            config_obj  = Configuration()
+            config_obj.get_all_user_information()
+            users_info  = config_obj.users
+            user_full_name_info = config_obj.users_full_name
+            exist_id     = {}
+            
+            list_record = []
+            for index in range(0, len(df[ExcelHeader.ID])):
+                id_timeoff          = str(df[ExcelHeader.ID][index])
+                try:
+                    unuse = exist_id[id_timeoff]
+                    message = utils.message_generate(MsgWarning.W001, id_timeoff)
+                    utils.println(message, logging_level='debug')
+                    continue
+                except KeyError:
+                    exist_id[id_timeoff] = ''
                 
+                requester   = str(df[ExcelHeader.REQUESTER][index])
+                department  = str(df[ExcelHeader.DEPARTMENT][index])
+                type_leave  = str(df[ExcelHeader.TYPE][index])
+                start_date  = str(df[ExcelHeader.START_DATE][index])
+                end_date    = str(df[ExcelHeader.END_DATE][index])
+                workday     = utils().search_pattern(str(df[ExcelHeader.WORKDAYS][index]),'(.+?)\((.+?)h\)')[1]
+                status      = str(df[ExcelHeader.STATUS][index])
+                user_id     = SettingKeys.NA_USER_ID
+                updated_by = 'root'
+                try:
+                    user_id = users_info[requester].user_id
+                except KeyError:
+                    try:
+                        user_id = user_full_name_info[requester].user_id
+                    except KeyError:
+                        pass
+
+                list_record.append(
+                    (
+                        id_timeoff, 
+                        user_id, 
+                        department,
+                        type_leave,
+                        start_date,
+                        end_date,
+                        workday,
+                        status,
+                        updated_by
+                        )
+                    )
+            config_obj.remove_all_timeoff_information()
+            config_obj.add_list_timeoff(list_record)
+            utils().remove_path(file_path)
+            return 1, Msg.M001
+        except Exception as e:
+            return 0, e
+        
+    def get_timeoff_info(self):
+        config_obj  = Configuration()
+        result      = config_obj.get_list_timeoff()
+        return result
+        
+        
+        
+        
+        
                 
                 
                 

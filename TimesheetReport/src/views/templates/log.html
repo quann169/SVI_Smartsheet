@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block breadcrumb %}
+	{% set br_items = [('/log', 'Log', True)] %}
+	{% with br_items=br_items %}
+		{% include "breadcrumb.html" %}
+	{% endwith %}
+{% endblock breadcrumb %}
+{% block sidebar %}
+	{% set active_sidebar = 'log' %}
+	{% with active_sidebar=active_sidebar %}
+		{% include "sidebar.html" %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block main %}
+TBD
+{% endblock main %}

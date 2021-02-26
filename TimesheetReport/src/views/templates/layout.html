@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		{%- block head %}
+		    {%- block metas %}
+		        <meta charset="utf-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		    {%- endblock metas %}
+			<title>
+		        {% block title %}
+		        {{title|default}}
+		        {% endblock title %}
+		    </title>
+			{%- block styles %}
+				<link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap-4.5.3/css/bootstrap.min.css') }}" />  
+				<link rel="stylesheet" href="{{ url_for('static', filename='lib/DataTables/datatables.min.css') }}" /> 
+				<!-- Our Custom CSS -->
+			    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.css') }}" />
+				<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
+			{%- endblock styles %}
+		{%- endblock head %}
+	</head>
+	
+	<body>
+	    <div class="wrapper">
+	        <!-- Sidebar  -->
+	        <nav id="sidebar" class=''>
+	            {% block sidebar %}
+		            {% include "sidebar.html" %}
+	        	{%- endblock sidebar %}
+	        </nav>
+	
+	        <!-- Page Content  -->
+	        <div id="content">
+				{% block navbar %}
+		            {% include "navbar.html" %}
+	        	{%- endblock navbar %}
+	            {% block breadcrumb %}
+		        	{% include "breadcrumb.html" %}
+		        {% endblock %}
+				<div class='main-div' id='main_div'>
+					{% block main %} 
+			        	
+			        {% endblock %}
+				</div>
+	
+	            
+	      </div>
+	    </div>
+		{% block scripts %}
+			<!-- Font Awesome JS -->
+			<script src="{{url_for('static', filename='lib/fontawesome/js/solid.js')}}" ></script>
+			<script src="{{url_for('static', filename='lib/fontawesome/js/fontawesome.js')}}"></script>
+			<script src="{{url_for('static', filename='lib/jquery-3.1.1.js')}}"></script>
+			<script src="{{url_for('static', filename='lib/jquery-3.1.1.slim.min.js')}}"></script>
+			<script src="{{url_for('static', filename='lib/popper-1.14.0.min.js')}}"></script>
+			<script src="{{url_for('static', filename='lib/bootstrap-4.5.3/js/bootstrap.min.js')}}"></script>
+			<script src="{{url_for('static', filename='lib/DataTables/datatables.min.js')}}"></script>
+			
+			<script src="{{url_for('static', filename='js/common.js')}}"></script>
+			<script src="{{url_for('static', filename='js/setting/time_off.js')}}"></script>
+	    {%- endblock scripts %}
+		
+	    
+	</body>
+
+</html>

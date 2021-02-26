@@ -1,0 +1,30 @@
+<div class="sidebar-header">
+    <h2>Timesheet Report</h2>
+</div>
+
+<ul class="list-unstyled components">
+    <p></p>
+    <li class="{% if active_sidebar == 'home' %}active{% endif %}">
+        <a href="/">Home</a>
+    </li>
+    <li>
+        <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Setting</a>
+        <ul class="collapse list-unstyled" id="pageSubmenu">
+            <li class="{% if active_sidebar == 'timeoff' %} active{% endif %}">
+                <a href="/timeoff">Time Off</a>
+            </li>
+            <li class="{% if active_sidebar == 'sheet' %} active{% endif %}">
+                <a href="/sheet">Sheet</a>
+            </li>
+            <li class="{% if active_sidebar == 'resource' %} active{% endif %}">
+                <a href="/resource">Resource</a>
+            </li>
+ 			<li class="{% if active_sidebar == 'holiday' %} active{% endif %}">
+                <a href="holiday">Holiday</a>
+            </li>
+        </ul>
+    </li>
+    <li class="{% if active_sidebar == 'log' %} active{% endif %}">
+        <a href="log">Log</a>
+    </li>
+</ul>

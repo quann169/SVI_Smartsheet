@@ -3,18 +3,66 @@ Created on Feb 5, 2021
 
 @author: toannguyen
 '''
-import os, sys
+import os, sys, re
 import datetime, calendar
-
-from src.commons.Message import Mgs, MgsError, MgsWarning
+import ast
+from src.commons.Message import Msg, MsgError, MsgWarning
 import string
 from src.commons.Enums import DateTime
 import logging
 import config
+from flask import request
+import shutil
 
 class CommonUtils:
     def __init__(self):
         pass
+    
+    def get_request_form(self):
+        # for post method
+        request_dict = {}
+        forms = request.form
+        for form in forms:
+            request_dict[form] = forms.get(form)
+        return request_dict
+    
+    def get_request_args(self):
+        # for get method
+        request_dict = {}
+        forms = request.args
+        for form in forms:
+            request_dict[form] = forms.get(form)
+        return request_dict
+    
+    def get_request_form_ajax(self):
+        # for past method
+        forms = request.form
+        request_dict = {}
+        for form in forms.keys():
+            request_dict = ast.literal_eval(form.strip())
+        return request_dict
+    
+    def make_folder(self, path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+    
+    def remove_path(self, path):
+        if os.path.exists(path):
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
+        
+    def save_file_from_request(self):
+        try:
+            for file_name in request.files:
+                userfile = request.files[file_name]
+                upload_folder   = os.path.join(config.WORKING_PATH, 'upload')
+                self.make_folder(upload_folder)
+                userfile.save(os.path.join(upload_folder, userfile.filename))
+            return 1, ''
+        except Exception as e:
+            return 0, e
     
     def stuck(self, message='', logging_level=None):
         print ('ERROR ' + message)
@@ -33,7 +81,15 @@ class CommonUtils:
             var_tuple = tuple(list_argv)
             return  message.format(*var_tuple)
         except Exception as e:
-            self.stuck(e.message, 'exception')
+            self.stuck(e, 'exception')
+    
+    def search_pattern(self, string, pattern):
+        obj_search = re.search(pattern, string)
+        if obj_search:
+            result = obj_search.groups()
+            return result
+        else:
+            return obj_search
         
     def select_logging_level(self, logging_level):
         level = ''
@@ -83,7 +139,7 @@ class CommonUtils:
                         try:
                             obj_date = datetime.datetime.strptime(string, '%m/%d/%Y')
                         except:
-                            message      = self.message_generate(MgsError.E001, string)
+                            message      = self.message_generate(MsgError.E001, string)
                             print("Other Date time format: %s"%string)
                             self.stuck(message, 'exception')
         year    = obj_date.year

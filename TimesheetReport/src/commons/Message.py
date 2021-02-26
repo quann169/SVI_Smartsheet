@@ -4,14 +4,16 @@ Created on Feb 22, 2021
 @author: toannguyen
 '''
 
-class MgsError:
+class MsgError:
     E001    = "Other Date time format: {}"
+    
+    
     pass
 
 
-class MgsWarning:
-    pass
+class MsgWarning:
+    W001    = 'Skip ID duplicate id :{}'
 
 
-class Mgs:
-    pass
+class Msg:
+    M001    = 'Import successfully'

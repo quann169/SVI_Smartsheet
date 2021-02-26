@@ -74,6 +74,23 @@ class DateTime():
         }
     LIST_WORK_DAY_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
     START_WEEK = 'Monday'
+
+class ExcelHeader:
+    ID          = 'ID'
+    REQUESTER   = 'Requester'
+    DEPARTMENT  = 'Department'
+    TYPE        = 'Type'
+    START_DATE  = 'Start Date'
+    END_DATE    = 'End Date'
+    WORKDAYS    = 'Workdays'
+    STATUS      = 'Status'
+
+class SettingKeys:
+    NA_USER_ID          = 3
+    NA_ENG_LEVEL_ID     = 11
+    NA_ENG_TYPE_ID      = 5
+    NA_TEAM_ID          = 9
+    
     
 class DbHeader:
     
@@ -127,7 +144,8 @@ class DbHeader:
     OTHER_NAME              = 'other_name'
     IS_ACTIVE               = 'is_active'
     ALLOCATION              = 'allocation'
-    
+
+
     
     
     

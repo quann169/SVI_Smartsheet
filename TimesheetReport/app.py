@@ -1,29 +1,39 @@
 from src.controllers.Controllers import Controllers
-import logging
-from logging.handlers import RotatingFileHandler
-from src.commons.Utils import CommonUtils
 import os, sys
+
+from src.commons.Utils import CommonUtils as utils
 import config
-
-try:
-    logging_lv      = config.LOGGING_LEVEL
-except  AttributeError:
-    logging_lv      = 'ERROR'
-logging_level       = CommonUtils().select_logging_level(logging_lv)
-log_formatter       = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
-log_name            = os.path.join(config.WORKING_PATH, 'TimesheetReport.log')
-log                 = logging.getLogger()
-log.setLevel(logging_level)
-handler             = logging.handlers.RotatingFileHandler(log_name,maxBytes= 1000*1024,backupCount=20)
-handler.setFormatter(log_formatter)
-log.addHandler(handler)
+from datetime import timedelta
+from flask import Flask, g, session, redirect, url_for
+from src.controllers.routes.Route import timesheet_bp
+from flask import Flask, flash, request, redirect, url_for
 
 
-c = Controllers().parse_smarsheet_and_update_task()
+ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
 
 
-        
-# from src.models.database.ConnectionModel import Connection
-# query   = '''show tables;'''
-# cnn     = Connection()
-# print (cnn.db_query(query))
+port        = 6602
+host        = "localhost"
+tool_path = os.path.abspath(os.path.dirname(__file__))
+# tool_path = '/var/www/html/wrs/app/'
+
+app = Flask( __name__ , static_folder="%s/%s"%(tool_path, 'src/views/static'), template_folder="%s/%s"%(tool_path, 'src/views/templates'))
+app.config['WORKING_PATH'] = config.WORKING_PATH
+app.config['SECRET_KEY']                    = 'TEST'
+app.config['SESSION_PERMANENT']             = True
+app.config['PERMANENT_SESSION_LIFETIME']    = timedelta(days = 7)
+app.register_blueprint(timesheet_bp)
+
+argv = sys.argv[1:]
+all_configs     = {}
+# @app.before_request
+# def global_var():
+#     g.tool_path             = tool_path
+
+
+if __name__ == "__main__":
+    app.run(port=port, host=host, debug=True, use_reloader=True, threaded=True)
+    
+    
+    
+    
