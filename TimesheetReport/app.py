@@ -1,7 +1,7 @@
 from src.controllers.Controllers import Controllers
 import os, sys
 
-from src.commons.Utils import CommonUtils as utils
+
 import config
 from datetime import timedelta
 from flask import Flask, g, session, redirect, url_for

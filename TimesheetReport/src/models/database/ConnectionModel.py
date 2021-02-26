@@ -11,7 +11,7 @@ import logging
 from pprint import pprint
 from flask import g
 import os
-from src.commons.Utils import CommonUtils as utils
+
 import re
 from src.models.database.DbSettings import DbSettings
 import config

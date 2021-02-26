@@ -12,5 +12,35 @@
 	{% endwith %}
 {% endblock sidebar %}
 {% block main %}
-TBD
+<form id='import_holiday' method="post" enctype="multipart/form-data">
+	<div class='dp-flex'>
+		<div class="custom-file col-4">
+		    <input type="file" name='holiday_file' id='holiday_file' accept='.xlsx' class="custom-file-input " >
+		    <label class="custom-file-label" for="holiday_file">Choose file</label>
+		</div>
+		<input type='submit' value='Import' class='mg-l-5' id='btn_import' disabled>
+	</div>
+</form>
+<br>
+<table id="holiday_table" class="table table-striped table-bordered " cellspacing="0" width='100%'>
+  {% set holiday_info = ctrl_obj.get_holiday_info() %}
+  <thead>
+    <tr>
+	  <th class="th-sm">#
+      </th>
+      <th class="th-sm">Date
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+	{% for row in holiday_info %}
+		<tr>
+		  <td>{{loop.index}}</td>
+	      <td>{{row[db_header.DATE].strftime('%Y-%m-%d')}}</td>
+	    </tr>
+	{% endfor %}
+
+  </tbody>
+  
+</table>
 {% endblock main %}

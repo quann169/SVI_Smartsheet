@@ -6,9 +6,8 @@ Created on Feb 22, 2021
 
 class MsgError:
     E001    = "Other Date time format: {}"
+    E002    = "No sheet name '{}' on smartsheet"
     
-    
-    pass
 
 
 class MsgWarning:

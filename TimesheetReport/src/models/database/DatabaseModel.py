@@ -8,6 +8,7 @@ from src.commons.Enums import DbHeader, DbTable
 from pprint import pprint
 
 
+
 class Configuration(Connection):
     def __init__(self):
         Connection.__init__(self)
@@ -48,6 +49,23 @@ class Configuration(Connection):
         else:
             return result
     
+    def get_sheet_type_info(self):
+        query = """
+                SELECT `%s`, `%s`
+                FROM `%s`;
+        """%(
+            DbHeader.SHEET_TYPE_ID, DbHeader.SHEET_TYPE,
+            DbTable.SHEET_TYPE
+            )
+        query_result    = self.db_query(query)
+        result          = ()
+        if query_result:
+            return query_result
+        else:
+            return result
+        
+    
+        
     def update_latest_modified_of_sheet(self):
         query   = '''UPDATE 
                         `%s` 
@@ -142,16 +160,43 @@ class Configuration(Connection):
             return query_result
         else:
             return result
-        
-        
-        
+    
+    def get_list_holiday(self):
+        query = """
+                SELECT `%s`
+                FROM `%s`;
+        """%(
+            DbHeader.DATE,
+            DbTable.HOLIDAY
+            )
+        query_result    = self.db_query(query)
+        result          = ()
+        if query_result:
+            return query_result
+        else:
+            return result
         
     def remove_all_timeoff_information(self):
         query   = '''DELETE FROM `%s`;'''%(\
                     DbTable.TIME_OFF
                     )
         self.db_execute(query)
-
+    
+    def add_holiday(self, date):
+        query   = """INSERT INTO `%s` (`%s`) VALUES ("%s");
+        """%(DbTable.HOLIDAY, DbHeader.DATE, date)
+        self.db_execute(query)
+    
+    def is_exist_holiday(self, date):
+        query   = """SELECT `%s` FROM `%s` WHERE `%s`="%s";
+        """%( DbHeader.HOLIDAY_ID, DbTable.HOLIDAY, DbHeader.DATE, date)
+        query_result    = self.db_query(query)
+        if query_result:
+            return True
+        else:
+            return False
+    
+    
 class Task(Connection):
     def __init__(self):
         Connection.__init__(self)

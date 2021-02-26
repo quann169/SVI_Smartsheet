@@ -1,13 +1,13 @@
-// submit import timeoff form
+// submit import sheet form
 $(document).ready(function () {
-	$('#import_timeoff').submit(function(event) {
+	$('#import_sheet').submit(function(event) {
 		event.preventDefault();
-		var up_file = upload_file('#import_timeoff');
+		var up_file = upload_file('#import_sheet');
 		if (up_file != null && up_file[0] == 1) {
-			var file_name	= $('#timeoff_file').get(0).files[0].name;
+			var file_name	= $('#sheet_file').get(0).files[0].name;
 			var data = {'file_name': file_name};
 			$.ajax({
-			   url: '/import_timeoff',
+			   url: '/import_sheet',
 			   type: "POST",
 			   async: false,
 			   data: encodeURIComponent(JSON.stringify(data)),
@@ -28,8 +28,8 @@ $(document).ready(function () {
 })
 
 // control 'import' btn
-$('#timeoff_file').change(function(e){
-        var files	= $('#timeoff_file').get(0).files[0];
+$('#sheet_file').change(function(e){
+        var files	= $('#sheet_file').get(0).files[0];
 		if (files == undefined) {
 			$('#btn_import').prop('disabled', true);
 		} else {
@@ -38,5 +38,5 @@ $('#timeoff_file').change(function(e){
     });
 
 $(document).ready( function () {
-	load_datatable('#timeoff_table');
+	load_datatable('#sheet_table');
 	});

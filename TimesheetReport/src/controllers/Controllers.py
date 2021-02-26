@@ -7,7 +7,8 @@ from src.models.smartsheet.SmartsheetModel import Sheet, Task, SmartSheets
 from src.models.database.DatabaseModel import Configuration, Task, FinalTask
 from src.commons.Enums import DbHeader, DbTable, ExcelHeader, SettingKeys
 from src.commons.Message import MsgError, MsgWarning, Msg
-from src.commons.Utils import CommonUtils as utils
+from src.commons.Utils import search_pattern, message_generate, println, remove_path
+
 from pprint import pprint
 import pandas as pd
 import os, sys
@@ -104,8 +105,8 @@ class Controllers:
                 id_timeoff          = str(df[ExcelHeader.ID][index])
                 try:
                     unuse = exist_id[id_timeoff]
-                    message = utils.message_generate(MsgWarning.W001, id_timeoff)
-                    utils.println(message, logging_level='debug')
+                    message = message_generate(MsgWarning.W001, id_timeoff)
+                    println(message, 'debug')
                     continue
                 except KeyError:
                     exist_id[id_timeoff] = ''
@@ -115,7 +116,7 @@ class Controllers:
                 type_leave  = str(df[ExcelHeader.TYPE][index])
                 start_date  = str(df[ExcelHeader.START_DATE][index])
                 end_date    = str(df[ExcelHeader.END_DATE][index])
-                workday     = utils().search_pattern(str(df[ExcelHeader.WORKDAYS][index]),'(.+?)\((.+?)h\)')[1]
+                workday     = search_pattern(str(df[ExcelHeader.WORKDAYS][index]),'(.+?)\((.+?)h\)')[1]
                 status      = str(df[ExcelHeader.STATUS][index])
                 user_id     = SettingKeys.NA_USER_ID
                 updated_by = 'root'
@@ -142,7 +143,7 @@ class Controllers:
                     )
             config_obj.remove_all_timeoff_information()
             config_obj.add_list_timeoff(list_record)
-            utils().remove_path(file_path)
+            remove_path(file_path)
             return 1, Msg.M001
         except Exception as e:
             return 0, e
@@ -151,11 +152,48 @@ class Controllers:
         config_obj  = Configuration()
         result      = config_obj.get_list_timeoff()
         return result
+    
+    def import_holiday(self, file_name):
+        try:
+            file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
+            df          = pd.read_excel (file_path, sheet_name='Holiday')
+            config_obj  = Configuration()
+            for index in range(0, len(df[ExcelHeader.HOLIDAY])):
+                date          = str(df[ExcelHeader.HOLIDAY][index])
+                if not config_obj.is_exist_holiday(date):
+                    config_obj.add_holiday(date)
+            return 1, Msg.M001
+        except Exception as e:
+            return 0, e
         
-        
-        
-        
-        
+    def get_holiday_info(self):
+        config_obj  = Configuration()
+        result      = config_obj.get_list_holiday()
+        return result   
+    
+    def get_sheet_config(self):
+        config_obj  = Configuration()
+        result      = config_obj.get_sheet_config()
+        return result    
+                
+    def import_sheet(self, file_name):
+        try:
+            file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
+            df          = pd.read_excel (file_path, sheet_name='Sheet')
+            config_obj  = Configuration()
+            sms_obj = SmartSheets()
+            sms_obj.connect_smartsheet()
+            available_sheet_name = sms_obj.available_name
+            for index in range(0, len(df[ExcelHeader.SHEET_NAME])):
+                sheet_name          = str(df[ExcelHeader.SHEET_NAME][index])
+                sheet_type          = str(df[ExcelHeader.SHEET_TYPE][index])
+                if sheet_name not in available_sheet_name:
+                    message = message_generate(MsgError.E002, sheet_name)
+                    println(message, 'error')
+                    return  0, message
                 
                 
+            return 1, Msg.M001
+        except Exception as e:
+            return 0, e         
                 

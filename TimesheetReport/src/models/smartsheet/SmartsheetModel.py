@@ -16,7 +16,7 @@ from jinja2 import Environment
 from jinja2.loaders import FileSystemLoader
 from config import TOKEN
 
-from src.commons.Utils import CommonUtils as utils
+from src.commons.Utils import get_prev_date_by_time_delta, stuck, convert_date_to_string, println, get_work_days
 
 from src.commons import Enums
 
@@ -29,7 +29,7 @@ class SmartSheets:
         self.holiday = holiday
         self.time_off = time_off
         self.info   = {}
-        self.timedelta  = utils().get_prev_date_by_time_delta(timedelta)
+        self.timedelta  = get_prev_date_by_time_delta(timedelta)
         
     def set_attr(self, **kwargs):                      
         for key, value in kwargs.items():
@@ -54,7 +54,7 @@ class SmartSheets:
                 if sheet_name in self.available_name:
                     list_sheet_name.append((sheet_name, latest_modified, sheet_id))
                 else:
-                    utils().stuck('No sheet name %s'%sheet_name)
+                    stuck('No sheet name %s'%sheet_name)
             for sheet_name, latest_modified, sheet_id in list_sheet_name:
                 info = Sheet(self, sheet_name, latest_modified, sheet_id)
                 info.parse_sheet()
@@ -71,7 +71,7 @@ class Sheet():
         self.info           = []
         self.smartsheet_obj = smartsheet_obj
         self.list_parent_id = set()
-        self.latest_modified  = utils().convert_date_to_string(latest_modified)
+        self.latest_modified  = convert_date_to_string(latest_modified)
         self.is_parse       = True
         self.timedelta      = smartsheet_obj.timedelta
         
@@ -79,12 +79,12 @@ class Sheet():
         sheet           = self.smartsheet_obj.connection.sheets.get(self.name)
         cols            = sheet.columns
         
-        modified_at = utils().convert_date_to_string(sheet.modified_at)
+        modified_at = convert_date_to_string(sheet.modified_at)
         if self.latest_modified == modified_at:
-            utils().println('Skip parsing sheet: %s'%(self.name), 'info')
+            println('Skip parsing sheet: %s'%(self.name), 'info')
             self.is_parse       = False
         else:
-            utils().println('Parsing sheet: %s'%(self.name), 'info')
+            println('Parsing sheet: %s'%(self.name), 'info')
             self.latest_modified    = modified_at
             count = 0
             for col  in cols:
@@ -180,7 +180,7 @@ class Task():
             self.start_date = self.start_date.replace(minute=0, hour=0, second=0, microsecond=0)
             self.end_date   = self.end_date.replace(minute=0, hour=0, second=0, microsecond=0)
             if self.end_date >= self.timedelta:
-                self.list_date = utils().get_work_days(self.start_date, self.end_date, time_delta=self.timedelta)
+                self.list_date = get_work_days(self.start_date, self.end_date, time_delta=self.timedelta)
             
             
                 

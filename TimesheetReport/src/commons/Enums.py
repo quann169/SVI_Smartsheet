@@ -84,7 +84,10 @@ class ExcelHeader:
     END_DATE    = 'End Date'
     WORKDAYS    = 'Workdays'
     STATUS      = 'Status'
-
+    HOLIDAY     = 'Holiday'
+    SHEET_NAME  = 'Sheet Name'
+    SHEET_TYPE  = 'Sheet Type'
+    
 class SettingKeys:
     NA_USER_ID          = 3
     NA_ENG_LEVEL_ID     = 11
