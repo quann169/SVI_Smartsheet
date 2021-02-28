@@ -1,6 +1,11 @@
 $(document).ready(function () {
     $('#sidebarCollapse').on('click', function () {
         $('#sidebar').toggleClass('active');
+		if ($('#sidebar').hasClass('active')) {
+			update_session(SESSION_SIDEBAR, 1);
+		} else {
+			update_session(SESSION_SIDEBAR, 0);
+		}
     });
 });
 
@@ -47,3 +52,15 @@ function custom_alert(message, type) {
 	alert(message);
 }
 
+function update_session(session_key, session_value) {
+	var data = {'session_key': session_key, 'session_value': session_value, };
+	$.ajax({
+	   url: '/update_session',
+	   type: "POST",
+	   async: false,
+	   data: encodeURIComponent(JSON.stringify(data)),
+	   success: function(resp){
+	   }
+   });
+	
+}

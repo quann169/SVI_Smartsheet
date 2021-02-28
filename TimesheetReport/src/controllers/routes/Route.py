@@ -11,6 +11,7 @@ import logging
 from src.commons.Utils import save_file_from_request, get_request_form_ajax, get_request_form_ajax, get_request_form_ajax
 from src.controllers.Controllers import Controllers as ctrl
 from src.commons.Enums import DbTable, DbHeader
+from src.commons.Utils import println
 
 
 tempalte_path =  os.getcwd() + 'src/views/templates'
@@ -20,43 +21,44 @@ timesheet_bp = Blueprint('timesheet_bp', __name__, template_folder=tempalte_path
 
 @timesheet_bp.route('/')
 def home():
-    logging.debug('/')
+    println('/', 'debug')
     try:
-        return render_template("index.html")
+        ctrl_obj   = ctrl()
+        return render_template("index.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
-        logging.exception(e)
+        println(e, 'exception')
         return abort(500, e)
 
 @timesheet_bp.route('/upload_file', methods=['POST'])
 def upload_file():
-    logging.debug('/upload_file')
+    println('/upload_file', 'debug')
     try:
         result = save_file_from_request()
         return jsonify({'result': result})
     except Exception as e:
-        logging.exception(e)
+        println(e, 'exception')
         return abort(500, e)
     
 
 @timesheet_bp.route('/timeoff')
 def timeoff():
-    logging.debug('/timeoff')
+    println('/timeoff', 'debug')
     try:
         ctrl_obj   = ctrl()
         return render_template("setting/timeoff.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
-        logging.exception(e)
+        println(e, 'exception')
         return abort(500, e)
 
 @timesheet_bp.route('/import_timeoff', methods=['POST'])
 def import_timeoff():
-    logging.debug('/import_timeoff')
+    println('/import_timeoff', 'debug')
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().import_timeoff(file_name=request_dict['file_name'])
         return jsonify({'result': result})
     except Exception as e:
-        logging.exception(e)
+        println(e, 'exception')
         return abort(500, e)
 
 
@@ -65,60 +67,84 @@ def import_timeoff():
 
 @timesheet_bp.route('/log')
 def log():
-    logging.debug('/log')
+    println('/log', 'debug')
     try:
-        return render_template("log.html")
+        ctrl_obj   = ctrl()
+        return render_template("log.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
-        logging.exception(e)
+        println(e, 'exception')
         return abort(500, e)
 
 @timesheet_bp.route('/sheet')
 def sheet():
-    logging.debug('/sheet')
+    println('/sheet', 'debug')
     try:
         ctrl_obj    = ctrl()
         return render_template("setting/sheet.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
-        logging.exception(e)
+        println(e, 'exception')
         return abort(500, e)
 
 @timesheet_bp.route('/import_sheet', methods=['POST'])
 def import_sheet():
-    logging.debug('/import_sheet')
+    println('/import_sheet', 'debug')
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().import_sheet(file_name=request_dict['file_name'])
         return jsonify({'result': result})
     except Exception as e:
-        logging.exception(e)
+        println(e, 'exception')
         return abort(500, e)
     
 @timesheet_bp.route('/resource')
 def resource():
-    logging.debug('/resource')
+    println('/resource', 'debug')
     try:
-        return render_template("setting/resource.html")
+        ctrl_obj   = ctrl()
+        return render_template("setting/resource.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
-        logging.exception(e)
+        println(e, 'exception')
         return abort(500, e)
 
+@timesheet_bp.route('/import_resource', methods=['POST'])
+def import_resource():
+    println('/import_resource', 'debug')
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().import_resource(file_name=request_dict['file_name'])
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+    
 @timesheet_bp.route('/holiday')
 def holiday():
-    logging.debug('/holiday')
+    println('/holiday', 'debug')
     try:
         ctrl_obj    = ctrl()
         return render_template("setting/holiday.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
-        logging.exception(e)
+        println(e, 'exception')
         return abort(500, e)
 
 @timesheet_bp.route('/import_holiday', methods=['POST'])
 def import_holiday():
-    logging.debug('/import_holiday')
+    println('/import_holiday', 'debug')
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().import_holiday(file_name=request_dict['file_name'])
         return jsonify({'result': result})
     except Exception as e:
-        logging.exception(e)
+        println(e, 'exception')
+        return abort(500, e)
+
+@timesheet_bp.route('/update_session', methods=['POST'])
+def update_session():
+    println('/update_session', 'debug')
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().update_session(request_dict['session_key'], request_dict['session_value'], )
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
         return abort(500, e)

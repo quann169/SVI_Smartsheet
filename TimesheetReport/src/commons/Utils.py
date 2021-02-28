@@ -59,6 +59,7 @@ def save_file_from_request():
             userfile.save(os.path.join(upload_folder, userfile.filename))
         return 1, ''
     except Exception as e:
+        println(e, 'exception')
         return 0, e
 
 def stuck(message='', logging_level=None):
@@ -66,9 +67,34 @@ def stuck(message='', logging_level=None):
     raise Exception(message)
 
 def println(message, logging_level=None):
-    logging.info(message)
-    print (message)
+    
+    if logging_level == 'critical':
+        logging.critical(message)
+        print (message)
+    elif logging_level == 'exception':
+        logging.exception(message)
+        print (message)
+    elif logging_level == 'error':
+        logging.error(message)
+        print (message)
+    elif logging_level == 'warning':
+        logging.warn(message)
+        print (message)
+    elif logging_level == 'info':
+        logging.info(message)
+        print (message)
+    elif logging_level == 'debug':
+        if config.LOGGING_LEVEL.lower() ==  'debug':
+            logging.debug(message)
+            print (message)
+    
 
+def split_patern(string, pattern=''):
+    result  = string.split(',')
+    return result
+    
+    
+    
 def message_generate(message, *argv):
     try:
         list_argv = []
@@ -137,7 +163,6 @@ def str_to_date(string):
                         obj_date = datetime.datetime.strptime(string, '%m/%d/%Y')
                     except:
                         message      = message_generate(MsgError.E001, string)
-                        print("Other Date time format: %s"%string)
                         stuck(message, 'exception')
     year    = obj_date.year
     month   = obj_date.month

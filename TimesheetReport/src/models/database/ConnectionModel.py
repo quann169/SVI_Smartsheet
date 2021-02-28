@@ -6,7 +6,8 @@ Created on Feb 17, 2021
 
 import pymysql
 from pymysql.constants import CLIENT
-from src.commons import Enums, Utils, Message
+from src.commons.Enums import Connect
+from src.commons.Utils import println
 import logging
 from pprint import pprint
 from flask import g
@@ -23,7 +24,7 @@ class Connection:
         self.db_user        = ''
         self.db_port        = 0
         self.db_password    = ''
-        self.db_char_set    = Enums.Connect.CHAR_SET
+        self.db_char_set    = Connect.CHAR_SET
         self.cusror_type    = pymysql.cursors.DictCursor
         self.db_setting     = db_setting
         self.get_database_setting()
@@ -63,10 +64,7 @@ class Connection:
         
             return connection
         except Exception as e:
-            logging.exception(e)
-            print(e)
-            
-            
+            println(e, 'exception')
         return connection
         
     
@@ -81,10 +79,10 @@ class Connection:
             cursor              = connection.cursor()
             cursor.execute(query)
             connection.commit()
-            logging.debug(query)
+            println(query, 'debug')
         except Exception as e:
-            logging.exception(query)
-            logging.exception(e)
+            println(query, 'exception')
+            println(e, 'exception')
             raise Exception(e)
         finally:
             connection.close()
@@ -99,11 +97,11 @@ class Connection:
             cursor              = connection.cursor()
             cursor.execute(query)
             connection.commit()
-            logging.debug(query)
+            println(query, 'debug')
             return cursor.lastrowid
         except Exception as e:
-            logging.exception(query)
-            logging.exception(e)
+            println(query, 'exception')
+            println(e, 'exception')
             raise Exception(e)
         finally:
             connection.close()
@@ -118,10 +116,10 @@ class Connection:
             cursor              = connection.cursor()
             cursor.executemany(query, list_record)
             connection.commit()
-            logging.debug(query)
+            println(query, 'debug')
         except Exception as e:
-            logging.exception(query)
-            logging.exception(e)
+            println(query, 'exception')
+            println(e, 'exception')
             raise Exception(e)
         finally:
             connection.close()
@@ -136,14 +134,14 @@ class Connection:
             cursor              = connection.cursor()
             cursor.execute(query)
             rows                = cursor.fetchall()
-            logging.debug(query)
+            println(query, 'debug')
             if rows:
                 return rows
             else:
                 return None
         except Exception as e:
-            logging.exception(query)
-            logging.exception(e)
+            println(query, 'exception')
+            println(e, 'exception')
             raise Exception(e)         
         finally:
             connection.close()

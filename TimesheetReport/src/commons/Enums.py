@@ -87,12 +87,34 @@ class ExcelHeader:
     HOLIDAY     = 'Holiday'
     SHEET_NAME  = 'Sheet Name'
     SHEET_TYPE  = 'Sheet Type'
+    RESOURCE    = 'Resource'
+    ENG_TYPE    = 'Eng Type'
+    ENG_LEVEL   = 'Eng Level'
+    FULL_NAME   = 'Full Name'
+    EMAIL       = 'Email'
+    OTHER_NAME  = 'Other Name'
+    LEADER      = 'Leader'
+    TEAM        = 'Team'
+    IS_ACTIVE   = 'Is Active'
+class DefaulteValue:
+    DATETIME    = '0000-00-00 00:00:00'
+    
     
 class SettingKeys:
     NA_USER_ID          = 3
     NA_ENG_LEVEL_ID     = 11
     NA_ENG_TYPE_ID      = 5
     NA_TEAM_ID          = 9
+    NA_SHEET_TYPE_ID    = 3
+    EMPTY_CELL          = ['', 'NaT', 'nan', 'NaN', '#REF']
+    NA_VALUE            = 'NA'
+
+
+class SessionKey:
+    USER_NAME       = 'user_name'
+    PASSWORD        = 'password'
+    SIDEBAR         = 'sidebar'
+    
     
     
 class DbHeader:

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block sidebar %}
 	{% set active_sidebar = 'home' %}
-	{% with active_sidebar=active_sidebar %}
+	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
 		{% include "sidebar.html" %}
 	{% endwith %}
 {% endblock sidebar %}

@@ -159,8 +159,11 @@ class Task():
             elif header in [Enums.SmartsheetCfgKeys.DURATION]:
                 self.duration = display_value
             elif header in [Enums.SmartsheetCfgKeys.PREDECESSOR]:
-                if value != None:
-                    self.predecessors = int(value)
+                if value != None and value != '#REF':
+                    try:
+                        self.predecessors = int(value)
+                    except ValueError:
+                        pass
             elif header in [Enums.SmartsheetCfgKeys.COMMENT]:
                 if value != None:
                     self.comments = value
@@ -174,8 +177,10 @@ class Task():
                 if value == None:
                     self.allocation = 100
                 else:
-                    self.allocation = int(value) * 100
-                    
+                    try:
+                        self.allocation = int(value) * 100
+                    except ValueError:
+                        pass
         if self.start_date != None and self.end_date != None and self.assign_to != None:
             self.start_date = self.start_date.replace(minute=0, hour=0, second=0, microsecond=0)
             self.end_date   = self.end_date.replace(minute=0, hour=0, second=0, microsecond=0)

@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `erp`.`eng_level` (
   `eng_level_id` INT(11) NOT NULL AUTO_INCREMENT,
   `level` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`eng_level_id`),
-  UNIQUE INDEX `level_UNIQUE` (`level` ASC) VISIBLE)
+  UNIQUE INDEX `level_UNIQUE` (`level` ASC) )
 ENGINE = InnoDB
 AUTO_INCREMENT = 12
 DEFAULT CHARACTER SET = utf8mb4;
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `erp`.`final_date` (
   `updated_date` DATETIME NOT NULL,
   `updated_by` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`final_date_id`),
-  UNIQUE INDEX `date_UNIQUE` (`date` ASC) VISIBLE)
+  UNIQUE INDEX `date_UNIQUE` (`date` ASC) )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4;
 
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `erp`.`holiday` (
   `holiday_id` INT(11) NOT NULL AUTO_INCREMENT,
   `date` DATETIME NOT NULL,
   PRIMARY KEY (`holiday_id`),
-  UNIQUE INDEX `date_UNIQUE` (`date` ASC) VISIBLE)
+  UNIQUE INDEX `date_UNIQUE` (`date` ASC) )
 ENGINE = InnoDB
 AUTO_INCREMENT = 14
 DEFAULT CHARACTER SET = utf8mb4;
@@ -106,8 +106,8 @@ CREATE TABLE IF NOT EXISTS `erp`.`sheet` (
   `updated_date` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
   `updated_by` VARCHAR(45) NULL DEFAULT NULL,
   PRIMARY KEY (`sheet_id`),
-  UNIQUE INDEX `sheet_name_UNIQUE` (`sheet_name` ASC) VISIBLE,
-  INDEX `sheet_type_id_idx` (`sheet_type_id` ASC) VISIBLE,
+  UNIQUE INDEX `sheet_name_UNIQUE` (`sheet_name` ASC) ,
+  INDEX `sheet_type_id_idx` (`sheet_type_id` ASC) ,
   CONSTRAINT `sheet_type_id`
     FOREIGN KEY (`sheet_type_id`)
     REFERENCES `erp`.`sheet_type` (`sheet_type_id`)
@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS `erp`.`log` (
   `updated_date` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
   `updated_by` VARCHAR(45) NULL DEFAULT NULL,
   PRIMARY KEY (`log_id`),
-  INDEX `log_sheet_id_idx` (`sheet_id` ASC) VISIBLE,
+  INDEX `log_sheet_id_idx` (`sheet_id` ASC) ,
   CONSTRAINT `log_sheet_id`
     FOREIGN KEY (`sheet_id`)
     REFERENCES `erp`.`sheet` (`sheet_id`)
@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS `erp`.`team` (
   `team_name` VARCHAR(45) NOT NULL,
   `team_lead_id` INT(11) NULL DEFAULT NULL,
   PRIMARY KEY (`team_id`),
-  UNIQUE INDEX `name_UNIQUE` (`team_name` ASC) VISIBLE)
+  UNIQUE INDEX `name_UNIQUE` (`team_name` ASC) )
 ENGINE = InnoDB
 AUTO_INCREMENT = 10
 DEFAULT CHARACTER SET = utf8mb4;
@@ -169,11 +169,11 @@ CREATE TABLE IF NOT EXISTS `erp`.`user` (
   `eng_type_id` INT(11) NULL DEFAULT NULL,
   `team_id` INT(11) NULL DEFAULT NULL,
   PRIMARY KEY (`user_id`),
-  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE,
-  UNIQUE INDEX `user_name_UNIQUE` (`user_name` ASC) VISIBLE,
-  INDEX `user_eng_level_id_idx` (`eng_level_id` ASC) VISIBLE,
-  INDEX `user_eng_type_id_idx` (`eng_type_id` ASC) VISIBLE,
-  INDEX `user_team_id_idx` (`team_id` ASC) VISIBLE,
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) ,
+  UNIQUE INDEX `user_name_UNIQUE` (`user_name` ASC) ,
+  INDEX `user_eng_level_id_idx` (`eng_level_id` ASC) ,
+  INDEX `user_eng_type_id_idx` (`eng_type_id` ASC) ,
+  INDEX `user_team_id_idx` (`team_id` ASC) ,
   CONSTRAINT `user_eng_level_id`
     FOREIGN KEY (`eng_level_id`)
     REFERENCES `erp`.`eng_level` (`eng_level_id`)
@@ -202,8 +202,8 @@ CREATE TABLE IF NOT EXISTS `erp`.`project_user` (
   `sheet_id` INT(11) NULL DEFAULT NULL,
   `user_id` INT(11) NULL DEFAULT NULL,
   PRIMARY KEY (`project_user_id`),
-  INDEX `project_sheet_id_idx` (`sheet_id` ASC) VISIBLE,
-  INDEX `project_user_idx_idx` (`user_id` ASC) VISIBLE,
+  INDEX `project_sheet_id_idx` (`sheet_id` ASC) ,
+  INDEX `project_user_idx_idx` (`user_id` ASC) ,
   CONSTRAINT `project_sheet_id`
     FOREIGN KEY (`sheet_id`)
     REFERENCES `erp`.`sheet` (`sheet_id`)
@@ -241,8 +241,8 @@ CREATE TABLE IF NOT EXISTS `erp`.`task` (
   `is_children` TINYINT(4) NOT NULL,
   `allocation` INT(11) NULL DEFAULT NULL,
   PRIMARY KEY (`task_id`),
-  INDEX `task_sheet_id_idx` (`sheet_id` ASC) VISIBLE,
-  INDEX `task_user_id_idx` (`user_id` ASC) VISIBLE,
+  INDEX `task_sheet_id_idx` (`sheet_id` ASC) ,
+  INDEX `task_user_id_idx` (`user_id` ASC) ,
   CONSTRAINT `task_sheet_id`
     FOREIGN KEY (`sheet_id`)
     REFERENCES `erp`.`sheet` (`sheet_id`)
@@ -281,9 +281,9 @@ CREATE TABLE IF NOT EXISTS `erp`.`task_final` (
   `is_children` TINYINT(4) NOT NULL,
   `allocation` INT(11) NULL DEFAULT NULL,
   PRIMARY KEY (`task_final_id`),
-  INDEX `task_final_sheet_id_idx` (`sheet_id` ASC) VISIBLE,
-  INDEX `task_final_user_id_idx` (`user_id` ASC) VISIBLE,
-  INDEX `task_final_date_idx` (`final_date_id` ASC) VISIBLE,
+  INDEX `task_final_sheet_id_idx` (`sheet_id` ASC) ,
+  INDEX `task_final_user_id_idx` (`user_id` ASC) ,
+  INDEX `task_final_date_idx` (`final_date_id` ASC) ,
   CONSTRAINT `task_final_date_id`
     FOREIGN KEY (`final_date_id`)
     REFERENCES `erp`.`final_date` (`final_date_id`)
@@ -318,7 +318,7 @@ CREATE TABLE IF NOT EXISTS `erp`.`time_off` (
   `updated_date` DATETIME NULL DEFAULT NULL,
   `updated_by` VARCHAR(45) NULL DEFAULT NULL,
   PRIMARY KEY (`time_off_id`),
-  INDEX `time_off_user_id_idx` (`user_id` ASC) VISIBLE,
+  INDEX `time_off_user_id_idx` (`user_id` ASC) ,
   CONSTRAINT `time_off_user_id`
     FOREIGN KEY (`user_id`)
     REFERENCES `erp`.`user` (`user_id`)

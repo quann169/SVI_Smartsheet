@@ -63,8 +63,27 @@ class Configuration(Connection):
             return query_result
         else:
             return result
-        
     
+    def add_sheet(self):
+        query   = """INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`) VALUES ("%s", "%s", "%s", "%s");
+        """%(DbTable.SHEET, DbHeader.SHEET_TYPE_ID, DbHeader.SHEET_NAME, DbHeader.LATEST_MODIFIED, DbHeader.UPDATED_BY,\
+             self.sheet_type_id, self.sheet_name, self.latest_modified, self.updated_by
+             )
+        self.db_execute(query)
+    
+    def is_exist_sheet(self):
+        query   = """SELECT `%s` FROM `%s` WHERE `%s`="%s";
+        """%( DbHeader.SHEET_ID, DbTable.SHEET, DbHeader.SHEET_NAME, self.sheet_name)
+        query_result    = self.db_query(query)
+        if query_result:
+            return True
+        else:
+            return False
+    
+    def update_sheet(self, ):
+        query   = """UPDATE `%s` SET `%s`="%s", `%s`="%s"  WHERE `%s`="%s";
+        """%( DbTable.SHEET, DbHeader.SHEET_TYPE_ID, self.sheet_type_id, DbHeader.UPDATED_BY, self.updated_by, DbHeader.SHEET_NAME, self.sheet_name)
+        self.db_execute(query)
         
     def update_latest_modified_of_sheet(self):
         query   = '''UPDATE 
@@ -196,7 +215,123 @@ class Configuration(Connection):
         else:
             return False
     
+    def get_list_resource(self):
+        query = """
+                SELECT `%s`.`%s`,
+                        `%s`.`%s`,
+                        `%s`.`%s`,
+                        `%s`.`%s`,
+                        `%s`.`%s`,
+                        `%s`.`%s`,
+                        `%s`.`%s`,
+                        `%s`.`%s`,
+                        `%s`.`%s`
+                FROM `%s`
+                INNER JOIN `%s`
+                ON `%s`.`%s`=`%s`.`%s`
+                INNER JOIN `%s`
+                ON `%s`.`%s`=`%s`.`%s`
+                INNER JOIN `%s`
+                ON `%s`.`%s`=`%s`.`%s`;
+        """%(
+            DbTable.USER, DbHeader.USER_ID, 
+            DbTable.USER, DbHeader.USER_NAME, 
+            DbTable.USER, DbHeader.FULL_NAME, 
+            DbTable.USER, DbHeader.EMAIL,
+            DbTable.USER, DbHeader.IS_ACTIVE,
+            DbTable.USER, DbHeader.OTHER_NAME,
+            DbTable.TEAM, DbHeader.TEAM_NAME,
+            DbTable.ENG_LEVEL, DbHeader.LEVEL,
+            DbTable.ENG_TYPE, DbHeader.ENG_TYPE_NAME,
+            DbTable.TEAM, 
+            DbTable.USER, 
+            DbTable.TEAM, DbHeader.TEAM_ID, DbTable.USER, DbHeader.TEAM_ID,
+            DbTable.ENG_LEVEL, 
+            DbTable.ENG_LEVEL, DbHeader.ENG_LEVEL_ID, DbTable.USER, DbHeader.ENG_LEVEL_ID,
+            DbTable.ENG_TYPE, 
+            DbTable.ENG_TYPE, DbHeader.ENG_TYPE_ID, DbTable.USER, DbHeader.ENG_TYPE_ID
+            )
+        query_result    = self.db_query(query)
+        result          = ()
+        if query_result:
+            return query_result
+        else:
+            return result
     
+    def get_team_info(self):
+        query = """
+                SELECT `%s`, `%s`, `%s`
+                FROM `%s`;
+        """%(
+            DbHeader.TEAM_ID, DbHeader.TEAM_NAME, DbHeader.TEAM_LEAD_ID,
+            DbTable.TEAM
+            )
+        query_result    = self.db_query(query)
+        result          = ()
+        if query_result:
+            return query_result
+        else:
+            return result
+    
+    def get_eng_level_info(self):
+        query = """
+                SELECT `%s`, `%s`
+                FROM `%s`;
+        """%(
+            DbHeader.ENG_LEVEL_ID, DbHeader.LEVEL,
+            DbTable.ENG_LEVEL
+            )
+        query_result    = self.db_query(query)
+        result          = ()
+        if query_result:
+            return query_result
+        else:
+            return result
+    
+    def get_eng_type_info(self):
+        query = """
+                SELECT `%s`, `%s`
+                FROM `%s`;
+        """%(
+            DbHeader.ENG_TYPE_ID, DbHeader.ENG_TYPE_NAME,
+            DbTable.ENG_TYPE
+            )
+        query_result    = self.db_query(query)
+        result          = ()
+        if query_result:
+            return query_result
+        else:
+            return result
+           
+    def add_resource(self):
+        query   = """INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`)
+                    VALUES ("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s");
+        """%(DbTable.USER, DbHeader.USER_NAME, DbHeader.FULL_NAME, DbHeader.EMAIL, DbHeader.IS_ACTIVE, DbHeader.OTHER_NAME,\
+             DbHeader.UPDATED_BY, DbHeader.ENG_LEVEL_ID, DbHeader.ENG_TYPE_ID, DbHeader.TEAM_ID,\
+             self.user_name, self.full_name, self.email, self.is_active, self.other_name, self.updated_by, 
+             self.eng_level_id, self.eng_type_id, self.team_id
+             )
+        self.db_execute(query)
+    
+    def is_exist_resource(self):
+        query   = """SELECT `%s` FROM `%s` WHERE `%s`="%s";
+        """%( DbHeader.USER_ID, DbTable.USER, DbHeader.USER_NAME, self.user_name)
+        query_result    = self.db_query(query)
+        if query_result:
+            return True
+        else:
+            return False
+    
+    def update_resource(self, ):
+        query   = """UPDATE `%s` SET `%s`="%s", `%s`="%s" , `%s`="%s" , `%s`="%s" , `%s`="%s" , `%s`="%s" , `%s`="%s" , `%s`="%s"
+                    WHERE `%s`="%s";
+        """%( DbTable.USER, DbHeader.FULL_NAME, self.full_name, DbHeader.EMAIL, self.email,
+              DbHeader.IS_ACTIVE, self.is_active, DbHeader.OTHER_NAME, self.other_name,
+              DbHeader.UPDATED_BY, self.updated_by, DbHeader.ENG_LEVEL_ID, self.eng_level_id,
+              DbHeader.ENG_TYPE_ID, self.eng_type_id, DbHeader.TEAM_ID, self.team_id,
+               DbHeader.USER_NAME, self.user_name)
+        self.db_execute(query)
+        
 class Task(Connection):
     def __init__(self):
         Connection.__init__(self)

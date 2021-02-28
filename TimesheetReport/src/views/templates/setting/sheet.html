@@ -7,7 +7,7 @@
 {% endblock breadcrumb %}
 {% block sidebar %}
 	{% set active_sidebar = 'sheet' %}
-	{% with active_sidebar=active_sidebar %}
+	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
 		{% include "sidebar.html" %}
 	{% endwith %}
 {% endblock sidebar %}
@@ -32,6 +32,8 @@
       </th>
 	  <th class="th-sm">Sheet Type
       </th>
+	  <th class="th-sm">Resource
+      </th>
       <th class="th-sm">Latest Modified
       </th>
     </tr>
@@ -42,6 +44,7 @@
 		  <td>{{loop.index}}</td>
 		  <td>{{row[db_header.SHEET_NAME]}}</td>
           <td>{{row[db_header.SHEET_TYPE]}}</td>
+		  <td></td>
 	      <td>{{row[db_header.LATEST_MODIFIED] | string }}</td>
 	    </tr>
 	{% endfor %}

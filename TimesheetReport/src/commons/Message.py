@@ -16,3 +16,4 @@ class MsgWarning:
 
 class Msg:
     M001    = 'Import successfully'
+
