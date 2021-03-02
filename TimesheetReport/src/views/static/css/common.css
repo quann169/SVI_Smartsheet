@@ -12,13 +12,16 @@ p {
 }
 
 a,
-a:hover,
 a:focus {
     color: inherit;
     text-decoration: none;
     transition: all 0.3s;
 }
-
+a:hover {
+    text-decoration: none;
+    transition: all 0.3s;
+	font-weight: bold;
+}
 .navbar {
     padding: 15px 10px;
     background: #fff;
@@ -150,6 +153,7 @@ a.article:hover {
 
 .main-div {
 	padding: 40px;
+	
 }
 /* ---------------------------------------------------
     MEDIAQUERIES
@@ -173,15 +177,30 @@ a.article:hover {
 	font-weight: bold;
 }
 
-
+.dataTables_length {
+	margin-top: 5px;
+	
+}
 /* ---------------------------------------------------
     Style for tags
 ----------------------------------------------------- */
-input {
+input, select {
     height: calc(1.5em + .75rem + 2px);
 }
-
-
+tr {
+	background-color: white !important;
+    border: 1px solid #aaa !important;
+}
+th {
+	background-color: #e9e9e9 !important;
+	border: 1px solid #aaa !important;
+}
+td {
+	border: 1px solid #aaa !important;
+}
+table, table.dataTable {
+	border-collapse: collapse !important;
+}
 /* ---------------------------------------------------
     Single style
 ----------------------------------------------------- */
@@ -201,5 +220,37 @@ input {
 .mg-l-5 {
 	margin-left: 5px;
 }
+.mg-r-5 {
+	margin-right: 5px;
+}
+.mg-t-5 {
+	margin-top: 5px;
+}
+.mg-b-5 {
+	margin-bottom: 5px;
+}
 
-
+.cl-blue {
+	color: blue;
+}
+.cl-red {
+	color: red;
+}
+.bg-red {
+	background-color: red;
+}
+.bg-blue {
+	background-color: blue;
+}
+.underline {
+	text-decoration: underline;
+}
+.mxw-100 {
+	max-width: 100px;
+}
+.mxh-100 {
+	max-height: 100px;
+}
+.h-100 {
+	max-width: 100px;
+}

@@ -8,9 +8,9 @@ import os, ast
 from flask import Blueprint, render_template, session, redirect, url_for, abort, request, jsonify
 from pprint import pprint
 import logging
-from src.commons.Utils import save_file_from_request, get_request_form_ajax, get_request_form_ajax, get_request_form_ajax
+from src.commons.Utils import save_file_from_request, get_request_form_ajax, get_request_form_ajax, get_request_form_ajax, get_request_args, get_request_args_list
 from src.controllers.Controllers import Controllers as ctrl
-from src.commons.Enums import DbTable, DbHeader
+from src.commons.Enums import DbTable, DbHeader, SessionKey
 from src.commons.Utils import println
 
 
@@ -20,7 +20,7 @@ timesheet_bp = Blueprint('timesheet_bp', __name__, template_folder=tempalte_path
 
 
 @timesheet_bp.route('/')
-def home():
+def index():
     println('/', 'debug')
     try:
         ctrl_obj   = ctrl()
@@ -29,6 +29,16 @@ def home():
         println(e, 'exception')
         return abort(500, e)
 
+@timesheet_bp.route('/home')
+def home():
+    println('/', 'debug')
+    try:
+        ctrl_obj   = ctrl()
+        return render_template("home.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+    
 @timesheet_bp.route('/upload_file', methods=['POST'])
 def upload_file():
     println('/upload_file', 'debug')
@@ -145,6 +155,31 @@ def update_session():
         request_dict = get_request_form_ajax()
         result = ctrl().update_session(request_dict['session_key'], request_dict['session_value'], )
         return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+
+@timesheet_bp.route('/timesheet')
+def timesheet():
+    println('/', 'debug')
+    try:
+        request_dict = get_request_args_list()
+        ctrl_obj   = ctrl()
+        return render_template("timesheet.html", ctrl_obj = ctrl_obj, db_header = DbHeader(), session_enum = SessionKey(), request_dict = request_dict)
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+
+@timesheet_bp.route('/test')
+def test():
+    println('/test', 'debug')
+    try:
+        ctrl_obj   = ctrl()
+        
+        ctrl_obj.get_timesheet_info(None, '2021-02-25', '2021-03-10', [1, 2, 3, 4], 'current')
+        
+        
+        return render_template("test.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)

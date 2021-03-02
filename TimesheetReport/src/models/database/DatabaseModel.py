@@ -6,7 +6,7 @@ Created on Feb 22, 2021
 from src.models.database.ConnectionModel import Connection
 from src.commons.Enums import DbHeader, DbTable
 from pprint import pprint
-
+from src.commons.Utils import get_work_days
 
 
 class Configuration(Connection):
@@ -14,8 +14,20 @@ class Configuration(Connection):
         Connection.__init__(self)
         self.users              = {}
         self.users_full_name    = {}
+        self.user_ids           = {}
+        self.sheet_ids          = {}
+        self.holiday            = []
+        self.time_off           = {}
+        self.sheet_type         = {}
+        self.sheet_type_ids     = {}
+        self.eng_type           = {}
+        self.eng_type_ids       = {}
+        self.eng_level          = {}
+        self.eng_level_ids      = {}
+        self.team               = {}
+        self.team_ids           = {}
         
-    def get_sheet_config(self, list_sheet_id=None):
+    def get_sheet_config(self, list_sheet_id=None, is_parse=False):
         condition = ''
         if list_sheet_id:
             condition   = 'WHERE `%s`.`%s` IN (%s)'%(DbTable.SHEET, DbHeader.SHEET_ID, ', '.join(list_sheet_id))
@@ -45,11 +57,20 @@ class Configuration(Connection):
         query_result    = self.db_query(query)
         result          = ()
         if query_result:
+            if is_parse:
+                for row in query_result:
+                    self.sheet_ids[row[DbHeader.SHEET_ID]] = {\
+                        DbHeader.SHEET_ID                       : row[DbHeader.SHEET_ID],
+                        DbHeader.SHEET_NAME                     : row[DbHeader.SHEET_NAME],
+                        DbHeader.LATEST_MODIFIED                : row[DbHeader.LATEST_MODIFIED],
+                        DbHeader.SHEET_TYPE                     : row[DbHeader.SHEET_TYPE]
+                        }
+                
             return query_result
         else:
             return result
     
-    def get_sheet_type_info(self):
+    def get_sheet_type_info(self, is_parse=False):
         query = """
                 SELECT `%s`, `%s`
                 FROM `%s`;
@@ -60,6 +81,12 @@ class Configuration(Connection):
         query_result    = self.db_query(query)
         result          = ()
         if query_result:
+            if is_parse:
+                for row in query_result:
+                    sheet_type_id   = row[DbHeader.SHEET_TYPE_ID]
+                    sheet_type_name = row[DbHeader.SHEET_TYPE]
+                    self.sheet_type[sheet_type_name] = sheet_type_id
+                    self.sheet_type_ids[sheet_type_id] = sheet_type_name
             return query_result
         else:
             return result
@@ -133,6 +160,7 @@ class Configuration(Connection):
                 user_obj    = Users(row)
                 self.users[user_obj.user_name] = user_obj
                 self.users_full_name[user_obj.full_name] = user_obj
+                self.user_ids[user_obj.user_id] = user_obj
         else:
             pass
     
@@ -147,9 +175,14 @@ class Configuration(Connection):
                     ;'''
         self.db_execute_many(query, list_record)
     
-    def get_list_timeoff(self):
+    def get_list_timeoff(self, is_parse=False, start_date=None, end_date=None):
+        condition   = ""
+        if start_date != None and end_date != None:
+            condition = 'WHERE `%s`>="%s" AND `%s`<="%s" '%(DbHeader.START_DATE, start_date, DbHeader.END_DATE, end_date)
+        
         query = """
                 SELECT `%s`.`%s`,
+                        `%s`.`%s`,
                         `%s`.`%s`,
                         `%s`.`%s`,
                         `%s`.`%s`,
@@ -159,10 +192,12 @@ class Configuration(Connection):
                         `%s`.`%s`
                 FROM `%s`
                 INNER JOIN `%s`
-                ON `%s`.`%s`=`%s`.`%s`;
+                ON `%s`.`%s`=`%s`.`%s`
+                %s;
         """%(
             DbTable.TIME_OFF, DbHeader.TIME_OFF_ID, 
             DbTable.USER, DbHeader.USER_NAME, 
+            DbTable.USER, DbHeader.USER_ID, 
             DbTable.TIME_OFF, DbHeader.DEPARTMENT, 
             DbTable.TIME_OFF, DbHeader.TYPE,
             DbTable.TIME_OFF, DbHeader.START_DATE,
@@ -171,16 +206,29 @@ class Configuration(Connection):
             DbTable.TIME_OFF, DbHeader.STATUS,
             DbTable.TIME_OFF, 
             DbTable.USER, 
-            DbTable.TIME_OFF, DbHeader.USER_ID, DbTable.USER, DbHeader.USER_ID
+            DbTable.TIME_OFF, DbHeader.USER_ID, DbTable.USER, DbHeader.USER_ID,
+            condition
             )
         query_result    = self.db_query(query)
+        
         result          = ()
         if query_result:
+            if is_parse:
+                for row in query_result:
+                    timeoff_obj     = TimeOff(row)
+                    try:
+                        unuse   = self.time_off[timeoff_obj.user_id]
+                    except KeyError:
+                        self.time_off[timeoff_obj.user_id]  = []
+                    
+                    for date, week in timeoff_obj.dates:
+                        self.time_off[timeoff_obj.user_id].append([date, week, timeoff_obj.timeoff_per_day, timeoff_obj])
+                    
             return query_result
         else:
             return result
     
-    def get_list_holiday(self):
+    def get_list_holiday(self, is_parse=False):
         query = """
                 SELECT `%s`
                 FROM `%s`;
@@ -191,6 +239,9 @@ class Configuration(Connection):
         query_result    = self.db_query(query)
         result          = ()
         if query_result:
+            if is_parse:
+                for row in query_result:
+                    self.holiday.append(row[DbHeader.DATE])
             return query_result
         else:
             return result
@@ -258,7 +309,7 @@ class Configuration(Connection):
         else:
             return result
     
-    def get_team_info(self):
+    def get_team_info(self, is_parse=False):
         query = """
                 SELECT `%s`, `%s`, `%s`
                 FROM `%s`;
@@ -269,11 +320,18 @@ class Configuration(Connection):
         query_result    = self.db_query(query)
         result          = ()
         if query_result:
+            if is_parse:
+                for row in query_result:
+                    team_id   = row[DbHeader.TEAM_ID]
+                    team_name = row[DbHeader.TEAM_NAME]
+                    lead_id   = row[DbHeader.TEAM_LEAD_ID]
+                    self.team[team_name] = team_id
+                    self.team_ids[team_id] = team_name
             return query_result
         else:
             return result
     
-    def get_eng_level_info(self):
+    def get_eng_level_info(self, is_parse=False):
         query = """
                 SELECT `%s`, `%s`
                 FROM `%s`;
@@ -284,11 +342,17 @@ class Configuration(Connection):
         query_result    = self.db_query(query)
         result          = ()
         if query_result:
+            if is_parse:
+                for row in query_result:
+                    eng_level_id   = row[DbHeader.ENG_LEVEL_ID]
+                    eng_level_name = row[DbHeader.LEVEL]
+                    self.eng_level[eng_level_name] = eng_level_id
+                    self.eng_level_ids[eng_level_id] = eng_level_name
             return query_result
         else:
             return result
     
-    def get_eng_type_info(self):
+    def get_eng_type_info(self, is_parse=False):
         query = """
                 SELECT `%s`, `%s`
                 FROM `%s`;
@@ -299,6 +363,12 @@ class Configuration(Connection):
         query_result    = self.db_query(query)
         result          = ()
         if query_result:
+            if is_parse:
+                for row in query_result:
+                    eng_type_id   = row[DbHeader.ENG_TYPE_ID]
+                    eng_type_name = row[DbHeader.ENG_TYPE_NAME]
+                    self.eng_type[eng_type_name] = eng_type_id
+                    self.eng_type_ids[eng_type_id] = eng_type_name
             return query_result
         else:
             return result
@@ -359,7 +429,26 @@ class Task(Connection):
 
         self.db_execute_many(query, list_record)
     
-    
+    def get_tasks(self):
+        query = """
+                SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`
+                FROM `%s`
+                WHERE
+                `%s`="%s" AND `%s`>="%s" AND `%s`<="%s";
+        """%(
+            DbHeader.TASK_ID, DbHeader.USER_ID,  DbHeader.SIBLING_ID, DbHeader.PARENT_ID, DbHeader.SELF_ID, DbHeader.TASK_NAME, DbHeader.DATE, DbHeader.ALLOCATION, DbHeader.IS_CHILDREN,
+            DbHeader.START_DATE, DbHeader.END_DATE,  DbHeader.DURATION, DbHeader.COMPLETE, DbHeader.PREDECESSORS, DbHeader.COMMENT, DbHeader.ACTUAL_END_DATE, DbHeader.STATUS, 
+            DbTable.TASK,
+            DbHeader.SHEET_ID, self.sheet_id, DbHeader.DATE, self.start_date, DbHeader.DATE, self.end_date
+            )
+        
+        query_result    = self.db_query(query)
+        result          = ()
+        if query_result:
+            return query_result
+        else:
+            return result
+        
     
 class FinalTask(Connection):
     def __init__(self):
@@ -380,7 +469,6 @@ class Users(Connection):
         self.eng_level_id   = None
         self.eng_type_id    = None
         self.team_id        = None
-        
         if info:
             self.user_id        = int(info[DbHeader.USER_ID])
             self.user_name      = info[DbHeader.USER_NAME]
@@ -393,5 +481,32 @@ class Users(Connection):
             self.eng_level_id   = int(info[DbHeader.ENG_LEVEL_ID])
             self.eng_type_id    = int(info[DbHeader.ENG_TYPE_ID])
             self.team_id        = int(info[DbHeader.TEAM_ID])
-    
-    
+
+class TimeOff(Connection):
+    def __init__(self, info=None):
+        Connection.__init__(self)
+        self.time_off_id    = None
+        self.user_name      = None
+        self.department     = None
+        self.type           = None
+        self.start_date     = None
+        self.end_date       = None
+        self.work_days      = None
+        self.timeoff_per_day = None
+        self.status         = None
+        self.user_id        = 0
+        self.dates          = []
+        
+        if info:
+            self.time_off_id    = info[DbHeader.TIME_OFF_ID]
+            self.user_name      = info[DbHeader.USER_NAME]
+            self.department     = info[DbHeader.DEPARTMENT]
+            self.type           = info[DbHeader.TYPE]
+            self.start_date     = info[DbHeader.START_DATE]
+            self.end_date       = info[DbHeader.END_DATE]
+            self.work_days      = int(info[DbHeader.WORK_DAYS])
+            self.status         = info[DbHeader.STATUS]
+            self.user_id        = info[DbHeader.USER_ID]
+            self.dates          = get_work_days(from_date=self.start_date, to_date=self.end_date)
+            self.timeoff_per_day    = int(self.work_days / len(self.dates))
+            

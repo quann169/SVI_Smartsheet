@@ -15,6 +15,7 @@
 			{%- block styles %}
 				<link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap-4.5.3/css/bootstrap.min.css') }}" />  
 				<link rel="stylesheet" href="{{ url_for('static', filename='lib/DataTables/datatables.min.css') }}" /> 
+				<link rel="stylesheet" href="{{ url_for('static', filename='lib/multiple-select/example-styles.css') }}" /> 
 				<!-- Our Custom CSS -->
 			    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.css') }}" />
 				<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
@@ -57,12 +58,17 @@
 			<script src="{{url_for('static', filename='lib/popper-1.14.0.min.js')}}"></script>
 			<script src="{{url_for('static', filename='lib/bootstrap-4.5.3/js/bootstrap.min.js')}}"></script>
 			<script src="{{url_for('static', filename='lib/DataTables/datatables.min.js')}}"></script>
+			<script src="{{url_for('static', filename='lib/multiple-select/jquery.multi-select.js')}}"></script>
+			
 			<script src="{{url_for('static', filename='js/enum.js')}}"></script>
 			<script src="{{url_for('static', filename='js/common.js')}}"></script>
 			<script src="{{url_for('static', filename='js/setting/time_off.js')}}"></script>
 			<script src="{{url_for('static', filename='js/setting/holiday.js')}}"></script>
 			<script src="{{url_for('static', filename='js/setting/sheet.js')}}"></script>
 			<script src="{{url_for('static', filename='js/setting/resource.js')}}"></script>
+			<script src="{{url_for('static', filename='js/setting/home.js')}}"></script>
+			
+			<script src="{{url_for('static', filename='js/timesheet.js')}}"></script>
 	    {%- endblock scripts %}
 		
 	    

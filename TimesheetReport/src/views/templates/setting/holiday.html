@@ -30,6 +30,8 @@
       </th>
       <th class="th-sm">Date
       </th>
+	  <th class="th-sm">Detail
+      </th>
     </tr>
   </thead>
   <tbody>
@@ -37,6 +39,7 @@
 		<tr>
 		  <td>{{loop.index}}</td>
 	      <td>{{row[db_header.DATE].strftime('%Y-%m-%d')}}</td>
+		  <td></td>
 	    </tr>
 	{% endfor %}
 

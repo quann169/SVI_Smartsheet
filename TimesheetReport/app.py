@@ -9,7 +9,6 @@ from src.controllers.routes.Route import timesheet_bp
 from flask import Flask, flash, request, redirect, url_for
 
 
-ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
 
 
 port        = 6602

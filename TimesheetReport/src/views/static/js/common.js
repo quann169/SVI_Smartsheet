@@ -30,6 +30,17 @@ function get_form_submit(form_id) {
     return data
 };
 
+function get_value_from_multiple_select() {
+	const list_checkbox = $('.multi-select-menu').find('input');
+	var result = [];
+	list_checkbox.each(function(){
+		if ($(this).prop('checked') == true ) {
+			result.push($(this).val());
+		}
+	});
+	return result;
+	}
+
 function upload_file (form_id) {
 	var form_data = new FormData($(form_id)[0]);
 	var result = null;

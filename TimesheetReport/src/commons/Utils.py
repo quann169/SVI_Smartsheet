@@ -8,7 +8,7 @@ import datetime, calendar
 import ast
 from src.commons.Message import Msg, MsgError, MsgWarning
 import string
-from src.commons.Enums import DateTime
+from src.commons.Enums import DateTime, SessionKey
 import logging
 import config
 from flask import request
@@ -29,6 +29,17 @@ def get_request_args():
     forms = request.args
     for form in forms:
         request_dict[form] = forms.get(form)
+    return request_dict
+
+def get_request_args_list():
+    # for get method
+    request_dict = {}
+    forms = request.args
+    for form in forms:
+        if form in [SessionKey.SHEETS]:
+            request_dict[form] = forms.getlist(form, type=int)
+        else:
+            request_dict[form] = forms.get(form)
     return request_dict
 
 def get_request_form_ajax():
@@ -62,6 +73,8 @@ def save_file_from_request():
         println(e, 'exception')
         return 0, e
 
+
+        
 def stuck(message='', logging_level=None):
     print ('ERROR ' + message)
     raise Exception(message)
@@ -168,6 +181,14 @@ def str_to_date(string):
     month   = obj_date.month
     day     = obj_date.day
     return obj_date, year, month, day
+
+def get_week_number(date):
+    if isinstance(date, datetime.date) or isinstance(date, datetime.datetime):
+        result  = date.isocalendar()[1]
+    else:
+        date = str_to_date(date)[0]
+        result  = date.isocalendar()[1]
+    return result
 
 def convert_date_to_string(date_obj, format_str='%Y-%m-%d %H:%M:%S'):
     if isinstance(date_obj, datetime.datetime):

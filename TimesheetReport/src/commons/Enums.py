@@ -96,6 +96,7 @@ class ExcelHeader:
     LEADER      = 'Leader'
     TEAM        = 'Team'
     IS_ACTIVE   = 'Is Active'
+    
 class DefaulteValue:
     DATETIME    = '0000-00-00 00:00:00'
     
@@ -111,10 +112,13 @@ class SettingKeys:
 
 
 class SessionKey:
-    USER_NAME       = 'user_name'
+    USERNAME        = 'username'
     PASSWORD        = 'password'
     SIDEBAR         = 'sidebar'
-    
+    SHEETS          = 'sheets'
+    FROM            = 'from'
+    TO              = 'to'
+    FILTER          = 'filter'
     
     
 class DbHeader:

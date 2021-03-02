@@ -3,11 +3,12 @@ Created on Feb 22, 2021
 
 @author: toannguyen
 '''
-from src.models.smartsheet.SmartsheetModel import Sheet, Task, SmartSheets
-from src.models.database.DatabaseModel import Configuration, Task, FinalTask
-from src.commons.Enums import DbHeader, DbTable, ExcelHeader, SettingKeys, DefaulteValue
+from src.models.smartsheet.SmartsheetModel import SmartSheets
+from src.models.database.DatabaseModel import Configuration, Task
+from src.commons.Enums import DbHeader, DbTable, ExcelHeader, SettingKeys, DefaulteValue, SessionKey
 from src.commons.Message import MsgError, MsgWarning, Msg
 from src.commons.Utils import search_pattern, message_generate, println, remove_path, split_patern
+from src.models.timesheet.TimesheetModel import Timesheet
 from flask import session
 from pprint import pprint
 import pandas as pd
@@ -206,12 +207,12 @@ class Controllers:
             file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
             df          = pd.read_excel (file_path, sheet_name='Sheet', engine='openpyxl')
             config_obj  = Configuration()
-            sheet_type  = config_obj.get_sheet_type_info()
-            sheet_type_info = {}
-            for row in sheet_type:
-                sheet_type_id   = row[DbHeader.SHEET_TYPE_ID]
-                sheet_type_name = row[DbHeader.SHEET_TYPE]
-                sheet_type_info[sheet_type_name] = sheet_type_id
+            config_obj.get_sheet_type_info(is_parse=True)
+            sheet_type_info = config_obj.sheet_type
+#             for row in sheet_type:
+#                 sheet_type_id   = row[DbHeader.SHEET_TYPE_ID]
+#                 sheet_type_name = row[DbHeader.SHEET_TYPE]
+#                 sheet_type_info[sheet_type_name] = sheet_type_id
             
             sms_obj = SmartSheets()
             sms_obj.connect_smartsheet()
@@ -257,29 +258,29 @@ class Controllers:
             file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
             df          = pd.read_excel (file_path, sheet_name='Staff', engine='openpyxl')
             config_obj  = Configuration()
-            eng_type  = config_obj.get_eng_type_info()
-            eng_type_info = {}
-            for row in eng_type:
-                eng_type_id   = row[DbHeader.ENG_TYPE_ID]
-                eng_type_name = row[DbHeader.ENG_TYPE_NAME]
-                eng_type_info[eng_type_name] = eng_type_id
+            config_obj.get_eng_type_info(is_parse=True)
+            eng_type_info = config_obj.eng_type
+#             for row in eng_type:
+#                 eng_type_id   = row[DbHeader.ENG_TYPE_ID]
+#                 eng_type_name = row[DbHeader.ENG_TYPE_NAME]
+#                 eng_type_info[eng_type_name] = eng_type_id
             
             
-            eng_level  = config_obj.get_eng_level_info()
-            eng_level_info = {}
-            for row in eng_level:
-                eng_level_id   = row[DbHeader.ENG_LEVEL_ID]
-                eng_level_name = row[DbHeader.LEVEL]
-                eng_level_info[eng_level_name] = eng_level_id
+            config_obj.get_eng_level_info(is_parse=True)
+            eng_level_info = config_obj.eng_level
+#             for row in eng_level:
+#                 eng_level_id   = row[DbHeader.ENG_LEVEL_ID]
+#                 eng_level_name = row[DbHeader.LEVEL]
+#                 eng_level_info[eng_level_name] = eng_level_id
 
 
-            teams  = config_obj.get_team_info()
-            teams_info = {}
-            for row in teams:
-                team_id   = row[DbHeader.TEAM_ID]
-                team_name = row[DbHeader.TEAM_NAME]
-                lead_id   = row[DbHeader.TEAM_LEAD_ID]
-                teams_info[team_name] = team_id
+            teams  = config_obj.get_team_info(is_parse=True)
+            teams_info = config_obj.team
+#             for row in teams:
+#                 team_id   = row[DbHeader.TEAM_ID]
+#                 team_name = row[DbHeader.TEAM_NAME]
+#                 lead_id   = row[DbHeader.TEAM_LEAD_ID]
+#                 teams_info[team_name] = team_id
             
             config_obj.set_attr(updated_by  = 'root')
             for index in range(0, len(df[ExcelHeader.RESOURCE])):
@@ -292,12 +293,11 @@ class Controllers:
                 leader            = str(df[ExcelHeader.LEADER][index])
                 is_active         = str(df[ExcelHeader.IS_ACTIVE][index])
                 other_name        = str(df[ExcelHeader.OTHER_NAME][index])
-                
-                
-                
+
                 if resource not in SettingKeys.EMPTY_CELL:
                     try:
                         eng_type_id   = eng_type_info[eng_type]
+                        
                     except KeyError:
                         eng_type_id  = SettingKeys.NA_ENG_TYPE_ID
                     try:
@@ -325,8 +325,76 @@ class Controllers:
                         config_obj.update_resource()
                     else:
                         config_obj.add_resource()
-                
             return 1, Msg.M001
         except Exception as e:
             println(e, 'exception')
-            return 0, e       
+            return 0, e
+        
+    def get_list_sheet_name(self):
+        config_obj      = Configuration()
+        sheet_info      = config_obj.get_sheet_config()
+        return sheet_info
+    
+    def get_sheet_information(self, list_sheet_id=None):
+        config_obj      = Configuration()
+        sheet_info      = config_obj.get_sheet_config(list_sheet_id)
+        list_week       = ['2021-02-22', '2021-03-01', '2021-03-08', '2021-03-15', '2021-03-22']
+        result  = [sheet_info, list_week]
+        return result
+        
+    def get_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter=None):
+        try:
+            pprint (request_dict)
+            missing_method = False
+            if request_dict:
+                try:
+                    from_date   = request_dict[SessionKey.FROM]
+                    to_date     = request_dict[SessionKey.TO]
+                    sheet_ids   = request_dict[SessionKey.SHEETS]
+                    filter      = request_dict[SessionKey.FILTER]
+                except KeyError:
+                    missing_method = True
+            if not filter or not sheet_ids or not to_date or not from_date or missing_method:
+                return []
+            result = []
+            timesheet_obj   = Timesheet(from_date, to_date, filter, sheet_ids)
+            timesheet_obj.parse()
+            user_ids        = timesheet_obj.user_ids
+            eng_type_ids   = timesheet_obj.eng_type_ids
+            team_ids        = timesheet_obj.team_ids
+            time_off_info   = timesheet_obj.time_off
+            
+            for sheet_id in timesheet_obj.sheets:
+                sheet_obj   = timesheet_obj.sheets[sheet_id]
+                sheet_type  = sheet_obj.sheet_type
+                sheet_name  = sheet_obj.sheet_name
+                for user_id in sheet_obj.resource:
+                    for task_obj in sheet_obj.resource[user_id]:
+                        user_name   = task_obj.user_name
+                        eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
+                        team_name   = team_ids[user_ids[user_id].team_id]
+                        week_number = task_obj.week_number
+                        task_date   = task_obj.date
+                        task_name   = task_obj.task_name
+                        start_date  = task_obj.start_date
+                        end_date    = task_obj.end_date
+                        allocation  = task_obj.allocation
+                        work_hour   = 8*(allocation)/100
+                        timeoff     = 0
+                        if user_id in time_off_info:
+                            for date, week, timeoff_per_day, obj in time_off_info[user_id]:
+                                if date == task_date:
+                                    timeoff = timeoff_per_day
+                                    break
+                        
+                        sdt_hour    = work_hour - timeoff
+                        result.append((sheet_name, sheet_type, user_name, eng_type, team_name, week_number, task_date, task_name, start_date, end_date, allocation, work_hour, timeoff, sdt_hour))
+            return result
+            
+        except Exception as e:
+            println(e, 'exception')
+            return 0, e
+        
+        
+        
+        
