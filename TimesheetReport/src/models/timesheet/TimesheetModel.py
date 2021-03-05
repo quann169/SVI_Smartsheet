@@ -4,7 +4,7 @@ Created on Mar 1, 2021
 @author: toannguyen
 '''
 from src.models.database.DatabaseModel import Task as DbTask
-from src.models.database.DatabaseModel import FinalTask as DbFinalTask
+
 from src.models.database.DatabaseModel import Configuration
 from src.commons.Enums import DbHeader
 from src.commons.Utils import get_week_number, convert_date_to_string
@@ -64,16 +64,61 @@ class Sheet():
             tasks       = db_task_obj.get_tasks()
             for row in tasks:
                 task_obj    = Task(self, row)
-                if self.resource.get(task_obj.user_id):
-                    self.resource[task_obj.user_id].append(task_obj)
-                else:
+                if not self.resource.get(task_obj.user_id):
                     self.resource[task_obj.user_id] = []
+                    
+                self.resource[task_obj.user_id].append(task_obj)
+                    
+        elif self.timesheet_obj.filter == 'final':
+            db_task_obj  = DbTask()
+            db_task_obj.set_attr(sheet_id        = self.sheet_id,
+                                start_date      = self.timesheet_obj.from_date,
+                                end_date        = self.timesheet_obj.to_date
+                )
+            tasks       = db_task_obj.get_final_tasks()
+            for row in tasks:
+                task_obj    = Task(self, row, is_final = True)
+                if not self.resource.get(task_obj.user_id):
+                    self.resource[task_obj.user_id] = []
+                    
+                self.resource[task_obj.user_id].append(task_obj)
+                    
+        elif self.timesheet_obj.filter == 'both':
+            #merge task and final task
+            #final_task
+            db_task_obj  = DbTask()
+            db_task_obj.set_attr(sheet_id        = self.sheet_id,
+                                start_date      = self.timesheet_obj.from_date,
+                                end_date        = self.timesheet_obj.to_date
+                )
+            tasks       = db_task_obj.get_final_tasks()
+            self.final_exist_date   = {}
+            
+            for row in tasks:
+                task_obj    = Task(self, row, is_final = True)
+                if not self.resource.get(task_obj.user_id):
+                    self.resource[task_obj.user_id] = []
+                self.final_exist_date[task_obj.date] = None
+                self.resource[task_obj.user_id].append(task_obj)
+            
+            
+            db_task_obj  = DbTask()
+            db_task_obj.set_attr(sheet_id        = self.sheet_id,
+                                start_date      = self.timesheet_obj.from_date,
+                                end_date        = self.timesheet_obj.to_date
+                )
+            tasks       = db_task_obj.get_tasks()
+            for row in tasks:
+                task_obj    = Task(self, row)
+                try:
+                    unuse = self.final_exist_date[task_obj.date]
+                except KeyError:
+                    if not self.resource.get(task_obj.user_id):
+                        self.resource[task_obj.user_id] = []
                     self.resource[task_obj.user_id].append(task_obj)
-        
-    
-     
+                    
 class Task():
-    def __init__(self, sheet_obj,  info={}):
+    def __init__(self, sheet_obj,  info={}, is_final = False):
         
         self.task_id  = None
         self.user_id  = None
@@ -95,9 +140,13 @@ class Task():
         self.user_name      = None
         self.week_number    = None
         self.sheet_obj      = sheet_obj
+        self.is_final       = is_final
         
         if info:
-            self.task_id        = info[DbHeader.TASK_ID]
+            if self.is_final:
+                self.task_id        = info[DbHeader.TASK_FINAL_ID]
+            else:
+                self.task_id        = info[DbHeader.TASK_ID]
             self.user_id        = info[DbHeader.USER_ID]
             self.sibling_id     = info[DbHeader.SIBLING_ID]
             self.parent_id      = info[DbHeader.PARENT_ID]

@@ -15,6 +15,7 @@ class Configuration(Connection):
         self.users              = {}
         self.users_full_name    = {}
         self.user_ids           = {}
+        self.sheets             = {}
         self.sheet_ids          = {}
         self.holiday            = []
         self.time_off           = {}
@@ -26,7 +27,9 @@ class Configuration(Connection):
         self.eng_level_ids      = {}
         self.team               = {}
         self.team_ids           = {}
+        self.sheet_user         = {}
         
+     
     def get_sheet_config(self, list_sheet_id=None, is_parse=False):
         condition = ''
         if list_sheet_id:
@@ -65,18 +68,26 @@ class Configuration(Connection):
                         DbHeader.LATEST_MODIFIED                : row[DbHeader.LATEST_MODIFIED],
                         DbHeader.SHEET_TYPE                     : row[DbHeader.SHEET_TYPE]
                         }
-                
+                    self.sheets[row[DbHeader.SHEET_NAME]] = {\
+                        DbHeader.SHEET_ID                       : row[DbHeader.SHEET_ID],
+                        DbHeader.SHEET_NAME                     : row[DbHeader.SHEET_NAME],
+                        DbHeader.LATEST_MODIFIED                : row[DbHeader.LATEST_MODIFIED],
+                        DbHeader.SHEET_TYPE                     : row[DbHeader.SHEET_TYPE]
+                        }
             return query_result
         else:
             return result
     
-    def get_sheet_type_info(self, is_parse=False):
+    def get_sheet_type_info(self, is_parse=False, is_active=False):
+        condition   = ''
+        if is_active:
+            condition   = 'WHERE `%s`="1"'%(DbHeader.IS_ACTIVE)
         query = """
                 SELECT `%s`, `%s`
-                FROM `%s`;
+                FROM `%s` %s;
         """%(
             DbHeader.SHEET_TYPE_ID, DbHeader.SHEET_TYPE,
-            DbTable.SHEET_TYPE
+            DbTable.SHEET_TYPE, condition
             )
         query_result    = self.db_query(query)
         result          = ()
@@ -91,10 +102,26 @@ class Configuration(Connection):
         else:
             return result
     
+    def get_sheet_user_info(self):
+        
+        query = """
+                SELECT `%s`, `%s`
+                FROM `%s` %s;
+        """%(
+            DbHeader.SHEET_ID, DbHeader.USER_ID,
+            DbTable.PROJECT_USER,
+            )
+        query_result    = self.db_query(query)
+        result          = ()
+        if query_result:
+            for row in query_result:
+                sheet_id    = row[DbHeader.SHEET_ID]
+                user_id     = row[DbHeader.USER_ID]
+                self.sheet_user[sheet_id] = user_id
     def add_sheet(self):
-        query   = """INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`) VALUES ("%s", "%s", "%s", "%s");
-        """%(DbTable.SHEET, DbHeader.SHEET_TYPE_ID, DbHeader.SHEET_NAME, DbHeader.LATEST_MODIFIED, DbHeader.UPDATED_BY,\
-             self.sheet_type_id, self.sheet_name, self.latest_modified, self.updated_by
+        query   = """INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`) VALUES ("%s", "%s", "%s", "%s", "%s");
+        """%(DbTable.SHEET, DbHeader.SHEET_TYPE_ID, DbHeader.SHEET_NAME, DbHeader.LATEST_MODIFIED, DbHeader.UPDATED_BY, DbHeader.IS_ACTIVE,\
+             self.sheet_type_id, self.sheet_name, self.latest_modified, self.updated_by, self.is_active
              )
         self.db_execute(query)
     
@@ -108,8 +135,8 @@ class Configuration(Connection):
             return False
     
     def update_sheet(self, ):
-        query   = """UPDATE `%s` SET `%s`="%s", `%s`="%s"  WHERE `%s`="%s";
-        """%( DbTable.SHEET, DbHeader.SHEET_TYPE_ID, self.sheet_type_id, DbHeader.UPDATED_BY, self.updated_by, DbHeader.SHEET_NAME, self.sheet_name)
+        query   = """UPDATE `%s` SET `%s`="%s", `%s`="%s", `%s`="%s"  WHERE `%s`="%s";
+        """%( DbTable.SHEET, DbHeader.SHEET_TYPE_ID, self.sheet_type_id, DbHeader.UPDATED_BY, self.updated_by, DbHeader.IS_ACTIVE, self.is_active, DbHeader.SHEET_NAME, self.sheet_name)
         self.db_execute(query)
         
     def update_latest_modified_of_sheet(self):
@@ -401,7 +428,31 @@ class Configuration(Connection):
               DbHeader.ENG_TYPE_ID, self.eng_type_id, DbHeader.TEAM_ID, self.team_id,
                DbHeader.USER_NAME, self.user_name)
         self.db_execute(query)
-        
+    
+    def remove_all_user_of_sheet(self, list_id=[]):
+        condition_list = []
+        for sheet_id in  list_id:
+            condition_list.append('`%s`="%s"'%(DbHeader.SHEET_ID, str(sheet_id)))
+        condition   = ' OR '.join(condition_list)
+        query   = '''DELETE FROM `%s` WHERE %s;'''%(\
+                    DbTable.PROJECT_USER, condition 
+                    )
+        self.db_execute(query)
+    
+    def add_user_of_sheet(self, list_record):
+        query   = '''INSERT INTO `%s` 
+                        (`%s`, `%s`)
+                    '''%(DbTable.PROJECT_USER,\
+                    DbHeader.SHEET_ID, DbHeader.USER_ID)
+        query   += '''
+                    VALUES
+                        (%s, %s)
+                    ;'''
+
+        self.db_execute_many(query, list_record)
+    
+    
+    
 class Task(Connection):
     def __init__(self):
         Connection.__init__(self)
@@ -448,11 +499,39 @@ class Task(Connection):
             return query_result
         else:
             return result
-        
     
-class FinalTask(Connection):
-    def __init__(self):
-        Connection.__init__(self)
+    def add_final_task(self, list_record):
+        query   = '''INSERT INTO `%s` 
+                        (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`)
+                    '''%(DbTable.TASK_FINAL,\
+                    DbHeader.SHEET_ID, DbHeader.USER_ID, DbHeader.SIBLING_ID, DbHeader.PARENT_ID, DbHeader.SELF_ID, DbHeader.TASK_NAME, DbHeader.DATE, DbHeader.START_DATE, DbHeader.END_DATE,\
+                    DbHeader.DURATION, DbHeader.COMPLETE, DbHeader.PREDECESSORS, DbHeader.COMMENT, DbHeader.ACTUAL_END_DATE, DbHeader.STATUS, DbHeader.IS_CHILDREN, DbHeader.ALLOCATION)
+        query   += '''
+                    VALUES
+                        (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ;'''
+
+        self.db_execute_many(query, list_record)
+        
+    def get_final_tasks(self):
+        query = """
+                SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`
+                FROM `%s`
+                WHERE
+                `%s`="%s" AND `%s`>="%s" AND `%s`<="%s";
+        """%(
+            DbHeader.TASK_FINAL_ID, DbHeader.USER_ID,  DbHeader.SIBLING_ID, DbHeader.PARENT_ID, DbHeader.SELF_ID, DbHeader.TASK_NAME, DbHeader.DATE, DbHeader.ALLOCATION, DbHeader.IS_CHILDREN,
+            DbHeader.START_DATE, DbHeader.END_DATE,  DbHeader.DURATION, DbHeader.COMPLETE, DbHeader.PREDECESSORS, DbHeader.COMMENT, DbHeader.ACTUAL_END_DATE, DbHeader.STATUS, 
+            DbTable.TASK_FINAL,
+            DbHeader.SHEET_ID, self.sheet_id, DbHeader.DATE, self.start_date, DbHeader.DATE, self.end_date
+            )
+        
+        query_result    = self.db_query(query)
+        result          = ()
+        if query_result:
+            return query_result
+        else:
+            return result    
         
         
 class Users(Connection):

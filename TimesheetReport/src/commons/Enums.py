@@ -102,11 +102,11 @@ class DefaulteValue:
     
     
 class SettingKeys:
-    NA_USER_ID          = 3
-    NA_ENG_LEVEL_ID     = 11
-    NA_ENG_TYPE_ID      = 5
-    NA_TEAM_ID          = 9
-    NA_SHEET_TYPE_ID    = 3
+#     NA_USER_ID          = 3
+#     NA_ENG_LEVEL_ID     = 11
+#     NA_ENG_TYPE_ID      = 5
+#     NA_TEAM_ID          = 9
+#     NA_SHEET_TYPE_ID    = 3
     EMPTY_CELL          = ['', 'NaT', 'nan', 'NaN', '#REF']
     NA_VALUE            = 'NA'
 
@@ -146,6 +146,7 @@ class DbHeader:
     LATEST_MODIFIED         = 'latest_modified'
     SHEET_TYPE              = 'sheet_type'
     TASK_ID                 = 'task_id'
+    TASK_FINAL_ID           = 'task_final_id'
     SIBLING_ID              = 'sibling_id'
     PARENT_ID               = 'parent_id'
     SELF_ID                 = 'self_id'

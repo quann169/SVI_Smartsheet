@@ -5,7 +5,7 @@ Created on Feb 22, 2021
 '''
 from src.models.smartsheet.SmartsheetModel import SmartSheets
 from src.models.database.DatabaseModel import Configuration, Task
-from src.commons.Enums import DbHeader, DbTable, ExcelHeader, SettingKeys, DefaulteValue, SessionKey
+from src.commons.Enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey
 from src.commons.Message import MsgError, MsgWarning, Msg
 from src.commons.Utils import search_pattern, message_generate, println, remove_path, split_patern
 from src.models.timesheet.TimesheetModel import Timesheet
@@ -20,14 +20,14 @@ class Controllers:
     def __init__(self):
         pass
     
-    def parse_smarsheet_and_update_task(self, list_sheet_id=None):
+    def parse_smarsheet_and_update_task(self, from_date=None, to_date=None, list_sheet_id=None):
         cfg_obj = Configuration()
         sheet_info  = cfg_obj.get_sheet_config(list_sheet_id)
         list_sheet  = []
         for row in sheet_info:
             list_sheet.append((row[DbHeader.SHEET_NAME], row[DbHeader.LATEST_MODIFIED], int(row[DbHeader.SHEET_ID])))
 
-        sms_obj = SmartSheets(list_sheet = list_sheet)
+        sms_obj = SmartSheets(list_sheet = list_sheet, from_date = from_date, to_date = to_date)
         sms_obj.connect_smartsheet()
         sms_obj.parse()
         config_obj  = Configuration()
@@ -66,7 +66,7 @@ class Controllers:
                     try:
                         user_id = user_info[assign_to].user_id
                     except KeyError:
-                        user_id = SettingKeys.NA_USER_ID
+                        user_id = user_info[SettingKeys.NA_VALUE].user_id
                     for date, week in dates:
                         record  = (
                             str(sheet_id),
@@ -122,7 +122,7 @@ class Controllers:
                 end_date    = str(df[ExcelHeader.END_DATE][index])
                 workday     = search_pattern(str(df[ExcelHeader.WORKDAYS][index]),'(.+?)\((.+?)h\)')[1]
                 status      = str(df[ExcelHeader.STATUS][index])
-                user_id     = SettingKeys.NA_USER_ID
+                user_id     = users_info[SettingKeys.NA_VALUE].user_id
                 updated_by = 'root'
                 try:
                     user_id = users_info[requester].user_id
@@ -151,7 +151,7 @@ class Controllers:
             return 1, Msg.M001
         except Exception as e:
             println(e, 'exception')
-            return 0, e
+            return 0, e.args[0]
         
     def get_timeoff_info(self):
         config_obj  = Configuration()
@@ -171,7 +171,7 @@ class Controllers:
             return 1, Msg.M001
         except Exception as e:
             println(e, 'exception')
-            return 0, e
+            return 0, e.args[0]
     
     def get_session(self, key=None):
         try:
@@ -199,20 +199,50 @@ class Controllers:
             return 1, ''
         except Exception as e:
             println(e, 'exception')
-            return 0, e
+            return 0, e.args[0]
     
+    def update_resource_of_sheet(self, info = {}):
+        config_obj  = Configuration()
+        
+        config_obj.get_all_user_information()
+        users    = config_obj.users
+        
+        config_obj.get_sheet_config(is_parse=True)
+        sheets          = config_obj.sheets
+        sheet_ids       = []
+        list_record     = []
+        
+        for sheet_name in info:
+            sheet_id = sheets[sheet_name][DbHeader.SHEET_ID]
+            sheet_ids.append(sheet_id)
+            for user_name in info[sheet_name]:
+                user_name = user_name.strip()
+                if users.get(user_name):
+                    
+                    user_id = users[user_name].user_id
+                    list_record.append((sheet_id, user_id))
+        if len(sheet_ids):
+            config_obj.remove_all_user_of_sheet(sheet_ids)
+            if len(list_record):
+                config_obj.add_user_of_sheet(list_record)
+    
+#     def get_sheet_resource_info(self):
+#         config_obj  = Configuration()
+#         config_obj.get_sheet_user_info()
+#         result      = config_obj.sheet_users
+#         return result
+        
+        
+        
+        
+        
     def import_sheet(self, file_name):
         try:
-            
             file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
             df          = pd.read_excel (file_path, sheet_name='Sheet', engine='openpyxl')
             config_obj  = Configuration()
             config_obj.get_sheet_type_info(is_parse=True)
             sheet_type_info = config_obj.sheet_type
-#             for row in sheet_type:
-#                 sheet_type_id   = row[DbHeader.SHEET_TYPE_ID]
-#                 sheet_type_name = row[DbHeader.SHEET_TYPE]
-#                 sheet_type_info[sheet_type_name] = sheet_type_id
             
             sms_obj = SmartSheets()
             sms_obj.connect_smartsheet()
@@ -225,6 +255,7 @@ class Controllers:
                     println(message, 'error')
                     return  0, message
             config_obj.set_attr(updated_by  = 'root')
+            user_of_sheet   = {}
             for index in range(0, len(df[ExcelHeader.SHEET_NAME])):
                 sheet_name          = str(df[ExcelHeader.SHEET_NAME][index])
                 sheet_type          = str(df[ExcelHeader.SHEET_TYPE][index])
@@ -232,21 +263,29 @@ class Controllers:
                     try:
                         sheet_type_id  = sheet_type_info[sheet_type]
                     except KeyError:
-                        sheet_type_id  = SettingKeys.NA_SHEET_TYPE_ID
-                    users               = split_patern(str(df[ExcelHeader.RESOURCE][index]))
+                        sheet_type_id  = sheet_type_info[SettingKeys.NA_VALUE]
+                    try:
+                        is_active       = float(str(df[ExcelHeader.IS_ACTIVE][index]))
+                    except:
+                        is_active       = 0
+                    users               = split_patern(str(df[ExcelHeader.RESOURCE][index]), pattern=',|\;')
+                    user_of_sheet[sheet_name] = users
                     config_obj.set_attr(sheet_name      = sheet_name,
                                         sheet_type_id   = str(sheet_type_id),
-                                        latest_modified = DefaulteValue.DATETIME)
-
+                                        latest_modified = DefaulteValue.DATETIME,
+                                        is_active       = str(is_active))
+                    
                     if config_obj.is_exist_sheet():
                         config_obj.update_sheet()
                     else:
                         config_obj.add_sheet()
-                
+            #update project-user table
+            self.update_resource_of_sheet(user_of_sheet)
+            
             return 1, Msg.M001
         except Exception as e:
             println(e, 'exception')
-            return 0, e         
+            return 0, e.args[0]         
     
     def get_resource_config(self):
         config_obj  = Configuration()
@@ -260,27 +299,17 @@ class Controllers:
             config_obj  = Configuration()
             config_obj.get_eng_type_info(is_parse=True)
             eng_type_info = config_obj.eng_type
-#             for row in eng_type:
-#                 eng_type_id   = row[DbHeader.ENG_TYPE_ID]
-#                 eng_type_name = row[DbHeader.ENG_TYPE_NAME]
-#                 eng_type_info[eng_type_name] = eng_type_id
+
             
             
             config_obj.get_eng_level_info(is_parse=True)
             eng_level_info = config_obj.eng_level
-#             for row in eng_level:
-#                 eng_level_id   = row[DbHeader.ENG_LEVEL_ID]
-#                 eng_level_name = row[DbHeader.LEVEL]
-#                 eng_level_info[eng_level_name] = eng_level_id
+
 
 
             teams  = config_obj.get_team_info(is_parse=True)
             teams_info = config_obj.team
-#             for row in teams:
-#                 team_id   = row[DbHeader.TEAM_ID]
-#                 team_name = row[DbHeader.TEAM_NAME]
-#                 lead_id   = row[DbHeader.TEAM_LEAD_ID]
-#                 teams_info[team_name] = team_id
+
             
             config_obj.set_attr(updated_by  = 'root')
             for index in range(0, len(df[ExcelHeader.RESOURCE])):
@@ -299,15 +328,15 @@ class Controllers:
                         eng_type_id   = eng_type_info[eng_type]
                         
                     except KeyError:
-                        eng_type_id  = SettingKeys.NA_ENG_TYPE_ID
+                        eng_type_id  = eng_type_info[SettingKeys.NA_VALUE]
                     try:
                         eng_level_id  = eng_level_info[eng_level]
                     except KeyError:
-                        eng_level_id  = SettingKeys.NA_ENG_LEVEL_ID
+                        eng_level_id  = eng_level_info[SettingKeys.NA_VALUE]
                     try:
                         team_id     = teams_info[team]
                     except KeyError:
-                        team_id     = SettingKeys.NA_TEAM_ID
+                        team_id     = teams_info[SettingKeys.NA_VALUE]
                         
                     if other_name in SettingKeys.EMPTY_CELL:
                         other_name  = ''
@@ -328,7 +357,7 @@ class Controllers:
             return 1, Msg.M001
         except Exception as e:
             println(e, 'exception')
-            return 0, e
+            return 0, e.args[0]
         
     def get_list_sheet_name(self):
         config_obj      = Configuration()
@@ -344,7 +373,6 @@ class Controllers:
         
     def get_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter=None):
         try:
-            pprint (request_dict)
             missing_method = False
             if request_dict:
                 try:
@@ -393,7 +421,21 @@ class Controllers:
             
         except Exception as e:
             println(e, 'exception')
-            return 0, e
+            return 0, e.args[0]
+    
+    def get_newest_data(self, from_date, to_date, sheet_ids):
+        
+        try:
+            self.parse_smarsheet_and_update_task(list_sheet_id =   sheet_ids,
+                                                 from_date      =   from_date,
+                                                 to_date        =   to_date)
+            return 1, Msg.M002
+        except Exception as e:
+            println(e, 'exception')
+            return 0, e.args[0]
+        
+        
+        
         
         
         

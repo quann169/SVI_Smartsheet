@@ -60,6 +60,7 @@ function upload_file (form_id) {
 }
 
 function custom_alert(message, type) {
+	$('#overlay_loader').hide();
 	alert(message);
 }
 

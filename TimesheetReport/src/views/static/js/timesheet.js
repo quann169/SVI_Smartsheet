@@ -6,16 +6,18 @@ $(document).ready( function () {
 	load_datatable('#timesheet_table');
 });
 
-function load_timesheet_report() {
+function colect_config_date() {
 	var data = get_form_submit('#timesheet_form');
 	var sheet_ids = get_value_from_multiple_select();
-	var get_method = '';
+	var method_get_url = '';
 	if (sheet_ids.length == 0) {
 		custom_alert('No sheet name selected', 'error');
 		return null;
 	} 
+	var ids = []
 	for (var idx = 0; idx < sheet_ids.length; idx++) {
-		get_method = get_method + '&' + SESSION_SHEETS + '=' + sheet_ids[idx];
+		method_get_url = method_get_url + '&' + SESSION_SHEETS + '=' + sheet_ids[idx];
+		ids.push(sheet_ids[idx]);
 	}
 	
 	
@@ -27,12 +29,25 @@ function load_timesheet_report() {
 		custom_alert('Missing date', 'error');
 		return null;
 	}
+	data[SESSION_FROM] = from_date;
+	data[SESSION_TO] = to_date;
+	data[SESSION_FILTER] = filter;
+	data[SESSION_SHEETS] = ids;
 	
-	get_method = get_method + '&' + SESSION_FROM + '=' + from_date;
-	get_method = get_method + '&' + SESSION_TO + '=' + to_date;
-	get_method = get_method + '&' + SESSION_FILTER + '=' + filter;
-	location.href = 'timesheet?' + get_method;
-	
+	method_get_url = method_get_url + '&' + SESSION_FROM + '=' + from_date;
+	method_get_url = method_get_url + '&' + SESSION_TO + '=' + to_date;
+	method_get_url = method_get_url + '&' + SESSION_FILTER + '=' + filter;
+	return [data, method_get_url];
+}
+
+
+function load_timesheet_report() {
+	var result = colect_config_date();
+	if (result) {
+		var data = result[0];
+		var method_get_url = result[1];
+		location.href = 'timesheet?' + method_get_url;
+	}
 }
 
 $(document).ready(function () {
@@ -46,7 +61,23 @@ $(document).ready(function () {
 
 $(document).ready(function () {
 	$('#get_newest_data').click(function(event) {
-		event.preventDefault();
+		$('#overlay_loader').show();
+		var result = colect_config_date();
+		var data = result[0];
+		var method_get_url = result[1];
+		$.ajax({
+			   url: '/get_newest_data',
+			   type: "POST",
+			   data: encodeURIComponent(JSON.stringify(data)),
+			   success: function(resp){
+				   var result = resp.result;
+					if (result[0]) {
+							custom_alert(result[1], 'success');
+						} else {
+							custom_alert(result[1], 'error');
+						}
+			      }
+		   });
 	});
 });
 

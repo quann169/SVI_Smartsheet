@@ -71,7 +71,7 @@ def save_file_from_request():
         return 1, ''
     except Exception as e:
         println(e, 'exception')
-        return 0, e
+        return 0, e.args[0]
 
 
         
@@ -103,7 +103,7 @@ def println(message, logging_level=None):
     
 
 def split_patern(string, pattern=''):
-    result  = string.split(',')
+    result = filter(None, re.split(pattern, string))
     return result
     
     

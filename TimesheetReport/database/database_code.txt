@@ -8,19 +8,19 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- Schema mydb
 -- -----------------------------------------------------
 -- -----------------------------------------------------
--- Schema erp
+-- Schema timesheet
 -- -----------------------------------------------------
 
 -- -----------------------------------------------------
--- Schema erp
+-- Schema timesheet
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `erp` DEFAULT CHARACTER SET utf8mb4 ;
-USE `erp` ;
+CREATE SCHEMA IF NOT EXISTS `timesheet` DEFAULT CHARACTER SET utf8mb4 ;
+USE `timesheet` ;
 
 -- -----------------------------------------------------
--- Table `erp`.`analysis_config`
+-- Table `timesheet`.`analysis_config`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`analysis_config` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`analysis_config` (
   `analysis_config_id` INT(11) NOT NULL AUTO_INCREMENT,
   `config_name` VARCHAR(100) NOT NULL,
   `config_value` TEXT NOT NULL,
@@ -32,9 +32,9 @@ DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`eng_level`
+-- Table `timesheet`.`eng_level`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`eng_level` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`eng_level` (
   `eng_level_id` INT(11) NOT NULL AUTO_INCREMENT,
   `level` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`eng_level_id`),
@@ -45,9 +45,9 @@ DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`eng_type`
+-- Table `timesheet`.`eng_type`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`eng_type` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`eng_type` (
   `eng_type_id` INT(11) NOT NULL AUTO_INCREMENT,
   `eng_type_name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`eng_type_id`))
@@ -57,23 +57,9 @@ DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`final_date`
+-- Table `timesheet`.`holiday`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`final_date` (
-  `final_date_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `date` DATETIME NOT NULL,
-  `updated_date` DATETIME NOT NULL,
-  `updated_by` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`final_date_id`),
-  UNIQUE INDEX `date_UNIQUE` (`date` ASC) )
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb4;
-
-
--- -----------------------------------------------------
--- Table `erp`.`holiday`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`holiday` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`holiday` (
   `holiday_id` INT(11) NOT NULL AUTO_INCREMENT,
   `date` DATETIME NOT NULL,
   PRIMARY KEY (`holiday_id`),
@@ -84,24 +70,25 @@ DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`sheet_type`
+-- Table `timesheet`.`sheet_type`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`sheet_type` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`sheet_type` (
   `sheet_type_id` INT(11) NOT NULL AUTO_INCREMENT,
   `sheet_type` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`sheet_type_id`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 3
+AUTO_INCREMENT = 4
 DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`sheet`
+-- Table `timesheet`.`sheet`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`sheet` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`sheet` (
   `sheet_id` INT(11) NOT NULL AUTO_INCREMENT,
   `sheet_type_id` INT(11) NOT NULL,
   `sheet_name` VARCHAR(100) NOT NULL,
+  `is_active` TINYINT(4) NULL DEFAULT NULL,
   `latest_modified` DATETIME NOT NULL,
   `updated_date` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
   `updated_by` VARCHAR(45) NULL DEFAULT NULL,
@@ -110,18 +97,18 @@ CREATE TABLE IF NOT EXISTS `erp`.`sheet` (
   INDEX `sheet_type_id_idx` (`sheet_type_id` ASC) ,
   CONSTRAINT `sheet_type_id`
     FOREIGN KEY (`sheet_type_id`)
-    REFERENCES `erp`.`sheet_type` (`sheet_type_id`)
+    REFERENCES `timesheet`.`sheet_type` (`sheet_type_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-AUTO_INCREMENT = 3
+AUTO_INCREMENT = 5
 DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`log`
+-- Table `timesheet`.`log`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`log` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`log` (
   `log_id` INT(11) NOT NULL AUTO_INCREMENT,
   `sheet_id` INT(11) NOT NULL,
   `old_value` MEDIUMTEXT NULL DEFAULT NULL,
@@ -132,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `erp`.`log` (
   INDEX `log_sheet_id_idx` (`sheet_id` ASC) ,
   CONSTRAINT `log_sheet_id`
     FOREIGN KEY (`sheet_id`)
-    REFERENCES `erp`.`sheet` (`sheet_id`)
+    REFERENCES `timesheet`.`sheet` (`sheet_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -140,9 +127,9 @@ DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`team`
+-- Table `timesheet`.`team`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`team` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`team` (
   `team_id` INT(11) NOT NULL AUTO_INCREMENT,
   `team_name` VARCHAR(45) NOT NULL,
   `team_lead_id` INT(11) NULL DEFAULT NULL,
@@ -154,9 +141,9 @@ DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`user`
+-- Table `timesheet`.`user`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`user` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`user` (
   `user_id` INT(11) NOT NULL AUTO_INCREMENT,
   `user_name` VARCHAR(45) NOT NULL,
   `full_name` VARCHAR(100) NOT NULL,
@@ -176,28 +163,28 @@ CREATE TABLE IF NOT EXISTS `erp`.`user` (
   INDEX `user_team_id_idx` (`team_id` ASC) ,
   CONSTRAINT `user_eng_level_id`
     FOREIGN KEY (`eng_level_id`)
-    REFERENCES `erp`.`eng_level` (`eng_level_id`)
+    REFERENCES `timesheet`.`eng_level` (`eng_level_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `user_eng_type_id`
     FOREIGN KEY (`eng_type_id`)
-    REFERENCES `erp`.`eng_type` (`eng_type_id`)
+    REFERENCES `timesheet`.`eng_type` (`eng_type_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `user_team_id`
     FOREIGN KEY (`team_id`)
-    REFERENCES `erp`.`team` (`team_id`)
+    REFERENCES `timesheet`.`team` (`team_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-AUTO_INCREMENT = 4
+AUTO_INCREMENT = 91
 DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`project_user`
+-- Table `timesheet`.`project_user`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`project_user` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`project_user` (
   `project_user_id` INT(11) NOT NULL AUTO_INCREMENT,
   `sheet_id` INT(11) NULL DEFAULT NULL,
   `user_id` INT(11) NULL DEFAULT NULL,
@@ -206,12 +193,12 @@ CREATE TABLE IF NOT EXISTS `erp`.`project_user` (
   INDEX `project_user_idx_idx` (`user_id` ASC) ,
   CONSTRAINT `project_sheet_id`
     FOREIGN KEY (`sheet_id`)
-    REFERENCES `erp`.`sheet` (`sheet_id`)
+    REFERENCES `timesheet`.`sheet` (`sheet_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `project_user_idx`
     FOREIGN KEY (`user_id`)
-    REFERENCES `erp`.`user` (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -219,9 +206,9 @@ DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`task`
+-- Table `timesheet`.`task`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`task` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`task` (
   `task_id` INT(11) NOT NULL AUTO_INCREMENT,
   `sheet_id` INT(11) NOT NULL,
   `user_id` INT(11) NULL DEFAULT NULL,
@@ -245,31 +232,31 @@ CREATE TABLE IF NOT EXISTS `erp`.`task` (
   INDEX `task_user_id_idx` (`user_id` ASC) ,
   CONSTRAINT `task_sheet_id`
     FOREIGN KEY (`sheet_id`)
-    REFERENCES `erp`.`sheet` (`sheet_id`)
+    REFERENCES `timesheet`.`sheet` (`sheet_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `task_user_id`
     FOREIGN KEY (`user_id`)
-    REFERENCES `erp`.`user` (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-AUTO_INCREMENT = 420
+AUTO_INCREMENT = 464
 DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`task_final`
+-- Table `timesheet`.`task_final`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`task_final` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`task_final` (
   `task_final_id` INT(11) NOT NULL AUTO_INCREMENT,
   `sheet_id` INT(11) NOT NULL,
   `user_id` INT(11) NULL DEFAULT NULL,
-  `final_date_id` INT(11) NULL DEFAULT NULL,
   `self_id` VARCHAR(25) NOT NULL,
   `parent_id` VARCHAR(25) NULL DEFAULT NULL,
   `sibling_id` VARCHAR(25) NULL DEFAULT NULL,
   `task_name` TEXT NOT NULL,
+  `date` DATETIME NULL DEFAULT NULL,
   `start_date` DATETIME NULL DEFAULT NULL,
   `end_date` DATETIME NULL DEFAULT NULL,
   `duration` VARCHAR(45) NULL DEFAULT NULL,
@@ -283,20 +270,14 @@ CREATE TABLE IF NOT EXISTS `erp`.`task_final` (
   PRIMARY KEY (`task_final_id`),
   INDEX `task_final_sheet_id_idx` (`sheet_id` ASC) ,
   INDEX `task_final_user_id_idx` (`user_id` ASC) ,
-  INDEX `task_final_date_idx` (`final_date_id` ASC) ,
-  CONSTRAINT `task_final_date_id`
-    FOREIGN KEY (`final_date_id`)
-    REFERENCES `erp`.`final_date` (`final_date_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
   CONSTRAINT `task_final_sheet_id`
     FOREIGN KEY (`sheet_id`)
-    REFERENCES `erp`.`sheet` (`sheet_id`)
+    REFERENCES `timesheet`.`sheet` (`sheet_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `task_final_user_id`
     FOREIGN KEY (`user_id`)
-    REFERENCES `erp`.`user` (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -304,9 +285,9 @@ DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
--- Table `erp`.`time_off`
+-- Table `timesheet`.`time_off`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `erp`.`time_off` (
+CREATE TABLE IF NOT EXISTS `timesheet`.`time_off` (
   `time_off_id` INT(11) NOT NULL AUTO_INCREMENT,
   `user_id` INT(11) NULL DEFAULT NULL,
   `department` VARCHAR(100) NOT NULL,
@@ -321,13 +302,36 @@ CREATE TABLE IF NOT EXISTS `erp`.`time_off` (
   INDEX `time_off_user_id_idx` (`user_id` ASC) ,
   CONSTRAINT `time_off_user_id`
     FOREIGN KEY (`user_id`)
-    REFERENCES `erp`.`user` (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 AUTO_INCREMENT = 9381
 DEFAULT CHARACTER SET = utf8mb4;
 
+
+-- Master value
+
+-- eng_type
+INSERT INTO `timesheet`.`eng_type` (`eng_type_id`, `eng_type_name`) VALUES (1, 'NA');
+INSERT INTO `timesheet`.`eng_type` (`eng_type_name`) VALUES ('Design Manager'), ('Director'), ('Jr. Engineer'), ('Sr. Engineer');
+
+-- eng_level
+INSERT INTO `timesheet`.`eng_level` (`eng_level_id`, `level`) VALUES (1, 'NA');
+INSERT INTO `timesheet`.`eng_level` (`level`) VALUES ('D2'), ('E0'), ('E1'), ('E2'), ('E3'), ('E4'), ('L1'), ('M1'), ('M2'), ('M3');
+
+-- sheet_type
+INSERT INTO `timesheet`.`sheet_type` (`sheet_type_id`, `sheet_type`) VALUES (1, 'NA');
+INSERT INTO `timesheet`.`sheet_type` (`sheet_type`) VALUES ('RnD'), ('NRE');
+
+-- team
+INSERT INTO `timesheet`.`team` (`team_id`, `team_name`) VALUES (1, 'NA');
+INSERT INTO `timesheet`.`team` (`team_name`) VALUES ('CAD'), ('QA'), ('PD'), ('CKT'), ('IT'), ('LAY'), ('Manager'), ('RTL'), ('UVM');
+
+
+
+-- user
+INSERT INTO `timesheet`.`user` (`user_name`, `full_name`, `email`, `other_name`, `is_active`, `updated_by`, `eng_level_id`, `eng_type_id`, `team_id`) VALUES ('NA', 'NA', 'NA', 'NA', '1', 'NA', '1', '1', '1');
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

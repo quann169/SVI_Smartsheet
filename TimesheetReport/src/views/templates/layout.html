@@ -34,18 +34,19 @@
 	
 	        <!-- Page Content  -->
 	        <div id="content">
+				<div class="loading" id ='overlay_loader'>&#8230;</div>
 				{% block navbar %}
 		            {% include "navbar.html" %}
 	        	{%- endblock navbar %}
 	            {% block breadcrumb %}
 		        	{% include "breadcrumb.html" %}
 		        {% endblock %}
+				<div >
 				<div class='main-div' id='main_div'>
 					{% block main %} 
-			        	
 			        {% endblock %}
 				</div>
-	
+				</div>
 	            
 	      </div>
 	    </div>

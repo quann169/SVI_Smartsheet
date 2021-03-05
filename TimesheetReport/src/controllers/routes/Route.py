@@ -38,7 +38,20 @@ def home():
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
-    
+
+@timesheet_bp.route('/get_newest_data', methods=['POST'])
+def get_newest_data():
+    println('/get_newest_data', 'debug')
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().get_newest_data(from_date=request_dict[SessionKey.FROM], to_date=request_dict[SessionKey.TO], sheet_ids=request_dict[SessionKey.SHEETS])
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+
+
+
 @timesheet_bp.route('/upload_file', methods=['POST'])
 def upload_file():
     println('/upload_file', 'debug')
@@ -176,10 +189,14 @@ def test():
     try:
         ctrl_obj   = ctrl()
         
-        ctrl_obj.get_timesheet_info(None, '2021-02-25', '2021-03-10', [1, 2, 3, 4], 'current')
+        ctrl_obj.update_resource_of_sheet()
         
         
         return render_template("test.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
+    
+    
+    
+    

@@ -16,4 +16,5 @@ class MsgWarning:
 
 class Msg:
     M001    = 'Import successfully'
+    M002    = 'Get data successfully'
 

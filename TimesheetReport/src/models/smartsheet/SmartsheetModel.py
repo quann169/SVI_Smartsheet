@@ -16,21 +16,24 @@ from jinja2 import Environment
 from jinja2.loaders import FileSystemLoader
 from config import TOKEN
 
-from src.commons.Utils import get_prev_date_by_time_delta, stuck, convert_date_to_string, println, get_work_days
+from src.commons.Utils import get_prev_date_by_time_delta, stuck, convert_date_to_string, println, get_work_days, str_to_date
 
 from src.commons import Enums
 
 
 class SmartSheets:
-    def __init__(self, list_sheet=None, holiday=[], time_off={}, timedelta=1):
+    def __init__(self, list_sheet=None, holiday=[], time_off={}, timedelta=1, from_date=None, to_date=None):
         self.connection = None
         self.available_name = []
         self.list_sheet = list_sheet
         self.holiday = holiday
         self.time_off = time_off
         self.info   = {}
-        self.timedelta  = get_prev_date_by_time_delta(timedelta)
-        
+        if from_date:
+            self.timedelta  = str_to_date(from_date)[0]
+        else:
+            self.timedelta  = get_prev_date_by_time_delta(timedelta)
+            
     def set_attr(self, **kwargs):                      
         for key, value in kwargs.items():
             setattr(self, key, value)
