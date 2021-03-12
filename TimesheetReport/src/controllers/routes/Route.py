@@ -5,14 +5,16 @@ Created on Feb 24, 2021
 '''
 
 import os, ast
-from flask import Blueprint, render_template, session, redirect, url_for, abort, request, jsonify
+from flask import Blueprint, render_template, session, redirect, url_for, abort, request, jsonify, send_file,\
+                    send_from_directory
 from pprint import pprint
 import logging
-from src.commons.Utils import save_file_from_request, get_request_form_ajax, get_request_form_ajax, get_request_form_ajax, get_request_args, get_request_args_list
+from src.commons.Utils import save_file_from_request, get_request_form_ajax, get_request_form_ajax, \
+                                get_request_form_ajax, get_request_args, get_request_args_list
 from src.controllers.Controllers import Controllers as ctrl
 from src.commons.Enums import DbTable, DbHeader, SessionKey
 from src.commons.Utils import println
-
+import config
 
 tempalte_path =  os.getcwd() + 'src/views/templates'
 static_path =  os.getcwd() + 'src/views/static'
@@ -24,7 +26,7 @@ def index():
     println('/', 'debug')
     try:
         ctrl_obj   = ctrl()
-        return render_template("index.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
+        return render_template("screens/layout/index.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
@@ -34,7 +36,7 @@ def home():
     println('/', 'debug')
     try:
         ctrl_obj   = ctrl()
-        return render_template("home.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
+        return render_template("screens/home/home.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
@@ -50,8 +52,17 @@ def get_newest_data():
         println(e, 'exception')
         return abort(500, e)
 
-
-
+@timesheet_bp.route('/add_to_final', methods=['POST'])
+def add_to_final():
+    println('/add_to_final', 'debug')
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().add_to_final(from_date=request_dict[SessionKey.FROM], to_date=request_dict[SessionKey.TO], sheet_ids=request_dict[SessionKey.SHEETS])
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+    
 @timesheet_bp.route('/upload_file', methods=['POST'])
 def upload_file():
     println('/upload_file', 'debug')
@@ -61,14 +72,32 @@ def upload_file():
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
-    
+
+@timesheet_bp.route('/dowload_file', methods=['GET', 'POST'])
+def download_file():
+    request_dict = get_request_args()
+    path = os.path.join(config.WORKING_PATH, request_dict[SessionKey.FILE_NAME])
+    return send_file(path, as_attachment=True, cache_timeout=0)
+
+@timesheet_bp.route('/export', methods=['POST'])
+def export():
+    println('/export', 'debug')
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().export_excel(from_date=request_dict[SessionKey.FROM], to_date=request_dict[SessionKey.TO], sheet_ids=request_dict[SessionKey.SHEETS])
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+
+
 
 @timesheet_bp.route('/timeoff')
 def timeoff():
     println('/timeoff', 'debug')
     try:
         ctrl_obj   = ctrl()
-        return render_template("setting/timeoff.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
+        return render_template("screens/setting/timeoff.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
@@ -84,16 +113,12 @@ def import_timeoff():
         println(e, 'exception')
         return abort(500, e)
 
-
-
-
-
 @timesheet_bp.route('/log')
 def log():
     println('/log', 'debug')
     try:
         ctrl_obj   = ctrl()
-        return render_template("log.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
+        return render_template("screens/log/log.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
@@ -103,7 +128,7 @@ def sheet():
     println('/sheet', 'debug')
     try:
         ctrl_obj    = ctrl()
-        return render_template("setting/sheet.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
+        return render_template("screens/setting/sheet.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
@@ -124,7 +149,7 @@ def resource():
     println('/resource', 'debug')
     try:
         ctrl_obj   = ctrl()
-        return render_template("setting/resource.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
+        return render_template("screens/setting/resource.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
@@ -145,7 +170,7 @@ def holiday():
     println('/holiday', 'debug')
     try:
         ctrl_obj    = ctrl()
-        return render_template("setting/holiday.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
+        return render_template("screens/setting/holiday.html", ctrl_obj = ctrl_obj, db_header = DbHeader())
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
@@ -172,17 +197,28 @@ def update_session():
         println(e, 'exception')
         return abort(500, e)
 
-@timesheet_bp.route('/timesheet')
-def timesheet():
-    println('/', 'debug')
+@timesheet_bp.route('/daily_timesheet')
+def daily_timesheet():
+    println('/daily_timesheet', 'debug')
     try:
         request_dict = get_request_args_list()
         ctrl_obj   = ctrl()
-        return render_template("timesheet.html", ctrl_obj = ctrl_obj, db_header = DbHeader(), session_enum = SessionKey(), request_dict = request_dict)
+        return render_template("screens/timesheet/daily_timesheet.html", ctrl_obj = ctrl_obj, db_header = DbHeader(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
 
+@timesheet_bp.route('/resource_timesheet')
+def resource_timesheet():
+    println('/export_timesheet', 'debug')
+    try:
+        request_dict = get_request_args_list()
+        ctrl_obj   = ctrl()
+        return render_template("screens/timesheet/resource_timesheet.html", ctrl_obj = ctrl_obj, db_header = DbHeader(), session_enum = SessionKey(), request_dict = request_dict)
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+    
 @timesheet_bp.route('/test')
 def test():
     println('/test', 'debug')

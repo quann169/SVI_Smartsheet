@@ -4,12 +4,24 @@
 
 <ul class="list-unstyled components">
     <p></p>
-    <li class="{% if active_sidebar == 'home' %}active{% endif %}">
-        <a href="/">Home</a>
+    <li class="{% if active_sidebar == 'home' %} active{% endif %}">
+        <a href="/home">Home</a>
     </li>
+	<li>
+	        <a href="#timesheets" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Timesheet</a>
+	        <ul class="collapse list-unstyled" id="timesheets">
+	            <li class="{% if active_sidebar == 'daily_timesheet' %} active{% endif %}">
+	                <a href="/daily_timesheet">Daily Timesheet</a>
+	            </li>
+	 			<li class="{% if active_sidebar == 'resource_timesheet' %} active{% endif %}">
+	                <a href="/resource_timesheet">Resource</a>
+	            </li>
+				
+	        </ul>
+	</li>
     <li>
-        <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Setting</a>
-        <ul class="collapse list-unstyled" id="pageSubmenu">
+        <a href="#setting" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Setting</a>
+        <ul class="collapse list-unstyled" id="setting">
             <li class="{% if active_sidebar == 'timeoff' %} active{% endif %}">
                 <a href="/timeoff">Time Off</a>
             </li>

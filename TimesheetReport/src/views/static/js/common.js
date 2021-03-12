@@ -1,6 +1,7 @@
 $(document).ready(function () {
     $('#sidebarCollapse').on('click', function () {
         $('#sidebar').toggleClass('active');
+		$('#content').toggleClass('active');
 		if ($('#sidebar').hasClass('active')) {
 			update_session(SESSION_SIDEBAR, 1);
 		} else {
@@ -9,7 +10,33 @@ $(document).ready(function () {
     });
 });
 
+$(document).ready(function () {
+    $('#notify_close').on('click', function () {
+        $('.notify').hide();
+    });
+});
 
+
+// multiple select 
+$(function(){
+	    $('select[multiple]').multiSelect({
+	})
+	$('.select-all').click(function() {
+		const list_checkbox = $('.multi-select-menu').find('input');
+		var result = [];
+		var is_check_all = $(this).prop('checked');
+		list_checkbox.each(function(){
+			$(this).prop('checked', is_check_all);
+			
+		});
+		if (is_check_all) {
+			$('.multi-select-button').text('All Values');
+		} else {
+			$('.multi-select-button').text('-- Select --');
+		}
+		return result;
+	})
+});
 
 $('input[type="file"]').change(function(e){
         var file_name = e.target.files[0].name;
@@ -17,9 +44,30 @@ $('input[type="file"]').change(function(e){
     });
 
 function load_datatable (id) {
-	$(id).DataTable({
-		 "dom": '<"top"if>rt<"bottom"lp><"clear">'
-	});
+	
+	// $(id + ' thead th').each( function () {
+    //     var title = $(this).text();
+    //     $(this).html(title);
+    // } );
+ 
+    // DataTable
+    $(id).DataTable({
+		"dom": '<"top"if>rt<"bottom"lp><"clear">',
+		"scrollX": true,
+    //     initComplete: function () {
+    //         // Apply the search
+    //         this.api().columns().every( function () {
+    //             var that = this;
+    //             $( 'input', this.header() ).on( 'keyup change clear', function () {
+    //                 if ( that.search() !== this.value ) {
+    //                     that
+    //                         .search( this.value )
+    //                         .draw();
+    //                 }
+    //             } );
+    //         } );
+    //     }
+    });
 }
 
 function get_form_submit(form_id) {
@@ -59,6 +107,64 @@ function upload_file (form_id) {
 	return result;
 }
 
+function get_data_from_form(form_id) {
+	var data = get_form_submit(form_id);
+	var sheet_ids = get_value_from_multiple_select();
+	if (sheet_ids.length == 0) {
+		custom_alert('No sheet name selected', 'error');
+		return null;
+	} 
+	var ids = []
+	for (var idx = 0; idx < sheet_ids.length; idx++) {
+		ids.push(sheet_ids[idx]);
+	}
+	var from_date 	= data['from_date'];
+	var to_date 	= data['to_date'];
+	var filter 		= data['task_filter'];
+	
+	if (to_date == '' || from_date == '') {
+		custom_alert('Missing date', 'error');
+		return null;
+	}
+	data[SESSION_FROM] = from_date;
+	data[SESSION_TO] = to_date;
+	data[SESSION_FILTER] = filter;
+	data[SESSION_SHEETS] = ids;
+	return data;
+}
+
+function export_file (form_id) {
+	$('#notify').hide();
+	$('#overlay_loader').show();
+	var data = get_data_from_form(form_id);
+	if (! data) {
+		return null;
+	}
+    $.ajax({
+	   url: '/export',
+	   type: "POST",
+	   data: encodeURIComponent(JSON.stringify(data)),
+	   success: function(resp){
+		   var result = resp.result;
+			if (result[0]) {
+					var file_name = result[1];
+					var link = 'dowload_file?' + SESSION_FILE_NAME + '=' + file_name;
+					var ctn = 'Export successfully. Click here to download:' + '<a class="cl-blue" href="' + link + '"><u>  ' + file_name + '</u></a>'
+					$('#notify_content').html(ctn);
+					$('#notify').show();
+					$('#overlay_loader').hide();
+				} else {
+					custom_alert(result[1], 'error');
+				}
+	      }
+   });
+}
+$(document).ready(function () {
+	$('#export').click(function(event) {
+		export_file('form');
+	});
+});
+
 function custom_alert(message, type) {
 	$('#overlay_loader').hide();
 	alert(message);
@@ -76,3 +182,6 @@ function update_session(session_key, session_value) {
    });
 	
 }
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();   
+});

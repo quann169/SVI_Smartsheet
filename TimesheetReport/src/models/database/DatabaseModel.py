@@ -6,13 +6,14 @@ Created on Feb 22, 2021
 from src.models.database.ConnectionModel import Connection
 from src.commons.Enums import DbHeader, DbTable
 from pprint import pprint
-from src.commons.Utils import get_work_days
+from src.commons.Utils import get_work_days, split_patern, round_num
 
 
 class Configuration(Connection):
     def __init__(self):
         Connection.__init__(self)
         self.users              = {}
+        self.other_name         = {}
         self.users_full_name    = {}
         self.user_ids           = {}
         self.sheets             = {}
@@ -40,11 +41,13 @@ class Configuration(Connection):
                         `%s`.`%s`,
                         `%s`.`%s`,
                         `%s`.`%s`,
+                        `%s`.`%s`,
                         `%s`.`%s`
                 FROM `%s`
                 INNER JOIN `%s`
                 ON `%s`.`%s`=`%s`.`%s`
-                %s;
+                %s
+                ORDER BY `%s` ASC;
         """%(
             DbTable.SHEET, DbHeader.SHEET_ID, 
             DbTable.SHEET, DbHeader.SHEET_NAME, 
@@ -52,10 +55,11 @@ class Configuration(Connection):
             DbTable.SHEET_TYPE, DbHeader.SHEET_TYPE,
             DbTable.SHEET, DbHeader.UPDATED_BY,
             DbTable.SHEET, DbHeader.UPDATED_DATE,
+            DbTable.SHEET, DbHeader.PARSED_DATE,
             DbTable.SHEET, 
             DbTable.SHEET_TYPE, 
             DbTable.SHEET, DbHeader.SHEET_TYPE_ID, DbTable.SHEET_TYPE, DbHeader.SHEET_TYPE_ID,
-            condition
+            condition, DbHeader.SHEET_NAME
             )
         query_result    = self.db_query(query)
         result          = ()
@@ -66,18 +70,35 @@ class Configuration(Connection):
                         DbHeader.SHEET_ID                       : row[DbHeader.SHEET_ID],
                         DbHeader.SHEET_NAME                     : row[DbHeader.SHEET_NAME],
                         DbHeader.LATEST_MODIFIED                : row[DbHeader.LATEST_MODIFIED],
-                        DbHeader.SHEET_TYPE                     : row[DbHeader.SHEET_TYPE]
+                        DbHeader.SHEET_TYPE                     : row[DbHeader.SHEET_TYPE],
+                        DbHeader.PARSED_DATE                    : row[DbHeader.PARSED_DATE]
                         }
                     self.sheets[row[DbHeader.SHEET_NAME]] = {\
                         DbHeader.SHEET_ID                       : row[DbHeader.SHEET_ID],
                         DbHeader.SHEET_NAME                     : row[DbHeader.SHEET_NAME],
                         DbHeader.LATEST_MODIFIED                : row[DbHeader.LATEST_MODIFIED],
-                        DbHeader.SHEET_TYPE                     : row[DbHeader.SHEET_TYPE]
+                        DbHeader.SHEET_TYPE                     : row[DbHeader.SHEET_TYPE],
+                        DbHeader.PARSED_DATE                    : row[DbHeader.PARSED_DATE]
                         }
             return query_result
         else:
             return result
     
+#     def get_min_date_of_task_in_sheet(self):
+#         query = """
+#                 SELECT MIN(`%s`) AS `%s`, `%s` from `%s` GROUP BY `%s`;
+# 
+#         """%(
+#             DbHeader.DATE, DbHeader.DATE, DbHeader.SHEET_ID,
+#             DbTable.TASK, DbHeader.SHEET_ID, 
+#             )
+#         query_result    = self.db_query(query)
+#         result = {}
+#         if query_result:
+#             for row in query_result:
+#                 result[row[DbHeader.SHEET_ID]] = row[DbHeader.DATE]
+#         return result
+        
     def get_sheet_type_info(self, is_parse=False, is_active=False):
         condition   = ''
         if is_active:
@@ -118,6 +139,7 @@ class Configuration(Connection):
                 sheet_id    = row[DbHeader.SHEET_ID]
                 user_id     = row[DbHeader.USER_ID]
                 self.sheet_user[sheet_id] = user_id
+                
     def add_sheet(self):
         query   = """INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`) VALUES ("%s", "%s", "%s", "%s", "%s");
         """%(DbTable.SHEET, DbHeader.SHEET_TYPE_ID, DbHeader.SHEET_NAME, DbHeader.LATEST_MODIFIED, DbHeader.UPDATED_BY, DbHeader.IS_ACTIVE,\
@@ -151,6 +173,18 @@ class Configuration(Connection):
                     DbHeader.SHEET_ID, self.sheet_id)
         self.db_execute(query)
     
+    def update_parsed_date_of_sheet(self):
+        query   = '''UPDATE 
+                        `%s` 
+                    SET 
+                        `%s`="%s"
+                    WHERE 
+                        `%s`="%d";'''%(\
+                    DbTable.SHEET,\
+                    DbHeader.PARSED_DATE, self.parsed_date, \
+                    DbHeader.SHEET_ID, self.sheet_id)
+        self.db_execute(query)
+        
     def get_all_user_information(self):
         query   = """
                 SELECT
@@ -188,6 +222,10 @@ class Configuration(Connection):
                 self.users[user_obj.user_name] = user_obj
                 self.users_full_name[user_obj.full_name] = user_obj
                 self.user_ids[user_obj.user_id] = user_obj
+                for name in user_obj.other_name:
+                    name = name.strip()
+                    if name:
+                        self.other_name[name] = user_obj.user_id
         else:
             pass
     
@@ -203,6 +241,7 @@ class Configuration(Connection):
         self.db_execute_many(query, list_record)
     
     def get_list_timeoff(self, is_parse=False, start_date=None, end_date=None):
+        
         condition   = ""
         if start_date != None and end_date != None:
             condition = 'WHERE `%s`>="%s" AND `%s`<="%s" '%(DbHeader.START_DATE, start_date, DbHeader.END_DATE, end_date)
@@ -237,7 +276,6 @@ class Configuration(Connection):
             condition
             )
         query_result    = self.db_query(query)
-        
         result          = ()
         if query_result:
             if is_parse:
@@ -532,7 +570,46 @@ class Task(Connection):
             return query_result
         else:
             return result    
+    
+    def remove_final_task_information(self):
+        query   = '''DELETE FROM
+                        `%s`
+                    WHERE
+                        `%s`="%s" AND `%s`>="%s" AND `%s`<="%s";'''%(\
+                    DbTable.TASK_FINAL, \
+                    DbHeader.SHEET_ID, self.sheet_id, DbHeader.DATE, self.start_date, DbHeader.DATE, self.end_date
+                    )
         
+        self.db_execute(query)
+    
+    def move_task_to_final(self):
+        query   = '''INSERT INTO `%s` 
+                            (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`)
+                        SELECT
+                            `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`
+                        FROM
+                            `%s`
+                        WHERE
+                            `%s`="%s" AND `%s`>="%s" AND `%s`<="%s";'''%(\
+                    DbTable.TASK_FINAL,\
+                    
+                    DbHeader.SHEET_ID, DbHeader.USER_ID, DbHeader.SIBLING_ID, DbHeader.PARENT_ID, \
+                    DbHeader.SELF_ID, DbHeader.TASK_NAME, DbHeader.DATE, DbHeader.START_DATE, DbHeader.END_DATE,\
+                    DbHeader.DURATION, DbHeader.COMPLETE, DbHeader.PREDECESSORS, DbHeader.COMMENT, \
+                    DbHeader.ACTUAL_END_DATE, DbHeader.STATUS, DbHeader.IS_CHILDREN, DbHeader.ALLOCATION, \
+                    
+                    DbHeader.SHEET_ID, DbHeader.USER_ID, DbHeader.SIBLING_ID, DbHeader.PARENT_ID, \
+                    DbHeader.SELF_ID, DbHeader.TASK_NAME, DbHeader.DATE, DbHeader.START_DATE, DbHeader.END_DATE,\
+                    DbHeader.DURATION, DbHeader.COMPLETE, DbHeader.PREDECESSORS, DbHeader.COMMENT, \
+                    DbHeader.ACTUAL_END_DATE, DbHeader.STATUS, DbHeader.IS_CHILDREN, DbHeader.ALLOCATION, \
+
+                    DbTable.TASK,\
+                    DbHeader.SHEET_ID, self.sheet_id, DbHeader.DATE, self.start_date, DbHeader.DATE, self.end_date)
+        
+        self.milestone_id = self.db_execute(query)
+    
+    
+      
         
 class Users(Connection):
     def __init__(self, info=None):
@@ -553,7 +630,7 @@ class Users(Connection):
             self.user_name      = info[DbHeader.USER_NAME]
             self.full_name      = info[DbHeader.FULL_NAME]
             self.email          = info[DbHeader.EMAIL]
-            self.other_name     = info[DbHeader.OTHER_NAME]
+            self.other_name     = split_patern(info[DbHeader.OTHER_NAME], ';|,')
             self.is_active      = int(info[DbHeader.IS_ACTIVE])
             self.updated_by     = info[DbHeader.UPDATED_BY]
             self.updated_date   = info[DbHeader.UPDATED_DATE]
@@ -587,5 +664,5 @@ class TimeOff(Connection):
             self.status         = info[DbHeader.STATUS]
             self.user_id        = info[DbHeader.USER_ID]
             self.dates          = get_work_days(from_date=self.start_date, to_date=self.end_date)
-            self.timeoff_per_day    = int(self.work_days / len(self.dates))
+            self.timeoff_per_day    = round_num(int(self.work_days / len(self.dates)))
             

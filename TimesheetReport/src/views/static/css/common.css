@@ -55,8 +55,7 @@ a:hover {
 }
 
 #sidebar {
-    min-width: 250px;
-    max-width: 250px;
+    width: 250px;
     background: #7386D5;
     color: #fff;
     transition: all 0.3s;
@@ -95,8 +94,8 @@ a:hover {
 
 #sidebar ul li.active>a,
 a[aria-expanded="true"] {
-    color: #fff;
-    background: #AAAAAA ;
+    color: #FFF;
+    background: #7386FE ;
 }
 
 a[data-toggle="collapse"] {
@@ -146,15 +145,44 @@ a.article:hover {
 
 #content {
     width: 100%;
-
     min-height: 100vh;
     transition: all 0.3s;
 }
 
+#content.active {
+    width: calc( 100% - 250px) !important;
+}
 .main-div {
-	padding: 40px;
+	padding: 20px;
+}
+
+.notify {
+	background-color:  #e1ecf4;
+	border: 1px solid #a0c7e4;
+	padding: 10px;
+	display: none;
+}
+
+.notify-content {
 	
 }
+.notify-content:hover {
+	
+}
+
+.notify-close {
+}
+
+#notify_close:hover {
+	color: red; 
+	cursor: pointer;
+}
+
+.table-content {
+	overflow-x: auto;
+}
+
+
 /* ---------------------------------------------------
     MEDIAQUERIES
 ----------------------------------------------------- */
@@ -175,6 +203,9 @@ a.article:hover {
 ----------------------------------------------------- */
 .breadcrumb-item:hover {
 	font-weight: bold;
+}
+.breadcrumb {
+	margin-bottom: 0px;
 }
 
 .dataTables_length {
@@ -236,11 +267,29 @@ table, table.dataTable {
 .cl-red {
 	color: red;
 }
+.cl-orange {
+	color: orange;
+}
+.cl-white {
+	color: white;
+}
+.cl-green {
+	color: green;
+}
 .bg-red {
 	background-color: red;
 }
 .bg-blue {
 	background-color: blue;
+}
+.bg-orange {
+	background-color: orange;
+}
+.bg-white {
+	background-color: white;
+}
+.bg-green {
+	background-color: green;
 }
 .underline {
 	text-decoration: underline;

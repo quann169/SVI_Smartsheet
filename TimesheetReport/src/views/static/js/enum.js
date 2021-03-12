@@ -3,3 +3,4 @@ var SESSION_FROM 	= 'from';
 var SESSION_TO 		= 'to';
 var SESSION_FILTER  = 'filter';
 var SESSION_SHEETS  = 'sheets';
+var SESSION_FILE_NAME  = 'file_name';

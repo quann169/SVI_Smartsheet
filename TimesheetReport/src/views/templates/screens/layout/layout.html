@@ -13,9 +13,9 @@
 		        {% endblock title %}
 		    </title>
 			{%- block styles %}
-				<link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap-4.5.3/css/bootstrap.min.css') }}" />  
-				<link rel="stylesheet" href="{{ url_for('static', filename='lib/DataTables/datatables.min.css') }}" /> 
-				<link rel="stylesheet" href="{{ url_for('static', filename='lib/multiple-select/example-styles.css') }}" /> 
+				<link rel="stylesheet" href="{{ url_for('static', filename='vendors/bootstrap-4.5.3/css/bootstrap.min.css') }}" />  
+				<link rel="stylesheet" href="{{ url_for('static', filename='vendors/DataTables/datatables.min.css') }}" /> 
+				<link rel="stylesheet" href="{{ url_for('static', filename='vendors/multiple-select/example-styles.css') }}" /> 
 				<!-- Our Custom CSS -->
 			    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.css') }}" />
 				<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
@@ -28,38 +28,47 @@
 	        <!-- Sidebar  -->
 	        <nav id="sidebar" class='{% if ctrl_obj.get_session('sidebar') == 1 %}active{% endif %}'>
 	            {% block sidebar %}
-		            {% include "sidebar.html" %}
+		            {% include "components/sidebar/sidebar.html" %}
 	        	{%- endblock sidebar %}
 	        </nav>
 	
 	        <!-- Page Content  -->
-	        <div id="content">
+	        <div id="content" class="{% if ctrl_obj.get_session('sidebar') == 0 %}active{% endif %}">
 				<div class="loading" id ='overlay_loader'>&#8230;</div>
 				{% block navbar %}
-		            {% include "navbar.html" %}
+		            {% include "components/navbar/navbar.html" %}
 	        	{%- endblock navbar %}
 	            {% block breadcrumb %}
-		        	{% include "breadcrumb.html" %}
+		        	{% include "components/breadcrumb/breadcrumb.html" %}
 		        {% endblock %}
-				<div >
+				
+				<div class='notify' id='notify'>
+					<div class='d-flex'>
+						<div id='notify_content' class='notify-content col-11 d-flex justify-content-center'></div>
+						<div class='notify-close notify-content col-1 d-flex justify-content-end'>
+							<a id='notify_close'><i class="fas fa-times" ></i></a>
+						</div>
+					</div>
+				</div>
 				<div class='main-div' id='main_div'>
+					
 					{% block main %} 
 			        {% endblock %}
 				</div>
-				</div>
+				
 	            
 	      </div>
 	    </div>
 		{% block scripts %}
 			<!-- Font Awesome JS -->
-			<script src="{{url_for('static', filename='lib/fontawesome/js/solid.js')}}" ></script>
-			<script src="{{url_for('static', filename='lib/fontawesome/js/fontawesome.js')}}"></script>
-			<script src="{{url_for('static', filename='lib/jquery-3.1.1.js')}}"></script>
-			<script src="{{url_for('static', filename='lib/jquery-3.1.1.slim.min.js')}}"></script>
-			<script src="{{url_for('static', filename='lib/popper-1.14.0.min.js')}}"></script>
-			<script src="{{url_for('static', filename='lib/bootstrap-4.5.3/js/bootstrap.min.js')}}"></script>
-			<script src="{{url_for('static', filename='lib/DataTables/datatables.min.js')}}"></script>
-			<script src="{{url_for('static', filename='lib/multiple-select/jquery.multi-select.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/fontawesome/js/solid.js')}}" ></script>
+			<script src="{{url_for('static', filename='vendors/fontawesome/js/fontawesome.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/jquery-3.1.1.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/jquery-3.1.1.slim.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/popper-1.14.0.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/bootstrap-4.5.3/js/bootstrap.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/DataTables/datatables.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/multiple-select/jquery.multi-select.js')}}"></script>
 			
 			<script src="{{url_for('static', filename='js/enum.js')}}"></script>
 			<script src="{{url_for('static', filename='js/common.js')}}"></script>
@@ -69,7 +78,8 @@
 			<script src="{{url_for('static', filename='js/setting/resource.js')}}"></script>
 			<script src="{{url_for('static', filename='js/setting/home.js')}}"></script>
 			
-			<script src="{{url_for('static', filename='js/timesheet.js')}}"></script>
+			
+			
 	    {%- endblock scripts %}
 		
 	    

@@ -9,7 +9,7 @@
   var pluginName = "multiSelect",
     defaults = {
       'containerHTML': '<div class="multi-select-container">',
-      'menuHTML': '<div class="multi-select-menu">',
+      'menuHTML': '<div class="multi-select-menu"><label class="multi-select-menuitem"><input type="checkbox" class="select-all" value="all"> Select All</label>',
       'buttonHTML': '<span class="multi-select-button">',
       'menuItemsHTML': '<div class="multi-select-menuitems">',
       'menuItemHTML': '<label class="multi-select-menuitem">',

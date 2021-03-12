@@ -19,8 +19,8 @@ logging_setting('TimesheetReport.log')
 app = Flask( __name__ , static_folder="%s/%s"%(tool_path, 'src/views/static'), template_folder="%s/%s"%(tool_path, 'src/views/templates'))
 app.config['WORKING_PATH'] = config.WORKING_PATH
 app.config['SECRET_KEY']                    = 'TEST'
-app.config['SESSION_PERMANENT']             = True
-app.config['PERMANENT_SESSION_LIFETIME']    = timedelta(days = 7)
+# app.config['SESSION_PERMANENT']             = True
+# app.config['PERMANENT_SESSION_LIFETIME']    = timedelta(days = 7)
 app.register_blueprint(timesheet_bp)
 
 argv = sys.argv[1:]

@@ -1,14 +1,14 @@
-{% extends "layout.html" %}
+{% extends "screens/layout/layout.html" %}
 {% block breadcrumb %}
 	{% set br_items = [('/log', 'Log', True)] %}
 	{% with br_items=br_items %}
-		{% include "breadcrumb.html" %}
+		{% include "components/breadcrumb/breadcrumb.html" %}
 	{% endwith %}
 {% endblock breadcrumb %}
 {% block sidebar %}
 	{% set active_sidebar = 'log' %}
 	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
-		{% include "sidebar.html" %}
+		{% include "components/sidebar/sidebar.html" %}
 	{% endwith %}
 {% endblock sidebar %}
 {% block main %}

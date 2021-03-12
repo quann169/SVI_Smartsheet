@@ -1,6 +1,3 @@
-$(function(){
-    $('#list_sheet').multiSelect()
-});
 
 $(document).ready( function () {
 	load_datatable('#timesheet_table');
@@ -46,7 +43,7 @@ function load_timesheet_report() {
 	if (result) {
 		var data = result[0];
 		var method_get_url = result[1];
-		location.href = 'timesheet?' + method_get_url;
+		location.href = 'daily_timesheet?' + method_get_url;
 	}
 }
 
@@ -83,12 +80,17 @@ $(document).ready(function () {
 
 $(document).ready(function () {
 	$('#analyze').click(function(event) {
-		event.preventDefault();
+		var result = colect_config_date();
+		if (result) {
+			var data = result[0];
+			var method_get_url = result[1];
+			location.href = 'resource_timesheet?' + method_get_url;
+		}
 	});
 });
 
 $(document).ready(function () {
 	$('#export').click(function(event) {
-		event.preventDefault();
+		
 	});
 });

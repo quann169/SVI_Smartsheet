@@ -7,7 +7,8 @@ from src.models.database.DatabaseModel import Task as DbTask
 
 from src.models.database.DatabaseModel import Configuration
 from src.commons.Enums import DbHeader
-from src.commons.Utils import get_week_number, convert_date_to_string
+from src.commons.Utils import get_week_number, convert_date_to_string,\
+    get_start_week_of_date, get_month_name_of_date, round_num
 
 from pprint import pprint
 
@@ -153,7 +154,7 @@ class Task():
             self.self_id        = info[DbHeader.SELF_ID]
             self.task_name      = info[DbHeader.TASK_NAME]
             self.date           = convert_date_to_string(info[DbHeader.DATE], '%Y-%m-%d')
-            self.allocation     = info[DbHeader.ALLOCATION]
+            self.allocation     = round_num(info[DbHeader.ALLOCATION])
             self.is_children    = info[DbHeader.IS_CHILDREN]
             self.start_date     = convert_date_to_string(info[DbHeader.START_DATE], '%Y-%m-%d')
             self.end_date       = convert_date_to_string(info[DbHeader.END_DATE], '%Y-%m-%d')
@@ -165,7 +166,8 @@ class Task():
             self.status         = info[DbHeader.STATUS]
             self.user_name      = self.sheet_obj.timesheet_obj.user_ids[self.user_id].user_name
             self.week_number    = get_week_number(self.date)
-
+            self.start_week     = get_start_week_of_date(self.date)
+            self.month_name     = get_month_name_of_date(self.date)
          
     
     

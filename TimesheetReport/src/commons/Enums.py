@@ -119,6 +119,7 @@ class SessionKey:
     FROM            = 'from'
     TO              = 'to'
     FILTER          = 'filter'
+    FILE_NAME       = 'file_name'
     
     
 class DbHeader:
@@ -174,9 +175,12 @@ class DbHeader:
     OTHER_NAME              = 'other_name'
     IS_ACTIVE               = 'is_active'
     ALLOCATION              = 'allocation'
+    PARSED_DATE             = 'parsed_date'
 
-
-    
+class ExcelColor:
+    LIST_COLOR = [
+        'lime', 'orange', 'tan', 'gray_ega', 'gray25', 'ice_blue', 'white', 'light_turquoise', 'green', 'red', 'blue'
+        ]
     
     
     

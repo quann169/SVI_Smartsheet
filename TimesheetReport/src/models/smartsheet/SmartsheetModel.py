@@ -16,13 +16,14 @@ from jinja2 import Environment
 from jinja2.loaders import FileSystemLoader
 from config import TOKEN
 
-from src.commons.Utils import get_prev_date_by_time_delta, stuck, convert_date_to_string, println, get_work_days, str_to_date
+from src.commons.Utils import get_prev_date_by_time_delta, stuck, convert_date_to_string, println,\
+                             get_work_days, str_to_date, compare_date
 
 from src.commons import Enums
 
 
 class SmartSheets:
-    def __init__(self, list_sheet=None, holiday=[], time_off={}, timedelta=1, from_date=None, to_date=None):
+    def __init__(self, list_sheet=None, holiday=[], time_off={}, timedelta=2, from_date=None, to_date=None):
         self.connection = None
         self.available_name = []
         self.list_sheet = list_sheet
@@ -48,28 +49,30 @@ class SmartSheets:
             self.available_name.append(sheet.name)
     
     def parse(self):
+        
         if self.list_sheet == None:
             pass
             # missing code
         else:
             list_sheet_name = []
-            for sheet_name, latest_modified, sheet_id in self.list_sheet:
+            for sheet_name, latest_modified, sheet_id, parsed_date in self.list_sheet:
                 if sheet_name in self.available_name:
-                    list_sheet_name.append((sheet_name, latest_modified, sheet_id))
+                    list_sheet_name.append((sheet_name, latest_modified, sheet_id, parsed_date))
                 else:
                     stuck('No sheet name %s'%sheet_name)
-            for sheet_name, latest_modified, sheet_id in list_sheet_name:
-                info = Sheet(self, sheet_name, latest_modified, sheet_id)
+            for sheet_name, latest_modified, sheet_id, parsed_date in list_sheet_name:
+                info = Sheet(self, sheet_name, latest_modified, sheet_id, parsed_date)
                 info.parse_sheet()
                 self.info[sheet_name] = info 
         
     
 class Sheet():
-    def __init__(self, smartsheet_obj, sheet_name, latest_modified, sheet_id):
+    def __init__(self, smartsheet_obj, sheet_name, latest_modified, sheet_id, parsed_date):
         self.children_task  = []
         self.parent_task    = []
         self.name           = sheet_name
         self.sheet_id       = sheet_id
+        self.parsed_date       = parsed_date
         self.header_index    = {}
         self.info           = []
         self.smartsheet_obj = smartsheet_obj
@@ -82,8 +85,10 @@ class Sheet():
         sheet           = self.smartsheet_obj.connection.sheets.get(self.name)
         cols            = sheet.columns
         
+        is_go = compare_date(self.timedelta, self.parsed_date)
+        
         modified_at = convert_date_to_string(sheet.modified_at)
-        if self.latest_modified == modified_at:
+        if self.latest_modified == modified_at and is_go:
             println('Skip parsing sheet: %s'%(self.name), 'info')
             self.is_parse       = False
         else:
@@ -127,7 +132,7 @@ class Task():
         self.comments           = ''
         self.actual_end_date    = None
         self.status             = ''
-        self.allocation         = None
+        self.allocation         = 100
         self.sheet_obj          = sheet_obj
         self.list_date          = []
         
@@ -154,7 +159,8 @@ class Task():
                     self.task_name = display_value
                     
             elif header in [Enums.SmartsheetCfgKeys.ASSIGN_TO]:
-                self.assign_to = display_value
+                if display_value:
+                    self.assign_to = display_value.strip()
             elif header in [Enums.SmartsheetCfgKeys.START_DATE]:
                 self.start_date = value
             elif header in [Enums.SmartsheetCfgKeys.END_DATE]:
@@ -175,13 +181,16 @@ class Task():
                     self.status = value
             elif header in [Enums.SmartsheetCfgKeys.COMPLETE]:
                 if value != None:
-                    self.complete = int(value) * 100
+                    try:
+                        self.complete = float(value) * 100
+                    except:
+                        self.complete = 0
             elif header in [Enums.SmartsheetCfgKeys.ALLOCATION]:
                 if value == None:
                     self.allocation = 100
                 else:
                     try:
-                        self.allocation = int(value) * 100
+                        self.allocation = float(value) * 100
                     except ValueError:
                         pass
         if self.start_date != None and self.end_date != None and self.assign_to != None:
