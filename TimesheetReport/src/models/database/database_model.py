@@ -3,10 +3,10 @@ Created on Feb 22, 2021
 
 @author: toannguyen
 '''
-from src.models.database.ConnectionModel import Connection
-from src.commons.Enums import DbHeader, DbTable
+from src.models.database.connection_model import Connection
+from src.commons.enums import DbHeader, DbTable
 from pprint import pprint
-from src.commons.Utils import get_work_days, split_patern, round_num
+from src.commons.utils import get_work_days, split_patern, round_num
 
 
 class Configuration(Connection):

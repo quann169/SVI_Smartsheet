@@ -6,15 +6,15 @@ Created on Feb 17, 2021
 
 import pymysql
 from pymysql.constants import CLIENT
-from src.commons.Enums import Connect
-from src.commons.Utils import println
+from src.commons.enums import Connect
+from src.commons.utils import println
 import logging
 from pprint import pprint
 from flask import g
 import os
 
 import re
-from src.models.database.DbSettings import DbSettings
+from src.models.database.db_setting import DbSetting
 import config
 
 class Connection:
@@ -35,7 +35,7 @@ class Connection:
                
     def get_database_setting(self):
 
-        db_setting                              =  DbSettings()
+        db_setting                              =  DbSetting()
         self.db_host                            = db_setting.db_host
         self.db_port                            = db_setting.db_port
         self.db_user                            = db_setting.db_user

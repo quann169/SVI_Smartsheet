@@ -1,5 +1,8 @@
-from src.controllers.Controllers import Controllers
-from src.commons.Utils import logging_setting
+import sys
+sys.path.insert(0, '../')
+sys.path.insert(0, '../3rd-src')
+from src.controllers.controllers import Controllers
+from src.commons.utils import logging_setting
 
 def main():
     logging_setting('TimesheetReportUpdateTask.log')

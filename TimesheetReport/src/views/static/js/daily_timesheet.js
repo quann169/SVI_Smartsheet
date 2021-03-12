@@ -13,6 +13,9 @@ function colect_config_date() {
 	} 
 	var ids = []
 	for (var idx = 0; idx < sheet_ids.length; idx++) {
+		if (sheet_ids[idx] == 'all') {
+			continue;
+		}
 		method_get_url = method_get_url + '&' + SESSION_SHEETS + '=' + sheet_ids[idx];
 		ids.push(sheet_ids[idx]);
 	}

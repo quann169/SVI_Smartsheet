@@ -3,11 +3,11 @@ Created on Mar 1, 2021
 
 @author: toannguyen
 '''
-from src.models.database.DatabaseModel import Task as DbTask
+from src.models.database.database_model import Task as DbTask
 
-from src.models.database.DatabaseModel import Configuration
-from src.commons.Enums import DbHeader
-from src.commons.Utils import get_week_number, convert_date_to_string,\
+from src.models.database.database_model import Configuration
+from src.commons.enums import DbHeader
+from src.commons.utils import get_week_number, convert_date_to_string,\
     get_start_week_of_date, get_month_name_of_date, round_num
 
 from pprint import pprint

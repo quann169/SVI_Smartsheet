@@ -1,13 +1,16 @@
-from src.controllers.Controllers import Controllers
 import os, sys
+sys.path.insert(0, './')
+sys.path.insert(0, './3rd-src')
+
+from src.controllers.controllers import Controllers
 import config
 from datetime import timedelta
 from flask import Flask, g, session, redirect, url_for
-from src.controllers.routes.Route import timesheet_bp
+from src.controllers.routes.route import timesheet_bp
 from flask import Flask, flash, request, redirect, url_for
 import webbrowser
 from threading import Timer
-from src.commons.Utils import logging_setting
+from src.commons.utils import logging_setting
 
 
 port        = 6602

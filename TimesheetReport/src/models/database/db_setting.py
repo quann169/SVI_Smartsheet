@@ -4,7 +4,7 @@ Created on Feb 22, 2021
 @author: toannguyen
 '''
 
-class DbSettings():
+class DbSetting():
     def __init__(self):
         self.db_name        = 'timesheet_dev'
         self.db_host        = '192.168.2.59'

@@ -16,10 +16,10 @@ from jinja2 import Environment
 from jinja2.loaders import FileSystemLoader
 from config import TOKEN
 
-from src.commons.Utils import get_prev_date_by_time_delta, stuck, convert_date_to_string, println,\
+from src.commons.utils import get_prev_date_by_time_delta, stuck, convert_date_to_string, println,\
                              get_work_days, str_to_date, compare_date
 
-from src.commons import Enums
+from src.commons.enums import SmartsheetCfgKeys
 
 
 class SmartSheets:
@@ -97,7 +97,7 @@ class Sheet():
             count = 0
             for col  in cols:
                 header_name = col.title
-                if header_name in Enums.SmartsheetCfgKeys.LIST_HEADER:
+                if header_name in SmartsheetCfgKeys.LIST_HEADER:
                     self.header_index[header_name] = count
                 count += 1
             rows = sheet.rows
@@ -151,41 +151,41 @@ class Task():
             index = self.header_index[header]
             display_value = cells[index].display_value
             value = cells[index].value
-            if header in [Enums.SmartsheetCfgKeys.ACTUAL_END_DATE]:
+            if header in [SmartsheetCfgKeys.ACTUAL_END_DATE]:
                 if value != None:
                     self.actual_end_date = value
-            elif header in [Enums.SmartsheetCfgKeys.TASK_NAME]:
+            elif header in [SmartsheetCfgKeys.TASK_NAME]:
                 if display_value != None:
                     self.task_name = display_value
                     
-            elif header in [Enums.SmartsheetCfgKeys.ASSIGN_TO]:
+            elif header in [SmartsheetCfgKeys.ASSIGN_TO]:
                 if display_value:
                     self.assign_to = display_value.strip()
-            elif header in [Enums.SmartsheetCfgKeys.START_DATE]:
+            elif header in [SmartsheetCfgKeys.START_DATE]:
                 self.start_date = value
-            elif header in [Enums.SmartsheetCfgKeys.END_DATE]:
+            elif header in [SmartsheetCfgKeys.END_DATE]:
                 self.end_date = value
-            elif header in [Enums.SmartsheetCfgKeys.DURATION]:
+            elif header in [SmartsheetCfgKeys.DURATION]:
                 self.duration = display_value
-            elif header in [Enums.SmartsheetCfgKeys.PREDECESSOR]:
+            elif header in [SmartsheetCfgKeys.PREDECESSOR]:
                 if value != None and value != '#REF':
                     try:
                         self.predecessors = int(value)
                     except ValueError:
                         pass
-            elif header in [Enums.SmartsheetCfgKeys.COMMENT]:
+            elif header in [SmartsheetCfgKeys.COMMENT]:
                 if value != None:
                     self.comments = value
-            elif header in [Enums.SmartsheetCfgKeys.STATUS]:
+            elif header in [SmartsheetCfgKeys.STATUS]:
                 if value != None:
                     self.status = value
-            elif header in [Enums.SmartsheetCfgKeys.COMPLETE]:
+            elif header in [SmartsheetCfgKeys.COMPLETE]:
                 if value != None:
                     try:
                         self.complete = float(value) * 100
                     except:
                         self.complete = 0
-            elif header in [Enums.SmartsheetCfgKeys.ALLOCATION]:
+            elif header in [SmartsheetCfgKeys.ALLOCATION]:
                 if value == None:
                     self.allocation = 100
                 else:

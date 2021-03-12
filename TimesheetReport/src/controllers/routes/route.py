@@ -9,11 +9,11 @@ from flask import Blueprint, render_template, session, redirect, url_for, abort,
                     send_from_directory
 from pprint import pprint
 import logging
-from src.commons.Utils import save_file_from_request, get_request_form_ajax, get_request_form_ajax, \
+from src.commons.utils import save_file_from_request, get_request_form_ajax, get_request_form_ajax, \
                                 get_request_form_ajax, get_request_args, get_request_args_list
-from src.controllers.Controllers import Controllers as ctrl
-from src.commons.Enums import DbTable, DbHeader, SessionKey
-from src.commons.Utils import println
+from src.controllers.controllers import Controllers as ctrl
+from src.commons.enums import DbTable, DbHeader, SessionKey
+from src.commons.utils import println
 import config
 
 tempalte_path =  os.getcwd() + 'src/views/templates'
