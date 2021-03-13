@@ -1,27 +1,71 @@
-<!doctype html>
-<html>
-<head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='lib/multiple-select/example-styles.css') }}" /> 
+{% extends "screens/layout/layout.html" %}
+{% block sidebar %}
+	{% set active_sidebar = 'home' %}
+	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
+		{% include "components/sidebar/sidebar.html" %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block breadcrumb %}
+	{% set br_items = [('/home', 'Home', True)] %}
+	{% with br_items=br_items %}
+		{% include "components/breadcrumb/breadcrumb.html" %}
+	{% endwith %}
+{% endblock breadcrumb %}
 
-</head>
-<body>
+{% block main %}
+<style>
+	.conflict {
+		
+		border: 1px solid red;
+		border-radius: 5px;
+		background-color: red;
+		color: white;
+		padding: 5px 10px;
+	}
+	.no-conflict {
+		
+		border: 1px solid green;
+		border-radius: 5px;
+		background-color: green;
+		color: white;
+		padding: 5px 10px;
+	}
+	td {
+		padding: 5px;
+	}
+</style>
+<div class='table-content'>
+	<table width='100%'>
 
-        <label for="people">Select people:</label>
-        <select id="people" name="people" multiple>
-            <option value="alice">Alice</option>
-            <option value="bob">Bob</option>
-            <option value="carol">Carol</option>
-        </select>
-    
-
-<script src="{{url_for('static', filename='lib/jquery-3.1.1.min.js')}}"></script>
-<script src="{{url_for('static', filename='lib/multiple-select/jquery.multi-select.js')}}"></script>
-<script type="text/javascript">
-$(function(){
-    $('#people').multiSelect();
-
-});
-</script>
-
-</body>
-</html>
+			<tr>
+			  <td><i class="far fa-check-circle"></i></td>
+		      <td>Sheet 1</td>
+			  <td>
+				<lable class='conflict'>20-03</lable>
+				<lable class='no-conflict'>20-03</lable>
+				<lable class='conflict'>20-03</lable>
+				<lable class='conflict'>20-03</lable>
+				<lable class='conflict'>20-03</lable>
+			</td>
+			  
+			  
+		    </tr>
+			<tr>
+			  <td><i class="far fa-check-circle"></i></td>
+		      <td>Sheet 1</td>
+			  <td>
+				<lable class='conflict'>20-03</lable>
+				<lable class='no-conflict'>20-03</lable>
+				<lable class='conflict'>20-03</lable>
+				<lable class='conflict'>20-03</lable>
+				<lable class='conflict'>20-03</lable>
+			</td>
+			  
+			  
+		    </tr>
+	
+	  </tbody>
+	  
+	</table>
+</div>
+{% endblock main%}

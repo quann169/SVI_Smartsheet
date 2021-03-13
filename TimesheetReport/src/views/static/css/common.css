@@ -376,6 +376,64 @@ table, table.dataTable {
     transform: rotate(360deg);
   }
 }
-
-
 /* end loading popup */
+
+/* show conflict toa add final */
+.cfl {
+		border: 1px solid red;
+		border-radius: 5px;
+		background-color: #dc3545;
+		color: white;
+		padding: 2px;
+		margin-right: 5px;
+		min-width: 50px;
+	}
+	
+	.no-cfl {
+		
+		border: 1px solid green;
+		border-radius: 5px;
+		background-color: #28a745;
+		color: white;
+		padding: 2px;
+		margin-right: 5px;
+		min-width: 50px;
+	}
+	
+	#cfl-tb {
+		border-collapse: collapse;
+		width: 100%;
+		
+	}
+	
+	#cfl-tb td {
+		border: 1px solid #EEE !important;
+		text-align: left;
+		padding: 5px;
+	} 
+	
+	#cfl-tb tr:hover {
+		background-color: #EEE !important;
+	} 
+	
+	.cfl-status{
+		width: 30px;	
+	}
+	
+	.cfl-sheet{
+		min-width: 100px;
+		
+	} 
+	
+	.cfl-date{
+		display: flex;
+		overflow-x: auto;
+		
+	} 
+	
+	.cfl-cnt {
+		width: 100%;
+		
+		overflow-x: auto;
+	}
+/* end show conflict toa add final */

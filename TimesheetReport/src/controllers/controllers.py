@@ -9,7 +9,8 @@ from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue,
 from src.commons.message import MsgError, MsgWarning, Msg
 from src.commons.utils import search_pattern, message_generate, println, remove_path, split_patern,\
                             get_prev_date_by_time_delta, get_work_week, convert_date_to_string,\
-                            get_work_month, round_num, defined_color
+                            get_work_month, round_num, defined_color,\
+    get_work_days
 from src.models.timesheet.timesheet_model import Timesheet
 from flask import session
 from pprint import pprint
@@ -677,11 +678,11 @@ class Controllers:
                         col_num = start_col
                         row_num += 1
             #end resource
-            cl  = wb.add_sheet('Color')
-            r , c = (0,1)
-            for color  in color_style:
-                cl.write(r, c, color, color_style[color])
-                r += 1
+            # cl  = wb.add_sheet('Color')
+            # r , c = (0,1)
+            # for color  in color_style:
+            #     cl.write(r, c, color, color_style[color])
+            #     r += 1
             wb.save(output_path)
             return 1, file_name
         
@@ -690,6 +691,10 @@ class Controllers:
             return 0, e.args[0]
     
     def add_to_final(self, from_date, to_date, sheet_ids, overwrite=False):
+        workdays = get_work_days(from_date=from_date, to_date=to_date)
+        list_date = []
+        for date, week in workdays:
+            list_date.append(date)
         try:
             if from_date and to_date and sheet_ids:
                 task_obj    = Task()
@@ -697,10 +702,15 @@ class Controllers:
                     task_obj.set_attr(sheet_id  = str(sheet_id),
                                       start_date = from_date,
                                       end_date   = to_date)
-#                     if overwrite:
-#                         task_obj.remove_final_task_information()
-#                     task_obj.move_task_to_final()
-                    return 1, Msg.M003
+                    # if overwrite:
+                        # task_obj.remove_final_task_information()
+                    task_obj.move_task_to_final()
+                    list_record = []
+                    for date in list_date:
+                        list_record.append((date, sheet_id))
+                    task_obj.add_final_date(list_record)
+
+                return 1, Msg.M003
             else:
                 # missing input
                 return 0, MsgError.E003
@@ -708,5 +718,53 @@ class Controllers:
         except Exception as e:
             println(e, 'exception')
             return 0, e.args[0]
+    
+    def calculate_conflict_to_add_final_task(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None):
+        missing_method = False
+        if request_dict:
+            try:
+                from_date   = request_dict[SessionKey.FROM]
+                to_date     = request_dict[SessionKey.TO]
+                sheet_ids   = request_dict[SessionKey.SHEETS]
+            except KeyError:
+                missing_method = True
+        if not filter or not sheet_ids or not to_date or not from_date or missing_method:
+            return []
+        config_obj  = Configuration()
+        
+        config_obj.get_sheet_config(is_parse=True)
+        cfg_sheet_ids = config_obj.sheet_ids
+        
+        task_obj  = Task()
+        task_obj.set_attr(start_date = from_date,
+                          end_date = to_date)
+        final_date_info = task_obj.get_final_date()
+        
+        workdays = get_work_days(from_date=from_date, to_date=to_date)
+        list_date = []
+        for date, week in workdays:
+            list_date.append(date)
+        
+        result = []
+        enable_add = True
+        for sheet_id in sheet_ids:
+            sheet_name = cfg_sheet_ids[sheet_id][DbHeader.SHEET_NAME]
+            is_conflict = False
+            list_1 = []
+            for date in list_date:
+                is_exist_date = False
+                if sheet_id in final_date_info and date in final_date_info[sheet_id]:
+                    is_conflict = True
+                    enable_add  = False
+                    is_exist_date = True
+                    list_1.append((date, is_exist_date))
+                else:
+                    list_1.append((date, is_exist_date))
+            result.append((is_conflict, sheet_name, list_1))
+        
+        return result, enable_add
+        
+        
+        
         
         

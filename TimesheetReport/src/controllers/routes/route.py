@@ -218,6 +218,17 @@ def resource_timesheet():
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
+
+@timesheet_bp.route('/conflict_final_date')
+def conflict_final_date():
+    println('/conflict_final_date', 'debug')
+    try:
+        request_dict = get_request_args_list()
+        ctrl_obj   = ctrl()
+        return render_template("screens/timesheet/conflict_final_date.html", ctrl_obj = ctrl_obj, db_header = DbHeader(), session_enum = SessionKey(), request_dict = request_dict)
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
     
 @timesheet_bp.route('/test')
 def test():

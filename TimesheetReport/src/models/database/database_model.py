@@ -6,7 +6,7 @@ Created on Feb 22, 2021
 from src.models.database.connection_model import Connection
 from src.commons.enums import DbHeader, DbTable
 from pprint import pprint
-from src.commons.utils import get_work_days, split_patern, round_num
+from src.commons.utils import get_work_days, split_patern, round_num, convert_date_to_string
 
 
 class Configuration(Connection):
@@ -84,21 +84,6 @@ class Configuration(Connection):
         else:
             return result
     
-#     def get_min_date_of_task_in_sheet(self):
-#         query = """
-#                 SELECT MIN(`%s`) AS `%s`, `%s` from `%s` GROUP BY `%s`;
-# 
-#         """%(
-#             DbHeader.DATE, DbHeader.DATE, DbHeader.SHEET_ID,
-#             DbTable.TASK, DbHeader.SHEET_ID, 
-#             )
-#         query_result    = self.db_query(query)
-#         result = {}
-#         if query_result:
-#             for row in query_result:
-#                 result[row[DbHeader.SHEET_ID]] = row[DbHeader.DATE]
-#         return result
-        
     def get_sheet_type_info(self, is_parse=False, is_active=False):
         condition   = ''
         if is_active:
@@ -608,7 +593,38 @@ class Task(Connection):
         
         self.milestone_id = self.db_execute(query)
     
-    
+    def add_final_date(self, list_record):
+        query   = '''INSERT INTO `%s` 
+                        (`%s`, `%s`)
+                    '''%(DbTable.FINAL_DATE,\
+                    DbHeader.DATE, DbHeader.SHEET_ID)
+        query   += '''
+                    VALUES
+                        (%s, %s)
+                    ;'''
+        self.db_execute_many(query, list_record)
+        
+    def get_final_date(self):
+        query = """
+                SELECT `%s`, `%s`
+                FROM `%s`
+                WHERE
+                `%s`>="%s" AND `%s`<="%s";
+        """%(
+            DbHeader.DATE, DbHeader.SHEET_ID, 
+            DbTable.FINAL_DATE,
+             DbHeader.DATE, self.start_date, DbHeader.DATE, self.end_date
+            )
+        
+        query_result    = self.db_query(query)
+        result          = {}
+        if query_result:
+            for row in query_result:
+                if not result.get(row[DbHeader.SHEET_ID]):
+                    result[row[DbHeader.SHEET_ID]] = []
+                date_str = convert_date_to_string(row[DbHeader.DATE], '%Y-%m-%d')
+                result[row[DbHeader.SHEET_ID]].append(date_str)
+        return result  
       
         
 class Users(Connection):

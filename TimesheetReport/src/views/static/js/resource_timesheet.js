@@ -83,23 +83,11 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-	$('#add_final').click(function(event) {
-		$('#overlay_loader').show();
+	$('#show_add_final').click(function(event) {
+//		$('#overlay_loader').show();
 		var result = colect_config_date();
 		var data = result[0];
 		var method_get_url = result[1];
-		$.ajax({
-			   url: '/add_to_final',
-			   type: "POST",
-			   data: encodeURIComponent(JSON.stringify(data)),
-			   success: function(resp){
-				   var result = resp.result;
-					if (result[0]) {
-							custom_alert(result[1], 'success');
-						} else {
-							custom_alert(result[1], 'error');
-						}
-			      }
-		   });
+		location.href = 'conflict_final_date?' + method_get_url;
 	});
 });

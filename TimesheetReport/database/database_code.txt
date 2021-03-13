@@ -32,6 +32,24 @@ DEFAULT CHARACTER SET = utf8mb4;
 
 
 -- -----------------------------------------------------
+-- Table `timesheet`.`final_date`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`final_date` (
+  `final_date_id` INT NOT NULL AUTO_INCREMENT,
+  `date` DATETIME NOT NULL,
+  `sheet_id` INT NOT NULL,
+  PRIMARY KEY (`final_date_id`),
+  INDEX `final_date_sheet_idx` (`sheet_id` ASC) ,
+  CONSTRAINT `final_date_sheet`
+    FOREIGN KEY (`sheet_id`)
+    REFERENCES `timesheet`.`sheet` (`sheet_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+    
+
+-- -----------------------------------------------------
 -- Table `timesheet`.`eng_level`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `timesheet`.`eng_level` (

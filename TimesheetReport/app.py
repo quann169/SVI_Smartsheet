@@ -20,6 +20,7 @@ logging_setting('TimesheetReport.log')
 
 
 app = Flask( __name__ , static_folder="%s/%s"%(tool_path, 'src/views/static'), template_folder="%s/%s"%(tool_path, 'src/views/templates'))
+# app = Flask( __name__ , static_folder="%s/%s"%(tool_path, 'static'), template_folder="%s/%s"%(tool_path, 'templates'))
 app.config['WORKING_PATH'] = config.WORKING_PATH
 app.config['SECRET_KEY']                    = 'TEST'
 # app.config['SESSION_PERMANENT']             = True

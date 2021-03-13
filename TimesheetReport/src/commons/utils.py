@@ -66,7 +66,8 @@ def remove_path(path):
 def round_num(number, ndigits=1):
     number  = Decimal(number)
     result = round(number, ndigits)
-    result = result.normalize()
+    # result = result.normalize()
+    result = result.quantize(Decimal(1)) if result == result.to_integral() else result.normalize()
     return result
     
 def save_file_from_request():
@@ -91,7 +92,7 @@ def println(message, logging_level=None):
         print (message)
     elif logging_level == 'exception':
         logging.exception(message)
-#         traceback.print_exc('')
+        # traceback.print_exc('')
         print (message)
     elif logging_level == 'error':
         logging.error(message)

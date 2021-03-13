@@ -56,7 +56,8 @@ class DbTable:
     TEAM                    = 'team'
     TIME_OFF                = 'time_off'
     USER                    = 'user'
-
+    FINAL_DATE              = 'final_date'
+    
 class DateTime():
     LIST_MONTH = {
         1 : 'Jan', 

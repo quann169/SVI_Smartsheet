@@ -185,3 +185,32 @@ function update_session(session_key, session_value) {
 $(document).ready(function(){
   $('[data-toggle="tooltip"]').tooltip();   
 });
+
+function parse_url() {
+	var url_string = window.location.href;
+	var url = new URL(url_string);
+	var method_get_str = url.search;
+	var method_str = method_get_str.replace("?", "");
+	var data = {};
+	
+	var list_arg = method_str.split('&');
+	
+	for (var idx =0; idx < list_arg.length; idx++) {
+		if (list_arg[idx].length > 0) {
+			var spl = list_arg[idx].split('=');
+			var key = spl[0];
+			var value = spl[1];
+			if (key == SESSION_SHEETS) {
+				if (key in data) {
+					data[key].push(value);
+				} else {
+					data[key] = [value];
+				}
+			} else {
+				data[key] = value;
+				}
+		}
+	}
+	var output = [method_get_str, data];
+	return output;
+}
