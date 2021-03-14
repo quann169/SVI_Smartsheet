@@ -9,8 +9,8 @@ from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue,
 from src.commons.message import MsgError, MsgWarning, Msg
 from src.commons.utils import search_pattern, message_generate, println, remove_path, split_patern,\
                             get_prev_date_by_time_delta, get_work_week, convert_date_to_string,\
-                            get_work_month, round_num, defined_color,\
-    get_work_days
+                            get_work_month, round_num, defined_color, \
+                            get_work_days, write_message_into_file
 from src.models.timesheet.timesheet_model import Timesheet
 from flask import session
 from pprint import pprint
@@ -19,6 +19,7 @@ import os, sys
 import config
 import xlwt
 import xlrd
+import time
 from xlwt import Workbook
 
 
@@ -26,14 +27,18 @@ class Controllers:
     def __init__(self):
         pass
     
-    def parse_smarsheet_and_update_task(self, from_date=None, to_date=None, list_sheet_id=None):
+    def parse_smarsheet_and_update_task(self, from_date=None, to_date=None, list_sheet_id=None, log=None):
+        if log:
+            write_message_into_file(log, 'Starting parse smartsheet\n')
+        println('Starting parse smartsheet', 'info')
+        start_time = time.time()
         cfg_obj = Configuration()
         sheet_info  = cfg_obj.get_sheet_config(list_sheet_id)
         list_sheet  = []
         
         for row in sheet_info:
             list_sheet.append((row[DbHeader.SHEET_NAME], row[DbHeader.LATEST_MODIFIED], int(row[DbHeader.SHEET_ID]), row[DbHeader.PARSED_DATE]))
-        sms_obj = SmartSheets(list_sheet = list_sheet, from_date = from_date, to_date = to_date)
+        sms_obj = SmartSheets(list_sheet=list_sheet, from_date=from_date, to_date=to_date, log=log)
         sms_obj.connect_smartsheet()
         sms_obj.parse()
         
@@ -42,7 +47,10 @@ class Controllers:
         user_info = config_obj.users
         other_name_info = config_obj.other_name
         task_obj    = Task()
+        total = len(sms_obj.info)
+        count = 0
         for sheet_name in sms_obj.info:
+            count += 1
             # save children_task only
             child_tasks         = sms_obj.info[sheet_name].children_task
             sheet_id            = sms_obj.info[sheet_name].sheet_id
@@ -50,7 +58,9 @@ class Controllers:
             
             is_parse            = sms_obj.info[sheet_name].is_parse
             if is_parse:
-                println('Updating sheet: %s'%(sheet_name), 'info')
+                if log:
+                    write_message_into_file(log, '[%d/%d] Updating sheet: %s\n'%(count, total, sheet_name))
+                println('[%d/%d] Updating sheet: %s'%(count, total, sheet_name), 'info')
                 task_obj.set_attr(sheet_id    = sheet_id)
                 task_obj.remove_all_task_information_by_project_id()
                 list_records_task   = []
@@ -112,8 +122,20 @@ class Controllers:
                 
                 config_obj.update_parsed_date_of_sheet()
                 
-                println('Update sheet: %s done'%(sheet_name), 'info')
-                  
+                println('[%d/%d] Update database for %s - Done'%(count, total, sheet_name), 'info')
+                if log:
+                    write_message_into_file(log, '[%d/%d] Update database for %s - Done\n'%(count, total, sheet_name))
+            else:
+                println('[%d/%d] Skip update database for %s'%(count, total, sheet_name), 'info')
+                if log:
+                    write_message_into_file(log, '[%d/%d] Skip update database for %s\n'%(count, total, sheet_name))
+        end_time = time.time()
+        diff = int(end_time - start_time)
+        minutes, seconds = diff // 60, diff % 60
+        println ("Time: " + str(minutes) + ':' + str(seconds).zfill(2))
+        if log:
+            write_message_into_file(log, "Time: " + str(minutes) + ':' + str(seconds).zfill(2)  + '\n')
+                    
     def import_timeoff(self, file_name):
         try:
             file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
@@ -446,16 +468,34 @@ class Controllers:
     
     def get_newest_data(self, from_date, to_date, sheet_ids):
         try:
-            self.parse_smarsheet_and_update_task(list_sheet_id =   sheet_ids,
-                                                 from_date      =   from_date,
-                                                 to_date        =   to_date)
+            log_file = os.path.join(config.WORKING_PATH, "GetNewestData.log")
+            if os.path.exists(log_file):
+                os.remove(log_file)
+            self.parse_smarsheet_and_update_task(list_sheet_id  = sheet_ids,
+                                                 from_date      = from_date,
+                                                 to_date        = to_date,
+                                                 log            = log_file)
+            
+            write_message_into_file(log_file, Msg.M002)
+            time.sleep(2)
             return 1, Msg.M002
         except Exception as e:
             println(e, 'exception')
-            return 0, e.args[0]
+            write_message_into_file(log_file, '[ERROR] %s'%(e.args[0]))
+            return 1, '[ERROR] %s'%(e.args[0])
+    
+    def get_newest_data_log(self):
+        log_file = os.path.join(config.WORKING_PATH, "GetNewestData.log")
+        result = ''
+        if os.path.exists(log_file):
+            with open(log_file, 'r') as log:
+                result = log.read()
+        result = result.replace('\n', '<br>')
+        return result  
         
     def get_resource_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter=None):
         try:
+            get_work_days('2021-01-03', '2021-01-04', holidays=[], time_delta=None)
             missing_method = False
             if request_dict:
                 try:

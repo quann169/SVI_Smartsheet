@@ -15,7 +15,7 @@ from flask import request
 import shutil
 import traceback
 from decimal import Decimal
-import xlwt
+import xlwt, socket
 
 def get_request_form():
     # for post method
@@ -55,6 +55,13 @@ def get_request_form_ajax():
 def make_folder(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
+def get_free_tcp_port():
+    tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    tcp.bind(('', 0))
+    addr, port = tcp.getsockname()
+    tcp.close()
+    return port
 
 def remove_path(path):
     if os.path.exists(path):
@@ -206,6 +213,10 @@ def get_week_number(date):
         result  = date.isocalendar()[1]
     return result
 
+def write_message_into_file(log, message='', mode='a'):
+    with open(log, mode) as file:
+        file.write(message)
+    
 def convert_date_to_string(date_obj, format_str='%Y-%m-%d %H:%M:%S'):
     if isinstance(date_obj, datetime.datetime):
         result = date_obj.strftime(format_str)
@@ -268,9 +279,9 @@ def get_work_days(from_date, to_date, holidays=[], time_delta=None):
         if (calendar.day_name[calendar.weekday(year, month, day)] in DateTime.LIST_WORK_DAY_OF_WEEK) and (not (date_str in holidays)):
             info = [str(datetime.date(year, month, day)), str(start_week)]
             list_work_day.append(info)
-        elif len(list_work_day) == 0:
-            info = [str(datetime.date(year, month, day)), str(start_week)]
-            list_work_day.append(info)
+        # elif len(list_work_day) == 0:
+            # info = [str(datetime.date(year, month, day)), str(start_week)]
+            # list_work_day.append(info)
     return list_work_day
 
 #[[week, total hour work], ...]
@@ -298,9 +309,9 @@ def get_work_week(from_date, to_date, holidays=[], time_delta=None):
             list_week.append(list_week_hour_total)
         if (calendar.day_name[calendar.weekday(year, month, day)] in DateTime.LIST_WORK_DAY_OF_WEEK)  and (not (date_str in holidays)):
             list_week[-1][1] += 8
-    for emptyW in list_week:
-        if not (emptyW[1]):
-            list_week.remove(emptyW)
+    for empty_w in list_week:
+        if not (empty_w[1]):
+            list_week.remove(empty_w)
     return list_week
 
 # # [[month, year, total hour work],...]

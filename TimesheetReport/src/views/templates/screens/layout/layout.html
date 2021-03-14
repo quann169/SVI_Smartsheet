@@ -35,6 +35,7 @@
 	        <!-- Page Content  -->
 	        <div id="content" class="{% if ctrl_obj.get_session('sidebar') == 0 %}active{% endif %}">
 				<div class="loading" id ='overlay_loader'>&#8230;</div>
+				<div id='overlay'></div>
 				{% block navbar %}
 		            {% include "components/navbar/navbar.html" %}
 	        	{%- endblock navbar %}

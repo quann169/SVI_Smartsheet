@@ -17,19 +17,20 @@ from jinja2.loaders import FileSystemLoader
 from config import TOKEN
 
 from src.commons.utils import get_prev_date_by_time_delta, stuck, convert_date_to_string, println,\
-                             get_work_days, str_to_date, compare_date
+                             get_work_days, str_to_date, compare_date,  write_message_into_file
 
 from src.commons.enums import SmartsheetCfgKeys
 
 
 class SmartSheets:
-    def __init__(self, list_sheet=None, holiday=[], time_off={}, timedelta=2, from_date=None, to_date=None):
+    def __init__(self, list_sheet=None, holiday=[], time_off={}, timedelta=2, from_date=None, to_date=None, log=None):
         self.connection = None
         self.available_name = []
         self.list_sheet = list_sheet
         self.holiday = holiday
         self.time_off = time_off
         self.info   = {}
+        self.log   = log
         if from_date:
             self.timedelta  = str_to_date(from_date)[0]
         else:
@@ -40,8 +41,14 @@ class SmartSheets:
             setattr(self, key, value)
             
     def connect_smartsheet(self):
+        if self.log:
+            write_message_into_file(self.log, 'Connecting to smartsheet\n')
+        println('Connecting to smartsheet', 'info')
         self.connection = Smartsheet(TOKEN)
         self.get_available_sheet_name()
+        if self.log:
+            write_message_into_file(self.log, 'Connect to smartsheet - Done\n')
+        println('Connect to smartsheet - Done', 'info')
         
     def get_available_sheet_name(self):
         sheets = self.connection.sheets.list()
@@ -59,15 +66,20 @@ class SmartSheets:
                 if sheet_name in self.available_name:
                     list_sheet_name.append((sheet_name, latest_modified, sheet_id, parsed_date))
                 else:
+                    if self.log:
+                        write_message_into_file(self.log, 'No sheet name %s\n'%sheet_name)
                     stuck('No sheet name %s'%sheet_name)
+            total = len(list_sheet_name)
+            count = 0
             for sheet_name, latest_modified, sheet_id, parsed_date in list_sheet_name:
-                info = Sheet(self, sheet_name, latest_modified, sheet_id, parsed_date)
+                count += 1
+                info = Sheet(self, sheet_name, latest_modified, sheet_id, parsed_date, count, total)
                 info.parse_sheet()
                 self.info[sheet_name] = info 
         
     
 class Sheet():
-    def __init__(self, smartsheet_obj, sheet_name, latest_modified, sheet_id, parsed_date):
+    def __init__(self, smartsheet_obj, sheet_name, latest_modified, sheet_id, parsed_date, count, total):
         self.children_task  = []
         self.parent_task    = []
         self.name           = sheet_name
@@ -80,6 +92,9 @@ class Sheet():
         self.latest_modified  = convert_date_to_string(latest_modified)
         self.is_parse       = True
         self.timedelta      = smartsheet_obj.timedelta
+        self.log         = smartsheet_obj.log
+        self.count         = count
+        self.total         = total
         
     def parse_sheet(self):
         sheet           = self.smartsheet_obj.connection.sheets.get(self.name)
@@ -89,10 +104,14 @@ class Sheet():
         
         modified_at = convert_date_to_string(sheet.modified_at)
         if self.latest_modified == modified_at and is_go:
-            println('Skip parsing sheet: %s'%(self.name), 'info')
+            println('[%d/%d] Skip parsing sheet: %s'%(self.count, self.total, self.name), 'info')
+            if self.log:
+                write_message_into_file(self.log, '[%d/%d] Skip parsing sheet: %s\n'%(self.count, self.total, self.name))
             self.is_parse       = False
         else:
-            println('Parsing sheet: %s'%(self.name), 'info')
+            if self.log:
+                write_message_into_file(self.log, '[%d/%d] Parsing sheet: %s\n'%(self.count, self.total, self.name))
+            println('[%d/%d] Parsing sheet: %s'%(self.count, self.total, self.name), 'info')
             self.latest_modified    = modified_at
             count = 0
             for col  in cols:

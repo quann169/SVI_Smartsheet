@@ -62,25 +62,45 @@ $(document).ready(function () {
 
 $(document).ready(function () {
 	$('#get_newest_data').click(function(event) {
-		$('#overlay_loader').show();
+		
 		var result = colect_config_date();
 		var data = result[0];
 		var method_get_url = result[1];
+		if (! confirm("This process will take about 1-5 minutes. Do you want to continue?")) {
+			return null;
+		}
+		var cnt = "<div id='get_newest_data_console'><div class='cnt1'><div align='center' class='b-bottom '><b>Console</b><a class='close-p' onclick='" + '$("#overlay").hide();' + "'><i class='fas fa-times '></i></a></div><div class='cnt2'></div></div></div>";
+		$('#overlay').html(cnt);
+		$('#overlay').show();
+		INTERVAL_GET_DATA = setInterval(function() {show_log_get_newest_data(); }, 2000);
 		$.ajax({
 			   url: '/get_newest_data',
 			   type: "POST",
 			   data: encodeURIComponent(JSON.stringify(data)),
 			   success: function(resp){
 				   var result = resp.result;
-					if (result[0]) {
-							custom_alert(result[1], 'success');
-						} else {
-							custom_alert(result[1], 'error');
-						}
+					clearInterval(INTERVAL_GET_DATA);
+					INTERVAL_GET_DATA = null;
+					$('#get_newest_data_console .close-p').show();
+
 			      }
 		   });
 	});
 });
+
+function show_log_get_newest_data() {
+		var data = {};
+	    $.ajax({
+	        url: "/get_newest_data_log",
+	        type: "POST",
+	        data: encodeURIComponent(JSON.stringify(data)),
+	        success: function (resp) {
+	        	var result = resp.result;
+				
+		        $('#get_newest_data_console .cnt2').html(result);
+			 }
+		 });
+};
 
 $(document).ready(function () {
 	$('#show_add_final').click(function(event) {

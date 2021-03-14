@@ -167,6 +167,7 @@ $(document).ready(function () {
 
 function custom_alert(message, type) {
 	$('#overlay_loader').hide();
+	$('#overlay').hide();
 	alert(message);
 }
 

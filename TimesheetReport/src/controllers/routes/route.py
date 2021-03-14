@@ -52,6 +52,16 @@ def get_newest_data():
         println(e, 'exception')
         return abort(500, e)
 
+@timesheet_bp.route('/get_newest_data_log', methods=['POST'])
+def get_newest_data_log():
+    println('/get_newest_data_log', 'debug')
+    try:
+        result = ctrl().get_newest_data_log()
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+    
 @timesheet_bp.route('/add_to_final', methods=['POST'])
 def add_to_final():
     println('/add_to_final', 'debug')
