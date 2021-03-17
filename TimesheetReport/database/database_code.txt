@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS `timesheet`.`sheet` (
   `is_active` TINYINT(4) NULL DEFAULT NULL,
   `latest_modified` DATETIME NOT NULL,
   `parsed_date` DATETIME NULL DEFAULT NULL,
+  `is_loading` TINYINT NULL DEFAULT NULL,
   `updated_date` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
   `updated_by` VARCHAR(45) NULL DEFAULT NULL,
   PRIMARY KEY (`sheet_id`),
@@ -281,7 +282,7 @@ CREATE TABLE IF NOT EXISTS `timesheet`.`task_final` (
   `duration` VARCHAR(45) NULL DEFAULT NULL,
   `complete` INT(11) NULL DEFAULT NULL,
   `predecessors` INT(11) NULL DEFAULT NULL,
-  `comment` VARCHAR(45) NULL DEFAULT NULL,
+  `comment` TEXT NULL DEFAULT NULL,
   `actual_end_date` DATETIME NULL DEFAULT NULL,
   `status` TEXT NULL DEFAULT NULL,
   `is_children` TINYINT(4) NOT NULL,
@@ -351,6 +352,10 @@ INSERT INTO `timesheet`.`team` (`team_name`) VALUES ('CAD'), ('QA'), ('PD'), ('C
 
 -- user
 INSERT INTO `timesheet`.`user` (`user_name`, `full_name`, `email`, `other_name`, `is_active`, `updated_by`, `eng_level_id`, `eng_type_id`, `team_id`) VALUES ('NA', 'NA', 'NA', 'NA', '1', 'NA', '1', '1', '1');
+
+-- analyze config
+INSERT INTO `timesheet`.`analysis_config` (`config_name`, `config_value`, `updated_by`) VALUES ('Token', 'nls2smz4rzdckgfp9pcem9sg8y', 'root'), ('Time Delta', '2', 'root');
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

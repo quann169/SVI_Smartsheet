@@ -52,7 +52,7 @@ function load_datatable (id) {
  
     // DataTable
     $(id).DataTable({
-		"dom": '<"top"if>rt<"bottom"lp><"clear">',
+		"dom": '<"top"f>rt<"bottom"lp><"clear">',
 		"scrollX": true,
     //     initComplete: function () {
     //         // Apply the search
@@ -215,3 +215,34 @@ function parse_url() {
 	var output = [method_get_str, data];
 	return output;
 }
+
+function check_loading_smartsheet() {
+	var method_info = parse_url()
+	var data = method_info[1];
+    $.ajax({
+        url: "/check_loading_smartsheet",
+        type: "POST",
+        data: encodeURIComponent(JSON.stringify(data)),
+        success: function (resp) {
+        	var result = resp.result;
+			var is_running = result[0];
+			var list_sheet_name = result[1];
+			var ctn = '<a class="cl-yellow" id="is_loading_smartsheet">WARNING:</a>' + 'Process to get data for "' + list_sheet_name + '" is running.';
+			if (is_running) {
+				$('#notify_content').html(ctn);
+				$('#notify').show();
+				$('#get_newest_data').attr('disabled', true);
+				$('#notify_close').hide();
+			} else {
+				if ($('#is_loading_smartsheet').length) {
+					$('#notify_close').show();
+					$('#notify').hide();
+					$('#get_newest_data').attr('disabled', false);
+				}
+				
+			}
+			
+		 }
+	 });
+};
+INTERVAL_CHECK_SMARTSHEET = setInterval(function() {check_loading_smartsheet(); }, 5000);

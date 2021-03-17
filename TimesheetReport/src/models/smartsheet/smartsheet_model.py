@@ -14,7 +14,7 @@ from pprint import pprint
 import xlwt
 from jinja2 import Environment
 from jinja2.loaders import FileSystemLoader
-from config import TOKEN
+
 
 from src.commons.utils import get_prev_date_by_time_delta, stuck, convert_date_to_string, println,\
                              get_work_days, str_to_date, compare_date,  write_message_into_file
@@ -23,14 +23,15 @@ from src.commons.enums import SmartsheetCfgKeys
 
 
 class SmartSheets:
-    def __init__(self, list_sheet=None, holiday=[], time_off={}, timedelta=2, from_date=None, to_date=None, log=None):
+    def __init__(self, list_sheet=None, holidays=[], time_off={}, timedelta=2, from_date=None, to_date=None, log=None, token=None):
         self.connection = None
         self.available_name = []
         self.list_sheet = list_sheet
-        self.holiday = holiday
+        self.holidays = holidays
         self.time_off = time_off
         self.info   = {}
         self.log   = log
+        self.token   = token
         if from_date:
             self.timedelta  = str_to_date(from_date)[0]
         else:
@@ -44,7 +45,7 @@ class SmartSheets:
         if self.log:
             write_message_into_file(self.log, 'Connecting to smartsheet\n')
         println('Connecting to smartsheet', 'info')
-        self.connection = Smartsheet(TOKEN)
+        self.connection = Smartsheet(self.token)
         self.get_available_sheet_name()
         if self.log:
             write_message_into_file(self.log, 'Connect to smartsheet - Done\n')
@@ -95,6 +96,7 @@ class Sheet():
         self.log         = smartsheet_obj.log
         self.count         = count
         self.total         = total
+        self.holidays      = smartsheet_obj.holidays
         
     def parse_sheet(self):
         sheet           = self.smartsheet_obj.connection.sheets.get(self.name)
@@ -121,7 +123,7 @@ class Sheet():
                 count += 1
             rows = sheet.rows
             for row in rows[::-1]:
-                task_obj = Task(self, self.header_index, row, self.name)
+                task_obj = Task(self, self.header_index, row, self.name, self.holidays)
                 task_obj.parse_task()
                 if task_obj.task_name != None:
                     self.info.append(task_obj)
@@ -135,7 +137,7 @@ class Sheet():
         
         
 class Task():
-    def __init__(self, sheet_obj, header_index, row, sheet_name):
+    def __init__(self, sheet_obj, header_index, row, sheet_name, holidays):
         self.header_index       = header_index
         self.row                = row
         self.self_id            = 0
@@ -154,6 +156,7 @@ class Task():
         self.allocation         = 100
         self.sheet_obj          = sheet_obj
         self.list_date          = []
+        self.holidays           = holidays
         
         if row.id != None:
             self.self_id            = row.id
@@ -216,7 +219,7 @@ class Task():
             self.start_date = self.start_date.replace(minute=0, hour=0, second=0, microsecond=0)
             self.end_date   = self.end_date.replace(minute=0, hour=0, second=0, microsecond=0)
             if self.end_date >= self.timedelta:
-                self.list_date = get_work_days(self.start_date, self.end_date, time_delta=self.timedelta)
+                self.list_date = get_work_days(self.start_date, self.end_date, time_delta=self.timedelta, holidays=self.holidays)
             
             
                 

@@ -17,8 +17,6 @@ class SmartsheetCfgKeys:
     ACTUAL_END_DATE = 'Actual End Date'
     STATUS      = 'Status'
     
-    
-    
     LIST_HEADER = [
                     TASK_NAME,
                     START_DATE,
@@ -57,6 +55,10 @@ class DbTable:
     TIME_OFF                = 'time_off'
     USER                    = 'user'
     FINAL_DATE              = 'final_date'
+
+class AnalyzeCFGKeys:
+    TOKEN   = 'Token'
+    TIME_DELTA  = 'Time Delta'
     
 class DateTime():
     LIST_MONTH = {
@@ -121,7 +123,7 @@ class SessionKey:
     TO              = 'to'
     FILTER          = 'filter'
     FILE_NAME       = 'file_name'
-    
+    MODE            = 'mode'
     
 class DbHeader:
     
@@ -177,7 +179,8 @@ class DbHeader:
     IS_ACTIVE               = 'is_active'
     ALLOCATION              = 'allocation'
     PARSED_DATE             = 'parsed_date'
-
+    IS_LOADING              = 'is_loading'
+    
 class ExcelColor:
     LIST_COLOR = [
         'lime', 'orange', 'tan', 'gray_ega', 'gray25', 'ice_blue', 'white', 'light_turquoise', 'green', 'red', 'blue'

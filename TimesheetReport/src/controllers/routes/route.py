@@ -213,6 +213,7 @@ def daily_timesheet():
     try:
         request_dict = get_request_args_list()
         ctrl_obj   = ctrl()
+        ctrl_obj.add_defalt_config_to_method_request(request_dict)
         return render_template("screens/timesheet/daily_timesheet.html", ctrl_obj = ctrl_obj, db_header = DbHeader(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, 'exception')
@@ -224,11 +225,23 @@ def resource_timesheet():
     try:
         request_dict = get_request_args_list()
         ctrl_obj   = ctrl()
+        ctrl_obj.add_defalt_config_to_method_request(request_dict)
         return render_template("screens/timesheet/resource_timesheet.html", ctrl_obj = ctrl_obj, db_header = DbHeader(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
 
+@timesheet_bp.route('/analyze')
+def analyze():
+    println('/analyze', 'debug')
+    try:
+        request_dict = get_request_args_list()
+        ctrl_obj   = ctrl()
+        return render_template("screens/timesheet/analyze.html", ctrl_obj = ctrl_obj, db_header = DbHeader(), session_enum = SessionKey(), request_dict = request_dict)
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+    
 @timesheet_bp.route('/conflict_final_date')
 def conflict_final_date():
     println('/conflict_final_date', 'debug')
@@ -239,7 +252,24 @@ def conflict_final_date():
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
-    
+
+@timesheet_bp.route('/check_loading_smartsheet', methods=['POST'])
+def check_loading_smartsheet():
+    println('/check_loading_smartsheet', 'debug')
+    try:
+        request_dict = get_request_form_ajax()
+        try:
+            sheet_ids = request_dict[SessionKey.SHEETS]
+        except KeyError:
+            sheet_ids = []
+        result = ctrl().check_get_newest_data_feature_is_running(sheet_ids)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+
+
+
 @timesheet_bp.route('/test')
 def test():
     println('/test', 'debug')

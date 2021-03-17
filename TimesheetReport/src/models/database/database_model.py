@@ -18,7 +18,7 @@ class Configuration(Connection):
         self.user_ids           = {}
         self.sheets             = {}
         self.sheet_ids          = {}
-        self.holiday            = []
+        self.holidays           = []
         self.time_off           = {}
         self.sheet_type         = {}
         self.sheet_type_ids     = {}
@@ -291,7 +291,8 @@ class Configuration(Connection):
         if query_result:
             if is_parse:
                 for row in query_result:
-                    self.holiday.append(row[DbHeader.DATE])
+                    if row[DbHeader.DATE]:
+                        self.holidays.append(convert_date_to_string(row[DbHeader.DATE], format_str='%Y-%m-%d'))
             return query_result
         else:
             return result
@@ -474,8 +475,33 @@ class Configuration(Connection):
 
         self.db_execute_many(query, list_record)
     
+    def get_analyze_config(self):
+        query   = """SELECT `%s`, `%s` FROM `%s`;
+        """%( DbHeader.CONFIG_NAME, DbHeader.CONFIG_VALUE, DbTable.ANALYSIS_CONFIG)
+        query_result    = self.db_query(query)
+        result = {}
+        if query_result:
+            for row in query_result:
+                result[row[DbHeader.CONFIG_NAME]] = row[DbHeader.CONFIG_VALUE]
+        return result
     
+    def get_sheet_loading_smartsheet(self): 
+        query   = """SELECT `%s`, `%s` FROM `%s` WHERE `%s`="1";
+        """%( DbHeader.SHEET_NAME, DbHeader.SHEET_ID, DbTable.SHEET, DbHeader.IS_LOADING)
+        query_result    = self.db_query(query)
+        result = {}
+        if query_result:
+            for row in query_result:
+                result[row[DbHeader.SHEET_ID]] = row[DbHeader.SHEET_NAME]
+        return result
     
+    def update_is_loading_of_sheet(self):
+        query   = """UPDATE `%s` SET `%s`="%s"
+                    WHERE `%s`="%s";
+        """%( DbTable.SHEET, DbHeader.IS_LOADING, str(self.is_loading),
+               DbHeader.SHEET_ID, self.sheet_id)
+        self.db_execute(query)
+        
 class Task(Connection):
     def __init__(self):
         Connection.__init__(self)

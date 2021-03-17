@@ -8,10 +8,11 @@
         <a href="/home">Home</a>
     </li>
 	<li>
-	        <a href="#timesheets" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Timesheet</a>
-	        <ul class="collapse list-unstyled" id="timesheets">
+	        <a href="#timesheets" data-toggle="collapse" aria-expanded="{% if active_sidebar in ['resource_timesheet', 'daily_timesheet'] %}true{%else%}false{% endif %}" 
+ class="dropdown-toggle">Timesheet</a>
+	        <ul class="collapse list-unstyled {% if active_sidebar in ['resource_timesheet', 'daily_timesheet'] %}show{% endif %}" id="timesheets">
 	            <li class="{% if active_sidebar == 'daily_timesheet' %} active{% endif %}">
-	                <a href="/daily_timesheet">Daily Timesheet</a>
+	                <a href="/daily_timesheet">Detail Timesheet</a>
 	            </li>
 	 			<li class="{% if active_sidebar == 'resource_timesheet' %} active{% endif %}">
 	                <a href="/resource_timesheet">Resource</a>
@@ -20,8 +21,8 @@
 	        </ul>
 	</li>
     <li>
-        <a href="#setting" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Setting</a>
-        <ul class="collapse list-unstyled" id="setting">
+        <a href="#setting" data-toggle="collapse" aria-expanded="{% if active_sidebar in ['holiday', 'resource', 'sheet', 'timeoff'] %}true{%else%}false{% endif %}" class="dropdown-toggle">Setting</a>
+        <ul class="collapse list-unstyled {% if active_sidebar in ['holiday', 'resource', 'sheet', 'timeoff'] %}show{% endif %}" id="setting">
             <li class="{% if active_sidebar == 'timeoff' %} active{% endif %}">
                 <a href="/timeoff">Time Off</a>
             </li>

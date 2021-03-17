@@ -26,7 +26,7 @@
 {% endblock scripts %}
 
 {% block main %}
-<form id='timesheet_form'>
+<form id='timesheet_form' class='{% if session_enum.MODE in request_dict and request_dict[session_enum.MODE] in ['equal', 'greater', 'less', 'overlay']%}d-none{% endif %}'>
 	{% set sheet_info = ctrl_obj.get_list_sheet_name() %}
 	<div class='row'>
 		<div class='col-md-10 d-flex align-items-center'>
@@ -40,7 +40,6 @@
 			<input type='date' name='to_date' id='to_date' placeholder='To date' class='mx-1 px-2' value='{{request_dict[session_enum.TO]}}'>
 			<input type='button' id='load' value='Load' class='mx-1 px-3'>
 			<input type='button' id='get_newest_data' value='Get Newest Data' class='mx-1'>
-			<input type='button' id='show_add_final' value='Add To Final' class='mx-1 px-3'>
 			<input type='button' id='export' value='Export' class='mx-1 px-3'>
 		</div>
 		<div class='col-md-2 d-flex justify-content-end'>
@@ -55,10 +54,11 @@
 <br>
 <div class='table-content'>
 	<table id="resource_timesheet" class="table table-striped table-bordered " cellspacing="0" width='100%'>
-		{% set info, list_sub_column = ctrl_obj.get_resource_timesheet_info(request_dict) %}
+		{% set info, list_sub_column, count_missing, count_redundant, count_enought, count_overlap, total = ctrl_obj.get_resource_timesheet_info(request_dict) %}
 		
 	  <thead>
 	    <tr>
+			<th class="th-sm">#</th>
 	    	<th class="th-sm">Eng Type</th>
 			<th class="th-sm">Team</th>
 			<th class="th-sm">Resource</th>
@@ -69,12 +69,14 @@
 	    </tr>
 	  </thead>
 	  <tbody>
+		{% set count = {'value': 0} %}
 		{% for eng_type in info %}
 			{% for team in info[eng_type] %}
 				{% for user_name in info[eng_type][team] %}
+					{% if count.update({'value': (count.value + 1)}) %} {% endif %}
 					<tr>
 					{% set timesheet = info[eng_type][team][user_name]%}
-			
+					<td>{{count.value}}</td>
 			  		<td>{{eng_type}}</td>
 					<td>{{team}}</td>
 					<td>{{user_name}}</td>

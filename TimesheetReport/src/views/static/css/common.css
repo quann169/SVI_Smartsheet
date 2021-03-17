@@ -1,3 +1,4 @@
+
 body {
     font-family: 'Poppins', sans-serif;
     background: #fafafa;
@@ -159,7 +160,7 @@ a.article:hover {
 .notify {
 	background-color:  #e1ecf4;
 	border: 1px solid #a0c7e4;
-	padding: 10px;
+	padding: 5px;
 	display: none;
 }
 
@@ -208,14 +209,20 @@ a.article:hover {
 	margin-bottom: 0px;
 }
 
+
 .dataTables_length {
-	margin-top: 5px;
-	
+	margin-top: 5px;	
 }
+
+.dataTables_wrapper .dataTables_filter {
+    float: left;
+    text-align: right;
+}
+
 /* ---------------------------------------------------
     Style for tags
 ----------------------------------------------------- */
-input, select {
+input[type=text], input[type=button], input[type=submit], input[type=date], select {
     height: calc(1.5em + .75rem + 2px);
 }
 tr {
@@ -276,6 +283,10 @@ table, table.dataTable {
 .cl-green {
 	color: green;
 }
+.cl-yellow {
+	color: #ffc107;
+}
+
 .bg-red {
 	background-color: red;
 }
@@ -300,6 +311,21 @@ table, table.dataTable {
 .mxh-100 {
 	max-height: 100px;
 }
+.w-100-px {
+	width: 100px;
+}
+.w-200-px {
+	width: 200px;
+}
+.w-20-px {
+	width: 20px;
+}
+
+.w-50-px {
+	width: 50px;
+}
+
+
 .h-100 {
 	max-width: 100px;
 }
@@ -394,8 +420,7 @@ table, table.dataTable {
 		min-width: 50px;
 	}
 	
-	.no-cfl {
-		
+.no-cfl {
 		border: 1px solid green;
 		border-radius: 5px;
 		background-color: #28a745;
@@ -404,39 +429,49 @@ table, table.dataTable {
 		margin-right: 5px;
 		min-width: 50px;
 	}
+
+.empty-cfl {
+		border: 1px solid #aaa;
+		border-radius: 5px;
+		background-color: #aaa;
+		color: white;
+		padding: 2px;
+		margin-right: 5px;
+		min-width: 50px;
+	}
 	
-	#cfl-tb {
+#cfl-tb {
 		border-collapse: collapse;
 		width: 100%;
 		
 	}
 	
-	#cfl-tb td {
+#cfl-tb td {
 		border: 1px solid #EEE !important;
 		text-align: left;
 		padding: 5px;
 	} 
 	
-	#cfl-tb tr:hover {
+#cfl-tb tr:hover {
 		background-color: #EEE !important;
 	} 
 	
-	.cfl-status{
+.cfl-status{
 		width: 30px;	
 	}
 	
-	.cfl-sheet{
+.cfl-sheet{
 		min-width: 100px;
 		
 	} 
 	
-	.cfl-date{
+.cfl-date{
 		display: flex;
 		overflow-x: auto;
 		
 	} 
 	
-	.cfl-cnt {
+.cfl-cnt {
 		width: 100%;
 		
 		overflow-x: auto;

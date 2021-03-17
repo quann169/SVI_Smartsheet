@@ -92,6 +92,20 @@ def save_file_from_request():
 def stuck(message='', logging_level=None):
     print ('ERROR ' + message)
     raise Exception(message)
+
+def convert_request_dict_to_url(request_dict, more_option=[]):
+    
+    list1 = []
+    for key, value in request_dict.items():
+        if key == SessionKey.SHEETS:
+            for sheet_id in request_dict[SessionKey.SHEETS]:
+                list1.append('%s=%s'%(SessionKey.SHEETS, str(sheet_id)))
+        else:
+            list1.append('%s=%s'%(key, str(value)))
+    for element in more_option:
+        list1.append('%s=%s'%(element[0], str(element[1])))
+    result = '&'.join(list1)
+    return result
     
 def println(message, logging_level=None):
     if logging_level == 'critical':
@@ -99,7 +113,7 @@ def println(message, logging_level=None):
         print (message)
     elif logging_level == 'exception':
         logging.exception(message)
-        # traceback.print_exc('')
+        traceback.print_exc('')
         print (message)
     elif logging_level == 'error':
         logging.error(message)
@@ -250,6 +264,17 @@ def get_start_week_of_date(date, output_str=True):
     else:
         return start_week
 
+def get_end_week_of_date(date, output_str=True):
+    if not isinstance(date, datetime.datetime):
+        date = str_to_date(date)[0]
+    start_week = date - datetime.timedelta(days=date.weekday())
+    end_week = start_week + datetime.timedelta(days=4)
+    if output_str:
+        result = convert_date_to_string(end_week, '%Y-%m-%d')
+        return result
+    else:
+        return end_week
+    
 def get_month_name_of_date(date):
     if not isinstance(date, datetime.datetime):
         date = str_to_date(date)[0]
@@ -259,6 +284,7 @@ def get_month_name_of_date(date):
     
 #[[day, week], ...]  
 def get_work_days(from_date, to_date, holidays=[], time_delta=None):
+    
     date_obj, start_year, start_month, start_day = str_to_date(from_date)
     date_obj, end_year, end_month, end_day = str_to_date(to_date)
     list_work_day = []
@@ -286,6 +312,7 @@ def get_work_days(from_date, to_date, holidays=[], time_delta=None):
 
 #[[week, total hour work], ...]
 def get_work_week(from_date, to_date, holidays=[], time_delta=None):
+    
     date_obj, start_year, start_month, start_day = str_to_date(from_date)
     date_obj, end_year, end_month, end_day = str_to_date(to_date)
     list_week = []
@@ -316,6 +343,7 @@ def get_work_week(from_date, to_date, holidays=[], time_delta=None):
 
 # # [[month, year, total hour work],...]
 def get_work_month(from_date, to_date, holidays=[], time_delta=None):
+    
     date_obj, start_year, start_month, start_day = str_to_date(from_date)
     date_obj, end_year, end_month, end_day = str_to_date(to_date)
     list_month = []

@@ -21,7 +21,7 @@ logging_setting('TimesheetReport.log')
 
 
 # app = Flask( __name__ , static_folder="%s/%s"%(tool_path, 'src/views/static'), template_folder="%s/%s"%(tool_path, 'src/views/templates'))
-app = Flask( __name__ , static_folder="%s/%s"%(tool_path, 'views/static'), template_folder="%s/%s"%(tool_path, 'views/templates'))
+app = Flask( __name__ , static_folder="%s/%s"%(tool_path, '.data/views/static'), template_folder="%s/%s"%(tool_path, '.data/views/templates'))
 app.config['WORKING_PATH'] = config.WORKING_PATH
 app.config['SECRET_KEY']                    = 'TEST'
 # app.config['SESSION_PERMANENT']             = True
@@ -36,7 +36,7 @@ def open_browser():
     webbrowser.open_new('http://%s:%d/'%(host, port))
     
 if __name__ == "__main__":
-    # app.run(port=port, host=host, debug=True, use_reloader=True, threaded=True)
+#     app.run(port=port, host=host, debug=True, use_reloader=True, threaded=True)
     thread  = threading.Thread(name='open GUI', target = app.run,  args=(host, port), kwargs={'threaded': True})
     thread.start()
     Timer(1, open_browser).start();

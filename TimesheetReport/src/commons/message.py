@@ -18,3 +18,11 @@ class Msg:
     M001    = 'Import successfully'
     M002    = 'Get data successfully'
     M003    = 'Add to final task successfully'
+
+class AnalyzeItem:
+    A001 = 'No resource missing timesheet' 
+    A002 = 'No resource redundant timesheet' 
+    A003 = 'All resource enough timesheet' 
+    A004 = 'Resource overlap timesheet'
+    A005 = 'No conflict with final date'  
+    A006 = 'Continuity with final date' 

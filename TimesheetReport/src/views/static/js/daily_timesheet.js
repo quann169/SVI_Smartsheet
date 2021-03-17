@@ -107,7 +107,7 @@ $(document).ready(function () {
 		if (result) {
 			var data = result[0];
 			var method_get_url = result[1];
-			location.href = 'resource_timesheet?' + method_get_url;
+			location.href = 'analyze?' + method_get_url;
 		}
 	});
 });

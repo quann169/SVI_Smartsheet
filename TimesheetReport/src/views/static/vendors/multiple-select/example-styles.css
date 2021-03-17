@@ -16,6 +16,8 @@
     border: 1px solid #aaa;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     display: none;
+	max-height: 350px;
+	overflow: auto;
 }
 
 .multi-select-menuitem {

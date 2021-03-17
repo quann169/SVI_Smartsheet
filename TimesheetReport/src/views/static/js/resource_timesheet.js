@@ -102,12 +102,4 @@ function show_log_get_newest_data() {
 		 });
 };
 
-$(document).ready(function () {
-	$('#show_add_final').click(function(event) {
-//		$('#overlay_loader').show();
-		var result = colect_config_date();
-		var data = result[0];
-		var method_get_url = result[1];
-		location.href = 'conflict_final_date?' + method_get_url;
-	});
-});
+

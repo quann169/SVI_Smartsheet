@@ -5,12 +5,14 @@ Created on Feb 22, 2021
 '''
 from src.models.smartsheet.smartsheet_model import SmartSheets
 from src.models.database.database_model import Configuration, Task
-from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, DateTime
-from src.commons.message import MsgError, MsgWarning, Msg
+from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, DateTime, AnalyzeCFGKeys
+from src.commons.message import MsgError, MsgWarning, Msg, AnalyzeItem
 from src.commons.utils import search_pattern, message_generate, println, remove_path, split_patern,\
                             get_prev_date_by_time_delta, get_work_week, convert_date_to_string,\
                             get_work_month, round_num, defined_color, \
-                            get_work_days, write_message_into_file
+                            get_work_days, write_message_into_file, convert_request_dict_to_url,\
+                            str_to_date, get_end_week_of_date, get_start_week_of_date
+                            
 from src.models.timesheet.timesheet_model import Timesheet
 from flask import session
 from pprint import pprint
@@ -22,7 +24,6 @@ import xlrd
 import time
 from xlwt import Workbook
 
-
 class Controllers:
     def __init__(self):
         pass
@@ -32,17 +33,18 @@ class Controllers:
             write_message_into_file(log, 'Starting parse smartsheet\n')
         println('Starting parse smartsheet', 'info')
         start_time = time.time()
-        cfg_obj = Configuration()
-        sheet_info  = cfg_obj.get_sheet_config(list_sheet_id)
+        config_obj = Configuration()
+        sheet_info  = config_obj.get_sheet_config(list_sheet_id)
+        config_obj.get_list_holiday(is_parse=True)
+        holidays  = config_obj.holidays
         list_sheet  = []
-        
+        analyze_config_info = config_obj.get_analyze_config()
+        token   = analyze_config_info[AnalyzeCFGKeys.TOKEN]
         for row in sheet_info:
             list_sheet.append((row[DbHeader.SHEET_NAME], row[DbHeader.LATEST_MODIFIED], int(row[DbHeader.SHEET_ID]), row[DbHeader.PARSED_DATE]))
-        sms_obj = SmartSheets(list_sheet=list_sheet, from_date=from_date, to_date=to_date, log=log)
+        sms_obj = SmartSheets(list_sheet=list_sheet, from_date=from_date, to_date=to_date, log=log, holidays=holidays, token=token)
         sms_obj.connect_smartsheet()
         sms_obj.parse()
-        
-        config_obj  = Configuration()
         config_obj.get_all_user_information()
         user_info = config_obj.users
         other_name_info = config_obj.other_name
@@ -61,6 +63,11 @@ class Controllers:
                 if log:
                     write_message_into_file(log, '[%d/%d] Updating sheet: %s\n'%(count, total, sheet_name))
                 println('[%d/%d] Updating sheet: %s'%(count, total, sheet_name), 'info')
+                config_obj.set_attr(sheet_id            = sheet_id,
+                                    latest_modified     = latest_modified,
+                                    parsed_date         = sms_obj.timedelta,
+                                    is_loading          = 1)
+                config_obj.update_is_loading_of_sheet()
                 task_obj.set_attr(sheet_id    = sheet_id)
                 task_obj.remove_all_task_information_by_project_id()
                 list_records_task   = []
@@ -114,14 +121,13 @@ class Controllers:
 
                 
                 task_obj.add_task(list_records_task)
-                config_obj.set_attr(sheet_id            = sheet_id,
-                                    latest_modified     = latest_modified,
-                                    parsed_date         = sms_obj.timedelta)
+                
                 
                 config_obj.update_latest_modified_of_sheet()
                 
                 config_obj.update_parsed_date_of_sheet()
-                
+                config_obj.set_attr(is_loading          = 0)
+                config_obj.update_is_loading_of_sheet()
                 println('[%d/%d] Update database for %s - Done'%(count, total, sheet_name), 'info')
                 if log:
                     write_message_into_file(log, '[%d/%d] Update database for %s - Done\n'%(count, total, sheet_name))
@@ -135,7 +141,28 @@ class Controllers:
         println ("Time: " + str(minutes) + ':' + str(seconds).zfill(2))
         if log:
             write_message_into_file(log, "Time: " + str(minutes) + ':' + str(seconds).zfill(2)  + '\n')
-                    
+    
+    def add_defalt_config_to_method_request(self, request_dict):
+        if not request_dict.get(SessionKey.FROM) or not request_dict.get(SessionKey.TO) or not request_dict.get(SessionKey.SHEETS):
+            config_obj = Configuration()
+            analyze_config_info = config_obj.get_analyze_config()
+            time_delta = int(analyze_config_info[AnalyzeCFGKeys.TIME_DELTA])
+            from_date      = get_prev_date_by_time_delta(time_delta)
+            from_date       = get_start_week_of_date(from_date, output_str=True)
+            to_date      = get_prev_date_by_time_delta(time_delta*(-1))
+            to_date       = get_end_week_of_date(to_date, output_str=True)
+            if not request_dict.get(SessionKey.FROM):
+                request_dict[SessionKey.FROM] = convert_date_to_string(from_date, '%Y-%m-%d')
+            if not request_dict.get(SessionKey.TO):
+                request_dict[SessionKey.TO] = convert_date_to_string(to_date, '%Y-%m-%d')
+            if not request_dict.get(SessionKey.SHEETS):
+                config_obj.get_sheet_config(is_parse=True)
+                sheet_ids_dict = config_obj.sheet_ids
+                sheet_ids = []
+                for key in sheet_ids_dict.keys():
+                    sheet_ids.append(key)
+                request_dict[SessionKey.SHEETS] = sheet_ids
+        
     def import_timeoff(self, file_name):
         try:
             file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
@@ -269,11 +296,6 @@ class Controllers:
             if len(list_record):
                 config_obj.add_user_of_sheet(list_record)
     
-
-        
-        
-        
-        
     def import_sheet(self, file_name):
         try:
             file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
@@ -281,8 +303,10 @@ class Controllers:
             config_obj  = Configuration()
             config_obj.get_sheet_type_info(is_parse=True)
             sheet_type_info = config_obj.sheet_type
-            
-            sms_obj = SmartSheets()
+            analyze_config_info = config_obj.get_analyze_config()
+            token   = analyze_config_info[AnalyzeCFGKeys.TOKEN]
+        
+            sms_obj = SmartSheets(token=token)
             sms_obj.connect_smartsheet()
             available_sheet_name = sms_obj.available_name
             #validate sheet 
@@ -401,11 +425,12 @@ class Controllers:
         sheet_info      = config_obj.get_sheet_config(list_sheet_id)
         start_date      = get_prev_date_by_time_delta(1)
         end_date      = get_prev_date_by_time_delta(-3)
-        
+        config_obj.get_list_holiday(is_parse=True)
+        holidays  = config_obj.holidays
         start_date      = convert_date_to_string(start_date)
         end_date      = convert_date_to_string(end_date)
         
-        list_workweek   = get_work_week(from_date=start_date, to_date=end_date)
+        list_workweek   = get_work_week(from_date=start_date, to_date=end_date, holidays=holidays)
         list_week       = []
         for week in list_workweek:
             list_week.append(week[0])
@@ -413,7 +438,7 @@ class Controllers:
         result  = [sheet_info, list_week]
         return result
         
-    def get_daily_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter=None):
+    def get_daily_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter='current'):
         try:
             missing_method = False
             if request_dict:
@@ -421,7 +446,10 @@ class Controllers:
                     from_date   = request_dict[SessionKey.FROM]
                     to_date     = request_dict[SessionKey.TO]
                     sheet_ids   = request_dict[SessionKey.SHEETS]
-                    filter      = request_dict[SessionKey.FILTER]
+                    try:
+                        filter      = request_dict[SessionKey.FILTER]
+                    except KeyError:
+                        pass
                 except KeyError:
                     missing_method = True
             if not filter or not sheet_ids or not to_date or not from_date or missing_method:
@@ -493,20 +521,27 @@ class Controllers:
         result = result.replace('\n', '<br>')
         return result  
         
-    def get_resource_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter=None):
+    def get_resource_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter='weekly', mode='all', is_caculate=False):
         try:
-            get_work_days('2021-01-03', '2021-01-04', holidays=[], time_delta=None)
             missing_method = False
             if request_dict:
                 try:
                     from_date   = request_dict[SessionKey.FROM]
                     to_date     = request_dict[SessionKey.TO]
                     sheet_ids   = request_dict[SessionKey.SHEETS]
-                    filter      = request_dict[SessionKey.FILTER]
+                    try:
+                        filter      = request_dict[SessionKey.FILTER]
+                    except KeyError:
+                        pass
+                    try:
+                        mode        = request_dict[SessionKey.MODE]
+                    except KeyError:
+                        mode    = mode
                 except KeyError:
                     missing_method = True
+            
             if not filter or not sheet_ids or not to_date or not from_date or missing_method:
-                return ({}, [])
+                return ({}, [], 0, 0, 0, 0, 0)
 
             timesheet_obj   = Timesheet(from_date, to_date, 'current', sheet_ids)
             timesheet_obj.parse()
@@ -514,19 +549,20 @@ class Controllers:
             eng_type_ids    = timesheet_obj.eng_type_ids
             team_ids        = timesheet_obj.team_ids
             time_off_info   = timesheet_obj.time_off
-            
+            config_obj      = Configuration()
+            config_obj.get_list_holiday(is_parse=True)
+            holidays  = config_obj.holidays
             info            = {}
             if filter == 'monthly':
-                list_month   = get_work_month(from_date=from_date, to_date=to_date)
+                list_month   = get_work_month(from_date=from_date, to_date=to_date, holidays=holidays)
                 cols_element = list_month
                 list_sub_col       = []
                 for col in cols_element:
                     month, year, max_hour = col
                     col_name    = DateTime.LIST_MONTH[month]
                     list_sub_col.append(col_name)
-              
             else:
-                list_week   = get_work_week(from_date=from_date, to_date=to_date)
+                list_week   = get_work_week(from_date=from_date, to_date=to_date, holidays=holidays)
                 cols_element = list_week
                 list_sub_col       = []
                 for col in cols_element:
@@ -584,8 +620,80 @@ class Controllers:
                         info[eng_type][team_name][user_name][col_element]['summary'][1]  = round_num(info[eng_type][team_name][user_name][col_element]['summary'][1])
                         info[eng_type][team_name][user_name][col_element]['sheets'][sheet_name][0]  = round_num(info[eng_type][team_name][user_name][col_element]['sheets'][sheet_name][0])
                         info[eng_type][team_name][user_name][col_element]['sheets'][sheet_name][1]  = round_num(info[eng_type][team_name][user_name][col_element]['sheets'][sheet_name][1])
-   
-            result = (info, list_sub_col)
+            
+            total    = 0
+            no_missing   = 0
+            no_redundant = 0
+            no_enought   = 0
+            count_overlap   = 0
+            
+            # caculate miising, redundant, enought timesheet
+            if is_caculate:
+                for eng_type in info:
+                    for team in info[eng_type]:
+                        list_user_remove = []
+                        for user_name in info[eng_type][team]:
+                            timesheet = info[eng_type][team][user_name]
+                            is_remove = True
+                            total += 1
+                            is_enought = True
+                            is_less = False
+                            is_greater = False
+                            for column in list_sub_col:
+                                hours = timesheet[column]['summary']
+                                max_hour = timesheet[column]['max_hour']
+                                if not( hours[0] + hours[1] == max_hour):
+                                    is_enought = False
+                                if hours[0] + hours[1] < max_hour:
+                                    is_less = True
+                                if hours[0] + hours[1] > max_hour:
+                                    is_greater = True
+                            if is_enought:
+                                no_enought += 1
+                            if is_less:
+                                no_missing += 1
+                            if is_greater:
+                                no_redundant += 1
+                no_missing = total - no_missing
+                no_redundant = total - no_redundant
+                no_enought = total - no_enought
+                count_overlap   = total - count_overlap
+            
+            # remove user by mode                
+            if mode in ['equal', 'greater', 'less']:
+                for eng_type in info:
+                    for team in info[eng_type]:
+                        list_user_remove = []
+                        for user_name in info[eng_type][team]:
+                            timesheet = info[eng_type][team][user_name]
+                            is_remove = True
+                            for column in list_sub_col:
+                                hours = timesheet[column]['summary']
+                                max_hour = timesheet[column]['max_hour']
+                                if mode == 'equal':
+                                    if not( hours[0] + hours[1] == max_hour):
+                                        is_remove = True
+                                        break
+                                    else:
+                                        is_remove = False
+                                elif mode == 'less':
+                                    if hours[0] + hours[1] < max_hour:
+                                        is_remove = False
+                                        break
+                                elif mode == 'greater':
+                                    if hours[0] + hours[1] > max_hour:
+                                        is_remove = False
+                                        break
+                            
+                            if is_remove:
+                                list_user_remove.append(user_name)
+                                
+                        for user_name in list_user_remove: 
+                            del info[eng_type][team][user_name]
+            
+            
+            
+            result = (info, list_sub_col, no_missing, no_redundant, no_enought, count_overlap, total)
             return result
             
         except Exception as e:
@@ -606,9 +714,37 @@ class Controllers:
             # style 
             color_style = defined_color()
             style_header = color_style['gray25']
+            
             # export daily timesheet
             daily_timesheet_info = self.get_daily_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='current')
-            daily_timesheet_wb = wb.add_sheet('Daily Timesheet')
+            daily_timesheet_wb = wb.add_sheet('Detail Timesheet')
+            row_num, col_num = (0, 0)
+            
+            # create  header
+            list_header = ['Sheet Name', 'Type', 'Resource', 'Eng Type', 'Team', 'WW No.', 'Date', 'Task', 'Start Date', \
+                           'End Date', 'Allocation', 'Work Hours', 'Time Off', 'STD Hours']
+            for header in list_header:
+                if col_num == 7:
+                    daily_timesheet_wb.col(col_num).width = 256 * 50
+                else:
+                    daily_timesheet_wb.col(col_num).width = 256 * 14
+                daily_timesheet_wb.write(row_num, col_num, header, style_header)
+                col_num += 1
+            col_num = start_col
+            row_num += 1
+            
+            # create  body
+            for row in daily_timesheet_info:
+                for cell in row:
+                    daily_timesheet_wb.write(row_num, col_num, cell)
+                    col_num += 1
+                col_num = start_col
+                row_num += 1
+            # end daily timesheet
+            
+            # export daily timesheet final
+            daily_timesheet_info = self.get_daily_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='final')
+            daily_timesheet_wb = wb.add_sheet('Detail Timesheet Final')
             row_num, col_num = (0, 0)
             
             # create  header
@@ -635,7 +771,7 @@ class Controllers:
             
             #weekly resource
             weekly_resource_wb = wb.add_sheet('Weekly Resource')
-            w_resource_info, list_week = self.get_resource_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='weekly')
+            w_resource_info, list_week, no_missing, no_redundant, no_enought, count_overlap, total_resource = self.get_resource_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='weekly')
             start_col, start_row = (0, 0)
             row_num, col_num = (0, 0)
             # create  header
@@ -678,7 +814,7 @@ class Controllers:
             
             #monthly resource
             monthly_resource_wb = wb.add_sheet('Monthly Resource')
-            m_resource_info, list_month = self.get_resource_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='monthly')
+            m_resource_info, list_month, no_missing, no_redundant, no_enought, count_overlap, total_resource = self.get_resource_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='monthly')
             start_col, start_row = (0, 0)
             row_num, col_num = (0, 0)
             # create  header
@@ -717,12 +853,7 @@ class Controllers:
                             col_num += 1
                         col_num = start_col
                         row_num += 1
-            #end resource
-            # cl  = wb.add_sheet('Color')
-            # r , c = (0,1)
-            # for color  in color_style:
-            #     cl.write(r, c, color, color_style[color])
-            #     r += 1
+            
             wb.save(output_path)
             return 1, file_name
         
@@ -748,6 +879,7 @@ class Controllers:
                     list_record = []
                     for date in list_date:
                         list_record.append((date, sheet_id))
+                    
                     task_obj.add_final_date(list_record)
 
                 return 1, Msg.M003
@@ -759,7 +891,86 @@ class Controllers:
             println(e, 'exception')
             return 0, e.args[0]
     
-    def calculate_conflict_to_add_final_task(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None):
+    def calculate_conflict_to_add_final_task(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, mode='exist'):
+        missing_method = False
+        if request_dict:
+            try:
+                from_date   = request_dict[SessionKey.FROM]
+                to_date     = request_dict[SessionKey.TO]
+                sheet_ids   = request_dict[SessionKey.SHEETS]
+                try: 
+                    mode        = request_dict[SessionKey.MODE]
+                except KeyError:
+                    mode    = mode
+            except KeyError:
+                missing_method = True
+        if not filter or not sheet_ids or not to_date or not from_date or missing_method:
+            return []
+        result = []
+        enable_add = True
+        config_obj  = Configuration()
+        config_obj.get_sheet_config(is_parse=True)
+        cfg_sheet_ids = config_obj.sheet_ids
+        task_obj  = Task()
+        
+        workdays = get_work_days(from_date=from_date, to_date=to_date)
+        list_date = []
+        for date, week in workdays:
+            list_date.append(date)
+        total = len(sheet_ids)
+        count_fail = 0 
+        if mode == 'exist':
+            task_obj.set_attr(start_date = from_date,
+                          end_date = to_date)
+            final_date_info = task_obj.get_final_date()
+            for sheet_id in sheet_ids:
+                sheet_name = cfg_sheet_ids[sheet_id][DbHeader.SHEET_NAME]
+                is_conflict = False
+                list_1 = []
+                for date in list_date:
+                    is_exist_date = False
+                    if sheet_id in final_date_info and date in final_date_info[sheet_id]:
+                        is_conflict = True
+                        enable_add  = False
+                        is_exist_date = True
+                        list_1.append((date, is_exist_date))
+                    else:
+                        list_1.append((date, is_exist_date))
+                if is_conflict:
+                    count_fail += 1
+                result.append((is_conflict, sheet_name, list_1))
+                
+        elif mode == 'continuity':
+            prev_date = get_prev_date_by_time_delta(timedelta = 1, compare_date = from_date)
+            task_obj.set_attr(start_date = prev_date,
+                          end_date = to_date)
+            final_date_info = task_obj.get_final_date()
+            workdays2 = get_work_days(from_date=prev_date, to_date=to_date)
+            list_date2 = []
+            for date, week in workdays2:
+                list_date2.append(date)
+            
+            for sheet_id in sheet_ids:
+                sheet_name = cfg_sheet_ids[sheet_id][DbHeader.SHEET_NAME]
+                is_conflict = False
+                list_1 = []
+                for date in list_date2:
+                    is_exist_date = None
+                    if (sheet_id in final_date_info and date in final_date_info[sheet_id]) or (date in list_date):
+                        is_exist_date = False
+                        list_1.append((date, is_exist_date))
+                    elif sheet_id not in final_date_info:
+                        list_1.append((date, is_exist_date))
+                    else:
+                        is_conflict = True
+                        enable_add  = False
+                        list_1.append((date, is_exist_date))
+                if is_conflict:
+                    count_fail += 1
+                result.append((is_conflict, sheet_name, list_1))
+        return result, enable_add, count_fail, total
+    
+    def analyze(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None):
         missing_method = False
         if request_dict:
             try:
@@ -770,40 +981,70 @@ class Controllers:
                 missing_method = True
         if not filter or not sheet_ids or not to_date or not from_date or missing_method:
             return []
-        config_obj  = Configuration()
         
-        config_obj.get_sheet_config(is_parse=True)
-        cfg_sheet_ids = config_obj.sheet_ids
+        info, list_sub_column, no_missing, no_redundant, no_enought, count_overlap, total_resource = self.get_resource_timesheet_info(request_dict, is_caculate=True)
         
-        task_obj  = Task()
-        task_obj.set_attr(start_date = from_date,
-                          end_date = to_date)
-        final_date_info = task_obj.get_final_date()
+        if no_missing == total_resource:
+            i1_status = True
+        else:
+            i1_status = False
+        i1_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'less']])
         
-        workdays = get_work_days(from_date=from_date, to_date=to_date)
-        list_date = []
-        for date, week in workdays:
-            list_date.append(date)
+        if no_redundant == total_resource:
+            i2_status = True
+        else:
+            i2_status = False
+        i2_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'greater']])
         
-        result = []
-        enable_add = True
-        for sheet_id in sheet_ids:
-            sheet_name = cfg_sheet_ids[sheet_id][DbHeader.SHEET_NAME]
-            is_conflict = False
-            list_1 = []
-            for date in list_date:
-                is_exist_date = False
-                if sheet_id in final_date_info and date in final_date_info[sheet_id]:
-                    is_conflict = True
-                    enable_add  = False
-                    is_exist_date = True
-                    list_1.append((date, is_exist_date))
-                else:
-                    list_1.append((date, is_exist_date))
-            result.append((is_conflict, sheet_name, list_1))
+        if total_resource - no_enought == total_resource:
+            i3_status = True
+        else:
+            i3_status = False
+        i3_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'equal']])
         
-        return result, enable_add
+#         if count_overlap:
+#             i4_status = False
+#         else:
+#             i4_status = True
+#         i4_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'overlay']])
         
+        unuse, i5_status, i5_count_fail, i5_total = self.calculate_conflict_to_add_final_task(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, mode='exist')
+        i5_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'exist']])
+        
+        
+        unuse, i6_status, i6_count_fail, i6_total = self.calculate_conflict_to_add_final_task(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, mode='continuity')
+        i6_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'continuity']])
+        
+        result = [
+            [AnalyzeItem.A001, i1_status, True, '/resource_timesheet?%s'%i1_method, no_missing, total_resource],
+            [AnalyzeItem.A002, i2_status, True, '/resource_timesheet?%s'%i2_method, no_redundant, total_resource],
+            [AnalyzeItem.A003, i3_status, True, '/resource_timesheet?%s'%i3_method, no_enought, total_resource],
+#             [AnalyzeItem.A004, i4_status, True, '/resource_timesheet?%s'%i4_method, count_overlap, total_resource],
+            [AnalyzeItem.A005, i5_status, False, '/conflict_final_date?%s'%i5_method, i5_count_fail, i5_total],
+            [AnalyzeItem.A006, i6_status, False, '/conflict_final_date?%s'%i6_method, i6_count_fail, i6_total]
+            ]        
+        return result
+    
+    def check_get_newest_data_feature_is_running(self, sheet_ids=[]):
+        
+        if len(sheet_ids):
+            config_obj  = Configuration()
+            dict_id     = config_obj.get_sheet_loading_smartsheet()
+            list_sheet = []
+            for sheet_id in sheet_ids:
+                sheet_id = int(sheet_id)
+                if dict_id.get(sheet_id):
+                    list_sheet.append(dict_id[sheet_id])
+                    if len(list_sheet) == 2:
+                        break
+            if len(list_sheet):
+                result = (True, list_sheet)
+            else:
+                result = (False, [])
+        else:
+            result = (False, [])
+        
+        return result 
         
         
         
