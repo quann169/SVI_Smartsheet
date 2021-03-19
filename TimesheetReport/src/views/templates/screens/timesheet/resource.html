@@ -1,14 +1,14 @@
-{% extends "screens/layout/layout.html" %}
+{% extends template.LAYOUT %}
 {% block sidebar %}
-	{% set active_sidebar = 'resource_timesheet' %}
+	{% set active_sidebar = route.RESOURCE_TIMESHEET %}
 	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
-		{% include "components/sidebar/sidebar.html" %}
+		{% include template.SIDEBAR %}
 	{% endwith %}
 {% endblock sidebar %}
 {% block breadcrumb %}
-	{% set br_items = [('/resource_timesheet', 'Resource Timesheet', True)] %}
+	{% set br_items = [(route.RESOURCE_TIMESHEET, 'Resource Timesheet', True)] %}
 	{% with br_items=br_items %}
-		{% include "components/breadcrumb/breadcrumb.html" %}
+		{% include template.BREADCRUMB %}
 	{% endwith %}
 {% endblock breadcrumb %}
 
@@ -38,9 +38,9 @@
 		    </select>
 			<input type='date' name='from_date' id='from_date' placeholder='From date' class='mx-1 px-2' value='{{request_dict[session_enum.FROM]}}'>
 			<input type='date' name='to_date' id='to_date' placeholder='To date' class='mx-1 px-2' value='{{request_dict[session_enum.TO]}}'>
-			<input type='button' id='load' value='Load' class='mx-1 px-3'>
-			<input type='button' id='get_newest_data' value='Get Newest Data' class='mx-1'>
-			<input type='button' id='export' value='Export' class='mx-1 px-3'>
+			<button type='button' id='load' class='mx-1 px-3' data-toggle="tooltip" title="Load"><i class="fas fa-sync-alt"></i></button>
+			<button type='button' id='get_newest_data' class='mx-1' data-toggle="tooltip" title="Get Newest Data"><i class="fas fa-cloud-download-alt"></i></button>
+			<button type='button' id='export' class='mx-1 px-3'><i class="fas fa-file-export" data-toggle="tooltip" title="Export"></i></button>
 		</div>
 		<div class='col-md-2 d-flex justify-content-end'>
 			<select id="task_filter" name="task_filter">

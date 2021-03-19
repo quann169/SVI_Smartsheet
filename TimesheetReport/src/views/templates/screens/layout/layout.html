@@ -13,11 +13,12 @@
 		        {% endblock title %}
 		    </title>
 			{%- block styles %}
+				<link rel="shortcut icon" href="#">
 				<link rel="stylesheet" href="{{ url_for('static', filename='vendors/bootstrap-4.5.3/css/bootstrap.min.css') }}" />  
 				<link rel="stylesheet" href="{{ url_for('static', filename='vendors/DataTables/datatables.min.css') }}" /> 
 				<link rel="stylesheet" href="{{ url_for('static', filename='vendors/multiple-select/example-styles.css') }}" /> 
 				<!-- Our Custom CSS -->
-			    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.css') }}" />
+			    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/fontawesome/css/all.css') }}" />
 				<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
 			{%- endblock styles %}
 		{%- endblock head %}
@@ -28,7 +29,7 @@
 	        <!-- Sidebar  -->
 	        <nav id="sidebar" class='{% if ctrl_obj.get_session('sidebar') == 1 %}active{% endif %}'>
 	            {% block sidebar %}
-		            {% include "components/sidebar/sidebar.html" %}
+		            {% include template.SIDEBAR %}
 	        	{%- endblock sidebar %}
 	        </nav>
 	
@@ -36,13 +37,21 @@
 	        <div id="content" class="{% if ctrl_obj.get_session('sidebar') == 0 %}active{% endif %}">
 				<div class="loading" id ='overlay_loader'>&#8230;</div>
 				<div id='overlay'></div>
-				{% block navbar %}
-		            {% include "components/navbar/navbar.html" %}
+				<!--{% block navbar %}
+		            {% include template.NAVBAR %}
 	        	{%- endblock navbar %}
-	            {% block breadcrumb %}
-		        	{% include "components/breadcrumb/breadcrumb.html" %}
-		        {% endblock %}
-				
+	            -->
+				<nav class="navbar navbar-expand-lg navbar-light">
+				    <div class="container-fluid">
+				        <button type="button" id="sidebarCollapse" class="btn btn-info">
+				            <i class="fas fa-bars"></i>
+				        </button>
+						{% block breadcrumb %}
+				        	{% include template.BREADCRUMB %}
+				        {% endblock %}
+				        <img src="{{ url_for('static', filename='img/svi_logo.png') }}" style = "width:125px;" alt="savarti logo">
+				    </div>
+				</nav>
 				<div class='notify' id='notify'>
 					<div class='d-flex'>
 						<div id='notify_content' class='notify-content col-11 d-flex justify-content-center'></div>
@@ -56,30 +65,21 @@
 					{% block main %} 
 			        {% endblock %}
 				</div>
-				
-	            
+
 	      </div>
 	    </div>
 		{% block scripts %}
 			<!-- Font Awesome JS -->
 			<script src="{{url_for('static', filename='vendors/fontawesome/js/solid.js')}}" ></script>
 			<script src="{{url_for('static', filename='vendors/fontawesome/js/fontawesome.js')}}"></script>
-			<script src="{{url_for('static', filename='vendors/jquery-3.1.1.js')}}"></script>
-			<script src="{{url_for('static', filename='vendors/jquery-3.1.1.slim.min.js')}}"></script>
-			<script src="{{url_for('static', filename='vendors/popper-1.14.0.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.slim.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/poper/popper-1.14.0.min.js')}}"></script>
 			<script src="{{url_for('static', filename='vendors/bootstrap-4.5.3/js/bootstrap.min.js')}}"></script>
 			<script src="{{url_for('static', filename='vendors/DataTables/datatables.min.js')}}"></script>
 			<script src="{{url_for('static', filename='vendors/multiple-select/jquery.multi-select.js')}}"></script>
-			
 			<script src="{{url_for('static', filename='js/enum.js')}}"></script>
 			<script src="{{url_for('static', filename='js/common.js')}}"></script>
-			<script src="{{url_for('static', filename='js/setting/time_off.js')}}"></script>
-			<script src="{{url_for('static', filename='js/setting/holiday.js')}}"></script>
-			<script src="{{url_for('static', filename='js/setting/sheet.js')}}"></script>
-			<script src="{{url_for('static', filename='js/setting/resource.js')}}"></script>
-			<script src="{{url_for('static', filename='js/setting/home.js')}}"></script>
-			
-			
 			
 	    {%- endblock scripts %}
 		

@@ -24,8 +24,8 @@ a:hover {
 	font-weight: bold;
 }
 .navbar {
-    padding: 15px 10px;
-    background: #fff;
+    padding: 0px;
+    background: #e9ecef;
     border: none;
     border-radius: 0;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
@@ -44,6 +44,9 @@ a:hover {
     margin: 40px 0;
 }
 
+.btn {
+	padding: 0px 5px;
+}
 /* ---------------------------------------------------
     SIDEBAR STYLE
 ----------------------------------------------------- */
@@ -207,37 +210,61 @@ a.article:hover {
 }
 .breadcrumb {
 	margin-bottom: 0px;
+	margin-left: 3px;
 }
 
-
+/* ---------------------------------------------------
+    DATATABLE
+----------------------------------------------------- */
 .dataTables_length {
 	margin-top: 5px;	
 }
 
 .dataTables_wrapper .dataTables_filter {
-    float: left;
-    text-align: right;
+    float: none;
+    text-align: left;
 }
 
+table.dataTable thead th, table.dataTable thead td {
+	padding-right: 30px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+	padding: .1em .5em;
+}   
 /* ---------------------------------------------------
     Style for tags
 ----------------------------------------------------- */
-input[type=text], input[type=button], input[type=submit], input[type=date], select {
-    height: calc(1.5em + .75rem + 2px);
+input[type=text], input[type=button], input[type=search], input[type=submit], input[type=date], select, button {
+    height: calc(1em + .75rem + 2px);
+	border-radius: 3px;
 }
+button {
+	border: 1px solid #aaa;
+	padding: 0px 5px;
+	border-radius: 3px;
+}
+
 tr {
 	background-color: white !important;
     border: 1px solid #aaa !important;
+    white-space: nowrap;
 }
 th {
 	background-color: #e9e9e9 !important;
 	border: 1px solid #aaa !important;
+	
 }
 td {
 	border: 1px solid #aaa !important;
 }
+
 table, table.dataTable {
 	border-collapse: collapse !important;
+}
+
+.table td, .table th {
+	padding: 5px;
 }
 /* ---------------------------------------------------
     Single style
@@ -313,6 +340,10 @@ table, table.dataTable {
 }
 .w-100-px {
 	width: 100px;
+}
+
+.w-100-pc {
+	width: 100%;
 }
 .w-200-px {
 	width: 200px;
@@ -461,7 +492,7 @@ table, table.dataTable {
 	}
 	
 .cfl-sheet{
-		min-width: 100px;
+		width: 300px;
 		
 	} 
 	
@@ -528,3 +559,6 @@ table, table.dataTable {
 	overflow: auto;
 }
 /* end get newest data popup*/
+.custom-file-input, .custom-file, .custom-file {
+	height: calc(1em + .75rem + 2px);
+}

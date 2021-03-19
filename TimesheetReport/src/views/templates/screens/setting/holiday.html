@@ -1,16 +1,20 @@
-{% extends "screens/layout/layout.html" %}
+{% extends template.LAYOUT %}
 {% block breadcrumb %}
-	{% set br_items = [('/holiday', 'Holiday', True)] %}
+	{% set br_items = [(route.HOLIDAY, 'Holiday', True)] %}
 	{% with br_items=br_items %}
-		{% include "components/breadcrumb/breadcrumb.html" %}
+		{% include template.BREADCRUMB %}
 	{% endwith %}
 {% endblock breadcrumb %}
 {% block sidebar %}
-	{% set active_sidebar = 'holiday' %}
+	{% set active_sidebar = route.HOLIDAY %}
 	{% with active_sidebar=active_sidebar , ctrl_obj = ctrl_obj%}
-		{% include "components/sidebar/sidebar.html" %}
+		{% include template.SIDEBAR %}
 	{% endwith %}
 {% endblock sidebar %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/setting/holiday.js')}}"></script>
+{% endblock scripts %}
 {% block main %}
 <form id='import_holiday' method="post" enctype="multipart/form-data">
 	<div class='dp-flex'>
@@ -18,7 +22,7 @@
 		    <input type="file" name='holiday_file' id='holiday_file' accept='.xlsx' class="custom-file-input " >
 		    <label class="custom-file-label" for="holiday_file">Choose file</label>
 		</div>
-		<input type='submit' value='Import' class='mg-l-5' id='btn_import' disabled>
+		<button type='submit' class='mg-l-5' id='btn_import' disabled  data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
 	</div>
 </form>
 <br>

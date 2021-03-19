@@ -1,7 +1,7 @@
 .multi-select-container {
     display: inline-block;
     position: relative;
-	height: calc(1.5em + .75rem + 2px);
+	height: calc(1em + .75rem + 2px);
 }
 
 .multi-select-menu {

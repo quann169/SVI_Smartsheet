@@ -1,18 +1,21 @@
-{% extends "screens/layout/layout.html" %}
+{% extends template.LAYOUT %}
 {% block breadcrumb %}
-	{% set br_items = [('/timeoff', 'Time Off', True)] %}
+	{% set br_items = [(route.TIMEOFF, 'Time Off', True)] %}
 	{% with br_items=br_items %}
-		{% include "components/breadcrumb/breadcrumb.html" %}
+		{% include template.BREADCRUMB %}
 	{% endwith %}
 {% endblock breadcrumb %}
 
 {% block sidebar %}
-	{% set active_sidebar = 'timeoff' %}
+	{% set active_sidebar = route.TIMEOFF %}
 	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
-		{% include "components/sidebar/sidebar.html" %}
+		{% include template.SIDEBAR %}
 	{% endwith %}
 {% endblock sidebar %}
-
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/setting/time_off.js')}}"></script>
+{% endblock scripts %}
 {% block main %}
 <form id='import_timeoff' method="post" enctype="multipart/form-data">
 	<div class='dp-flex'>
@@ -20,7 +23,7 @@
 		    <input type="file" name='timeoff_file' id='timeoff_file' accept='.xlsx' class="custom-file-input " >
 		    <label class="custom-file-label" for="timeoff_file">Choose file</label>
 		</div>
-		<input type='submit' value='Import' class='mg-l-5' id='btn_import' disabled>
+		<button type='submit' class='mg-l-5' id='btn_import' disabled data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
 	</div>
 </form>
 <br>

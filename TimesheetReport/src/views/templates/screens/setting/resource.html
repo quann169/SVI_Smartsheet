@@ -1,16 +1,21 @@
-{% extends "screens/layout/layout.html" %}
+{% extends template.LAYOUT %}
 {% block breadcrumb %}
-	{% set br_items = [('/resource', 'Resource', True)] %}
+	{% set br_items = [(route.RESOURCE, 'Resource', True)] %}
 	{% with br_items=br_items %}
-		{% include "components/breadcrumb/breadcrumb.html" %}
+		{% include template.BREADCRUMB %}
 	{% endwith %}
 {% endblock breadcrumb %}
 {% block sidebar %}
-	{% set active_sidebar = 'resource' %}
+	{% set active_sidebar = route.RESOURCE %}
 	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
-		{% include "components/sidebar/sidebar.html" %}
+		{% include template.SIDEBAR %}
 	{% endwith %}
 {% endblock sidebar %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/setting/resource.js')}}"></script>
+{% endblock scripts %}
+
 {% block main %}
 <form id='import_resource' method="post" enctype="multipart/form-data">
 	<div class='dp-flex'>
@@ -18,7 +23,7 @@
 		    <input type="file" name='resource_file' id='resource_file' accept='.xlsx' class="custom-file-input " >
 		    <label class="custom-file-label" for="resource_file">Choose file</label>
 		</div>
-		<input type='submit' value='Import' class='mg-l-5' id='btn_import' disabled>
+		<button type='submit' class='mg-l-5' id='btn_import' disabled data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
 	</div>
 </form>
 <br>

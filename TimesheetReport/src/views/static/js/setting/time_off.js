@@ -7,7 +7,7 @@ $(document).ready(function () {
 			var file_name	= $('#timeoff_file').get(0).files[0].name;
 			var data = {'file_name': file_name};
 			$.ajax({
-			   url: '/import_timeoff',
+			   url: IMPORT_TIMEOFF,
 			   type: "POST",
 			   async: false,
 			   data: encodeURIComponent(JSON.stringify(data)),

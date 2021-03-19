@@ -53,7 +53,7 @@ function load_datatable (id) {
     // DataTable
     $(id).DataTable({
 		"dom": '<"top"f>rt<"bottom"lp><"clear">',
-		"scrollX": true,
+	//	"scrollX": true,
     //     initComplete: function () {
     //         // Apply the search
     //         this.api().columns().every( function () {
@@ -68,6 +68,7 @@ function load_datatable (id) {
     //         } );
     //     }
     });
+	$(id).wrap('<div style="overflow-x: auto;"></div>')
 }
 
 function get_form_submit(form_id) {
@@ -94,7 +95,7 @@ function upload_file (form_id) {
 	var result = null;
     $.ajax({
         type: 'POST',
-        url: '/upload_file',
+        url: UPLOAD_FILE,
 		async: false,
         data: form_data,
         contentType: false,
@@ -141,14 +142,14 @@ function export_file (form_id) {
 		return null;
 	}
     $.ajax({
-	   url: '/export',
+	   url: EXPORT,
 	   type: "POST",
 	   data: encodeURIComponent(JSON.stringify(data)),
 	   success: function(resp){
 		   var result = resp.result;
 			if (result[0]) {
 					var file_name = result[1];
-					var link = 'dowload_file?' + SESSION_FILE_NAME + '=' + file_name;
+					var link = DOWNLOAD_FILE + '?' + SESSION_FILE_NAME + '=' + file_name;
 					var ctn = 'Export successfully. Click here to download:' + '<a class="cl-blue" href="' + link + '"><u>  ' + file_name + '</u></a>'
 					$('#notify_content').html(ctn);
 					$('#notify').show();
@@ -174,7 +175,7 @@ function custom_alert(message, type) {
 function update_session(session_key, session_value) {
 	var data = {'session_key': session_key, 'session_value': session_value, };
 	$.ajax({
-	   url: '/update_session',
+	   url: UPDATE_SESSION,
 	   type: "POST",
 	   async: false,
 	   data: encodeURIComponent(JSON.stringify(data)),
@@ -220,7 +221,7 @@ function check_loading_smartsheet() {
 	var method_info = parse_url()
 	var data = method_info[1];
     $.ajax({
-        url: "/check_loading_smartsheet",
+        url: CHECK_LOADING_SMARTSHEET,
         type: "POST",
         data: encodeURIComponent(JSON.stringify(data)),
         success: function (resp) {
@@ -245,4 +246,4 @@ function check_loading_smartsheet() {
 		 }
 	 });
 };
-INTERVAL_CHECK_SMARTSHEET = setInterval(function() {check_loading_smartsheet(); }, 5000);
+// INTERVAL_CHECK_SMARTSHEET = setInterval(function() {check_loading_smartsheet(); }, 5000);

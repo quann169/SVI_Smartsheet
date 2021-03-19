@@ -1,14 +1,14 @@
-{% extends "screens/layout/layout.html" %}
+{% extends template.LAYOUT %}
 {% block sidebar %}
-	{% set active_sidebar = 'home' %}
+	{% set active_sidebar = route.HOME %}
 	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
-		{% include "components/sidebar/sidebar.html" %}
+		{% include template.SIDEBAR %}
 	{% endwith %}
 {% endblock sidebar %}
 {% block breadcrumb %}
-	{% set br_items = [('/home', 'Home', True)] %}
+	{% set br_items = [(route.HOME, 'Home', True)] %}
 	{% with br_items=br_items %}
-		{% include "components/breadcrumb/breadcrumb.html" %}
+		{% include template.BREADCRUMB %}
 	{% endwith %}
 {% endblock breadcrumb %}
 
@@ -36,7 +36,7 @@
 		{% for row in sheet_info %}
 			<tr>
 			  <td>{{loop.index}}</td>
-		      <td><a href='daily_timesheet?sheets={{row[db_header.SHEET_ID]}}' class='cl-blue '>{{row[db_header.SHEET_NAME]}}</a></td>
+		      <td><a href='{{route.DETAIL}}?sheets={{row[db_header.SHEET_ID]}}' class='cl-blue '>{{row[db_header.SHEET_NAME]}}</a></td>
 			  <td>{{row[db_header.SHEET_TYPE]}}</td>
 			  <td>{{row[db_header.LATEST_MODIFIED]}}</td>
 			  {% for week in list_week %}

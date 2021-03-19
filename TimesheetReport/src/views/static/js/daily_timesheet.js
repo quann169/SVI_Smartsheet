@@ -46,7 +46,7 @@ function load_timesheet_report() {
 	if (result) {
 		var data = result[0];
 		var method_get_url = result[1];
-		location.href = 'daily_timesheet?' + method_get_url;
+		location.href = DETAIL + '?' + method_get_url;
 	}
 }
 
@@ -73,7 +73,7 @@ $(document).ready(function () {
 		$('#overlay').show();
 		INTERVAL_GET_DATA = setInterval(function() {show_log_get_newest_data(); }, 2000);
 		$.ajax({
-			   url: '/get_newest_data',
+			   url: GET_NEWEST_DATA,
 			   type: "POST",
 			   data: encodeURIComponent(JSON.stringify(data)),
 			   success: function(resp){
@@ -90,7 +90,7 @@ $(document).ready(function () {
 function show_log_get_newest_data() {
 		var data = {};
 	    $.ajax({
-	        url: "/get_newest_data_log",
+	        url: GET_NEWEST_DATA_LOG,
 	        type: "POST",
 	        data: encodeURIComponent(JSON.stringify(data)),
 	        success: function (resp) {
@@ -107,7 +107,7 @@ $(document).ready(function () {
 		if (result) {
 			var data = result[0];
 			var method_get_url = result[1];
-			location.href = 'analyze?' + method_get_url;
+			location.href = ANALYZE + '?' + method_get_url;
 		}
 	});
 });

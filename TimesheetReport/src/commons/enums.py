@@ -185,12 +185,52 @@ class ExcelColor:
     LIST_COLOR = [
         'lime', 'orange', 'tan', 'gray_ega', 'gray25', 'ice_blue', 'white', 'light_turquoise', 'green', 'red', 'blue'
         ]
+
+class Template:
+    SETTING_HOLIDAY     = 'screens/setting/holiday.html'
+    SETTING_RESOURCE    = 'screens/setting/resource.html'
+    SETTING_SHEET       = 'screens/setting/sheet.html'
+    SETTING_TIMEOFF     = 'screens/setting/timeoff.html'
     
+    HOME                = 'screens/home/home.html'
+    INDEX               = 'screens/layout/index.html'
+    LAYOUT              = 'screens/layout/layout.html'
+    LOG                 = 'screens/log/log.html'
     
+    TIMESHEET_ANALYZE   = 'screens/timesheet/analyze.html'
+    TIMESHEET_CONFLICT_DATE  = 'screens/timesheet/conflict_date.html'
+    TIMESHEET_DETAIL     = 'screens/timesheet/detail.html'
+    TIMESHEET_RESOURCE   = 'screens/timesheet/resource.html'
+    TIMESHEET_PROJECT   = 'screens/timesheet/project.html'
     
+    BREADCRUMB          = 'components/breadcrumb/breadcrumb.html'
+    NAVBAR              = 'components/navbar/navbar.html'
+    SIDEBAR             = 'components/sidebar/sidebar.html'
     
-    
-    
+class Route:
+    INDEX   = '/'
+    HOME   = '/home'
+    GET_NEWEST_DATA = '/get-newest-data'
+    GET_NEWEST_DATA_LOG = '/get-newest-data_log'
+    ADD_TO_FINAL    = '/add-to-final'
+    UPLOAD_FILE    = '/upload'
+    DOWNLOAD_FILE    = '/dowload'
+    EXPORT    = '/export'
+    TIMEOFF    = '/timeoff'
+    IMPORT_TIMEOFF    = '/import-timeoff'
+    LOG    = '/log'
+    SHEET    = '/sheet'
+    IMPORT_SHEET    = '/import-sheet'
+    RESOURCE    = '/resource'
+    IMPORT_RESOURCE    = '/import-resource'
+    HOLIDAY    = '/holiday'
+    IMPORT_HOLIDAY    = '/import-holiday'
+    UPDATE_SESSION    = '/update-session'
+    DETAIL              = '/detail-timesheet'
+    RESOURCE_TIMESHEET = '/resource-timesheet'
+    ANALYZE = '/analyze'
+    CONFLICT_DATE   = '/conflict-date'
+    CHECK_LOADING_SMARTSHEET    = '/check-loading-smartsheet'
     
     
     

@@ -480,6 +480,7 @@ class Configuration(Connection):
         """%( DbHeader.CONFIG_NAME, DbHeader.CONFIG_VALUE, DbTable.ANALYSIS_CONFIG)
         query_result    = self.db_query(query)
         result = {}
+        
         if query_result:
             for row in query_result:
                 result[row[DbHeader.CONFIG_NAME]] = row[DbHeader.CONFIG_VALUE]

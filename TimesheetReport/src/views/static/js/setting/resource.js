@@ -7,7 +7,7 @@ $(document).ready(function () {
 			var file_name	= $('#resource_file').get(0).files[0].name;
 			var data = {'file_name': file_name};
 			$.ajax({
-			   url: '/import_resource',
+			   url: IMPORT_RESOURCE,
 			   type: "POST",
 			   async: false,
 			   data: encodeURIComponent(JSON.stringify(data)),

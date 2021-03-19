@@ -5,7 +5,7 @@ Created on Feb 22, 2021
 '''
 from src.models.smartsheet.smartsheet_model import SmartSheets
 from src.models.database.database_model import Configuration, Task
-from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, DateTime, AnalyzeCFGKeys
+from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, DateTime, AnalyzeCFGKeys, Route
 from src.commons.message import MsgError, MsgWarning, Msg, AnalyzeItem
 from src.commons.utils import search_pattern, message_generate, println, remove_path, split_patern,\
                             get_prev_date_by_time_delta, get_work_week, convert_date_to_string,\
@@ -14,6 +14,7 @@ from src.commons.utils import search_pattern, message_generate, println, remove_
                             str_to_date, get_end_week_of_date, get_start_week_of_date
                             
 from src.models.timesheet.timesheet_model import Timesheet
+
 from flask import session
 from pprint import pprint
 import pandas as pd
@@ -1016,12 +1017,12 @@ class Controllers:
         i6_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'continuity']])
         
         result = [
-            [AnalyzeItem.A001, i1_status, True, '/resource_timesheet?%s'%i1_method, no_missing, total_resource],
-            [AnalyzeItem.A002, i2_status, True, '/resource_timesheet?%s'%i2_method, no_redundant, total_resource],
-            [AnalyzeItem.A003, i3_status, True, '/resource_timesheet?%s'%i3_method, no_enought, total_resource],
-#             [AnalyzeItem.A004, i4_status, True, '/resource_timesheet?%s'%i4_method, count_overlap, total_resource],
-            [AnalyzeItem.A005, i5_status, False, '/conflict_final_date?%s'%i5_method, i5_count_fail, i5_total],
-            [AnalyzeItem.A006, i6_status, False, '/conflict_final_date?%s'%i6_method, i6_count_fail, i6_total]
+            [AnalyzeItem.A001, i1_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i1_method), no_missing, total_resource],
+            [AnalyzeItem.A002, i2_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i2_method), no_redundant, total_resource],
+            [AnalyzeItem.A003, i3_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i3_method), no_enought, total_resource],
+#             [AnalyzeItem.A004, i4_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i4_method), count_overlap, total_resource],
+            [AnalyzeItem.A005, i5_status, False, '%s?%s'%(Route.CONFLICT_DATE, i5_method), i5_count_fail, i5_total],
+            [AnalyzeItem.A006, i6_status, False, '%s?%s'%(Route.CONFLICT_DATE, i6_method), i6_count_fail, i6_total]
             ]        
         return result
     

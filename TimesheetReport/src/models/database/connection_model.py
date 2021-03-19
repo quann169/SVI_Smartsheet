@@ -12,7 +12,7 @@ import logging
 from pprint import pprint
 from flask import g
 import os
-
+from dbutils.pooled_db import PooledDB
 import re
 from src.models.database.db_setting import DbSetting
 import config
@@ -42,8 +42,6 @@ class Connection:
         self.db_password                        = db_setting.db_password
         self.db_name                            = db_setting.db_name
 
-                    
-    
     def create_connection(self):
         """ create a database connection to the MYSQL database
         specified by db_file
@@ -61,31 +59,67 @@ class Connection:
                             cursorclass  = self.cusror_type,
                             client_flag  = CLIENT.MULTI_STATEMENTS
                             )
-        
             return connection
         except Exception as e:
             println(e, 'exception')
         return connection
+    
+    def create_pool_connection (self ):
+        """ create a pool connection to the MYSQL database
+        specified by db_file
+        :param : None
+        :return: pool Connection object or None
+        """
         
-    
-    
+        pool_conn = None
+        try:
+            pool_conn = PooledDB(
+                creator=pymysql,
+                mincached=1,
+                maxcached=20,
+                host=self.db_host,
+                port=self.db_port,
+                user=self.db_user,
+                password=self.db_password,
+                db=self.db_name,
+                charset=self.db_char_set,
+                cursorclass=self.cusror_type,
+                client_flag  = CLIENT.MULTI_STATEMENTS
+            )
+            return pool_conn
+        except Exception as e:
+            println(e, 'exception')
+        return pool_conn
+        
+    def check_connection(self):
+        try:
+            query   = """SHOW TABLES;"""
+            query_result    = self.db_query(query)
+            if query_result:
+                return True
+            else:
+                return False
+        except Exception as e:
+            return False
+        
     def db_execute(self, query):
         """ Execute MySQL query for insert/update/delete database
         :param : query - text
         :return: None
         """
         try:
-            connection          = self.create_connection()
-            cursor              = connection.cursor()
-            cursor.execute(query)
-            connection.commit()
+            connection          = g.pool_conn.connection(shareable=True)
+            with connection.cursor() as cursor:
+                
+                cursor.execute(query)
+                connection.commit()
             println(query, 'debug')
         except Exception as e:
             println(query, 'exception')
             println(e, 'exception')
             raise Exception(e)
         finally:
-            connection.close()
+            pass
     
     def db_execute_2(self, query):
         """ Execute MySQL query for insert
@@ -93,10 +127,10 @@ class Connection:
         :return: insert_id
         """
         try:
-            connection          = self.create_connection()
-            cursor              = connection.cursor()
-            cursor.execute(query)
-            connection.commit()
+            connection          = g.pool_conn.connection(shareable=True)
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+                connection.commit()
             println(query, 'debug')
             return cursor.lastrowid
         except Exception as e:
@@ -104,7 +138,7 @@ class Connection:
             println(e, 'exception')
             raise Exception(e)
         finally:
-            connection.close()
+            pass
       
     def db_execute_many(self, query, list_record):
         """ Execute multiple the same query query
@@ -112,17 +146,17 @@ class Connection:
         :return: None
         """
         try:
-            connection          = self.create_connection()
-            cursor              = connection.cursor()
-            cursor.executemany(query, list_record)
-            connection.commit()
+            connection          = g.pool_conn.connection(shareable=True)
+            with connection.cursor() as cursor:
+                cursor.executemany(query, list_record)
+                connection.commit()
             println(query, 'debug')
         except Exception as e:
             println(query, 'exception')
             println(e, 'exception')
             raise Exception(e)
         finally:
-            connection.close()
+            pass
             
     def db_query(self, query):
         """ Execute MySQL query for select database
@@ -130,10 +164,10 @@ class Connection:
         :return: all rows
         """
         try:
-            connection          = self.create_connection()
-            cursor              = connection.cursor()
-            cursor.execute(query)
-            rows                = cursor.fetchall()
+            connection          = g.pool_conn.connection(shareable=True)
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+                rows                = cursor.fetchall()
             println(query, 'debug')
             if rows:
                 return rows
@@ -144,7 +178,7 @@ class Connection:
             println(e, 'exception')
             raise Exception(e)         
         finally:
-            connection.close()
+            pass
             
             
             

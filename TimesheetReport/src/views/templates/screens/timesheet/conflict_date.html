@@ -1,14 +1,14 @@
-{% extends "screens/layout/layout.html" %}
+{% extends template.LAYOUT %}
 {% block sidebar %}
-	{% set active_sidebar = 'daily_timesheet' %}
+	{% set active_sidebar = route.DETAIL %}
 	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
-		{% include "components/sidebar/sidebar.html" %}
+		{% include template.SIDEBAR %}
 	{% endwith %}
 {% endblock sidebar %}
 {% block breadcrumb %}
-	{% set br_items = [('/daily_timesheet', 'Detail Timesheet', False), ('/conflict_final_date', 'Conflict Date', True)] %}
+	{% set br_items = [(route.DETAIL, 'Detail Timesheet', False), (route.CONFLICT_DATE, 'Conflict Date', True)] %}
 	{% with br_items=br_items %}
-		{% include "components/breadcrumb/breadcrumb.html" %}
+		{% include template.BREADCRUMB %}
 	{% endwith %}
 {% endblock breadcrumb %}
 
