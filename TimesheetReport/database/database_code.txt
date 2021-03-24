@@ -342,7 +342,7 @@ INSERT INTO `timesheet`.`eng_level` (`level`) VALUES ('D2'), ('E0'), ('E1'), ('E
 
 -- sheet_type
 INSERT INTO `timesheet`.`sheet_type` (`sheet_type_id`, `sheet_type`) VALUES (1, 'NA');
-INSERT INTO `timesheet`.`sheet_type` (`sheet_type`) VALUES ('RnD'), ('NRE');
+INSERT INTO `timesheet`.`sheet_type` (`sheet_type`) VALUES ('RnD'), ('NRE'), ('Pre-sale'), ('Post-sale');
 
 -- team
 INSERT INTO `timesheet`.`team` (`team_id`, `team_name`) VALUES (1, 'NA');
@@ -354,7 +354,7 @@ INSERT INTO `timesheet`.`team` (`team_name`) VALUES ('CAD'), ('QA'), ('PD'), ('C
 INSERT INTO `timesheet`.`user` (`user_name`, `full_name`, `email`, `other_name`, `is_active`, `updated_by`, `eng_level_id`, `eng_type_id`, `team_id`) VALUES ('NA', 'NA', 'NA', 'NA', '1', 'NA', '1', '1', '1');
 
 -- analyze config
-INSERT INTO `timesheet`.`analysis_config` (`config_name`, `config_value`, `updated_by`) VALUES ('Token', 'nls2smz4rzdckgfp9pcem9sg8y', 'root'), ('Time Delta', '2', 'root');
+INSERT INTO `timesheet`.`analysis_config` (`config_name`, `config_value`, `updated_by`) VALUES ('Token', 'nls2smz4rzdckgfp9pcem9sg8y', 'root'), ('Time Delta', '1', 'root');
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

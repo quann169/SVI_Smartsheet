@@ -1,7 +1,6 @@
 
 $(document).ready(function () {
 	$('#add_final').click(function(event) {
-		
 		var url_info = parse_url();
 		var method_get_str = url_info[0];
 		var data = url_info[1];
@@ -11,6 +10,7 @@ $(document).ready(function () {
 			return null;
 		} else {
 			$('#overlay_loader').show();
+			console.log(data);
 			$.ajax({
 				   url: ADD_TO_FINAL,
 				   type: "POST",

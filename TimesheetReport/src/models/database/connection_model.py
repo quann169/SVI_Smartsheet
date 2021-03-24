@@ -8,14 +8,10 @@ import pymysql
 from pymysql.constants import CLIENT
 from src.commons.enums import Connect
 from src.commons.utils import println
-import logging
 from pprint import pprint
 from flask import g
-import os
 from dbutils.pooled_db import PooledDB
-import re
 from src.models.database.db_setting import DbSetting
-import config
 
 class Connection:
     def __init__(self, db_setting = None):
@@ -77,6 +73,8 @@ class Connection:
                 creator=pymysql,
                 mincached=1,
                 maxcached=20,
+                maxconnections=20,
+                maxshared=20,
                 host=self.db_host,
                 port=self.db_port,
                 user=self.db_user,
@@ -110,7 +108,6 @@ class Connection:
         try:
             connection          = g.pool_conn.connection(shareable=True)
             with connection.cursor() as cursor:
-                
                 cursor.execute(query)
                 connection.commit()
             println(query, 'debug')
@@ -119,7 +116,7 @@ class Connection:
             println(e, 'exception')
             raise Exception(e)
         finally:
-            pass
+            connection.close()
     
     def db_execute_2(self, query):
         """ Execute MySQL query for insert
@@ -138,7 +135,7 @@ class Connection:
             println(e, 'exception')
             raise Exception(e)
         finally:
-            pass
+            connection.close()
       
     def db_execute_many(self, query, list_record):
         """ Execute multiple the same query query
@@ -156,7 +153,7 @@ class Connection:
             println(e, 'exception')
             raise Exception(e)
         finally:
-            pass
+            connection.close()
             
     def db_query(self, query):
         """ Execute MySQL query for select database
@@ -178,7 +175,7 @@ class Connection:
             println(e, 'exception')
             raise Exception(e)         
         finally:
-            pass
+            connection.close()
             
             
             

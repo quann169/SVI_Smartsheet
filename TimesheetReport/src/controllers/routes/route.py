@@ -9,31 +9,29 @@ from flask import Blueprint, render_template, session, redirect, url_for, abort,
                     send_from_directory, g
 from pprint import pprint
 import logging
-from src.commons.utils import save_file_from_request, get_request_form_ajax, get_request_form_ajax, \
-                                get_request_form_ajax, get_request_args, get_request_args_list
+from src.commons.utils import save_file_from_request, get_request_form_ajax, get_request_args
 from src.controllers.controllers import Controllers as ctrl
 from src.commons.enums import DbTable, DbHeader, SessionKey, Template, Route
 from src.models.database.connection_model import Connection
 from src.commons.utils import println
 import config
 
-tempalte_path =  os.getcwd() + 'src/views/templates'
-static_path =  os.getcwd() + 'src/views/static'
-timesheet_bp = Blueprint('timesheet_bp', __name__, template_folder=tempalte_path, static_folder=static_path)
+timesheet_bp = Blueprint('timesheet_bp', __name__)
 
-connect_obj = Connection()
-pool_conn = connect_obj.create_pool_connection()
-
-@timesheet_bp.before_request
-def create_connection():
-    g.pool_conn = pool_conn
+# connect_obj = Connection()
+# pool_conn = connect_obj.create_pool_connection()
+# 
+# @timesheet_bp.before_request
+# def create_connection():
+#     g.pool_conn = pool_conn
     
 @timesheet_bp.route(Route.INDEX)
 def index():
     println(Route.INDEX, 'debug')
     try:
         ctrl_obj   = ctrl()
-        return render_template(Template.INDEX, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
+        return render_template(Template.INDEX, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , \
+                               session_enum = SessionKey(), template= Template())
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
@@ -44,7 +42,8 @@ def home():
     try:
         
         ctrl_obj   = ctrl()
-        return render_template(Template.HOME, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
+        return render_template(Template.HOME, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , \
+                               session_enum = SessionKey(), template= Template())
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
@@ -220,9 +219,9 @@ def update_session():
 def daily_timesheet():
     println(Route.DETAIL, 'debug')
     try:
-        request_dict = get_request_args_list()
+        request_dict = get_request_args()
         ctrl_obj   = ctrl()
-        ctrl_obj.add_defalt_config_to_method_request(request_dict)
+        ctrl_obj.add_defalt_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
         return render_template(Template.TIMESHEET_DETAIL, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, 'exception')
@@ -232,19 +231,31 @@ def daily_timesheet():
 def resource_timesheet():
     println(Route.RESOURCE_TIMESHEET, 'debug')
     try:
-        request_dict = get_request_args_list()
+        request_dict = get_request_args()
         ctrl_obj   = ctrl()
-        ctrl_obj.add_defalt_config_to_method_request(request_dict)
+        ctrl_obj.add_defalt_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
         return render_template(Template.TIMESHEET_RESOURCE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
 
+@timesheet_bp.route(Route.PROJECT_TIMESHEET)
+def project_timesheet():
+    println(Route.PROJECT_TIMESHEET, 'debug')
+    try:
+        request_dict = get_request_args()
+        ctrl_obj   = ctrl()
+        ctrl_obj.add_defalt_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
+        return render_template(Template.TIMESHEET_PROJECT, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+    
 @timesheet_bp.route(Route.ANALYZE)
 def analyze():
     println(Route.ANALYZE, 'debug')
     try:
-        request_dict = get_request_args_list()
+        request_dict = get_request_args()
         ctrl_obj   = ctrl()
         return render_template(Template.TIMESHEET_ANALYZE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
@@ -255,7 +266,7 @@ def analyze():
 def conflict_final_date():
     println(Route.CONFLICT_DATE, 'debug')
     try:
-        request_dict = get_request_args_list()
+        request_dict = get_request_args()
         ctrl_obj   = ctrl()
         return render_template(Template.TIMESHEET_CONFLICT_DATE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:

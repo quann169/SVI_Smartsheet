@@ -1,4 +1,7 @@
 {% extends template.LAYOUT %}
+{% block title %}
+	Analyze
+{% endblock title %}
 {% block sidebar %}
 	{% set active_sidebar = route.DETAIL %}
 	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
@@ -6,7 +9,7 @@
 	{% endwith %}
 {% endblock sidebar %}
 {% block breadcrumb %}
-	{% set br_items = [(route.DETAIL, 'Detail', False), (route.ANALYZE, 'Analyze', True)] %}
+	{% set br_items = [(route.ANALYZE, 'Analyze', True)] %}
 	{% with br_items=br_items %}
 		{% include template.BREADCRUMB %}
 	{% endwith %}
@@ -33,7 +36,7 @@
 		
 		</div>
 		<div class='col-md-2 d-flex justify-content-end'>
-			<input type='button' id='add_final' value='Add To Final' class='mx-1 px-3' disabled>
+			<input type='button' id='add_final' value='Add To Final' class='mx-1 px-3' >
 		</div>
 	</div>
 </form>

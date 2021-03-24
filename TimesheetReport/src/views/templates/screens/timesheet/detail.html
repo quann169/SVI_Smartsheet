@@ -1,4 +1,7 @@
 {% extends template.LAYOUT %}
+{% block title %}
+	Detail
+{% endblock title %}
 {% block sidebar %}
 	{% set active_sidebar = route.DETAIL %}
 	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
@@ -27,11 +30,11 @@
 {% endblock scripts %}
 
 {% block main %}
-<form id='timesheet_form'>
+<form id='timesheet_form' class='{% if session_enum.MODE in request_dict and request_dict[session_enum.MODE] in ['view'] %}d-none{% endif %}'>
 	{% set sheet_info = ctrl_obj.get_list_sheet_name() %}
 	<div class='row'>
 		<div class='col-md-10 d-flex align-items-center'>
-			<select id="list_sheet" name="list_sheet" class='mt-1' multiple="multiple">
+			<select id="list_sheet" class='mt-1' multiple="multiple">
 				{% for row in sheet_info %}
 		        	<option value="{{row[db_header.SHEET_ID]}}" {% if row[db_header.SHEET_ID] in request_dict[session_enum.SHEETS]%} selected {% endif %} >{{row[db_header.SHEET_NAME]}}</option>
 		    	{% endfor %}
@@ -45,9 +48,13 @@
 		</div>
 		<div class='col-md-2 d-flex justify-content-end'>
 			<select id="task_filter" name="task_filter">
-		        <option value="current" {% if request_dict[session_enum.FILTER] == 'current' %}selected{% endif %}>Current Task</option>
-		        <option value="final" {% if request_dict[session_enum.FILTER] == 'final' %}selected{% endif %}>Final Task</option>
-		        <option value="both"  {% if request_dict[session_enum.FILTER] == 'both' %}selected{% endif %}>Both</option>
+		        <option value="current" {% if request_dict[session_enum.TASK_FILTER] == 'current' %}selected{% endif %}>Current</option>
+		        <option value="final" {% if request_dict[session_enum.TASK_FILTER] == 'final' %}selected{% endif %}>Final</option>
+		        <option value="both"  {% if request_dict[session_enum.TASK_FILTER] == 'both' %}selected{% endif %}>Both</option>
+		    </select>
+			<select id="filter" name="filter" class='mg-l-5 dp-none'>
+		        <option value="weekly" {% if request_dict[session_enum.FILTER] == 'weekly' %}selected{% endif %}>Weekly</option>
+		        <option value="monthly" {% if request_dict[session_enum.FILTER] == 'monthly' %}selected{% endif %}>Monthly</option>
 		    </select>
 		</div>
 	</div>

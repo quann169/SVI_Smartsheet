@@ -4,20 +4,22 @@
 
 <ul class="list-unstyled components">
     <p></p>
-    <li class="{% if active_sidebar == 'home' %} active{% endif %}">
+    <li class="{% if active_sidebar == route.HOME %} active{% endif %}">
         <a href="{{route.HOME}}"><i class="fas fa-home"></i>&nbsp;&nbsp;Home</a>
     </li>
 	<li>
-	        <a href="#timesheets" data-toggle="collapse" aria-expanded="{% if active_sidebar in [route.RESOURCE_TIMESHEET, route.DETAIL] %}true{%else%}false{% endif %}" 
+	        <a href="#timesheets" data-toggle="collapse" aria-expanded="{% if active_sidebar in [route.RESOURCE_TIMESHEET, route.DETAIL, route.PROJECT_TIMESHEET] %}true{%else%}false{% endif %}" 
  class="dropdown-toggle"><i class="fas fa-hourglass-start"></i>&nbsp;&nbsp;Timesheet</a>
-	        <ul class="collapse list-unstyled {% if active_sidebar in [route.RESOURCE_TIMESHEET, route.DETAIL] %}show{% endif %}" id="timesheets">
+	        <ul class="collapse list-unstyled {% if active_sidebar in [route.RESOURCE_TIMESHEET, route.DETAIL, route.PROJECT_TIMESHEET] %}show{% endif %}" id="timesheets">
 	            <li class="{% if active_sidebar == route.DETAIL %} active{% endif %}">
 	                <a href="{{route.DETAIL}}"><i class="fas fa-info-circle"></i>&nbsp;&nbsp;Detail</a>
 	            </li>
 	 			<li class="{% if active_sidebar == route.RESOURCE_TIMESHEET %} active{% endif %}">
 	                <a href="{{route.RESOURCE_TIMESHEET}}"><i class="fas fa-user-clock"></i>&nbsp;&nbsp;Resource</a>
 	            </li>
-				
+				<li class="{% if active_sidebar == route.PROJECT_TIMESHEET %} active{% endif %}">
+	                <a href="{{route.PROJECT_TIMESHEET}}"><i class="fas fa-book"></i></i>&nbsp;&nbsp;Project</a>
+	            </li>
 	        </ul>
 	</li>
     <li>
@@ -38,7 +40,7 @@
             </li>
         </ul>
     </li>
-    <li class="{% if active_sidebar == route.LOG %} active{% endif %}">
+    <li class="{% if active_sidebar == route.LOG %} active{% endif %} dp-none">
         <a href="{{route.LOG}}"><i class="fas fa-history"></i>&nbsp;&nbsp;Log</a>
     </li>
 </ul>

@@ -3,13 +3,14 @@ $(document).ready(function () {
 	$('#import_resource').submit(function(event) {
 		event.preventDefault();
 		var up_file = upload_file('#import_resource');
+		$('#overlay_loader').show();
 		if (up_file != null && up_file[0] == 1) {
 			var file_name	= $('#resource_file').get(0).files[0].name;
 			var data = {'file_name': file_name};
 			$.ajax({
 			   url: IMPORT_RESOURCE,
 			   type: "POST",
-			   async: false,
+			   //async: false,
 			   data: encodeURIComponent(JSON.stringify(data)),
 			   success: function(resp){
 				   var result = resp.result;

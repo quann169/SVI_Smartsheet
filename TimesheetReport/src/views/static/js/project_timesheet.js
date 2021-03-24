@@ -1,14 +1,14 @@
 
 
 $(document).ready( function () {
-	load_datatable('#resource_timesheet');
+	load_datatable('#project_timesheet', false);
 });
 
 function load_timesheet_report() {
 	var data = colect_config_date();
 	if (data) {
 		var method_get_url = encodeURIComponent(JSON.stringify(data));
-		location.href = RESOURCE_TIMESHEET + '?' + method_get_url;
+		location.href = PROJECT_TIMESHEET + '?' + method_get_url;
 	}
 }
 
@@ -23,6 +23,7 @@ $(document).ready(function () {
 		load_timesheet_report();
 	});
 });
+
 
 
 

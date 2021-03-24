@@ -14,8 +14,6 @@ from pprint import pprint
 import xlwt
 from jinja2 import Environment
 from jinja2.loaders import FileSystemLoader
-
-
 from src.commons.utils import get_prev_date_by_time_delta, stuck, convert_date_to_string, println,\
                              get_work_days, str_to_date, compare_date,  write_message_into_file
 

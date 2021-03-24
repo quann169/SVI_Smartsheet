@@ -3,7 +3,7 @@ Created on Feb 5, 2021
 
 @author: toannguyen
 '''
-import os, sys, re
+import os, sys, re, copy
 import datetime, calendar
 import ast
 from src.commons.message import Msg, MsgError, MsgWarning
@@ -16,6 +16,7 @@ import shutil
 import traceback
 from decimal import Decimal
 import xlwt, socket
+import urllib
 
 def get_request_form():
     # for post method
@@ -30,18 +31,11 @@ def get_request_args():
     request_dict = {}
     forms = request.args
     for form in forms:
-        request_dict[form] = forms.get(form)
-    return request_dict
-
-def get_request_args_list():
-    # for get method
-    request_dict = {}
-    forms = request.args
-    for form in forms:
-        if form in [SessionKey.SHEETS]:
-            request_dict[form] = forms.getlist(form, type=int)
-        else:
-            request_dict[form] = forms.get(form)
+        request_dict = ast.literal_eval(form.strip())
+    
+    if SessionKey.SHEETS in request_dict:
+        for idx in range(0, len(request_dict[SessionKey.SHEETS])):
+            request_dict[SessionKey.SHEETS][idx] = int(request_dict[SessionKey.SHEETS][idx])
     return request_dict
 
 def get_request_form_ajax():
@@ -94,18 +88,16 @@ def stuck(message='', logging_level=None):
     raise Exception(message)
 
 def convert_request_dict_to_url(request_dict, more_option=[]):
-    
-    list1 = []
-    for key, value in request_dict.items():
-        if key == SessionKey.SHEETS:
-            for sheet_id in request_dict[SessionKey.SHEETS]:
-                list1.append('%s=%s'%(SessionKey.SHEETS, str(sheet_id)))
-        else:
-            list1.append('%s=%s'%(key, str(value)))
+    request_dict_cp = copy.deepcopy(request_dict) 
+    result = ''
+    if not request_dict_cp:
+        return result
     for element in more_option:
-        list1.append('%s=%s'%(element[0], str(element[1])))
-    result = '&'.join(list1)
-    return result
+        key, val = element
+        request_dict_cp[key] = val
+    
+    result = urllib.parse.quote(str(request_dict_cp))
+    return result   
     
 def println(message, logging_level=None):
     if logging_level == 'critical':
@@ -113,7 +105,7 @@ def println(message, logging_level=None):
         print (message)
     elif logging_level == 'exception':
         logging.exception(message)
-        traceback.print_exc('')
+#         traceback.print_exc('')
         print (message)
     elif logging_level == 'error':
         logging.error(message)
@@ -274,7 +266,53 @@ def get_end_week_of_date(date, output_str=True):
         return result
     else:
         return end_week
+
+def get_start_month_of_date(date, d_years=0, d_months=0, output_str=True):
+    if not isinstance(date, datetime.datetime):
+        date = str_to_date(date)[0]
+    date.replace(minute=0, hour=0, second=0, microsecond=0)
+    # d_years, d_months are "deltas" to apply to dt
+    y, m = date.year + d_years, date.month + d_months
+    a, m = divmod(m-1, 12)
+    start_date = datetime.datetime(y+a, m+1, 1)
+    if output_str:
+        result = convert_date_to_string(start_date, '%Y-%m-%d')
+        return result
+    else:
+        return start_date
+
+def get_end_month_of_date(date, output_str=True):
+    end_date =  get_start_month_of_date(date, 0, 1, False) + datetime.timedelta(-1)
+    if output_str:
+        result = convert_date_to_string(end_date, '%Y-%m-%d')
+        return result
+    else:
+        return end_date
+
+
+def calculate_start_end_date_by_option(date, from_date, to_date, mode):
     
+    start = from_date
+    end = to_date
+    if mode == 'monthly':
+        start_month = get_start_month_of_date(date)
+        end_month = get_end_month_of_date(date)
+        if compare_date(start_month, from_date):
+            start = start_month
+        if compare_date(to_date, end_month):
+            start = end_month
+    else:
+        start_week = get_start_week_of_date(date)
+        end_week = get_end_week_of_date(date)
+        if compare_date(start_week, from_date):
+            start = start_week
+        if compare_date(to_date, end_week):
+            end = end_week
+    
+    start = convert_date_to_string(start, '%Y-%m-%d')
+    end = convert_date_to_string(end, '%Y-%m-%d')
+    return start, end
+
 def get_month_name_of_date(date):
     if not isinstance(date, datetime.datetime):
         date = str_to_date(date)[0]

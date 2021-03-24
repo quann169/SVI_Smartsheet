@@ -1,4 +1,7 @@
 {% extends template.LAYOUT %}
+{% block title %}
+	Project Setting
+{% endblock title %}
 {% block breadcrumb %}
 	{% set br_items = [(route.SHEET, 'Sheet', True)] %}
 	{% with br_items=br_items %}
@@ -42,6 +45,8 @@
 	      </th> -->
 	      <th class="th-sm">Latest Modified
 	      </th>
+		  <th class="th-sm">Is Active
+	      </th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -53,6 +58,7 @@
 				<!--
 			  <td></td> -->
 		      <td>{{row[db_header.LATEST_MODIFIED] | string }}</td>
+			  <td>{{row[db_header.IS_ACTIVE]}}</td>
 		    </tr>
 		{% endfor %}
 	

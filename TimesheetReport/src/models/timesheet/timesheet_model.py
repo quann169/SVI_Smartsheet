@@ -3,17 +3,16 @@ Created on Mar 1, 2021
 
 @author: toannguyen
 '''
-from src.models.database.database_model import Task as DbTask
+from src.models.database.database_model import DbTask
 
 from src.models.database.database_model import Configuration
 from src.commons.enums import DbHeader
 from src.commons.utils import get_week_number, convert_date_to_string,\
-    get_start_week_of_date, get_month_name_of_date, round_num
-
+                            get_start_week_of_date, get_month_name_of_date, round_num
 from pprint import pprint
 
 class Timesheet():
-    def __init__(self, from_date, to_date, filter, sheet_ids):
+    def __init__(self, from_date, to_date, filter, sheet_ids, list_user=None, exclude=False):
         self.sheets     = {}
         self.resource   = {}
         self.from_date  = from_date
@@ -24,6 +23,10 @@ class Timesheet():
         self.user_ids    = {}
         self.team_ids   = {}
         self.eng_type_ids = {}
+        self.exclude    = exclude
+        self.all_task    = {}
+        self.all_final_task = {}
+        self.list_user = list_user
         
     def parse(self):
         config_obj  = Configuration()
@@ -37,6 +40,12 @@ class Timesheet():
         self.team_ids       = config_obj.team_ids
         config_obj.get_eng_type_info(is_parse=True)
         self.eng_type_ids     = config_obj.eng_type_ids
+        db_task_obj  = DbTask()
+        db_task_obj.set_attr(start_date      = self.from_date,
+                            end_date        = self.to_date
+            )
+        self.all_task = db_task_obj.get_all_tasks()
+        self.all_final_task = db_task_obj.get_all_final_tasks()
         
         for sheet_id  in self.sheet_ids:
             sheet_id    = int(sheet_id)
@@ -57,60 +66,91 @@ class Sheet():
     def parse(self):
         
         if self.timesheet_obj.filter == 'current':
-            db_task_obj  = DbTask()
-            db_task_obj.set_attr(sheet_id        = self.sheet_id,
-                                start_date      = self.timesheet_obj.from_date,
-                                end_date        = self.timesheet_obj.to_date
-                )
-            tasks       = db_task_obj.get_tasks()
+#             db_task_obj  = DbTask()
+#             db_task_obj.set_attr(sheet_id        = self.sheet_id,
+#                                 start_date      = self.timesheet_obj.from_date,
+#                                 end_date        = self.timesheet_obj.to_date
+#                 )
+#             tasks       = db_task_obj.get_tasks()
+            if self.timesheet_obj.all_task.get(self.sheet_id):
+                tasks = self.timesheet_obj.all_task[self.sheet_id]
+            else:
+                tasks  = []
             for row in tasks:
                 task_obj    = Task(self, row)
+                if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
+                    continue
+                
+                if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
+                    continue
+                
                 if not self.resource.get(task_obj.user_id):
                     self.resource[task_obj.user_id] = []
-                    
-                self.resource[task_obj.user_id].append(task_obj)
-                    
+                self.resource[task_obj.user_id].append(task_obj)    
         elif self.timesheet_obj.filter == 'final':
-            db_task_obj  = DbTask()
-            db_task_obj.set_attr(sheet_id        = self.sheet_id,
-                                start_date      = self.timesheet_obj.from_date,
-                                end_date        = self.timesheet_obj.to_date
-                )
-            tasks       = db_task_obj.get_final_tasks()
+#             db_task_obj  = DbTask()
+#             db_task_obj.set_attr(sheet_id        = self.sheet_id,
+#                                 start_date      = self.timesheet_obj.from_date,
+#                                 end_date        = self.timesheet_obj.to_date
+#                 )
+#             tasks       = db_task_obj.get_final_tasks()
+            if self.timesheet_obj.all_final_task.get(self.sheet_id):
+                tasks = self.timesheet_obj.all_final_task[self.sheet_id]
+            else:
+                tasks  = []
             for row in tasks:
                 task_obj    = Task(self, row, is_final = True)
+                if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
+                    continue
+                if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
+                    continue
                 if not self.resource.get(task_obj.user_id):
                     self.resource[task_obj.user_id] = []
-                    
                 self.resource[task_obj.user_id].append(task_obj)
                     
         elif self.timesheet_obj.filter == 'both':
             #merge task and final task
             #final_task
-            db_task_obj  = DbTask()
-            db_task_obj.set_attr(sheet_id        = self.sheet_id,
-                                start_date      = self.timesheet_obj.from_date,
-                                end_date        = self.timesheet_obj.to_date
-                )
-            tasks       = db_task_obj.get_final_tasks()
+#             db_task_obj  = DbTask()
+#             db_task_obj.set_attr(sheet_id        = self.sheet_id,
+#                                 start_date      = self.timesheet_obj.from_date,
+#                                 end_date        = self.timesheet_obj.to_date
+#                 )
+#             tasks       = db_task_obj.get_final_tasks()
             self.final_exist_date   = {}
-            
+            if self.timesheet_obj.all_final_task.get(self.sheet_id):
+                tasks = self.timesheet_obj.all_final_task[self.sheet_id]
+            else:
+                tasks  = []
             for row in tasks:
                 task_obj    = Task(self, row, is_final = True)
+                if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
+                    continue
+                
+                if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
+                    continue
                 if not self.resource.get(task_obj.user_id):
                     self.resource[task_obj.user_id] = []
                 self.final_exist_date[task_obj.date] = None
                 self.resource[task_obj.user_id].append(task_obj)
             
-            
-            db_task_obj  = DbTask()
-            db_task_obj.set_attr(sheet_id        = self.sheet_id,
-                                start_date      = self.timesheet_obj.from_date,
-                                end_date        = self.timesheet_obj.to_date
-                )
-            tasks       = db_task_obj.get_tasks()
+#             db_task_obj  = DbTask()
+#             db_task_obj.set_attr(sheet_id        = self.sheet_id,
+#                                 start_date      = self.timesheet_obj.from_date,
+#                                 end_date        = self.timesheet_obj.to_date
+#                 )
+#             tasks       = db_task_obj.get_tasks()
+            if self.timesheet_obj.all_task.get(self.sheet_id):
+                tasks = self.timesheet_obj.all_task[self.sheet_id]
+            else:
+                tasks  = []
             for row in tasks:
                 task_obj    = Task(self, row)
+                if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
+                    continue
+                if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
+                    continue
+                
                 try:
                     unuse = self.final_exist_date[task_obj.date]
                 except KeyError:
@@ -142,7 +182,9 @@ class Task():
         self.week_number    = None
         self.sheet_obj      = sheet_obj
         self.is_final       = is_final
+        self.add_info(info)
         
+    def add_info(self, info):
         if info:
             if self.is_final:
                 self.task_id        = info[DbHeader.TASK_FINAL_ID]
@@ -168,7 +210,7 @@ class Task():
             self.week_number    = get_week_number(self.date)
             self.start_week     = get_start_week_of_date(self.date)
             self.month_name     = get_month_name_of_date(self.date)
-         
+            
     
     
     

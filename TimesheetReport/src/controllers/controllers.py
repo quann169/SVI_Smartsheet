@@ -4,14 +4,15 @@ Created on Feb 22, 2021
 @author: toannguyen
 '''
 from src.models.smartsheet.smartsheet_model import SmartSheets
-from src.models.database.database_model import Configuration, Task
+from src.models.database.database_model import Configuration, DbTask
 from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, DateTime, AnalyzeCFGKeys, Route
 from src.commons.message import MsgError, MsgWarning, Msg, AnalyzeItem
 from src.commons.utils import search_pattern, message_generate, println, remove_path, split_patern,\
                             get_prev_date_by_time_delta, get_work_week, convert_date_to_string,\
                             get_work_month, round_num, defined_color, \
                             get_work_days, write_message_into_file, convert_request_dict_to_url,\
-                            str_to_date, get_end_week_of_date, get_start_week_of_date
+                            str_to_date, get_end_week_of_date, get_start_week_of_date, get_month_name_of_date, \
+                            calculate_start_end_date_by_option
                             
 from src.models.timesheet.timesheet_model import Timesheet
 
@@ -49,7 +50,7 @@ class Controllers:
         config_obj.get_all_user_information()
         user_info = config_obj.users
         other_name_info = config_obj.other_name
-        task_obj    = Task()
+        task_obj    = DbTask()
         total = len(sms_obj.info)
         count = 0
         for sheet_name in sms_obj.info:
@@ -143,7 +144,14 @@ class Controllers:
         if log:
             write_message_into_file(log, "Time: " + str(minutes) + ':' + str(seconds).zfill(2)  + '\n')
     
-    def add_defalt_config_to_method_request(self, request_dict):
+    def convert_request_dict_to_url(self, request_dict):
+        result = convert_request_dict_to_url(request_dict)
+        return result
+    
+    def add_defalt_config_to_method_request(self, request_dict, more_option={}):
+        for key, val in more_option.items():
+            if not request_dict.get(key):
+                request_dict[key] = val
         if not request_dict.get(SessionKey.FROM) or not request_dict.get(SessionKey.TO) or not request_dict.get(SessionKey.SHEETS):
             config_obj = Configuration()
             analyze_config_info = config_obj.get_analyze_config()
@@ -191,6 +199,8 @@ class Controllers:
                 type_leave  = str(df[ExcelHeader.TYPE][index])
                 start_date  = str(df[ExcelHeader.START_DATE][index])
                 end_date    = str(df[ExcelHeader.END_DATE][index])
+                if requester in SettingKeys.EMPTY_CELL or start_date in SettingKeys.EMPTY_CELL or end_date in SettingKeys.EMPTY_CELL:
+                    continue
                 workday     = search_pattern(str(df[ExcelHeader.WORKDAYS][index]),'(.+?)\((.+?)h\)')[1]
                 status      = str(df[ExcelHeader.STATUS][index])
                 user_id     = users_info[SettingKeys.NA_VALUE].user_id
@@ -239,6 +249,7 @@ class Controllers:
                 if date not in SettingKeys.EMPTY_CELL:
                     if not config_obj.is_exist_holiday(date):
                         config_obj.add_holiday(date)
+            remove_path(file_path)
             return 1, Msg.M001
         except Exception as e:
             println(e, 'exception')
@@ -259,7 +270,7 @@ class Controllers:
     
     def get_sheet_config(self):
         config_obj  = Configuration()
-        result      = config_obj.get_sheet_config()
+        result      = config_obj.get_sheet_config(is_active=False)
         return result    
     
     def update_session(self, key, val):
@@ -319,6 +330,7 @@ class Controllers:
                     return  0, message
             config_obj.set_attr(updated_by  = 'root')
             user_of_sheet   = {}
+            config_obj.inactive_all_sheet()
             for index in range(0, len(df[ExcelHeader.SHEET_NAME])):
                 sheet_name          = str(df[ExcelHeader.SHEET_NAME][index])
                 sheet_type          = str(df[ExcelHeader.SHEET_TYPE][index])
@@ -337,14 +349,13 @@ class Controllers:
                                         sheet_type_id   = str(sheet_type_id),
                                         latest_modified = DefaulteValue.DATETIME,
                                         is_active       = str(is_active))
-                    
                     if config_obj.is_exist_sheet():
                         config_obj.update_sheet()
                     else:
                         config_obj.add_sheet()
             #update project-user table
             self.update_resource_of_sheet(user_of_sheet)
-            
+            remove_path(file_path)
             return 1, Msg.M001
         except Exception as e:
             println(e, 'exception')
@@ -411,6 +422,7 @@ class Controllers:
                         config_obj.update_resource()
                     else:
                         config_obj.add_resource()
+            remove_path(file_path)
             return 1, Msg.M001
         except Exception as e:
             println(e, 'exception')
@@ -439,7 +451,7 @@ class Controllers:
         result  = [sheet_info, list_week]
         return result
         
-    def get_daily_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter='current'):
+    def get_daily_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, task_filter=None, list_user=None):
         try:
             missing_method = False
             if request_dict:
@@ -447,16 +459,16 @@ class Controllers:
                     from_date   = request_dict[SessionKey.FROM]
                     to_date     = request_dict[SessionKey.TO]
                     sheet_ids   = request_dict[SessionKey.SHEETS]
-                    try:
-                        filter      = request_dict[SessionKey.FILTER]
-                    except KeyError:
-                        pass
+                    if request_dict.get(SessionKey.TASK_FILTER):
+                        task_filter      = request_dict[SessionKey.TASK_FILTER]
+                    if request_dict.get(SessionKey.USERS):
+                        list_user      = request_dict[SessionKey.USERS]
                 except KeyError:
                     missing_method = True
-            if not filter or not sheet_ids or not to_date or not from_date or missing_method:
+            if not task_filter or not sheet_ids or not to_date or not from_date or missing_method:
                 return []
             result = []
-            timesheet_obj   = Timesheet(from_date, to_date, filter, sheet_ids)
+            timesheet_obj   = Timesheet(from_date, to_date, task_filter, sheet_ids, list_user)
             timesheet_obj.parse()
             user_ids        = timesheet_obj.user_ids
             eng_type_ids   = timesheet_obj.eng_type_ids
@@ -522,7 +534,8 @@ class Controllers:
         result = result.replace('\n', '<br>')
         return result  
         
-    def get_resource_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter='weekly', mode='all', is_caculate=False):
+    def get_resource_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, 
+                                    filter='weekly', task_filter='both', mode='all', is_caculate=False):
         try:
             missing_method = False
             if request_dict:
@@ -530,21 +543,20 @@ class Controllers:
                     from_date   = request_dict[SessionKey.FROM]
                     to_date     = request_dict[SessionKey.TO]
                     sheet_ids   = request_dict[SessionKey.SHEETS]
-                    try:
+                    if request_dict.get(SessionKey.FILTER):
                         filter      = request_dict[SessionKey.FILTER]
-                    except KeyError:
-                        pass
-                    try:
+                    if request_dict.get(SessionKey.MODE):
                         mode        = request_dict[SessionKey.MODE]
-                    except KeyError:
-                        mode    = mode
+                    if request_dict.get(SessionKey.TASK_FILTER):
+                        task_filter = request_dict[SessionKey.TASK_FILTER]
+                    
                 except KeyError:
                     missing_method = True
             
             if not filter or not sheet_ids or not to_date or not from_date or missing_method:
                 return ({}, [], 0, 0, 0, 0, 0)
-
-            timesheet_obj   = Timesheet(from_date, to_date, 'current', sheet_ids)
+            
+            timesheet_obj   = Timesheet(from_date, to_date, task_filter, sheet_ids)
             timesheet_obj.parse()
             user_ids        = timesheet_obj.user_ids
             eng_type_ids    = timesheet_obj.eng_type_ids
@@ -554,6 +566,7 @@ class Controllers:
             config_obj.get_list_holiday(is_parse=True)
             holidays  = config_obj.holidays
             info            = {}
+            
             if filter == 'monthly':
                 list_month   = get_work_month(from_date=from_date, to_date=to_date, holidays=holidays)
                 cols_element = list_month
@@ -568,6 +581,20 @@ class Controllers:
                 list_sub_col       = []
                 for col in cols_element:
                     list_sub_col.append(col[0])
+                    
+            # caculate timeoff by week/month
+            timeoff_info_2 = {}
+            for user_id in time_off_info:
+                for date, week, timeoff_per_day, obj in time_off_info[user_id]:
+                    if filter == 'monthly':
+                        name     = get_month_name_of_date(date)
+                    else:
+                        name     = get_start_week_of_date(date)
+                    if not  timeoff_info_2.get(user_id):
+                        timeoff_info_2[user_id] = {}
+                    if not timeoff_info_2[user_id].get(name):
+                        timeoff_info_2[user_id][name] = 0
+                    timeoff_info_2[user_id][name] += timeoff_per_day
             
             for sheet_id in timesheet_obj.sheets:
                 sheet_obj   = timesheet_obj.sheets[sheet_id]
@@ -586,12 +613,9 @@ class Controllers:
                             col_element = task_obj.month_name
                         else:
                             col_element  = task_obj.start_week
-                        
-                        if user_id in time_off_info:
-                            for date, week, timeoff_per_day, obj in time_off_info[user_id]:
-                                if date == task_date:
-                                    timeoff = timeoff_per_day
-                                    break
+                        if timeoff_info_2.get(user_id):
+                            if timeoff_info_2[user_id].get(col_element):
+                                timeoff = timeoff_info_2[user_id][col_element]
                         
                         if not info.get(eng_type):
                             info[eng_type]  = {}
@@ -607,21 +631,31 @@ class Controllers:
                                     col_name    = DateTime.LIST_MONTH[month]
                                 else:
                                     col_name, max_hour = element
-                                info[eng_type][team_name][user_name][col_name]  = {'max_hour' : max_hour, 'summary': [0, 0], 'sheets': {}}
+                                info[eng_type][team_name][user_name][col_name]  = {'max_hour' : max_hour, 
+                                                                                   'summary': [0, 0], 
+                                                                                   'sheets': {},
+                                                                                   'href': ''}
                         
                         if not info[eng_type][team_name][user_name][col_element]['sheets'].get(sheet_name):
                             info[eng_type][team_name][user_name][col_element]['sheets'][sheet_name]  = [0, 0]
                         
                         # add value
                         info[eng_type][team_name][user_name][col_element]['summary'][0]  += work_hour
-                        info[eng_type][team_name][user_name][col_element]['summary'][1]  += timeoff
+                        info[eng_type][team_name][user_name][col_element]['summary'][1]  = timeoff
                         info[eng_type][team_name][user_name][col_element]['sheets'][sheet_name][0]  += work_hour
-                        info[eng_type][team_name][user_name][col_element]['sheets'][sheet_name][1]  += timeoff
+
                         info[eng_type][team_name][user_name][col_element]['summary'][0]   = round_num(info[eng_type][team_name][user_name][col_element]['summary'][0])
                         info[eng_type][team_name][user_name][col_element]['summary'][1]  = round_num(info[eng_type][team_name][user_name][col_element]['summary'][1])
                         info[eng_type][team_name][user_name][col_element]['sheets'][sheet_name][0]  = round_num(info[eng_type][team_name][user_name][col_element]['sheets'][sheet_name][0])
-                        info[eng_type][team_name][user_name][col_element]['sheets'][sheet_name][1]  = round_num(info[eng_type][team_name][user_name][col_element]['sheets'][sheet_name][1])
-            
+                        start, end = calculate_start_end_date_by_option(task_date, from_date, to_date, filter)
+                        href = '%s?%s'%(Route.PROJECT_TIMESHEET, convert_request_dict_to_url(request_dict, [[SessionKey.USERS, [user_name]],
+                                                                                                             [SessionKey.MODE, 'view'],
+                                                                                                             [SessionKey.TASK_FILTER, task_filter],
+                                                                                                             [SessionKey.FROM, start],
+                                                                                                             [SessionKey.TO, end],
+                                                                                                             ]))
+                        info[eng_type][team_name][user_name][col_element]['href'] = href
+
             total    = 0
             no_missing   = 0
             no_redundant = 0
@@ -685,15 +719,11 @@ class Controllers:
                                     if hours[0] + hours[1] > max_hour:
                                         is_remove = False
                                         break
-                            
                             if is_remove:
                                 list_user_remove.append(user_name)
-                                
                         for user_name in list_user_remove: 
                             del info[eng_type][team][user_name]
-            
-            
-            
+
             result = (info, list_sub_col, no_missing, no_redundant, no_enought, count_overlap, total)
             return result
             
@@ -706,7 +736,7 @@ class Controllers:
             if not (from_date and to_date and sheet_ids):
                 return 0, MsgError.E003
             wb = Workbook()
-            file_name = 'TimeSheet.xls'
+            file_name = 'Report.xls'
             output_path   = os.path.join(config.WORKING_PATH, file_name)
             if os.path.exists(output_path):
                 os.remove(output_path)
@@ -717,7 +747,7 @@ class Controllers:
             style_header = color_style['gray25']
             
             # export daily timesheet
-            daily_timesheet_info = self.get_daily_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='current')
+            daily_timesheet_info = self.get_daily_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, task_filter='current')
             daily_timesheet_wb = wb.add_sheet('Detail Timesheet')
             row_num, col_num = (0, 0)
             
@@ -744,7 +774,7 @@ class Controllers:
             # end daily timesheet
             
             # export daily timesheet final
-            daily_timesheet_info = self.get_daily_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='final')
+            daily_timesheet_info = self.get_daily_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, task_filter='final')
             daily_timesheet_wb = wb.add_sheet('Detail Timesheet Final')
             row_num, col_num = (0, 0)
             
@@ -806,7 +836,6 @@ class Controllers:
                             else:
                                 color = 'tan'
                                 value  = hours[0] + hours[1]
-                            
                             weekly_resource_wb.write(row_num, col_num, value, color_style[color])
                             col_num += 1
                         col_num = start_col
@@ -849,11 +878,132 @@ class Controllers:
                             else:
                                 color = 'tan'
                                 value  = hours[0] + hours[1]
-                            
                             monthly_resource_wb.write(row_num, col_num, value, color_style[color])
                             col_num += 1
                         col_num = start_col
                         row_num += 1
+            
+            #weekly Project
+            weekly_project_wb = wb.add_sheet('Weekly Project')
+            w_project_info, list_week = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='weekly')
+            start_col, start_row = (0, 0)
+            row_num, col_num = (0, 0)
+            # create  header
+            list_header = ['Sheet', 'Resource', 'Eng Type', 'Team'] + list_week
+            for header in list_header:
+                weekly_project_wb.col(col_num).width = 256 * 14
+                weekly_project_wb.write(row_num, col_num, header, style_header)
+                col_num += 1
+            col_num = start_col
+            row_num += 1
+            for sheet_name in w_project_info:
+                weekly_project_wb.write(row_num, col_num, sheet_name, color_style['light_turquoise'])
+                col_num += 1
+                weekly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                col_num += 1
+                weekly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                col_num += 1
+                weekly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                col_num += 1
+                for column in list_week:
+                    weekly_project_wb.write(row_num, col_num, w_project_info[sheet_name]['total'][column], color_style['light_turquoise'])
+                    col_num += 1
+                col_num = start_col
+                row_num += 1
+                for user_name in w_project_info[sheet_name]['resource']:
+                    eng_type = w_project_info[sheet_name]['resource'][user_name]['eng_type']
+                    team = w_project_info[sheet_name]['resource'][user_name]['team']
+                    eng_type = w_project_info[sheet_name]['resource'][user_name]['eng_type']
+                    timesheet = w_project_info[sheet_name]['resource'][user_name]['timesheet']
+                    weekly_project_wb.write(row_num, col_num, '')
+                    col_num += 1
+                    weekly_project_wb.write(row_num, col_num, user_name)
+                    col_num += 1
+                    weekly_project_wb.write(row_num, col_num, eng_type)
+                    col_num += 1
+                    weekly_project_wb.write(row_num, col_num, team)
+                    col_num += 1
+                    
+                    for column in list_week:
+                        work_hour = timesheet[column]['work_hour']
+                        max_hour = timesheet[column]['max_hour']
+                        if work_hour > max_hour:
+                            weekly_project_wb.write(row_num, col_num, max_hour, color_style['orange'])
+                            col_num += 1
+                        elif work_hour  == max_hour:
+                            weekly_project_wb.write(row_num, col_num, max_hour, color_style['lime'])
+                            col_num += 1
+                        else:
+                            weekly_project_wb.write(row_num, col_num, work_hour, color_style['tan'])
+                            col_num += 1
+                    col_num = start_col
+                    row_num += 1
+            #end project
+            
+            #monthly Project
+            monthly_project_wb = wb.add_sheet('Monthly Project')
+            m_project_info, list_month = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='monthly')
+            start_col, start_row = (0, 0)
+            row_num, col_num = (0, 0)
+            # create  header
+            list_header = ['Sheet', 'Resource', 'Eng Type', 'Team'] + list_month
+            for header in list_header:
+                monthly_project_wb.col(col_num).width = 256 * 14
+                monthly_project_wb.write(row_num, col_num, header, style_header)
+                col_num += 1
+            col_num = start_col
+            row_num += 1
+            for sheet_name in m_project_info:
+                monthly_project_wb.write(row_num, col_num, sheet_name, color_style['light_turquoise'])
+                col_num += 1
+                monthly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                col_num += 1
+                monthly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                col_num += 1
+                monthly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                col_num += 1
+                for column in list_month:
+                    monthly_project_wb.write(row_num, col_num, m_project_info[sheet_name]['total'][column], color_style['light_turquoise'])
+                    col_num += 1
+                col_num = start_col
+                row_num += 1
+                for user_name in m_project_info[sheet_name]['resource']:
+                    eng_type = m_project_info[sheet_name]['resource'][user_name]['eng_type']
+                    team = m_project_info[sheet_name]['resource'][user_name]['team']
+                    eng_type = m_project_info[sheet_name]['resource'][user_name]['eng_type']
+                    timesheet = m_project_info[sheet_name]['resource'][user_name]['timesheet']
+                    monthly_project_wb.write(row_num, col_num, '')
+                    col_num += 1
+                    monthly_project_wb.write(row_num, col_num, user_name)
+                    col_num += 1
+                    monthly_project_wb.write(row_num, col_num, eng_type)
+                    col_num += 1
+                    monthly_project_wb.write(row_num, col_num, team)
+                    col_num += 1
+                    
+                    for column in list_month:
+                        work_hour = timesheet[column]['work_hour']
+                        max_hour = timesheet[column]['max_hour']
+                        if work_hour > max_hour:
+                            monthly_project_wb.write(row_num, col_num, max_hour, color_style['orange'])
+                            col_num += 1
+                        elif work_hour  == max_hour:
+                            monthly_project_wb.write(row_num, col_num, max_hour, color_style['lime'])
+                            col_num += 1
+                        else:
+                            monthly_project_wb.write(row_num, col_num, work_hour, color_style['tan'])
+                            col_num += 1
+                    col_num = start_col
+                    row_num += 1
+            #end project
+            
+#             color_wb = wb.add_sheet('Color')
+#             row_num, col_num = (0, 0)
+#             for color in color_style:
+#                 color_wb.write(row_num, col_num, color, color_style[color])
+#                 col_num = start_col
+#                 row_num += 1
+
             
             wb.save(output_path)
             return 1, file_name
@@ -869,25 +1019,23 @@ class Controllers:
             list_date.append(date)
         try:
             if from_date and to_date and sheet_ids:
-                task_obj    = Task()
+                task_obj    = DbTask()
                 for sheet_id in sheet_ids:
                     task_obj.set_attr(sheet_id  = str(sheet_id),
                                       start_date = from_date,
                                       end_date   = to_date)
                     # if overwrite:
-                        # task_obj.remove_final_task_information()
+#                         task_obj.remove_final_task_information()
                     task_obj.move_task_to_final()
                     list_record = []
                     for date in list_date:
                         list_record.append((date, sheet_id))
                     
                     task_obj.add_final_date(list_record)
-
                 return 1, Msg.M003
             else:
                 # missing input
                 return 0, MsgError.E003
-            
         except Exception as e:
             println(e, 'exception')
             return 0, e.args[0]
@@ -912,8 +1060,7 @@ class Controllers:
         config_obj  = Configuration()
         config_obj.get_sheet_config(is_parse=True)
         cfg_sheet_ids = config_obj.sheet_ids
-        task_obj  = Task()
-        
+        task_obj  = DbTask()
         workdays = get_work_days(from_date=from_date, to_date=to_date)
         list_date = []
         for date, week in workdays:
@@ -989,19 +1136,19 @@ class Controllers:
             i1_status = True
         else:
             i1_status = False
-        i1_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'less']])
+        i1_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'less'], [SessionKey.TASK_FILTER, 'current']])
         
         if no_redundant == total_resource:
             i2_status = True
         else:
             i2_status = False
-        i2_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'greater']])
+        i2_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'greater'], [SessionKey.TASK_FILTER, 'current']])
         
         if total_resource - no_enought == total_resource:
             i3_status = True
         else:
             i3_status = False
-        i3_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'equal']])
+        i3_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'equal'], [SessionKey.TASK_FILTER, 'current']])
         
 #         if count_overlap:
 #             i4_status = False
@@ -1009,12 +1156,20 @@ class Controllers:
 #             i4_status = True
 #         i4_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'overlay']])
         
-        unuse, i5_status, i5_count_fail, i5_total = self.calculate_conflict_to_add_final_task(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, mode='exist')
-        i5_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'exist']])
+        unuse, i5_status, i5_count_fail, i5_total = self.calculate_conflict_to_add_final_task(from_date=from_date, 
+                                                                                              to_date=to_date, 
+                                                                                              sheet_ids=sheet_ids, 
+                                                                                              mode='exist')
+        i5_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'exist'], 
+                                                               [SessionKey.TITLE, AnalyzeItem.A005]])
         
         
-        unuse, i6_status, i6_count_fail, i6_total = self.calculate_conflict_to_add_final_task(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, mode='continuity')
-        i6_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'continuity']])
+        unuse, i6_status, i6_count_fail, i6_total = self.calculate_conflict_to_add_final_task(from_date=from_date, 
+                                                                                              to_date=to_date, 
+                                                                                              sheet_ids=sheet_ids, 
+                                                                                              mode='continuity')
+        i6_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'continuity'],
+                                                               [SessionKey.TITLE, AnalyzeItem.A006]])
         
         result = [
             [AnalyzeItem.A001, i1_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i1_method), no_missing, total_resource],
@@ -1046,6 +1201,119 @@ class Controllers:
             result = (False, [])
         
         return result 
+        
+    def get_project_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter='weekly', 
+                                   mode='all', task_filter='both', list_user=None):
+        try:
+            missing_method = False
+            if request_dict:
+                try:
+                    from_date   = request_dict[SessionKey.FROM]
+                    to_date     = request_dict[SessionKey.TO]
+                    sheet_ids   = request_dict[SessionKey.SHEETS]
+                    if request_dict.get(SessionKey.FILTER):
+                        filter      = request_dict[SessionKey.FILTER]
+                    if request_dict.get(SessionKey.MODE):
+                        mode        = request_dict[SessionKey.MODE]
+                    if request_dict.get(SessionKey.USERS):
+                        list_user = request_dict[SessionKey.USERS]
+                    if request_dict.get(SessionKey.TASK_FILTER):
+                        task_filter = request_dict[SessionKey.TASK_FILTER]
+                except KeyError:
+                    missing_method = True
+            
+            if not filter or not sheet_ids or not to_date or not from_date or missing_method:
+                return ({}, [])
+            timesheet_obj   = Timesheet(from_date, to_date, task_filter, sheet_ids, list_user)
+            timesheet_obj.parse()
+            user_ids        = timesheet_obj.user_ids
+            eng_type_ids    = timesheet_obj.eng_type_ids
+            team_ids        = timesheet_obj.team_ids
+            config_obj      = Configuration()
+            config_obj.get_list_holiday(is_parse=True)
+            holidays  = config_obj.holidays
+            info            = {}
+             
+            if filter == 'monthly':
+                list_month   = get_work_month(from_date=from_date, to_date=to_date, holidays=holidays)
+                cols_element = list_month
+                list_sub_col       = []
+                for col in cols_element:
+                    month, year, max_hour = col
+                    col_name    = DateTime.LIST_MONTH[month]
+                    list_sub_col.append(col_name)
+            else:
+                list_week   = get_work_week(from_date=from_date, to_date=to_date, holidays=holidays)
+                cols_element = list_week
+                list_sub_col       = []
+                for col in cols_element:
+                    list_sub_col.append(col[0])
+            
+            for sheet_id in timesheet_obj.sheets:
+                sheet_obj   = timesheet_obj.sheets[sheet_id]
+                sheet_name  = sheet_obj.sheet_name
+                for user_id in sheet_obj.resource:
+                    for task_obj in sheet_obj.resource[user_id]:
+                        user_name   = task_obj.user_name
+                        eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
+                        team_name   = team_ids[user_ids[user_id].team_id]
+                        allocation  = task_obj.allocation
+                        date        = task_obj.date
+                        work_hour   = 8*(allocation)/100
+                        work_hour   = round_num(work_hour)
+                        if filter == 'monthly':
+                            col_element = task_obj.month_name
+                        else:
+                            col_element  = task_obj.start_week
+                        if not info.get(sheet_name):
+                            info[sheet_name]  = {'resource': {}, 'total': {}}
+                             
+                        if not info[sheet_name]['resource'].get(user_name):
+                            info[sheet_name]['resource'][user_name]  = {'eng_type': eng_type, 
+                                                                        'team': team_name,
+                                                                        'timesheet': {}} 
+                        for element in cols_element:
+                            if filter == 'monthly':
+                                month, year, max_hour = element
+                                col_name    = DateTime.LIST_MONTH[month]
+                            else:
+                                col_name, max_hour = element
+                            if not info[sheet_name]['resource'][user_name]['timesheet'].get(col_name):
+                                info[sheet_name]['resource'][user_name]['timesheet'][col_name]  = {'work_hour': 0,
+                                                                                                   'max_hour': max_hour,
+                                                                                                   'href': ''
+                                                                                                   }
+                            if not info[sheet_name]['total'].get(col_name):
+                                info[sheet_name]['total'][col_name]  = 0
+                        info[sheet_name]['resource'][user_name]['timesheet'][col_element]['work_hour']  += work_hour
+                        info[sheet_name]['resource'][user_name]['timesheet'][col_element]['work_hour']  = round_num(info[sheet_name]['resource'][user_name]['timesheet'][col_element]['work_hour'])
+                        start, end = calculate_start_end_date_by_option(date, from_date, to_date, filter)
+                        href = '%s?%s'%(Route.DETAIL, convert_request_dict_to_url(request_dict, [[SessionKey.USERS, [user_name]],
+                                                                                                            [SessionKey.TASK_FILTER, task_filter],
+                                                                                                            [SessionKey.SHEETS, [sheet_id]],
+                                                                                                            [SessionKey.FROM, start],
+                                                                                                            [SessionKey.TO, end],
+                                                                                                            [SessionKey.MODE, 'view']
+                                                                                                            ]))
+                        info[sheet_name]['resource'][user_name]['timesheet'][col_element]['href']  = href
+            # caculate total of sheet
+            for sheet_name in info:
+                for user_name in info[sheet_name]['resource']:
+                    for col_name in info[sheet_name]['resource'][user_name]['timesheet']:
+                        work_hour = info[sheet_name]['resource'][user_name]['timesheet'][col_name]['work_hour']
+                        max_hour = info[sheet_name]['resource'][user_name]['timesheet'][col_name]['max_hour']
+                        if work_hour > max_hour:
+                            info[sheet_name]['total'][col_name]  += max_hour
+                        else:
+                            info[sheet_name]['total'][col_name]  += work_hour
+                        info[sheet_name]['total'][col_name]  = round_num(info[sheet_name]['total'][col_name])
+            result = (info, list_sub_col)
+            return result
+        except Exception as e:
+            println(e, 'exception')
+            return 0, e.args[0]  
+    
+    
         
         
         

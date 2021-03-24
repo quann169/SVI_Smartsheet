@@ -124,7 +124,9 @@ class SessionKey:
     FILTER          = 'filter'
     FILE_NAME       = 'file_name'
     MODE            = 'mode'
-    
+    USERS           = 'users'
+    TASK_FILTER     = 'task_filter'
+    TITLE           = 'title'
 class DbHeader:
     
     ANALYSIS_CONFIG_ID      = 'analysis_config_id'
@@ -228,6 +230,7 @@ class Route:
     UPDATE_SESSION    = '/update-session'
     DETAIL              = '/detail-timesheet'
     RESOURCE_TIMESHEET = '/resource-timesheet'
+    PROJECT_TIMESHEET = '/project-timesheet'
     ANALYZE = '/analyze'
     CONFLICT_DATE   = '/conflict-date'
     CHECK_LOADING_SMARTSHEET    = '/check-loading-smartsheet'

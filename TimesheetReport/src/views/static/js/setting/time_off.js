@@ -3,13 +3,14 @@ $(document).ready(function () {
 	$('#import_timeoff').submit(function(event) {
 		event.preventDefault();
 		var up_file = upload_file('#import_timeoff');
+		$('#overlay_loader').show();
 		if (up_file != null && up_file[0] == 1) {
 			var file_name	= $('#timeoff_file').get(0).files[0].name;
 			var data = {'file_name': file_name};
 			$.ajax({
 			   url: IMPORT_TIMEOFF,
 			   type: "POST",
-			   async: false,
+			   //async: false,
 			   data: encodeURIComponent(JSON.stringify(data)),
 			   success: function(resp){
 				   var result = resp.result;

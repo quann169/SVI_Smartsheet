@@ -3,13 +3,14 @@ $(document).ready(function () {
 	$('#import_sheet').submit(function(event) {
 		event.preventDefault();
 		var up_file = upload_file('#import_sheet');
+		$('#overlay_loader').show();
 		if (up_file != null && up_file[0] == 1) {
 			var file_name	= $('#sheet_file').get(0).files[0].name;
 			var data = {'file_name': file_name};
 			$.ajax({
 			   url: IMPORT_SHEET,
 			   type: "POST",
-			   async: false,
+			   //async: false,
 			   data: encodeURIComponent(JSON.stringify(data)),
 			   success: function(resp){
 				   var result = resp.result;
