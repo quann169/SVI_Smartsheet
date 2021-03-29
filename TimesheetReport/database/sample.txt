@@ -1,0 +1,28 @@
+-- eng_type
+INSERT INTO `erp`.`eng_type` (`eng_type_name`) VALUES ('NA'), ('Design Manager'), ('Director'), ('Jr. Engineer'), ('Sr. Engineer');
+-- eng_level
+INSERT INTO `erp`.`eng_level` (`level`) VALUES ('NA'), ('D2'), ('E0'), ('E1'), ('E2'), ('E3'), ('E4'), ('L1'), ('M1'), ('M2'), ('M3');
+
+-- sheet_type
+INSERT INTO `erp`.`sheet_type` (`sheet_type`) VALUES ('NA'), ('RnD'), ('NRE');
+
+-- sheet
+INSERT INTO `erp`.`sheet` (`sheet_type_id`, `sheet_name`) VALUES ('2', 'WRS_Project'), ('1', 'RnD_CAD');
+
+-- team
+INSERT INTO `erp`.`team` (`team_name`) VALUES ('NA');
+INSERT INTO `erp`.`team` (`team_name`) VALUES ('CAD');
+INSERT INTO `erp`.`team` (`team_name`) VALUES ('QA');
+INSERT INTO `erp`.`team` (`team_name`) VALUES ('PD');
+INSERT INTO `erp`.`team` (`team_name`) VALUES ('CKT');
+INSERT INTO `erp`.`team` (`team_name`) VALUES ('IT');
+INSERT INTO `erp`.`team` (`team_name`) VALUES ('LAY');
+INSERT INTO `erp`.`team` (`team_name`) VALUES ('Manager');
+INSERT INTO `erp`.`team` (`team_name`) VALUES ('RTL');
+INSERT INTO `erp`.`team` (`team_name`) VALUES ('UVM');
+
+--user 
+INSERT INTO `erp`.`user` (`user_name`, `full_name`, `email`, `is_active`, `updated_by`, `updated_date`, `eng_level_id`, `eng_type_id`, `team_id`) VALUES ('Toan Nguyen', 'Nguyen Huu Toan', 'toannguyen@savarti.com', '1', 'root', 'root', '3', '3', '5');
+INSERT INTO `erp`.`user` (`user_name`, `full_name`, `email`, `is_active`, `updated_by`, `updated_date`, `eng_level_id`, `eng_type_id`, `team_id`) VALUES ('Nhuan Hoang', 'Hoang Dinh Nhuan', 'nhuanhoang@savarti.com', '1', 'root', 'root', '3', '3', '5');
+
+-- add 'NA' User

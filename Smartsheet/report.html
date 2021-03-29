@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<style>
+	table {
+	  font-family: arial, sans-serif;
+	  border-collapse: collapse;
+	  width: 100%;
+	  font-size: 10px;
+	  
+	}
+	
+	td, th {
+	  border: 1px solid #dddddd;
+	  text-align: left;
+	  padding: 8px;
+	  font-size: 10px;
+	}
+	th {
+		background-color: #f9be3e;
+		font-size: 10px;
+	}
+
+</style>
+</head>
+<body>
+
+<!-------------------------------------------- Edit content here (create new line use '<br>' instead of 'Enter')--------------------------->
+Dear Managers, <br>
+
+Below engineers don't have enough plan tasks and are over-allocated tasks on smartsheet in next week, kindly double-check and get back to me by afternoon Monday. Thank you. <br><br>
+Best regards, <br>
+Phuong Truong. <br>
+<!---------------------------------------------Edit content here------------------------------------------------ --------------------------->
+<h2>Timesheet</h2>
+
+{% for report_week in INFO %}
+	Week: {{report_week}}<br>
+	<table>
+		 <tr>
+		 	<th>No.</th>
+		    <th>Resource</th>
+		    <th>Weekly hours</th>
+		    <th>Off work</th>
+		    <th>Total</th>
+		    <th>Detail</th>
+		    <th>Comment</th>
+		  </tr>
+		{% for index in range ( 1, INFO[report_week]|length + 1) %}
+			 <tr>
+			 	<td>{{index}}</td>
+			 	<td>{{INFO[report_week][index - 1][0]}}</td>
+			    <td>{{INFO[report_week][index - 1][1]}}</td>
+			    <td>{{INFO[report_week][index - 1][2]}}</td>
+			    <td>{{INFO[report_week][index - 1][3]}}</td>
+			    <td>{{INFO[report_week][index - 1][5]}}</td>
+			    <td>{{INFO[report_week][index - 1][6]}}</td>
+			 </tr>
+		{% endfor %}
+		</table>
+<br>
+{% endfor %}
+
+</body>
+</html>
