@@ -20,9 +20,8 @@ class Msg:
     M003    = 'Add to final task successfully'
 
 class AnalyzeItem:
-    A001 = 'No resource missing working hours' 
-    A002 = 'No resource redundant working hours' 
-    A003 = 'All resource enough working hours' 
-    A004 = 'Resource overlap working hours'
-    A005 = 'No conflict with final date'  
-    A006 = 'Continuity with final date' 
+    A001 = 'No. resource lack of working hours' 
+    A002 = 'No. resource have redundant working hours' 
+    A003 = 'No. resource have enough working hours' 
+    A004 = 'No conflict with final date'  
+    A005 = 'Continuity with final date' 

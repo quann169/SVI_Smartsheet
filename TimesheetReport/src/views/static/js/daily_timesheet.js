@@ -28,6 +28,7 @@ $(document).ready(function () {
 	$('#analyze').click(function(event) {
 		var data = colect_config_date();
 		if (data) {
+			data[SESSION_TASK_FILTER] = 'current';
 			var method_get_url = encodeURIComponent(JSON.stringify(data));
 			location.href = ANALYZE + '?' + method_get_url;
 		}

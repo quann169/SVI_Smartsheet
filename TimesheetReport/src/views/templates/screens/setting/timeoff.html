@@ -35,6 +35,8 @@
 	  {% set timeoff_info = ctrl_obj.get_timeoff_info() %}
 	  <thead>
 	    <tr>
+		  <th class="th-sm">#
+	      </th>
 		  <th class="th-sm">ID
 	      </th>
 	      <th class="th-sm">Resource
@@ -56,6 +58,7 @@
 	  <tbody>
 		{% for row in timeoff_info %}
 			<tr>
+			  <td>{{loop.index}}</td>
 			  <td>{{row[db_header.TIME_OFF_ID]}}</td>
 		      <td>{{row[db_header.USER_NAME]}}</td>
 		      <td>{{row[db_header.DEPARTMENT]}}</td>

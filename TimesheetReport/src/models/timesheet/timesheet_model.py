@@ -12,6 +12,7 @@ from src.commons.utils import get_week_number, convert_date_to_string,\
 from pprint import pprint
 
 class Timesheet():
+    
     def __init__(self, from_date, to_date, filter, sheet_ids, list_user=None, exclude=False):
         self.sheets     = {}
         self.resource   = {}
@@ -55,6 +56,7 @@ class Timesheet():
             self.sheets[sheet_id] = sheet_obj
         
 class Sheet():
+    
     def __init__(self, timesheet_obj, sheet_id, sheet_name, sheet_type):
         self.timesheet_obj  = timesheet_obj
         self.sheet_id       = sheet_id
@@ -64,14 +66,7 @@ class Sheet():
         self.parse()
         
     def parse(self):
-        
         if self.timesheet_obj.filter == 'current':
-#             db_task_obj  = DbTask()
-#             db_task_obj.set_attr(sheet_id        = self.sheet_id,
-#                                 start_date      = self.timesheet_obj.from_date,
-#                                 end_date        = self.timesheet_obj.to_date
-#                 )
-#             tasks       = db_task_obj.get_tasks()
             if self.timesheet_obj.all_task.get(self.sheet_id):
                 tasks = self.timesheet_obj.all_task[self.sheet_id]
             else:
@@ -88,12 +83,6 @@ class Sheet():
                     self.resource[task_obj.user_id] = []
                 self.resource[task_obj.user_id].append(task_obj)    
         elif self.timesheet_obj.filter == 'final':
-#             db_task_obj  = DbTask()
-#             db_task_obj.set_attr(sheet_id        = self.sheet_id,
-#                                 start_date      = self.timesheet_obj.from_date,
-#                                 end_date        = self.timesheet_obj.to_date
-#                 )
-#             tasks       = db_task_obj.get_final_tasks()
             if self.timesheet_obj.all_final_task.get(self.sheet_id):
                 tasks = self.timesheet_obj.all_final_task[self.sheet_id]
             else:
@@ -110,13 +99,6 @@ class Sheet():
                     
         elif self.timesheet_obj.filter == 'both':
             #merge task and final task
-            #final_task
-#             db_task_obj  = DbTask()
-#             db_task_obj.set_attr(sheet_id        = self.sheet_id,
-#                                 start_date      = self.timesheet_obj.from_date,
-#                                 end_date        = self.timesheet_obj.to_date
-#                 )
-#             tasks       = db_task_obj.get_final_tasks()
             self.final_exist_date   = {}
             if self.timesheet_obj.all_final_task.get(self.sheet_id):
                 tasks = self.timesheet_obj.all_final_task[self.sheet_id]
@@ -126,20 +108,16 @@ class Sheet():
                 task_obj    = Task(self, row, is_final = True)
                 if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
                     continue
-                
                 if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
                     continue
                 if not self.resource.get(task_obj.user_id):
                     self.resource[task_obj.user_id] = []
-                self.final_exist_date[task_obj.date] = None
+                if not self.final_exist_date.get(task_obj.user_id):
+                    self.final_exist_date[task_obj.user_id] = {}
+                if not self.final_exist_date[task_obj.user_id].get(task_obj.date):
+                    self.final_exist_date[task_obj.user_id][task_obj.date] = None
                 self.resource[task_obj.user_id].append(task_obj)
             
-#             db_task_obj  = DbTask()
-#             db_task_obj.set_attr(sheet_id        = self.sheet_id,
-#                                 start_date      = self.timesheet_obj.from_date,
-#                                 end_date        = self.timesheet_obj.to_date
-#                 )
-#             tasks       = db_task_obj.get_tasks()
             if self.timesheet_obj.all_task.get(self.sheet_id):
                 tasks = self.timesheet_obj.all_task[self.sheet_id]
             else:
@@ -150,15 +128,15 @@ class Sheet():
                     continue
                 if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
                     continue
-                
                 try:
-                    unuse = self.final_exist_date[task_obj.date]
+                    unuse = self.final_exist_date[task_obj.user_id][task_obj.date]
                 except KeyError:
                     if not self.resource.get(task_obj.user_id):
                         self.resource[task_obj.user_id] = []
                     self.resource[task_obj.user_id].append(task_obj)
-                    
+               
 class Task():
+    
     def __init__(self, sheet_obj,  info={}, is_final = False):
         
         self.task_id  = None

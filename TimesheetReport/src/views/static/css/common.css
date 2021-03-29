@@ -193,7 +193,7 @@ a.article:hover {
 }
 
 .table-content {
-	overflow-x: auto;
+	/* overflow-x: auto; */
 }
 
 
@@ -239,7 +239,7 @@ a.article:hover {
 }
 
 table.dataTable thead th, table.dataTable thead td {
-	padding-right: 30px;
+	padding-right: 20px;
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button {
@@ -252,13 +252,33 @@ table.dataTable thead th, table.dataTable thead td {
 	color: white;
 	
 }
+.dataTables_wrapper .top {
+	display: flex;
+}
+.dropdown-menu {
+	padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+	position: absolute;
+    transform: translate3d(-139px, 30px, 0px) !important;
+    top: 0px  !important;
+    left: 0px  !important;
+    will-change: transform  !important;
+}
+.lb-toggle-vis:hover {
+	cursor: pointer;
+}
+.dataTables_wrapper a:link,
+.dataTables_wrapper a:visited,
+.dataTables_wrapper a:active  {
+	text-decoration: underline;
+}
 /* ---------------------------------------------------
     Style for Input file
 ----------------------------------------------------- */
 .custom-file-label::after , .custom-file-label {
 	height: calc(1em + .75rem + 2px);
 	}
-
 /* ---------------------------------------------------
     Style for tags
 ----------------------------------------------------- */
@@ -426,8 +446,6 @@ table, table.dataTable {
 .bold {
 	font-weight: bold;
 }
-
-
 
 /* loading popup style */
 .loading {

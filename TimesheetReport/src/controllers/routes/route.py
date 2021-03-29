@@ -256,6 +256,7 @@ def analyze():
     println(Route.ANALYZE, 'debug')
     try:
         request_dict = get_request_args()
+        request_dict[SessionKey.TASK_FILTER] = 'current'
         ctrl_obj   = ctrl()
         return render_template(Template.TIMESHEET_ANALYZE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:

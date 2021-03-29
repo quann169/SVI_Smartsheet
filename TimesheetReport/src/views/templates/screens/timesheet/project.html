@@ -102,11 +102,11 @@
 						{% set href = timesheet[column]['href']%}
 						<td>
 							{% if work_hour > max_hour %}
-								<a class='cl-red bold' href='{{href}}'>{{max_hour}}</a>
+								<a class='cl-red bold' {% if href %} href="{{href}}" {% endif %}>{{max_hour}}</a>
 							{% elif work_hour  == max_hour %}
-								<a class='cl-green bold' href='{{href}}'>{{max_hour}}</a>
+								<a class='cl-green bold' {% if href %} href="{{href}}" {% endif %}>{{max_hour}}</a>
 							{% else %}
-								<a class='cl-orange bold' href='{{href}}'>{{work_hour}}</a>
+								<a class='cl-orange bold' {% if href %} href="{{href}}" {% endif %}>{{work_hour}}</a>
 							{% endif %}
 						</td>
 					{% endfor %}

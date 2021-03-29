@@ -9,7 +9,7 @@
 	{% endwith %}
 {% endblock sidebar %}
 {% block breadcrumb %}
-	{% set br_items = [(route.CONFLICT_DATE, request_dict[session_enum.TITLE], True)] %}
+	{% set br_items = [(route.ANALYZE + '?' + ctrl_obj.convert_request_dict_to_url(request_dict), 'Analyze', False), (route.CONFLICT_DATE, request_dict[session_enum.TITLE], True)] %}
 	{% with br_items=br_items %}
 		{% include template.BREADCRUMB %}
 	{% endwith %}

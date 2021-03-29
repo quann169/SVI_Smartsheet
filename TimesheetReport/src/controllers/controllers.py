@@ -436,17 +436,17 @@ class Controllers:
     def get_sheet_information(self, list_sheet_id=None):
         config_obj      = Configuration()
         sheet_info      = config_obj.get_sheet_config(list_sheet_id)
-        start_date      = get_prev_date_by_time_delta(1)
-        end_date      = get_prev_date_by_time_delta(-3)
-        config_obj.get_list_holiday(is_parse=True)
-        holidays  = config_obj.holidays
-        start_date      = convert_date_to_string(start_date)
-        end_date      = convert_date_to_string(end_date)
+        # start_date      = get_prev_date_by_time_delta(1)
+        # end_date      = get_prev_date_by_time_delta(-3)
+        # config_obj.get_list_holiday(is_parse=True)
+        # holidays  = config_obj.holidays
+        # start_date      = convert_date_to_string(start_date)
+        # end_date      = convert_date_to_string(end_date)
         
-        list_workweek   = get_work_week(from_date=start_date, to_date=end_date, holidays=holidays)
-        list_week       = []
-        for week in list_workweek:
-            list_week.append(week[0])
+        # list_workweek   = get_work_week(from_date=start_date, to_date=end_date, holidays=holidays)
+        # list_week       = []
+        # for week in list_workweek:
+        #     list_week.append(week[0])
         list_week       = []
         result  = [sheet_info, list_week]
         return result
@@ -555,7 +555,6 @@ class Controllers:
             
             if not filter or not sheet_ids or not to_date or not from_date or missing_method:
                 return ({}, [], 0, 0, 0, 0, 0)
-            
             timesheet_obj   = Timesheet(from_date, to_date, task_filter, sheet_ids)
             timesheet_obj.parse()
             user_ids        = timesheet_obj.user_ids
@@ -566,7 +565,6 @@ class Controllers:
             config_obj.get_list_holiday(is_parse=True)
             holidays  = config_obj.holidays
             info            = {}
-            
             if filter == 'monthly':
                 list_month   = get_work_month(from_date=from_date, to_date=to_date, holidays=holidays)
                 cols_element = list_month
@@ -1118,13 +1116,14 @@ class Controllers:
                 result.append((is_conflict, sheet_name, list_1))
         return result, enable_add, count_fail, total
     
-    def analyze(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None):
+    def analyze(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, task_filter='current'):
         missing_method = False
         if request_dict:
             try:
                 from_date   = request_dict[SessionKey.FROM]
                 to_date     = request_dict[SessionKey.TO]
                 sheet_ids   = request_dict[SessionKey.SHEETS]
+                task_filter = request_dict[SessionKey.TASK_FILTER]
             except KeyError:
                 missing_method = True
         if not filter or not sheet_ids or not to_date or not from_date or missing_method:
@@ -1136,32 +1135,26 @@ class Controllers:
             i1_status = True
         else:
             i1_status = False
-        i1_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'less'], [SessionKey.TASK_FILTER, 'current']])
+        i1_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'less'], [SessionKey.TASK_FILTER, task_filter]])
         
         if no_redundant == total_resource:
             i2_status = True
         else:
             i2_status = False
-        i2_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'greater'], [SessionKey.TASK_FILTER, 'current']])
+        i2_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'greater'], [SessionKey.TASK_FILTER, task_filter]])
         
         if total_resource - no_enought == total_resource:
             i3_status = True
         else:
             i3_status = False
-        i3_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'equal'], [SessionKey.TASK_FILTER, 'current']])
-        
-#         if count_overlap:
-#             i4_status = False
-#         else:
-#             i4_status = True
-#         i4_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'overlay']])
+        i3_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'equal'], [SessionKey.TASK_FILTER, task_filter]])
         
         unuse, i5_status, i5_count_fail, i5_total = self.calculate_conflict_to_add_final_task(from_date=from_date, 
                                                                                               to_date=to_date, 
                                                                                               sheet_ids=sheet_ids, 
                                                                                               mode='exist')
         i5_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'exist'], 
-                                                               [SessionKey.TITLE, AnalyzeItem.A005]])
+                                                               [SessionKey.TITLE, AnalyzeItem.A004]])
         
         
         unuse, i6_status, i6_count_fail, i6_total = self.calculate_conflict_to_add_final_task(from_date=from_date, 
@@ -1169,15 +1162,14 @@ class Controllers:
                                                                                               sheet_ids=sheet_ids, 
                                                                                               mode='continuity')
         i6_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'continuity'],
-                                                               [SessionKey.TITLE, AnalyzeItem.A006]])
+                                                               [SessionKey.TITLE, AnalyzeItem.A005]])
         
         result = [
             [AnalyzeItem.A001, i1_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i1_method), no_missing, total_resource],
             [AnalyzeItem.A002, i2_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i2_method), no_redundant, total_resource],
             [AnalyzeItem.A003, i3_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i3_method), no_enought, total_resource],
-#             [AnalyzeItem.A004, i4_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i4_method), count_overlap, total_resource],
-            [AnalyzeItem.A005, i5_status, False, '%s?%s'%(Route.CONFLICT_DATE, i5_method), i5_count_fail, i5_total],
-            [AnalyzeItem.A006, i6_status, False, '%s?%s'%(Route.CONFLICT_DATE, i6_method), i6_count_fail, i6_total]
+            [AnalyzeItem.A004, i5_status, False, '%s?%s'%(Route.CONFLICT_DATE, i5_method), i5_count_fail, i5_total],
+            [AnalyzeItem.A005, i6_status, False, '%s?%s'%(Route.CONFLICT_DATE, i6_method), i6_count_fail, i6_total]
             ]        
         return result
     

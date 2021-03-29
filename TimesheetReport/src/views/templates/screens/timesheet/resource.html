@@ -92,16 +92,17 @@
 						{% set details = timesheet[column]['sheets']%}
 						{% set max_hour = timesheet[column]['max_hour']%}
 						{% set href = timesheet[column]['href']%}
+						{% set number_sheet = details | length %}
 						<td>
 							{% if hours[0] + hours[1] > max_hour %}
-								<a class='cl-red bold' href="{{href}}" data-html="true" data-toggle="tooltip" data-placement="left"
-								 title="{% for sheet_name in details%}{{sheet_name}}:  {{details[sheet_name][0]}}<br>{% endfor %}Time-Off: {{hours[1]}}">{{max_hour}}</a>
+								<a class='cl-red bold' {% if href %} href="{{href}}" {% endif %} data-html="true" data-toggle="tooltip" data-placement="left"
+								 title="{% for sheet_name in details%}{{sheet_name}}:  {{details[sheet_name][0]}}<br>{% endfor %}Time-Off: {{hours[1]}}">{{max_hour}}{% if number_sheet > 1%}<sup class='cl-blue bold'>({{number_sheet}})</sup>{%endif%}</a>
 							{% elif hours[0] + hours[1] == max_hour %}
-								<a class='cl-green bold' href="{{href}}" data-html="true" data-toggle="tooltip" data-placement="left"
-								title="{% for sheet_name in details%}{{sheet_name}}: {{details[sheet_name][0]}}<br>{% endfor %}Time-Off: {{hours[1]}}">{{max_hour}}</a>
+								<a class='cl-green bold' {% if href %} href="{{href}}" {% endif %} data-html="true" data-toggle="tooltip" data-placement="left"
+								title="{% for sheet_name in details%}{{sheet_name}}: {{details[sheet_name][0]}}<br>{% endfor %}Time-Off: {{hours[1]}}">{{max_hour}}{% if number_sheet > 1%}<sup class='cl-blue bold'>({{number_sheet}})</sup>{%endif%}</a>
 							{% else %}
-								<a class='cl-orange bold' href="{{href}}" data-html="true"data-toggle="tooltip" data-placement="left"
-								title="{% for sheet_name in details%}{{sheet_name}}: {{details[sheet_name][0]}}<br>{% endfor %}Time-Off: {{hours[1]}}">{{hours[0] + hours[1]}}</a>
+								<a class='cl-orange bold' {% if href %} href="{{href}}" {% endif %} data-html="true"data-toggle="tooltip" data-placement="left"
+								title="{% for sheet_name in details%}{{sheet_name}}: {{details[sheet_name][0]}}<br>{% endfor %}Time-Off: {{hours[1]}}">{{hours[0] + hours[1]}}{% if number_sheet > 1%}<sup class='cl-blue bold'>({{number_sheet}})</sup>{%endif%}</a>
 							{% endif %}
 						</td>
 			

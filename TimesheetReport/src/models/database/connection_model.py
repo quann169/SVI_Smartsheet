@@ -100,13 +100,13 @@ class Connection:
         except Exception as e:
             return False
         
-    def db_execute(self, query):
+    def db_execute(self, query, shareable=True):
         """ Execute MySQL query for insert/update/delete database
         :param : query - text
         :return: None
         """
         try:
-            connection          = g.pool_conn.connection(shareable=True)
+            connection          = g.pool_conn.connection(shareable)
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 connection.commit()
@@ -118,13 +118,13 @@ class Connection:
         finally:
             connection.close()
     
-    def db_execute_2(self, query):
+    def db_execute_2(self, query, shareable=True):
         """ Execute MySQL query for insert
         :param : query - text
         :return: insert_id
         """
         try:
-            connection          = g.pool_conn.connection(shareable=True)
+            connection          = g.pool_conn.connection(shareable)
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 connection.commit()
@@ -137,13 +137,13 @@ class Connection:
         finally:
             connection.close()
       
-    def db_execute_many(self, query, list_record):
+    def db_execute_many(self, query, list_record, shareable=True):
         """ Execute multiple the same query query
         :param : query - text
         :return: None
         """
         try:
-            connection          = g.pool_conn.connection(shareable=True)
+            connection          = g.pool_conn.connection(shareable)
             with connection.cursor() as cursor:
                 cursor.executemany(query, list_record)
                 connection.commit()
@@ -155,13 +155,13 @@ class Connection:
         finally:
             connection.close()
             
-    def db_query(self, query):
+    def db_query(self, query, shareable=True):
         """ Execute MySQL query for select database
         :param : query - text 
         :return: all rows
         """
         try:
-            connection          = g.pool_conn.connection(shareable=True)
+            connection          = g.pool_conn.connection(shareable)
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 rows                = cursor.fetchall()

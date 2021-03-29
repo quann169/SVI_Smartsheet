@@ -257,7 +257,8 @@ class Configuration(Connection):
                 FROM `%s`
                 INNER JOIN `%s`
                 ON `%s`.`%s`=`%s`.`%s`
-                %s;
+                %s 
+                ORDER BY `%s`.`%s` DESC ;
         """%(
             DbTable.TIME_OFF, DbHeader.TIME_OFF_ID, 
             DbTable.USER, DbHeader.USER_NAME, 
@@ -271,7 +272,8 @@ class Configuration(Connection):
             DbTable.TIME_OFF, 
             DbTable.USER, 
             DbTable.TIME_OFF, DbHeader.USER_ID, DbTable.USER, DbHeader.USER_ID,
-            condition
+            condition,
+            DbTable.TIME_OFF, DbHeader.START_DATE
             )
         query_result    = self.db_query(query)
         result          = ()
@@ -294,10 +296,12 @@ class Configuration(Connection):
     def get_list_holiday(self, is_parse=False):
         query = """
                 SELECT `%s`
-                FROM `%s`;
+                FROM `%s`
+                ORDER BY `%s` DESC;
         """%(
             DbHeader.DATE,
-            DbTable.HOLIDAY
+            DbTable.HOLIDAY,
+            DbHeader.DATE
             )
         query_result    = self.db_query(query)
         result          = ()
@@ -347,7 +351,8 @@ class Configuration(Connection):
                 INNER JOIN `%s`
                 ON `%s`.`%s`=`%s`.`%s`
                 INNER JOIN `%s`
-                ON `%s`.`%s`=`%s`.`%s`;
+                ON `%s`.`%s`=`%s`.`%s`
+                ORDER BY `%s`.`%s`;
         """%(
             DbTable.USER, DbHeader.USER_ID, 
             DbTable.USER, DbHeader.USER_NAME, 
@@ -364,7 +369,8 @@ class Configuration(Connection):
             DbTable.ENG_LEVEL, 
             DbTable.ENG_LEVEL, DbHeader.ENG_LEVEL_ID, DbTable.USER, DbHeader.ENG_LEVEL_ID,
             DbTable.ENG_TYPE, 
-            DbTable.ENG_TYPE, DbHeader.ENG_TYPE_ID, DbTable.USER, DbHeader.ENG_TYPE_ID
+            DbTable.ENG_TYPE, DbHeader.ENG_TYPE_ID, DbTable.USER, DbHeader.ENG_TYPE_ID,
+            DbTable.USER, DbHeader.USER_NAME
             )
         query_result    = self.db_query(query)
         result          = ()
@@ -502,7 +508,7 @@ class Configuration(Connection):
     def get_sheet_loading_smartsheet(self): 
         query   = """SELECT `%s`, `%s` FROM `%s` WHERE `%s`="1";
         """%( DbHeader.SHEET_NAME, DbHeader.SHEET_ID, DbTable.SHEET, DbHeader.IS_LOADING)
-        query_result    = self.db_query(query)
+        query_result    = self.db_query(query, shareable=False)
         result = {}
         if query_result:
             for row in query_result:
