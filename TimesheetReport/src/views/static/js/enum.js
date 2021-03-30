@@ -8,6 +8,12 @@ var SESSION_FILE_NAME  = 'file_name';
 var SESSION_USERS  = 'users';
 var SESSION_TASK_FILTER  = 'task_filter';
 var SESSION_TITLE  = 'title';
+var SESSION_USERNAME  = 'username';
+var SESSION_PASSWORD  = 'password';
+var SESSION_IS_LOGIN  = 'is_login';
+var SESSION_USER_ID         = 'user_id'
+var SESSION_RESOURCE_NAME   = 'resource_name'
+var SESSION_ROLE_NAME       = 'role_name'
 
 // INTERVAL KEY
 var INTERVAL_GET_DATA  = null;
@@ -39,3 +45,5 @@ var PROJECT_TIMESHEET = '/project-timesheet';
 var ANALYZE = '/analyze';
 var CONFLICT_DATE   = '/conflict-date';
 var CHECK_LOADING_SMARTSHEET = '/check-loading-smartsheet';
+var LOGIN = '/login';
+var AUTH = '/auth';

@@ -50,7 +50,11 @@
 						{% block breadcrumb %}
 				        	{% include template.BREADCRUMB %}
 				        {% endblock %}
-				        <img src="{{ url_for('static', filename='img/svi_logo.png') }}" style = "width:125px;" alt="savarti logo">
+				        {% set user_id, resource_name, role_name = ctrl_obj.get_resource_and_role_name() %}
+						<i class="fas fa-server cl-blue mg-l-5" aria-hidden="true"></i><div class='nowrap mg-l-5 mg-r-5'>{{role_name}}</div>|
+						<i class="fas fa-user cl-blue mg-l-5" aria-hidden="true"></i><div class='nowrap mg-l-5  mg-r-5'>{{resource_name}}</div>|
+						<a href='{{route.LOGIN}}' data-toggle="tooltip" title="Logout"><i class="fas fa-sign-out-alt cl-red mg-l-5" aria-hidden="true"></i></a>
+        				
 				    </div>
 				</nav>
 				<div class='notify' id='notify'>

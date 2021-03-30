@@ -7,7 +7,6 @@ import os, sys, re, copy
 import datetime, calendar
 import ast
 from src.commons.message import Msg, MsgError, MsgWarning
-import string
 from src.commons.enums import DateTime, SessionKey, ExcelColor
 import logging
 import config
@@ -17,6 +16,7 @@ import traceback
 from decimal import Decimal
 import xlwt, socket
 import urllib
+import win32security
 
 def get_request_form():
     # for post method
@@ -421,21 +421,52 @@ def defined_color():
         format_command = 'align: wrap 0;pattern: pattern solid, fore-colour %s; border: left thin, top thin, right thin, bottom thin, bottom-color gray25, top-color gray25, left-color gray25, right-color gray25; font: name Calibri, bold 0,height 240;' %(color)
         style = xlwt.easyxf(format_command)
         color_style[color] = style
-    
     return color_style
 
+def encrypt(message):
+    new_str=''
+    for car in message:
+        new_str = new_str + chr(ord(car)+7)
+    return new_str
 
-# def definedColorText():
-#     colorDict = {}
-#     colorDictNoneBorder = {}
-#     listColor = [ExcelColor.IS_EQUAL, ExcelColor.IS_GREATER, ExcelColor.IS_LESS, ExcelColor.IS_HEADER,
-#                 ExcelColor.IS_USER_NAME, ExcelColor.IS_SHEET_NAME, ExcelColor.BACK_GROUND, ExcelColor.IS_POSITION]
-#     for color in listColor:
-#         formatCommand = 'align: wrap 0;pattern: pattern solid, fore-colour white; border: left thin, top thin, right thin, bottom thin; font: name Calibri, bold 0,height 240, color %s;' %(color)
-#         style = xlwt.easyxf(formatCommand)
-#         colorDict[color] = style
-#     for color in listColor:
-#         formatCommand = 'align: wrap 0;pattern: pattern solid, fore-colour white; border: left thin, top thin, right thin, bottom thin; font: name Calibri, bold 0,height 240, color %s;' %(color)
-#         style = xlwt.easyxf(formatCommand)
-#         colorDictNoneBorder[color] = style
-#     return colorDict, colorDictNoneBorder
+def decrypt(message):
+    new_str=''
+    for car in message:
+        new_str= new_str + chr(ord(car)-7)
+    return new_str
+
+def get_saved_password():
+    working_path = config.WORKING_PATH
+    file_name = os.path.join(working_path, '.pswd.txt')
+    password = None
+    if os.path.exists(file_name):
+        with open(file_name, 'r') as f:
+            encrypt_ctn = f.read()
+            password = decrypt(encrypt_ctn)
+    return password
+
+def save_password(password):
+    working_path = config.WORKING_PATH
+    file_name = os.path.join(working_path, '.pswd.txt')
+    with open(file_name, 'w') as f:
+        encrypt_ctn = encrypt(password)
+        f.write(encrypt_ctn)
+
+def check_domain_password(username, password, domain_name='SVI'):
+    try:
+#         token = win32security.LogonUser(
+#             username,
+#             domain_name,
+#             password,
+#             win32security.LOGON32_LOGON_NETWORK,
+#             win32security.LOGON32_PROVIDER_DEFAULT)
+#         result = bool(token)
+        result = True
+        if result:
+            return True, ''
+        else:
+            return False, MsgError.E004
+    except Exception as e:
+        println(str(e.args), 'exception')
+        return False, MsgError.E004
+    

@@ -10,18 +10,22 @@ import webbrowser, threading
 from threading import Timer
 from src.models.database.connection_model import Connection
 
+
+
+
+        
 __version__  = 'v0.1'
 
 port        = 6602
-port = get_free_tcp_port()
+# port = get_free_tcp_port()
 host        = "localhost"
 tool_path = os.path.abspath(os.path.dirname(__file__))
 logging_setting('TimesheetReport.log')
 
-# tempalte_path =  'src/views/templates'
-# static_path =  'src/views/static'
-tempalte_path =  '.data/views/templates'
-static_path =  '.data/views/static'
+tempalte_path =  'src/views/templates'
+static_path =  'src/views/static'
+# tempalte_path =  '.data/views/templates'
+# static_path =  '.data/views/static'
 
 app = Flask( __name__ , static_folder="%s/%s"%(tool_path, static_path), template_folder="%s/%s"%(tool_path, tempalte_path))
 app.config['SECRET_KEY']                    = 'SECRET_KEY'
@@ -40,21 +44,22 @@ pool_conn = connect_obj.create_pool_connection()
 @app.before_request
 def create_connection():
     g.pool_conn = pool_conn
-     
+
+  
 if __name__ == "__main__":
-#     app.run(port=port, host=host, debug=True, use_reloader=True, threaded=True)
-    thread  = threading.Thread(name='open GUI', target = app.run,  args=(host, port), kwargs={'threaded': True})
-    thread.start()
-    while True:
-        # Waiting for Flask start server
-        request = requests.get(url)
-        if request.status_code == 200:
-            print('Starting browser...')
-            break
-        else:
-            print('Checking RUL: %s...'%url)
-        time.sleep(1)
-    Timer(1, open_browser).start()
-    print('Start browser: Done')
+    app.run(port=port, host=host, debug=True, use_reloader=True, threaded=True)
+#     thread  = threading.Thread(name='open GUI', target = app.run,  args=(host, port), kwargs={'threaded': True})
+#     thread.start()
+#     while True:
+#         # Waiting for Flask start server
+#         request = requests.get(url)
+#         if request.status_code == 200:
+#             print('Starting browser...')
+#             break
+#         else:
+#             print('Checking RUL: %s...'%url)
+#         time.sleep(1)
+#     Timer(1, open_browser).start()
+#     print('Start browser: Done')
     
     

@@ -55,7 +55,11 @@ class DbTable:
     TIME_OFF                = 'time_off'
     USER                    = 'user'
     FINAL_DATE              = 'final_date'
-
+    ROLE                    = 'role'
+    USER_ROLE               = 'user_role'
+    ANALYZE_ITEM            = 'analyze_item'
+    FINAL_EVIDENCE          = 'final_evidence'
+    
 class AnalyzeCFGKeys:
     TOKEN   = 'Token'
     TIME_DELTA  = 'Time Delta'
@@ -105,11 +109,6 @@ class DefaulteValue:
     
     
 class SettingKeys:
-#     NA_USER_ID          = 3
-#     NA_ENG_LEVEL_ID     = 11
-#     NA_ENG_TYPE_ID      = 5
-#     NA_TEAM_ID          = 9
-#     NA_SHEET_TYPE_ID    = 3
     EMPTY_CELL          = ['', 'NaT', 'nan', 'NaN', '#REF']
     NA_VALUE            = 'NA'
 
@@ -127,6 +126,11 @@ class SessionKey:
     USERS           = 'users'
     TASK_FILTER     = 'task_filter'
     TITLE           = 'title'
+    IS_LOGIN        = 'is_login'
+    USER_ID         = 'user_id'
+    RESOURCE_NAME   = 'resource_name'
+    ROLE_NAME       = 'role_name'
+    
 class DbHeader:
     
     ANALYSIS_CONFIG_ID      = 'analysis_config_id'
@@ -182,11 +186,24 @@ class DbHeader:
     ALLOCATION              = 'allocation'
     PARSED_DATE             = 'parsed_date'
     IS_LOADING              = 'is_loading'
-    
+    ROLE_NAME               = 'role_name'
+    ROLE_ID                 = 'role_id'
+    USER_ROLE_ID            = 'user_role_id'
+    ANALYZE_ITEM_ID         = 'analyze_item_id'
+    ITEM_NAME               = 'item_name'
+    IS_APPROVE              = 'is_approve'
+    COUNTER                 = 'counter'
+
 class ExcelColor:
     LIST_COLOR = [
         'lime', 'orange', 'tan', 'gray_ega', 'gray25', 'ice_blue', 'white', 'light_turquoise', 'green', 'red', 'blue'
         ]
+
+class Role:
+    ADMIN = 'Admin'
+    PM    = 'PM'
+    DM    = 'DM'
+    USER  = 'User'
 
 class Template:
     SETTING_HOLIDAY     = 'screens/setting/holiday.html'
@@ -195,7 +212,6 @@ class Template:
     SETTING_TIMEOFF     = 'screens/setting/timeoff.html'
     
     HOME                = 'screens/home/home.html'
-    INDEX               = 'screens/layout/index.html'
     LAYOUT              = 'screens/layout/layout.html'
     LOG                 = 'screens/log/log.html'
     
@@ -208,6 +224,7 @@ class Template:
     BREADCRUMB          = 'components/breadcrumb/breadcrumb.html'
     NAVBAR              = 'components/navbar/navbar.html'
     SIDEBAR             = 'components/sidebar/sidebar.html'
+    LOGIN               = 'screens/auth/login.html'
     
 class Route:
     INDEX   = '/'
@@ -234,7 +251,21 @@ class Route:
     ANALYZE = '/analyze'
     CONFLICT_DATE   = '/conflict-date'
     CHECK_LOADING_SMARTSHEET    = '/check-loading-smartsheet'
+    LOGIN   = '/login'
+    AUTH   = '/auth'
     
-    
+    # DEFINE ROUTE REQUIRE ROLE 
+    role = Role()
+    REQUIRE_ROLE_OF_ROUTE = {
+        ADD_TO_FINAL: [role.PM],
+        UPLOAD_FILE: [role.PM],
+        IMPORT_TIMEOFF: [role.PM],
+        IMPORT_SHEET: [role.PM],
+        IMPORT_RESOURCE: [role.PM],
+        IMPORT_HOLIDAY: [role.PM],
+        ANALYZE: [role.PM],
+        CONFLICT_DATE: [role.PM]
+        }
+     
     
     

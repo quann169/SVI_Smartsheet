@@ -3,6 +3,7 @@
         <button type="button" id="sidebarCollapse" class="btn btn-info">
             <i class="fas fa-bars"></i>
         </button>
-        <img src="{{ url_for('static', filename='img/svi_logo.png') }}" style = "width:125px;" alt="savarti logo">
+		{% set user_id, resource_name, role_name = ctrl_obj.get_resource_and_role_name() %}
+        <a >{{resource_name}}</a><a >{{user_id}}</a><a >{{role_name}}</a>
     </div>
 </nav>

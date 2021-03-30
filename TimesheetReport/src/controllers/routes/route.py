@@ -9,38 +9,87 @@ from flask import Blueprint, render_template, session, redirect, url_for, abort,
                     send_from_directory, g
 from pprint import pprint
 import logging
-from src.commons.utils import save_file_from_request, get_request_form_ajax, get_request_args
+from src.commons.utils import save_file_from_request, get_request_form_ajax, get_request_args, \
+                                get_saved_password, save_password
 from src.controllers.controllers import Controllers as ctrl
 from src.commons.enums import DbTable, DbHeader, SessionKey, Template, Route
 from src.models.database.connection_model import Connection
 from src.commons.utils import println
 import config
-
+import getpass
+from src.commons.message import MsgError
 timesheet_bp = Blueprint('timesheet_bp', __name__)
 
-# connect_obj = Connection()
-# pool_conn = connect_obj.create_pool_connection()
-# 
-# @timesheet_bp.before_request
-# def create_connection():
-#     g.pool_conn = pool_conn
-    
-@timesheet_bp.route(Route.INDEX)
+@timesheet_bp.before_request
+def before_request():
+    method = request.method 
+    path = request.path
+    enum_route = Route()
+    # check login
+    if not session.get(SessionKey.IS_LOGIN) or not session.get(SessionKey.IS_LOGIN):
+        if path not in [Route().LOGIN, Route().AUTH]:
+            return (redirect(url_for("timesheet_bp.login")))
+    # check role
+    list_role_required = enum_route.REQUIRE_ROLE_OF_ROUTE.get(path)
+    if list_role_required:
+        role = session[SessionKey.ROLE_NAME]
+        if not role in list_role_required:
+            return abort(403, MsgError.E005)
+ 
+@timesheet_bp.route(Route.INDEX, methods=['POST', 'GET'])
 def index():
     println(Route.INDEX, 'debug')
-    try:
+    try:  
         ctrl_obj   = ctrl()
-        return render_template(Template.INDEX, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , \
-                               session_enum = SessionKey(), template= Template())
+        if not session.get(SessionKey.SIDEBAR):
+            ctrl_obj.update_session(SessionKey.SIDEBAR, 1)
+        password = get_saved_password()
+        username = getpass.getuser()
+        if password == None:
+            return (redirect(url_for("timesheet_bp.login")))
+        else:
+            check_password = ctrl_obj.authenticate_account(username, password)
+            if check_password[0]:
+                return (redirect(url_for("timesheet_bp.home")))
+            else:
+                return (redirect(url_for("timesheet_bp.login")))
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
 
-@timesheet_bp.route(Route.HOME)
+@timesheet_bp.route(Route.LOGIN, methods=['POST', 'GET'])
+def login():
+    println(Route.LOGIN, 'debug')
+    try:
+        session.clear()
+        ctrl_obj   = ctrl()
+        if not session.get(SessionKey.SIDEBAR):
+            ctrl_obj.update_session(SessionKey.SIDEBAR, 1)
+        current_user = getpass.getuser()
+        request_dict = get_request_args()
+        
+        return render_template(Template.LOGIN, ctrl_obj = ctrl_obj, db_header = DbHeader(), \
+                               route = Route(), template= Template(), session_enum = SessionKey(), \
+                               request_dict = request_dict, current_user=current_user)
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+
+@timesheet_bp.route(Route.AUTH, methods=['POST'])
+def auth():
+    println(Route.AUTH, 'debug')
+    request_dict = get_request_form_ajax()
+    password = request_dict[SessionKey.PASSWORD]
+    username = request_dict[SessionKey.USERNAME].strip()
+    remember = request_dict['remember']
+    ctrl_obj = ctrl()
+    result = ctrl_obj.authenticate_account(username, password, remember)
+    return jsonify({'result': result})
+
+@timesheet_bp.route(Route.HOME, methods=['POST', 'GET'])
 def home():
     println(Route.HOME, 'debug')
     try:
-        
         ctrl_obj   = ctrl()
         return render_template(Template.HOME, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , \
                                session_enum = SessionKey(), template= Template())
@@ -289,14 +338,14 @@ def check_loading_smartsheet():
         println(e, 'exception')
         return abort(500, e)
 
+
+    
 @timesheet_bp.route('/test')
 def test():
     println('/test', 'debug')
     try:
-        ctrl_obj   = ctrl()
         
-        ctrl_obj.update_resource_of_sheet()
-        
+        ctrl_obj   = ctrl()       
         return render_template("test.html", ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
     except Exception as e:
         println(e, 'exception')

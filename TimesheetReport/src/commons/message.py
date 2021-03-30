@@ -8,11 +8,13 @@ class MsgError:
     E001    = "Other Date time format: {}"
     E002    = "No sheet name '{}' on smartsheet"
     E003    = "Missing parameter"
+    E004    = "Incorrect username or password"
+    E005    = "Access denied: You don't have permission to access"
 
 
 class MsgWarning:
     W001    = 'Skip ID duplicate id :{}'
-
+    W002    = "Can not found '{}' in list resource" 
 
 class Msg:
     M001    = 'Import successfully'

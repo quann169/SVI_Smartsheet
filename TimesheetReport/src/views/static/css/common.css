@@ -2,6 +2,7 @@
 body {
     font-family: 'Poppins', sans-serif;
     background: #fafafa;
+	margin: 0px;
 }
 
 p {
@@ -282,7 +283,7 @@ table.dataTable thead th, table.dataTable thead td {
 /* ---------------------------------------------------
     Style for tags
 ----------------------------------------------------- */
-input[type=text], input[type=button], input[type=search], input[type=submit], input[type=date], select, button {
+input[type=text], input[type=button], input[type=search], input[type=submit], input[type=date], input[type=password], select, button {
     height: calc(1em + .75rem + 2px);
 	border-radius: 5px;
 	border: 1px solid #aaa;
@@ -346,6 +347,10 @@ table, table.dataTable {
 /* ---------------------------------------------------
     Single style
 ----------------------------------------------------- */
+.nowrap {
+	white-space: nowrap;
+}
+
 .dp-flex {
     display : flex;
 }

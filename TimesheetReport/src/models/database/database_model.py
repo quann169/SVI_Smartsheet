@@ -227,6 +227,32 @@ class Configuration(Connection):
         else:
             pass
     
+    def get_user_by_email(self, email):
+        query = """
+                SELECT `%s`, `%s`, `%s`, `%s`
+                FROM `%s`
+                WHERE `%s`="%s";
+        """%(
+            DbHeader.USER_ID, DbHeader.USER_NAME, DbHeader.FULL_NAME, DbHeader.OTHER_NAME,
+            DbTable.USER, DbHeader.EMAIL, email
+            )
+        query_result    = self.db_query(query)
+        result          = (None, None)
+        if query_result:
+            result = (query_result[0][DbHeader.USER_ID], query_result[0][DbHeader.USER_NAME])
+        return result
+    
+    def get_role_by_user_id(self, user_id):
+        query = """SELECT `%s`.`%s` FROM `%s` INNER JOIN `%s` on `%s`.`%s`=`%s`.`%s` WHERE `%s`.`%s`="%s";"""%(
+            DbTable.ROLE, DbHeader.ROLE_NAME, DbTable.ROLE, DbTable.USER_ROLE, DbTable.ROLE, DbHeader.ROLE_ID, \
+            DbTable.USER_ROLE, DbHeader.ROLE_ID, DbTable.USER_ROLE, DbHeader.USER_ID, str(user_id)
+            )
+        query_result    = self.db_query(query)
+        result = None
+        if query_result:
+            result = query_result[0][DbHeader.ROLE_NAME]
+        return result
+        
     def add_list_timeoff(self, list_record):
         query   = '''INSERT INTO `%s` 
                         (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`)

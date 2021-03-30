@@ -5,17 +5,17 @@ Created on Feb 22, 2021
 '''
 from src.models.smartsheet.smartsheet_model import SmartSheets
 from src.models.database.database_model import Configuration, DbTask
-from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, DateTime, AnalyzeCFGKeys, Route
+from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, \
+                            DateTime, AnalyzeCFGKeys, Route, Role
 from src.commons.message import MsgError, MsgWarning, Msg, AnalyzeItem
 from src.commons.utils import search_pattern, message_generate, println, remove_path, split_patern,\
                             get_prev_date_by_time_delta, get_work_week, convert_date_to_string,\
                             get_work_month, round_num, defined_color, \
                             get_work_days, write_message_into_file, convert_request_dict_to_url,\
                             str_to_date, get_end_week_of_date, get_start_week_of_date, get_month_name_of_date, \
-                            calculate_start_end_date_by_option
+                            calculate_start_end_date_by_option, check_domain_password, save_password, get_saved_password
                             
 from src.models.timesheet.timesheet_model import Timesheet
-
 from flask import session
 from pprint import pprint
 import pandas as pd
@@ -53,6 +53,7 @@ class Controllers:
         task_obj    = DbTask()
         total = len(sms_obj.info)
         count = 0
+        missing_user = {}
         for sheet_name in sms_obj.info:
             count += 1
             # save children_task only
@@ -97,6 +98,7 @@ class Controllers:
                         try:
                             user_id = other_name_info[assign_to]
                         except KeyError:
+                            missing_user[assign_to] = ''
                             user_id = user_info[SettingKeys.NA_VALUE].user_id
                     
                     for date, week in dates:
@@ -137,6 +139,11 @@ class Controllers:
                 println('[%d/%d] Skip update database for %s'%(count, total, sheet_name), 'info')
                 if log:
                     write_message_into_file(log, '[%d/%d] Skip update database for %s\n'%(count, total, sheet_name))
+        for user in missing_user:
+            message = message_generate(MsgWarning.W002, user)
+            println('Warning: %s'%(message), 'info')
+            if log:
+                write_message_into_file(log, 'Warning: %s\n'%(message))
         end_time = time.time()
         diff = int(end_time - start_time)
         minutes, seconds = diff // 60, diff % 60
@@ -258,7 +265,6 @@ class Controllers:
     def get_session(self, key=None):
         try:
             val   = session[key]
-            
             return val
         except KeyError:
             return None
@@ -382,7 +388,7 @@ class Controllers:
 
             config_obj.set_attr(updated_by  = 'root')
             for index in range(0, len(df[ExcelHeader.RESOURCE])):
-                resource          = str(df[ExcelHeader.RESOURCE][index])
+                resource          = str(df[ExcelHeader.RESOURCE][index]).strip()
                 eng_type          = str(df[ExcelHeader.ENG_TYPE][index])
                 eng_level         = str(df[ExcelHeader.ENG_LEVEL][index])
                 email             = str(df[ExcelHeader.EMAIL][index])
@@ -1305,7 +1311,34 @@ class Controllers:
             println(e, 'exception')
             return 0, e.args[0]  
     
-    
+    def get_resource_and_role_name(self):
+        user_name = session[SessionKey.USERNAME]
+        email = '%s@savarti.com'%user_name
+        config_obj = Configuration()
+        role_name = Role.USER
+        user_id, name = config_obj.get_user_by_email(email)
+        if user_id:
+            role_name2 = config_obj.get_role_by_user_id(user_id)
+            if role_name2:
+                role_name = role_name2
+        
+        return user_id, name, role_name
+        
+    def authenticate_account(self, username, password, remember=0):
+        result = check_domain_password(username, password)
+        if result[0]:
+            session[SessionKey.USERNAME] = username
+            session[SessionKey.PASSWORD] = password
+            session[SessionKey.IS_LOGIN] = True
+            if remember:
+                save_password(password)
+            user_id, name, role_name = self.get_resource_and_role_name()
+            session[SessionKey.RESOURCE_NAME] = name
+            session[SessionKey.USER_ID] = user_id
+            session[SessionKey.ROLE_NAME] = role_name
+        else:
+            session[SessionKey.IS_LOGIN] = False
+        return result
         
         
         

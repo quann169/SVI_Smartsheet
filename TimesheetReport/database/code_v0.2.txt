@@ -329,6 +329,98 @@ ENGINE = InnoDB
 AUTO_INCREMENT = 9381
 DEFAULT CHARACTER SET = utf8mb4;
 
+--v0.2
+-- -----------------------------------------------------
+-- Table `timesheet`.`analyze_item`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`analyze_item` (
+  `analyze_item_id` INT NOT NULL AUTO_INCREMENT,
+  `item_name` VARCHAR(400) NOT NULL,
+  PRIMARY KEY (`analyze_item_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`role`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`role` (
+  `role_id` INT NOT NULL AUTO_INCREMENT,
+  `role_name` VARCHAR(45) NULL,
+  PRIMARY KEY (`role_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`user_version`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`user_version` (
+  `user_version_id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `version` VARCHAR(45) NULL,
+  PRIMARY KEY (`user_version_id`),
+  INDEX `user_version_fk_idx` (`user_id` ASC),
+  CONSTRAINT `user_version_fk`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`final_evidence`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`final_evidence` (
+  `final_evidence_id` INT NOT NULL AUTO_INCREMENT,
+  `final_date_id` INT NOT NULL,
+  `analyze_item_id` INT NOT NULL,
+  `is_approve` INT NOT NULL,
+  `counter` VARCHAR(45) NOT NULL,
+  `comment` TEXT NULL,
+  `updated_by` VARCHAR(45) NOT NULL,
+  `updated_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  PRIMARY KEY (`final_evidence_id`),
+  INDEX `final_date_fk_idx` (`final_date_id` ASC) ,
+  INDEX `analyze_item_fk_idx` (`analyze_item_id` ASC) ,
+  CONSTRAINT `final_date_fk`
+    FOREIGN KEY (`final_date_id`)
+    REFERENCES `timesheet`.`final_date` (`final_date_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `analyze_item_fk`
+    FOREIGN KEY (`analyze_item_id`)
+    REFERENCES `timesheet`.`analyze_item` (`analyze_item_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`user_role`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`user_role` (
+  `user_role_id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `role_id` INT NOT NULL,
+  PRIMARY KEY (`user_role_id`),
+  INDEX `user_role_u_fk_idx` (`user_id` ASC) ,
+  INDEX `user_role_r_fk_idx` (`role_id` ASC) ,
+  CONSTRAINT `user_role_u_fk`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `user_role_r_fk`
+    FOREIGN KEY (`role_id`)
+    REFERENCES `timesheet`.`role` (`role_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+ALTER TABLE `timesheet`.`final_date` 
+ADD COLUMN `start_date` DATETIME NULL AFTER `date`,
+ADD COLUMN `end_date` DATETIME NULL AFTER `start_date`;
 
 -- Master value
 
@@ -356,6 +448,18 @@ INSERT INTO `timesheet`.`user` (`user_name`, `full_name`, `email`, `other_name`,
 -- analyze config
 INSERT INTO `timesheet`.`analysis_config` (`config_name`, `config_value`, `updated_by`) VALUES ('Token', 'nls2smz4rzdckgfp9pcem9sg8y', 'root'), ('Time Delta', '1', 'root');
 
+-- analyze item
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (1, 'No. resource lack of working hours');
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (2, 'No. resource have redundant working hours');
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (3, 'No. resource have enough working hours');
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (4, 'No conflict with final date');
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (5, 'Continuity with final date');
+
+-- role
+INSERT INTO `timesheet`.`role` (`role_id`, `role_name`) VALUES (1, 'Admin');
+INSERT INTO `timesheet`.`role` (`role_id`, `role_name`) VALUES (2, 'PM');
+INSERT INTO `timesheet`.`role` (`role_id`, `role_name`) VALUES (3, 'DM');
+INSERT INTO `timesheet`.`role` (`role_id`, `role_name`) VALUES (4, 'User');
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
