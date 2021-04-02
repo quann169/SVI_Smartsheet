@@ -338,7 +338,54 @@ def check_loading_smartsheet():
         println(e, 'exception')
         return abort(500, e)
 
+@timesheet_bp.route(Route.SAVE_SHEET_SETTING, methods=['POST'])
+def save_sheet_setting():
+    println(Route.SAVE_SHEET_SETTING, 'debug')
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().save_sheet_setting(request_dict)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
 
+@timesheet_bp.route(Route.GET_SYNC_SHEET, methods=['POST', 'GET'])
+def get_sync_sheet():
+    println(Route.GET_SYNC_SHEET, 'debug')
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().get_sync_sheet(request_dict)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+
+@timesheet_bp.route(Route.GET_TEMPLATE_CONTENT, methods=['POST', 'GET'])
+def get_template_content():
+    println(Route.GET_TEMPLATE_CONTENT, 'debug')
+    try:
+        request_dict = get_request_form_ajax()
+        file_path = request_dict['path']
+        tool_path = g.tool_path
+        template_path = os.path.join(os.path.join(tool_path, 'src/views/templates'), file_path)
+        result = ''
+        with open(template_path, 'r') as f:
+            result = f.read()
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+
+@timesheet_bp.route(Route.UPDATE_SYNC_SHEET, methods=['POST', 'GET'])
+def update_sync_sheet():
+    println(Route.UPDATE_SYNC_SHEET, 'debug')
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().update_sync_sheet(request_dict)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
     
 @timesheet_bp.route('/test')
 def test():
@@ -351,6 +398,16 @@ def test():
         println(e, 'exception')
         return abort(500, e)
     
-    
+@timesheet_bp.route('/test-ajax', methods=['POST', 'GET'])
+def test_ajax():
+    try:
+        request_dict = get_request_form_ajax()
+        result = [1, 1]
+        import time
+        time.sleep(5)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e) 
     
     

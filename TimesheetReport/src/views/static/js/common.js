@@ -19,7 +19,7 @@ $(document).ready(function () {
 
 // multiple select 
 function control_select_all_button() {
-	var list_checkbox = $('.multi-select-menuitems').find('input');
+	var list_checkbox = $(FOCUS_MULTISELECT).find('.multi-select-menuitems').find('input');
 	var is_check_all = true;
 	list_checkbox.each(function(){
 		if ($(this).prop('checked') == false) {
@@ -29,27 +29,32 @@ function control_select_all_button() {
 	});
 	$('.select-all').prop('checked', is_check_all);
 	if (is_check_all) {
-		$('.multi-select-button').text('All Values');
+		$(FOCUS_MULTISELECT).find('.multi-select-button').text('All Values');
 	}
 }
 $(function(){
     $('select[multiple]').multiSelect({
+		allText: 'All Values'
 	})
 	$('.select-all').click(function() {
-		var list_checkbox = $('.multi-select-menuitems').find('input');
+		var list_checkbox = $(FOCUS_MULTISELECT).find('.multi-select-menuitems').find('input');
 		var result = [];
 		var is_check_all = $(this).prop('checked');
 		list_checkbox.each(function(){
 			$(this).prop('checked', is_check_all);
 		});
 		if (is_check_all) {
-			$('.multi-select-button').text('All Values');
+			$(FOCUS_MULTISELECT).find('.multi-select-button').text('All Values');
 		} else {
-			$('.multi-select-button').text('-- Select --');
+			$(FOCUS_MULTISELECT).find('.multi-select-button').text('-- Select --');
 		}
 		return result;
 	})
-	control_select_all_button()
+	$('.multi-select-container').click(function() {
+		FOCUS_MULTISELECT = $(this);
+		control_select_all_button();
+	})
+	
 });
 
 // end multiple select 
@@ -65,8 +70,8 @@ function create_dropdown_show_hide_column(id) {
         cols.push($(this).text());
     });
     var html = "";
-    html += '<div class="dropdown allow-focus" style="margin-left: auto;">';
-    html += '<button id="dropdownLabel" type="button" style="background-color: #e9e9e9; border: 1px solid #aaa;" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+    html += '<div class="dropdown allow-focus " style="margin-left: auto;">';
+    html += '<button id="dropdownLabel" type="button" style="background-color: #e9e9e9; border: 1px solid #aaa;" class="btn btn-default mnw-auto" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
     html += '<i class="fas fa-bars"></i>';
     html += '</button>';
     html += '<div class="dropdown-menu panel" aria-labelledby="dropdownLabel">';
@@ -327,7 +332,7 @@ $(document).ready(function () {
 		if (! confirm("This process will take about 1-5 minutes. Do you want to continue?")) {
 			return null;
 		}
-		var cnt = "<div id='get_newest_data_console'><div class='cnt1'><div align='center' class='b-bottom '><b>Console</b><a class='close-p' onclick='" + '$("#overlay").hide();' + "'><i class='fas fa-times '></i></a></div><div class='cnt2'></div></div></div>";
+		var cnt = "<div id='get_newest_data_console'><div class='cnt1'><div align='center' class='b-bottom '><b>Console</b><a class='close-p dp-none' onclick='close_overlay();'><i class='fas fa-times '></i></a></div><div class='cnt2'></div></div></div>";
 		$('#overlay').html(cnt);
 		$('#overlay').show();
 		INTERVAL_GET_DATA = setInterval(function() {show_log_get_newest_data(); }, 2000);
@@ -358,4 +363,25 @@ function show_log_get_newest_data() {
 			 }
 		 });
 };
+function close_overlay(is_clean=true) {
+	if (is_clean) {
+		$('#overlay').html('');
+	}
+	$('#overlay').hide();
+}
+
+function get_template_content(path, handle_output) {
+	var data = {'path': path};
+	$.ajax({
+		   url: GET_TEMPLATE_CONTENT,
+		   type: "POST",
+		   data: encodeURIComponent(JSON.stringify(data)),
+		   success: function(resp){
+			   var result = resp.result;
+				handle_output(result);
+		      }
+	   });
+}
+
+
 INTERVAL_CHECK_SMARTSHEET = setInterval(function() {check_loading_smartsheet(); }, 10000);

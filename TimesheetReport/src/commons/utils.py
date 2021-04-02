@@ -18,6 +18,7 @@ import xlwt, socket
 import urllib
 import win32security
 
+
 def get_request_form():
     # for post method
     request_dict = {}
@@ -120,6 +121,26 @@ def println(message, logging_level=None):
         if config.LOGGING_LEVEL.lower() ==  'debug':
             logging.debug(message)
             print (message)
+
+def is_caculate_sheet(sheet_name):
+    result = True
+    if '_ais' in sheet_name.lower():
+        result = False
+    if ' ais' in sheet_name.lower():
+        result = False
+    elif sheet_name.lower().startswith('bug_'):
+        result = False
+    elif sheet_name.lower().startswith('copy of'):
+        result = False
+    elif sheet_name.lower().startswith('ai_'):
+        result = False
+    elif sheet_name.lower().startswith('ais_'):
+        result = False
+    elif sheet_name.lower().startswith('ai '):
+        result = False
+    elif sheet_name.lower().startswith('ar-'):
+        result = False
+    return result
     
 def split_patern(string, pattern=''):
     result = filter(None, re.split(pattern, string))

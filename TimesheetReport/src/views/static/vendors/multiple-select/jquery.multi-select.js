@@ -310,7 +310,8 @@
         .attr({
           'type': 'checkbox',
           'id': unique_id,
-          'value': $option.val()
+          'value': $option.val(),
+		  'name': unique_id
         })
         .prependTo($item);
 

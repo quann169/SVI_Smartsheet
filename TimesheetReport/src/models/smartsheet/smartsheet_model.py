@@ -15,15 +15,16 @@ import xlwt
 from jinja2 import Environment
 from jinja2.loaders import FileSystemLoader
 from src.commons.utils import get_prev_date_by_time_delta, stuck, convert_date_to_string, println,\
-                             get_work_days, str_to_date, compare_date,  write_message_into_file
+                             get_work_days, str_to_date, compare_date,  write_message_into_file, \
+                             is_caculate_sheet
 
-from src.commons.enums import SmartsheetCfgKeys
-
+from src.commons.enums import SmartsheetCfgKeys, SettingKeys, DbHeader
+import copy
 
 class SmartSheets:
     def __init__(self, list_sheet=None, holidays=[], time_off={}, timedelta=2, from_date=None, to_date=None, log=None, token=None):
         self.connection = None
-        self.available_name = []
+        self.available_name = {}
         self.list_sheet = list_sheet
         self.holidays = holidays
         self.time_off = time_off
@@ -52,8 +53,46 @@ class SmartSheets:
     def get_available_sheet_name(self):
         sheets = self.connection.sheets.list()
         for sheet in sheets:
-            self.available_name.append(sheet.name)
-    
+            self.available_name[sheet.name] = sheet.id
+            
+            
+    def get_sheet_name_and_validate_column(self, sheet_in_db={}):
+        self.get_available_sheet_name()
+        sms = smartsheet.Smartsheet(self.token)
+        result = {}
+        total_sheet = len(self.available_name)
+        count = 0
+        for sheet_name in self.available_name:
+            count += 1
+            if count > 60:
+                break
+            is_skip = 'Skip'
+            if is_caculate_sheet(sheet_name):
+                sheet_id = self.available_name[sheet_name]
+                require_col = copy.deepcopy(SmartsheetCfgKeys.LIST_HEADER) 
+                # Get all columns.
+                response = sms.Sheets.get_columns(sheet_id, include_all=False)
+                columns = response.data
+                is_valid = 0
+                if len(columns) >= len(require_col):
+                    for col in columns:
+                        col_name = col.title
+                        try:
+                            require_col.remove(col_name)
+                        except ValueError:
+                            pass
+                    if not len(require_col):
+                        is_valid = 1
+                is_skip = ''
+                sheet_type = SettingKeys.NA_VALUE
+                is_active = 0
+                if sheet_in_db.get(sheet_name):
+                    sheet_type = sheet_in_db[sheet_name][DbHeader.SHEET_TYPE]
+                    is_active = sheet_in_db[sheet_name][DbHeader.IS_ACTIVE]
+                result[sheet_name] = {'is_valid': is_valid, 'sheet_type': sheet_type, 'is_active': is_active, 'missing_cols': require_col}
+            println('Caculate [%d/%d] %s sheet: %s'%(count, total_sheet, is_skip, sheet_name), 'info')
+        return result
+        
     def parse(self):
         
         if self.list_sheet == None:

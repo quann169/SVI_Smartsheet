@@ -26,9 +26,9 @@ class SmartsheetCfgKeys:
                     COMPLETE,
                     ALLOCATION,
                     PREDECESSOR,
-                    COMMENT,
-                    ACTUAL_END_DATE,
-                    STATUS
+#                     COMMENT,
+#                     ACTUAL_END_DATE,
+#                     STATUS
         ]
 
 class Connect:
@@ -193,6 +193,7 @@ class DbHeader:
     ITEM_NAME               = 'item_name'
     IS_APPROVE              = 'is_approve'
     COUNTER                 = 'counter'
+    IS_VALID                = 'is_valid'
 
 class ExcelColor:
     LIST_COLOR = [
@@ -227,6 +228,7 @@ class Template:
     LOGIN               = 'screens/auth/login.html'
     
 class Route:
+    
     INDEX   = '/'
     HOME   = '/home'
     GET_NEWEST_DATA = '/get-newest-data'
@@ -253,6 +255,10 @@ class Route:
     CHECK_LOADING_SMARTSHEET    = '/check-loading-smartsheet'
     LOGIN   = '/login'
     AUTH   = '/auth'
+    SAVE_SHEET_SETTING   = '/save-sheet-setting'
+    GET_TEMPLATE_CONTENT   = '/get-template-content'
+    GET_SYNC_SHEET   = '/get-sync-sheet'
+    UPDATE_SYNC_SHEET   = '/update-sync-sheet'
     
     # DEFINE ROUTE REQUIRE ROLE 
     role = Role()
@@ -264,7 +270,8 @@ class Route:
         IMPORT_RESOURCE: [role.PM],
         IMPORT_HOLIDAY: [role.PM],
         ANALYZE: [role.PM],
-        CONFLICT_DATE: [role.PM]
+        CONFLICT_DATE: [role.PM],
+        SAVE_SHEET_SETTING: [role.PM]
         }
      
     

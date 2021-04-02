@@ -276,8 +276,17 @@ class Controllers:
     
     def get_sheet_config(self):
         config_obj  = Configuration()
-        result      = config_obj.get_sheet_config(is_active=False)
-        return result    
+        sheet_info      = config_obj.get_sheet_config(is_active=False)
+        config_obj.get_sheet_user_info()
+        project_user = config_obj.sheet_user
+        return sheet_info, project_user
+    
+    def get_sheet_type_info(self):
+        config_obj  = Configuration()
+        config_obj.get_sheet_type_info(is_parse=True)
+        sheet_type_id = config_obj.sheet_type_ids
+        sheet_type = config_obj.sheet_type
+        return sheet_type, sheet_type_id
     
     def update_session(self, key, val):
         try:
@@ -354,7 +363,9 @@ class Controllers:
                     config_obj.set_attr(sheet_name      = sheet_name,
                                         sheet_type_id   = str(sheet_type_id),
                                         latest_modified = DefaulteValue.DATETIME,
-                                        is_active       = str(is_active))
+                                        is_active       = str(is_active),
+                                        is_valid       = '1') 
+                                        
                     if config_obj.is_exist_sheet():
                         config_obj.update_sheet()
                     else:
@@ -1339,7 +1350,86 @@ class Controllers:
         else:
             session[SessionKey.IS_LOGIN] = False
         return result
-        
-        
-        
+    
+    def save_sheet_setting(self, request_dict):
+        try:
+            config_obj = Configuration()
+            config_obj.set_attr(updated_by=session[SessionKey.USERNAME])
+            pprint(request_dict)
+            for sheet_id in request_dict:
+                config_obj.set_attr(sheet_id=sheet_id)
+                if request_dict[sheet_id].get('is_active'):
+                    is_active = request_dict[sheet_id]['is_active']
+                    config_obj.set_attr(is_active=is_active)
+                    config_obj.update_sheet_active()
+                if request_dict[sheet_id].get('sheet_type'):
+                    sheet_type_id = request_dict[sheet_id]['sheet_type']
+                    config_obj.set_attr(sheet_type_id=sheet_type_id)
+                    config_obj.update_type_of_sheet()
+                if request_dict[sheet_id].get('resource'):
+                    # add user
+                    add_ids = request_dict[sheet_id]['resource']['add']
+                    add_record = []
+                    for user_id in add_ids:
+                        add_record.append([sheet_id, user_id])
+                    if len(add_record):
+                        config_obj.add_user_of_sheet(add_record)
+                    # remove user
+                    remove_ids = request_dict[sheet_id]['resource']['remove']
+                    remove_record = []
+                    for user_id in remove_ids:
+                        remove_record.append([sheet_id, user_id])
+                    if len(remove_record):
+                        config_obj.remove_users_of_sheet(remove_record)
+            return 1, ''
+        except Exception as e:
+            println(e, 'exception')
+            return 0, e.args[0]
+
+    def get_sync_sheet(self, request_dict={}):
+        sheet_types, sheet_type_id = self.get_sheet_type_info()
+        config_obj  = Configuration()
+        config_obj.get_sheet_config(is_parse=True, is_active=False)
+        sheet_in_db = config_obj.sheets
+        analyze_config_info = config_obj.get_analyze_config()
+        token   = analyze_config_info[AnalyzeCFGKeys.TOKEN]
+        sms_obj = SmartSheets(token=token)
+        sms_obj.connect_smartsheet()
+        sheets = sms_obj.get_sheet_name_and_validate_column(sheet_in_db=sheet_in_db)
+        info = {'sheet_types': sheet_types,
+                'sheets' : sheets
+                }
+        return info
+    
+    def update_sync_sheet(self, request_dict):
+        try:
+            info = request_dict['info']
+            config_obj  = Configuration()
+            config_obj.set_attr(updated_by  = session[SessionKey.USERNAME])
+            config_obj.get_sheet_type_info(is_parse=True)
+            sheet_type_info = config_obj.sheet_type
+            for element in info:
+                sheet_name = element[0]
+                sheet_type = element[1]
+                is_active = element[2]
+                is_valid = element[3]
+                try:
+                    sheet_type_id  = sheet_type_info[sheet_type]
+                except KeyError:
+                    sheet_type_id  = sheet_type_info[SettingKeys.NA_VALUE]
+                config_obj.set_attr(sheet_name      = sheet_name,
+                                    sheet_type_id   = str(sheet_type_id),
+                                    latest_modified = DefaulteValue.DATETIME,
+                                    is_active       = str(is_active),
+                                    is_valid       = str(is_valid),
+                                    )
+                if config_obj.is_exist_sheet():
+                    config_obj.update_sheet()
+                else:
+                    config_obj.add_sheet()
+                
+            return 1, 'Synchronize successfully'
+        except Exception as e:
+            println(e, 'exception')
+            return 0, e.args[0]
         

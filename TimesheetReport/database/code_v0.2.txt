@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS `timesheet`.`user` (
   `user_id` INT(11) NOT NULL AUTO_INCREMENT,
   `user_name` VARCHAR(45) NOT NULL,
   `full_name` VARCHAR(100) NOT NULL,
-  `email` VARCHAR(45) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
   `other_name` VARCHAR(200) NULL DEFAULT NULL,
   `is_active` INT(11) NOT NULL,
   `updated_by` VARCHAR(45) NOT NULL,
@@ -422,6 +422,10 @@ ALTER TABLE `timesheet`.`final_date`
 ADD COLUMN `start_date` DATETIME NULL AFTER `date`,
 ADD COLUMN `end_date` DATETIME NULL AFTER `start_date`;
 
+ALTER TABLE `timesheet`.`sheet` 
+ADD COLUMN `is_valid` TINYINT NULL AFTER `is_loading`;
+
+
 -- Master value
 
 -- eng_type
@@ -434,7 +438,7 @@ INSERT INTO `timesheet`.`eng_level` (`level`) VALUES ('D2'), ('E0'), ('E1'), ('E
 
 -- sheet_type
 INSERT INTO `timesheet`.`sheet_type` (`sheet_type_id`, `sheet_type`) VALUES (1, 'NA');
-INSERT INTO `timesheet`.`sheet_type` (`sheet_type`) VALUES ('RnD'), ('NRE'), ('Pre-sale'), ('Post-sale');
+INSERT INTO `timesheet`.`sheet_type` (`sheet_type`) VALUES ('RnD'), ('NRE'), ('Pre-sale'), ('Post-sale'), ('TRN');
 
 -- team
 INSERT INTO `timesheet`.`team` (`team_id`, `team_name`) VALUES (1, 'NA');

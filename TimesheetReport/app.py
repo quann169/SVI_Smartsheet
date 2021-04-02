@@ -9,7 +9,7 @@ from src.controllers.routes.route import timesheet_bp
 import webbrowser, threading
 from threading import Timer
 from src.models.database.connection_model import Connection
-
+from src.controllers.controllers import Controllers as ctrl
 
 
 
@@ -44,8 +44,8 @@ pool_conn = connect_obj.create_pool_connection()
 @app.before_request
 def create_connection():
     g.pool_conn = pool_conn
-
-  
+    g.tool_path = tool_path
+#     ctrl().get_sync_sheet()
 if __name__ == "__main__":
     app.run(port=port, host=host, debug=True, use_reloader=True, threaded=True)
 #     thread  = threading.Thread(name='open GUI', target = app.run,  args=(host, port), kwargs={'threaded': True})

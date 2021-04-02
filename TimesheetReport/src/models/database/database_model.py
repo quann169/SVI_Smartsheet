@@ -49,6 +49,7 @@ class Configuration(Connection):
                         `%s`.`%s`,
                         `%s`.`%s`,
                         `%s`.`%s`,
+                        `%s`.`%s`,
                         `%s`.`%s`
                 FROM `%s`
                 INNER JOIN `%s`
@@ -56,6 +57,7 @@ class Configuration(Connection):
                 %s
                 ORDER BY `%s` ASC;
         """%(
+            DbTable.SHEET, DbHeader.IS_VALID, 
             DbTable.SHEET, DbHeader.SHEET_ID, 
             DbTable.SHEET, DbHeader.IS_ACTIVE, 
             DbTable.SHEET, DbHeader.SHEET_NAME, 
@@ -80,14 +82,18 @@ class Configuration(Connection):
                         DbHeader.SHEET_NAME                     : row[DbHeader.SHEET_NAME],
                         DbHeader.LATEST_MODIFIED                : row[DbHeader.LATEST_MODIFIED],
                         DbHeader.SHEET_TYPE                     : row[DbHeader.SHEET_TYPE],
-                        DbHeader.PARSED_DATE                    : row[DbHeader.PARSED_DATE]
+                        DbHeader.PARSED_DATE                    : row[DbHeader.PARSED_DATE],
+                        DbHeader.IS_ACTIVE                      : row[DbHeader.IS_ACTIVE],
+                        DbHeader.IS_VALID                       : row[DbHeader.IS_VALID]
                         }
                     self.sheets[row[DbHeader.SHEET_NAME]] = {\
                         DbHeader.SHEET_ID                       : row[DbHeader.SHEET_ID],
                         DbHeader.SHEET_NAME                     : row[DbHeader.SHEET_NAME],
                         DbHeader.LATEST_MODIFIED                : row[DbHeader.LATEST_MODIFIED],
                         DbHeader.SHEET_TYPE                     : row[DbHeader.SHEET_TYPE],
-                        DbHeader.PARSED_DATE                    : row[DbHeader.PARSED_DATE]
+                        DbHeader.PARSED_DATE                    : row[DbHeader.PARSED_DATE],
+                        DbHeader.IS_ACTIVE                      : row[DbHeader.IS_ACTIVE],
+                        DbHeader.IS_VALID                       : row[DbHeader.IS_VALID]
                         }
             return query_result
         else:
@@ -95,8 +101,8 @@ class Configuration(Connection):
     
     def get_sheet_type_info(self, is_parse=False, is_active=False):
         condition   = ''
-        if is_active:
-            condition   = 'WHERE `%s`="1"'%(DbHeader.IS_ACTIVE)
+        # if is_active:
+        # condition   = 'WHERE `%s`="1"'%(DbHeader.IS_ACTIVE)
         query = """
                 SELECT `%s`, `%s`
                 FROM `%s` %s;
@@ -119,11 +125,25 @@ class Configuration(Connection):
     
     def get_sheet_user_info(self):
         query = """
-                SELECT `%s`, `%s`
-                FROM `%s` %s;
+                SELECT `%s`.`%s`, 
+                        `%s`.`%s`,
+                        `%s`.`%s`,
+                        `%s`.`%s`
+                FROM `%s` 
+                INNER JOIN `%s`
+                ON `%s`.`%s`=`%s`.`%s`
+                INNER JOIN `%s`
+                ON `%s`.`%s`=`%s`.`%s`;
         """%(
-            DbHeader.SHEET_ID, DbHeader.USER_ID,
+            DbTable.SHEET, DbHeader.SHEET_NAME,
+            DbTable.PROJECT_USER, DbHeader.SHEET_ID,
+            DbTable.PROJECT_USER, DbHeader.USER_ID,
+            DbTable.USER, DbHeader.USER_NAME,
             DbTable.PROJECT_USER,
+            DbTable.SHEET,
+            DbTable.SHEET, DbHeader.SHEET_ID, DbTable.PROJECT_USER, DbHeader.SHEET_ID,
+            DbTable.USER,
+            DbTable.USER, DbHeader.USER_ID, DbTable.PROJECT_USER, DbHeader.USER_ID,
             )
         query_result    = self.db_query(query)
         result          = ()
@@ -131,12 +151,16 @@ class Configuration(Connection):
             for row in query_result:
                 sheet_id    = row[DbHeader.SHEET_ID]
                 user_id     = row[DbHeader.USER_ID]
-                self.sheet_user[sheet_id] = user_id
+                user_name     = row[DbHeader.USER_NAME]
+                if not self.sheet_user.get(sheet_id):
+                    self.sheet_user[sheet_id] = []
+                self.sheet_user[sheet_id].append(user_id)
                 
     def add_sheet(self):
-        query   = """INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`) VALUES ("%s", "%s", "%s", "%s", "%s");
-        """%(DbTable.SHEET, DbHeader.SHEET_TYPE_ID, DbHeader.SHEET_NAME, DbHeader.LATEST_MODIFIED, DbHeader.UPDATED_BY, DbHeader.IS_ACTIVE,\
-             self.sheet_type_id, self.sheet_name, self.latest_modified, self.updated_by, self.is_active
+        query   = """INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES ("%s", "%s", "%s", "%s", "%s", "%s");
+        """%(DbTable.SHEET, DbHeader.SHEET_TYPE_ID, DbHeader.SHEET_NAME, DbHeader.LATEST_MODIFIED, \
+             DbHeader.UPDATED_BY, DbHeader.IS_ACTIVE, DbHeader.IS_VALID,\
+             self.sheet_type_id, self.sheet_name, self.latest_modified, self.updated_by, self.is_active, self.is_valid
              )
         self.db_execute(query)
     
@@ -150,8 +174,20 @@ class Configuration(Connection):
             return False
     
     def update_sheet(self, ):
-        query   = """UPDATE `%s` SET `%s`="%s", `%s`="%s", `%s`="%s"  WHERE `%s`="%s";
-        """%( DbTable.SHEET, DbHeader.SHEET_TYPE_ID, self.sheet_type_id, DbHeader.UPDATED_BY, self.updated_by, DbHeader.IS_ACTIVE, self.is_active, DbHeader.SHEET_NAME, self.sheet_name)
+        query   = """UPDATE `%s` SET `%s`="%s", `%s`="%s", `%s`="%s", `%s`="%s"  WHERE `%s`="%s";
+        """%( DbTable.SHEET, DbHeader.SHEET_TYPE_ID, self.sheet_type_id, DbHeader.UPDATED_BY, self.updated_by, \
+              DbHeader.IS_VALID, self.is_valid, \
+              DbHeader.IS_ACTIVE, self.is_active, DbHeader.SHEET_NAME, self.sheet_name)
+        self.db_execute(query)
+    
+    def update_sheet_active(self, ):
+        query   = """UPDATE `%s` SET `%s`="%s", `%s`="%s"  WHERE `%s`="%s";
+        """%( DbTable.SHEET, DbHeader.UPDATED_BY, self.updated_by, DbHeader.IS_ACTIVE, self.is_active, DbHeader.SHEET_ID, self.sheet_id)
+        self.db_execute(query)
+    
+    def update_type_of_sheet(self, ):
+        query   = """UPDATE `%s` SET `%s`="%s", `%s`="%s"  WHERE `%s`="%s";
+        """%( DbTable.SHEET, DbHeader.UPDATED_BY, self.updated_by, DbHeader.SHEET_TYPE_ID, self.sheet_type_id, DbHeader.SHEET_ID, self.sheet_id)
         self.db_execute(query)
     
     def inactive_all_sheet(self, ):
@@ -507,6 +543,12 @@ class Configuration(Connection):
                     DbTable.PROJECT_USER, condition 
                     )
         self.db_execute(query)
+    
+    def remove_users_of_sheet(self, list_record):
+        
+        query   = 'DELETE FROM `%s` WHERE `%s`='%(DbTable.PROJECT_USER, DbHeader.SHEET_ID) \
+                    + '%s AND ' + '`%s`='%(DbHeader.USER_ID) + '%s;'
+        self.db_execute_many(query, list_record)
     
     def add_user_of_sheet(self, list_record):
         query   = '''INSERT INTO `%s` 
