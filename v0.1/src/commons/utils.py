@@ -332,7 +332,7 @@ def get_work_days(from_date, to_date, holidays=[], time_delta=None):
         date_obj_2, year, month, day = str_to_date(date.strftime("%Y-%m-%d"))
         if time_delta != None and date_obj_2 < time_delta:
             continue
-        date_str = '%s-%s-%s'%(year, month, day)
+        date_str = '%s-%02d-%02d'%(year, month, day)
         start_week = None
         if calendar.day_name[calendar.weekday(year, month, day)] == DateTime.START_WEEK:
             start_week = datetime.date(year, month, day)
@@ -360,7 +360,7 @@ def get_work_week(from_date, to_date, holidays=[], time_delta=None):
         date_obj_2, year, month, day = str_to_date(date.strftime("%Y-%m-%d"))
         if time_delta != None and date_obj_2 < time_delta:
             continue
-        date_str = '%s-%s-%s'%(year, month, day)
+        date_str = '%s-%02d-%02d'%(year, month, day)
         start_week = None
         if (calendar.day_name[calendar.weekday(year, month, day)] != DateTime.START_WEEK) and (list_week == []):
             day2 = datetime.date(year, month, day)
@@ -393,7 +393,7 @@ def get_work_month(from_date, to_date, holidays=[], time_delta=None):
         date_obj_2, year, month, day = str_to_date(dt.strftime("%Y-%m-%d"))
         if time_delta != None and date_obj_2 < time_delta:
             continue
-        y_m_d = '%s-%s-%s'%(year, month, day)
+        y_m_d = '%s-%02d-%02d'%(year, month, day)
         month_tuple = [month, year]
         if len(list_month) == 0:
             month_tuple = [month, year]

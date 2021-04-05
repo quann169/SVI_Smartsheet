@@ -323,7 +323,7 @@ class Controllers:
             available_sheet_name = sms_obj.available_name
             #validate sheet 
             for index in range(0, len(df[ExcelHeader.SHEET_NAME])):
-                sheet_name          = str(df[ExcelHeader.SHEET_NAME][index])
+                sheet_name          = str(df[ExcelHeader.SHEET_NAME][index]).strip()
                 if sheet_name not in SettingKeys.EMPTY_CELL and sheet_name not in available_sheet_name:
                     message = message_generate(MsgError.E002, sheet_name)
                     println(message, 'error')
@@ -332,7 +332,7 @@ class Controllers:
             user_of_sheet   = {}
             config_obj.inactive_all_sheet()
             for index in range(0, len(df[ExcelHeader.SHEET_NAME])):
-                sheet_name          = str(df[ExcelHeader.SHEET_NAME][index])
+                sheet_name          = str(df[ExcelHeader.SHEET_NAME][index]).strip()
                 sheet_type          = str(df[ExcelHeader.SHEET_TYPE][index])
                 if sheet_name not in SettingKeys.EMPTY_CELL:
                     try:
@@ -382,7 +382,7 @@ class Controllers:
 
             config_obj.set_attr(updated_by  = 'root')
             for index in range(0, len(df[ExcelHeader.RESOURCE])):
-                resource          = str(df[ExcelHeader.RESOURCE][index])
+                resource          = str(df[ExcelHeader.RESOURCE][index]).strip()
                 eng_type          = str(df[ExcelHeader.ENG_TYPE][index])
                 eng_level         = str(df[ExcelHeader.ENG_LEVEL][index])
                 email             = str(df[ExcelHeader.EMAIL][index])
