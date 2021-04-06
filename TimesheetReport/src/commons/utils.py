@@ -7,7 +7,7 @@ import os, sys, re, copy
 import datetime, calendar
 import ast
 from src.commons.message import Msg, MsgError, MsgWarning
-from src.commons.enums import DateTime, SessionKey, ExcelColor
+from src.commons.enums import DateTime, SessionKey, ExcelColor, SettingKeys
 import logging
 import config
 from flask import request
@@ -126,7 +126,7 @@ def is_caculate_sheet(sheet_name):
     result = True
     if '_ais' in sheet_name.lower():
         result = False
-    if ' ais' in sheet_name.lower():
+    elif ' ais' in sheet_name.lower():
         result = False
     elif sheet_name.lower().startswith('bug_'):
         result = False
@@ -139,6 +139,8 @@ def is_caculate_sheet(sheet_name):
     elif sheet_name.lower().startswith('ai '):
         result = False
     elif sheet_name.lower().startswith('ar-'):
+        result = False
+    elif sheet_name in SettingKeys.SKIP_SHEET:
         result = False
     return result
     
@@ -353,7 +355,7 @@ def get_work_days(from_date, to_date, holidays=[], time_delta=None):
         date_obj_2, year, month, day = str_to_date(date.strftime("%Y-%m-%d"))
         if time_delta != None and date_obj_2 < time_delta:
             continue
-        date_str = '%s-%s-%s'%(year, month, day)
+        date_str = '%s-%02d-%02d'%(year, month, day)
         start_week = None
         if calendar.day_name[calendar.weekday(year, month, day)] == DateTime.START_WEEK:
             start_week = datetime.date(year, month, day)
@@ -381,7 +383,7 @@ def get_work_week(from_date, to_date, holidays=[], time_delta=None):
         date_obj_2, year, month, day = str_to_date(date.strftime("%Y-%m-%d"))
         if time_delta != None and date_obj_2 < time_delta:
             continue
-        date_str = '%s-%s-%s'%(year, month, day)
+        date_str = '%s-%02d-%02d'%(year, month, day)
         start_week = None
         if (calendar.day_name[calendar.weekday(year, month, day)] != DateTime.START_WEEK) and (list_week == []):
             day2 = datetime.date(year, month, day)
@@ -414,7 +416,7 @@ def get_work_month(from_date, to_date, holidays=[], time_delta=None):
         date_obj_2, year, month, day = str_to_date(dt.strftime("%Y-%m-%d"))
         if time_delta != None and date_obj_2 < time_delta:
             continue
-        y_m_d = '%s-%s-%s'%(year, month, day)
+        y_m_d = '%s-%02d-%02d'%(year, month, day)
         month_tuple = [month, year]
         if len(list_month) == 0:
             month_tuple = [month, year]

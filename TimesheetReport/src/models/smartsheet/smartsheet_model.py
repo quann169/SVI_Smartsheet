@@ -64,8 +64,6 @@ class SmartSheets:
         count = 0
         for sheet_name in self.available_name:
             count += 1
-            if count > 60:
-                break
             is_skip = 'Skip'
             if is_caculate_sheet(sheet_name):
                 sheet_id = self.available_name[sheet_name]

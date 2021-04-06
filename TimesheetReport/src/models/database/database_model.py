@@ -36,11 +36,17 @@ class Configuration(Connection):
         condition = ''
         if list_sheet_id:
             condition   = 'WHERE `%s`.`%s` IN (%s)'%(DbTable.SHEET, DbHeader.SHEET_ID, ', '.join(list_sheet_id))
-        if is_active:
+        if is_active == True:
             if not len(condition):
                 condition   = 'WHERE `%s`="1"'%(DbHeader.IS_ACTIVE)
             else:
                 condition   += ' AND `%s`="1"'%(DbHeader.IS_ACTIVE)
+        elif is_active == False:
+            if not len(condition):
+                condition   = 'WHERE `%s`="0"'%(DbHeader.IS_ACTIVE)
+            else:
+                condition   += ' AND `%s`="0"'%(DbHeader.IS_ACTIVE)
+        
         query = """
                 SELECT `%s`.`%s`,
                         `%s`.`%s`,
@@ -572,6 +578,12 @@ class Configuration(Connection):
             for row in query_result:
                 result[row[DbHeader.CONFIG_NAME]] = row[DbHeader.CONFIG_VALUE]
         return result
+    
+    def update_analyze_config(self):
+        query   = """UPDATE `%s` SET `%s`="%s", `%s`="%s" WHERE `%s`="%s";
+        """%( DbTable.ANALYSIS_CONFIG, DbHeader.CONFIG_VALUE, self.config_value, DbHeader.UPDATED_BY, self.updated_by,\
+              DbHeader.CONFIG_NAME, self.config_name)
+        self.db_execute(query)
     
     def get_sheet_loading_smartsheet(self): 
         query   = """SELECT `%s`, `%s` FROM `%s` WHERE `%s`="1";

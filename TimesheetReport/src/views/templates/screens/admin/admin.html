@@ -1,0 +1,27 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Admin
+{% endblock title %}
+{% block breadcrumb %}
+	{% set br_items = [(route.ADMIN, 'Admin', True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+{% block sidebar %}
+	{% set active_sidebar = route.ADMIN %}
+	{% with active_sidebar=active_sidebar , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/setting/other_setting.js')}}"></script>
+{% endblock scripts %}
+{% block styles %}
+	{{super()}}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/setting/other_setting.css') }}" />
+{% endblock styles %}
+{% block main %}
+
+{% endblock main %}

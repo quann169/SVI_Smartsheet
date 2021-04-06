@@ -91,20 +91,28 @@ $(document).on('click', '.allow-focus .dropdown-menu', function (e) {
   e.stopPropagation();
 });
 
-function load_datatable (id, ordering) {
+function load_datatable (id, ordering, paging, info) {
 	if (ordering == undefined) {
 		ordering = true;
+	}
+	if (paging == undefined) {
+		paging = true;
+	}
+	if (info == undefined) {
+		info = true;
 	}
     var table = $(id).DataTable({
 		"dom": '<"top"f>rt<"bottom"lp><"clear">', 
 		"ordering": ordering,
+		"paging":   paging,
+        "info":     info,
 		"lengthMenu": [[10, 50, 100, -1], [10, 50, 100, "All"]],
-		"iDisplayLength": 100,
+		"iDisplayLength": 10,
 		initComplete: function () {
         create_dropdown_show_hide_column(id);
     }
     });
-	$(id).wrap('<div style="overflow-x: auto;"></div>');
+	$(id).wrap('<div style="overflow-x: auto; resize: vertical;"></div>');
 	$('input.toggle-vis').on( 'click', function (e) {
 		var column_number = $(this).val();
 		if (column_number != 0){
@@ -115,6 +123,7 @@ function load_datatable (id, ordering) {
 		}
         
     } );
+
 }
 function get_form_submit(form_id) {
 	var data = $(form_id).serializeArray().reduce(function(obj, item){
@@ -381,6 +390,15 @@ function get_template_content(path, handle_output) {
 				handle_output(result);
 		      }
 	   });
+}
+function parse_serialize(serialize){
+	var out = {}
+	var elements = serialize.split('&');
+	for (var idx = 0; idx < elements.length; idx++ ){
+		var items = elements[idx].split('=')
+		out[items[0]] = items[1];
+	}
+	return out;
 }
 
 

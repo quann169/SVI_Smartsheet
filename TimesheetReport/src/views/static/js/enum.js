@@ -14,6 +14,7 @@ const SESSION_IS_LOGIN  = 'is_login';
 const SESSION_USER_ID         = 'user_id'
 const SESSION_RESOURCE_NAME   = 'resource_name'
 const SESSION_ROLE_NAME       = 'role_name'
+const SESSION_MODE 		= 'mode'
 
 // INTERVAL KEY
 var INTERVAL_GET_DATA  = null;
@@ -51,6 +52,8 @@ const SAVE_SHEET_SETTING = '/save-sheet-setting'
 const GET_TEMPLATE_CONTENT   = '/get-template-content'
 const GET_SYNC_SHEET   = '/get-sync-sheet'
 const UPDATE_SYNC_SHEET   = '/update-sync-sheet'
+const OTHER_SETTING   = '/other-setting'
+const SAVE_OTHER_SETTING   = '/save-other-setting'
 
 var FOCUS_MULTISELECT = null;
 

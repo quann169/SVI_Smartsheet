@@ -28,6 +28,17 @@ $(document).ready(function () {
 	})
 })
 
+
+$(document).ready(function () {
+	$('#mode').change(function(event) {
+		var mode = $(this).val();
+		var request = {};
+		request[SESSION_MODE] = mode;
+		location.href = SHEET + '?' + encodeURIComponent(JSON.stringify(request));;
+	});
+	
+});
+
 // control 'import' btn
 $('#sheet_file').change(function(e){
         var files	= $('#sheet_file').get(0).files[0];
@@ -39,7 +50,7 @@ $('#sheet_file').change(function(e){
     });
 
 $(document).ready( function () {
-	load_datatable('#sheet_table');
+	load_datatable('#sheet_table', false, false, false);
 });
 
 $(document).ready(function() {
@@ -49,7 +60,7 @@ $(document).ready(function() {
 	})
 	.on('change input', 'input, select, textarea', function(e) {
 	    var $form = $(this).closest("form");
-		var state = $form.serialize() === $form.data('serialized');  
+		var state = $form.serialize() === $form.data('serialized');
 		$('#save').attr('disabled', state);
 	})
 	$('#save').attr('disabled', true);

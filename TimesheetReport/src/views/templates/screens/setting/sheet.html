@@ -26,14 +26,23 @@
 
 {% block main %}
 <form id='import_sheet' method="post" enctype="multipart/form-data">
-	<div class='dp-flex'>
-		<div class="custom-file col-4">
+	<div class='row'>
+		<!-- <div class="custom-file col-md-2">
 		    <input type="file" name='sheet_file' id='sheet_file' accept='.xlsx' class="custom-file-input " >
 		    <label class="custom-file-label" for="sheet_file">Choose file</label>
+		</div> -->
+		<div class='col-md-10'>
+			<!-- <button type='submit' class='mg-l-5' id='btn_import' disabled data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>-->
+			<button type='button' class='mg-l-5' id='save' disabled data-toggle="tooltip" title="Save"><i class="fas fa-save"></i></button>
+			<button type='button' id='sync_sheet' class='mx-1' data-toggle="tooltip" title="Synchronize sheet"><i class="fas fa-cloud-download-alt"></i></button>
 		</div>
-		<button type='submit' class='mg-l-5' id='btn_import' disabled data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
-		<button type='button' class='mg-l-5' id='save' disabled data-toggle="tooltip" title="Save"><i class="fas fa-save"></i></button>
-		<button type='button' id='sync_sheet' class='mx-1' data-toggle="tooltip" title="Synchronize sheet"><i class="fas fa-cloud-download-alt"></i></button>
+		<div class='col-md-2 d-flex justify-content-end'>
+			<select id="mode" name="mode">
+		        <option value="active" {% if request_dict[session_enum.MODE] == 'active' %}selected{% endif %}>Active</option>
+		        <option value="inactive" {% if request_dict[session_enum.MODE] == 'inactive' %}selected{% endif %}>Inactive</option>
+		    </select>
+			
+		</div>
 	</div>
 </form>
 <br>
@@ -41,7 +50,11 @@
 <form id='save_form' method="post" enctype="multipart/form-data">
 	<div class='table-content'>
 		<table id="sheet_table" class="table table-striped table-bordered " cellspacing="0" width='100%'>
-		  {% set sheet_info, project_user = ctrl_obj.get_sheet_config() %}
+		  {% if request_dict[session_enum.MODE] == 'active' %}
+		    {% set sheet_info, project_user = ctrl_obj.get_sheet_config(True) %}
+		  {% else %} 
+		  	{% set sheet_info, project_user = ctrl_obj.get_sheet_config(False) %}
+	      {% endif %}
 		  {% set sheet_types, sheet_type_id = ctrl_obj.get_sheet_type_info() %}
 		  {% set resource_info = ctrl_obj.get_resource_config() %}
 		  <thead>

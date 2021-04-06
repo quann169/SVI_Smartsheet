@@ -155,17 +155,18 @@ class Controllers:
         result = convert_request_dict_to_url(request_dict)
         return result
     
-    def add_defalt_config_to_method_request(self, request_dict, more_option={}):
+    def add_default_config_to_method_request(self, request_dict, more_option={}):
         for key, val in more_option.items():
             if not request_dict.get(key):
                 request_dict[key] = val
         if not request_dict.get(SessionKey.FROM) or not request_dict.get(SessionKey.TO) or not request_dict.get(SessionKey.SHEETS):
             config_obj = Configuration()
             analyze_config_info = config_obj.get_analyze_config()
-            time_delta = int(analyze_config_info[AnalyzeCFGKeys.TIME_DELTA])
-            from_date      = get_prev_date_by_time_delta(time_delta)
+            time_delta_before = int(analyze_config_info[AnalyzeCFGKeys.TIME_DELTA_BEFORE])
+            time_delta_after = int(analyze_config_info[AnalyzeCFGKeys.TIME_DELTA_AFTER])
+            from_date      = get_prev_date_by_time_delta(time_delta_before)
             from_date       = get_start_week_of_date(from_date, output_str=True)
-            to_date      = get_prev_date_by_time_delta(time_delta*(-1))
+            to_date      = get_prev_date_by_time_delta(time_delta_after*(-1))
             to_date       = get_end_week_of_date(to_date, output_str=True)
             if not request_dict.get(SessionKey.FROM):
                 request_dict[SessionKey.FROM] = convert_date_to_string(from_date, '%Y-%m-%d')
@@ -178,7 +179,12 @@ class Controllers:
                 for key in sheet_ids_dict.keys():
                     sheet_ids.append(key)
                 request_dict[SessionKey.SHEETS] = sheet_ids
-        
+    
+    def get_analyze_config(self):
+        config_obj = Configuration()
+        analyze_config = config_obj.get_analyze_config()
+        return analyze_config
+    
     def import_timeoff(self, file_name):
         try:
             file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
@@ -274,9 +280,9 @@ class Controllers:
         result      = config_obj.get_list_holiday()
         return result   
     
-    def get_sheet_config(self):
+    def get_sheet_config(self, is_active=None):
         config_obj  = Configuration()
-        sheet_info      = config_obj.get_sheet_config(is_active=False)
+        sheet_info      = config_obj.get_sheet_config(is_active=is_active)
         config_obj.get_sheet_user_info()
         project_user = config_obj.sheet_user
         return sheet_info, project_user
@@ -338,7 +344,7 @@ class Controllers:
             available_sheet_name = sms_obj.available_name
             #validate sheet 
             for index in range(0, len(df[ExcelHeader.SHEET_NAME])):
-                sheet_name          = str(df[ExcelHeader.SHEET_NAME][index])
+                sheet_name          = str(df[ExcelHeader.SHEET_NAME][index]).strip()
                 if sheet_name not in SettingKeys.EMPTY_CELL and sheet_name not in available_sheet_name:
                     message = message_generate(MsgError.E002, sheet_name)
                     println(message, 'error')
@@ -347,7 +353,7 @@ class Controllers:
             user_of_sheet   = {}
             config_obj.inactive_all_sheet()
             for index in range(0, len(df[ExcelHeader.SHEET_NAME])):
-                sheet_name          = str(df[ExcelHeader.SHEET_NAME][index])
+                sheet_name          = str(df[ExcelHeader.SHEET_NAME][index]).strip()
                 sheet_type          = str(df[ExcelHeader.SHEET_TYPE][index])
                 if sheet_name not in SettingKeys.EMPTY_CELL:
                     try:
@@ -581,6 +587,7 @@ class Controllers:
             config_obj      = Configuration()
             config_obj.get_list_holiday(is_parse=True)
             holidays  = config_obj.holidays
+            
             info            = {}
             if filter == 'monthly':
                 list_month   = get_work_month(from_date=from_date, to_date=to_date, holidays=holidays)
@@ -596,7 +603,7 @@ class Controllers:
                 list_sub_col       = []
                 for col in cols_element:
                     list_sub_col.append(col[0])
-                    
+             
             # caculate timeoff by week/month
             timeoff_info_2 = {}
             for user_id in time_off_info:
@@ -1355,7 +1362,6 @@ class Controllers:
         try:
             config_obj = Configuration()
             config_obj.set_attr(updated_by=session[SessionKey.USERNAME])
-            pprint(request_dict)
             for sheet_id in request_dict:
                 config_obj.set_attr(sheet_id=sheet_id)
                 if request_dict[sheet_id].get('is_active'):
@@ -1385,11 +1391,24 @@ class Controllers:
         except Exception as e:
             println(e, 'exception')
             return 0, e.args[0]
-
+    
+    def save_other_setting(self, request_dict):
+        try:
+            config_obj = Configuration()
+            config_obj.set_attr(updated_by=session[SessionKey.USERNAME])
+            for key, val in request_dict['info'].items():
+                config_obj.set_attr(config_name=key,
+                                    config_value=val)
+                config_obj.update_analyze_config()
+            return 1, ''
+        except Exception as e:
+            println(e, 'exception')
+            return 0, e.args[0]
+        
     def get_sync_sheet(self, request_dict={}):
         sheet_types, sheet_type_id = self.get_sheet_type_info()
         config_obj  = Configuration()
-        config_obj.get_sheet_config(is_parse=True, is_active=False)
+        config_obj.get_sheet_config(is_parse=True, is_active=None)
         sheet_in_db = config_obj.sheets
         analyze_config_info = config_obj.get_analyze_config()
         token   = analyze_config_info[AnalyzeCFGKeys.TOKEN]

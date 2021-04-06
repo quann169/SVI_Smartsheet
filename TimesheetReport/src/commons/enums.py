@@ -63,6 +63,8 @@ class DbTable:
 class AnalyzeCFGKeys:
     TOKEN   = 'Token'
     TIME_DELTA  = 'Time Delta'
+    TIME_DELTA_BEFORE  = 'Time Delta Before'
+    TIME_DELTA_AFTER  = 'Time Delta After'
     
 class DateTime():
     LIST_MONTH = {
@@ -111,7 +113,10 @@ class DefaulteValue:
 class SettingKeys:
     EMPTY_CELL          = ['', 'NaT', 'nan', 'NaN', '#REF']
     NA_VALUE            = 'NA'
-
+    SKIP_SHEET      = [
+        'Cash usd', 'EDA', 'Interview List', 'NDA list', 'New Sheet', 'Operation Cost', 'Overtime Record', 'QA_Handover', \
+        'Request to Hire', 'Time card', 'Validation- iCUE Tasks (VN)'
+        ]
 
 class SessionKey:
     USERNAME        = 'username'
@@ -211,6 +216,9 @@ class Template:
     SETTING_RESOURCE    = 'screens/setting/resource.html'
     SETTING_SHEET       = 'screens/setting/sheet.html'
     SETTING_TIMEOFF     = 'screens/setting/timeoff.html'
+    SETTING_OTHER     = 'screens/setting/other_setting.html'
+    
+    ADMIN               = 'screens/admin/admin.html'
     
     HOME                = 'screens/home/home.html'
     LAYOUT              = 'screens/layout/layout.html'
@@ -243,6 +251,8 @@ class Route:
     SHEET    = '/sheet'
     IMPORT_SHEET    = '/import-sheet'
     RESOURCE    = '/resource'
+    OTHER_SETTING    = '/other-setting'
+    ADMIN           = '/admin'
     IMPORT_RESOURCE    = '/import-resource'
     HOLIDAY    = '/holiday'
     IMPORT_HOLIDAY    = '/import-holiday'
@@ -259,6 +269,7 @@ class Route:
     GET_TEMPLATE_CONTENT   = '/get-template-content'
     GET_SYNC_SHEET   = '/get-sync-sheet'
     UPDATE_SYNC_SHEET   = '/update-sync-sheet'
+    SAVE_OTHER_SETTING   = '/save-other-setting'
     
     # DEFINE ROUTE REQUIRE ROLE 
     role = Role()

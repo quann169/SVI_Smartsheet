@@ -1,0 +1,66 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Other Setting
+{% endblock title %}
+{% block breadcrumb %}
+	{% set br_items = [(route.OTHER_SETTING, 'Other Setting', True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+{% block sidebar %}
+	{% set active_sidebar = route.OTHER_SETTING %}
+	{% with active_sidebar=active_sidebar , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/setting/other_setting.js')}}"></script>
+{% endblock scripts %}
+{% block styles %}
+	{{super()}}
+	
+{% endblock styles %}
+{% block main %}
+<form id='other_setting_form' method="post" enctype="multipart/form-data">
+	<div class='row'>
+		<div class='col-md-10 '>
+			<button type='button' class='mg-l-5' id='save' disabled data-toggle="tooltip" title="Save"><i class="fas fa-save"></i></button>
+		</div>
+	</div>
+</form>
+<br>
+{% set analyze_config = ctrl_obj.get_analyze_config() %}
+<form id='save_form' method="post" enctype="multipart/form-data">
+	<table id='other_setting_table'>
+		<thead>
+			<tr>
+			  <th class="th-sm w-50-px">#
+		      </th>
+		      <th class="th-sm w-300-px">Type 
+		      </th>
+			  <th class="th-sm w-300-px">Value
+		       </th>
+		    </tr>
+		</thead>
+		<tbody>
+			<tr>
+				  <td>1</td>
+				  <td>Token</td>
+				  <td><input type='text' name='{{analyze_cfg_key.TOKEN}}' class='w-100-pc' value="{{analyze_config[analyze_cfg_key.TOKEN]}}"></td>
+		    </tr>
+			<tr>
+				  <td>2</td>
+				  <td>Time Delta Before</td>
+				  <td><input type='number' name='{{analyze_cfg_key.TIME_DELTA_BEFORE}}' class='w-50-px' value="{{analyze_config[analyze_cfg_key.TIME_DELTA_BEFORE]}}"> weeks</td>
+		    </tr>
+			<tr>
+				  <td>3</td>
+				  <td>Time Delta After</td>
+				  <td><input type='number' name='{{analyze_cfg_key.TIME_DELTA_AFTER}}' class='w-50-px' value="{{analyze_config[analyze_cfg_key.TIME_DELTA_AFTER]}}" > weeks</td>
+		    </tr>
+		</tbody>
+	</table>
+</form>
+{% endblock main %}

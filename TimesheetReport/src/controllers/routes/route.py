@@ -12,7 +12,7 @@ import logging
 from src.commons.utils import save_file_from_request, get_request_form_ajax, get_request_args, \
                                 get_saved_password, save_password
 from src.controllers.controllers import Controllers as ctrl
-from src.commons.enums import DbTable, DbHeader, SessionKey, Template, Route
+from src.commons.enums import DbTable, DbHeader, SessionKey, Template, Route, AnalyzeCFGKeys
 from src.models.database.connection_model import Connection
 from src.commons.utils import println
 import config
@@ -194,12 +194,28 @@ def log():
 def sheet():
     println(Route.SHEET, 'debug')
     try:
-        ctrl_obj    = ctrl()
-        return render_template(Template.SETTING_SHEET, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
+        request_dict = get_request_args()
+        ctrl_obj   = ctrl()
+        ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.MODE: 'active'})
+        return render_template(Template.SETTING_SHEET, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , \
+                               template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, 'exception')
         return abort(500, e)
 
+@timesheet_bp.route(Route.OTHER_SETTING)
+def other_setting():
+    println(Route.OTHER_SETTING, 'debug')
+    try:
+        request_dict = get_request_args()
+        ctrl_obj   = ctrl()
+        return render_template(Template.SETTING_OTHER, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , \
+                               template= Template(), session_enum = SessionKey(), request_dict = request_dict,\
+                               analyze_cfg_key = AnalyzeCFGKeys())
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+    
 @timesheet_bp.route(Route.IMPORT_SHEET, methods=['POST'])
 def import_sheet():
     println(Route.IMPORT_SHEET, 'debug')
@@ -270,7 +286,7 @@ def daily_timesheet():
     try:
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
-        ctrl_obj.add_defalt_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
+        ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
         return render_template(Template.TIMESHEET_DETAIL, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, 'exception')
@@ -282,7 +298,7 @@ def resource_timesheet():
     try:
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
-        ctrl_obj.add_defalt_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
+        ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
         return render_template(Template.TIMESHEET_RESOURCE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, 'exception')
@@ -294,7 +310,7 @@ def project_timesheet():
     try:
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
-        ctrl_obj.add_defalt_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
+        ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
         return render_template(Template.TIMESHEET_PROJECT, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, 'exception')
@@ -349,6 +365,17 @@ def save_sheet_setting():
         println(e, 'exception')
         return abort(500, e)
 
+@timesheet_bp.route(Route.SAVE_OTHER_SETTING, methods=['POST'])
+def save_other_setting():
+    println(Route.SAVE_OTHER_SETTING, 'debug')
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().save_other_setting(request_dict)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, 'exception')
+        return abort(500, e)
+    
 @timesheet_bp.route(Route.GET_SYNC_SHEET, methods=['POST', 'GET'])
 def get_sync_sheet():
     println(Route.GET_SYNC_SHEET, 'debug')
