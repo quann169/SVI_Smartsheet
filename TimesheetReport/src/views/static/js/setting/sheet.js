@@ -50,7 +50,7 @@ $('#sheet_file').change(function(e){
     });
 
 $(document).ready( function () {
-	load_datatable('#sheet_table', false, false, false);
+	load_datatable('#sheet_table', false, false, false, 'scroll-data-table');
 });
 
 $(document).ready(function() {

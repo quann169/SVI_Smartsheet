@@ -91,7 +91,7 @@ $(document).on('click', '.allow-focus .dropdown-menu', function (e) {
   e.stopPropagation();
 });
 
-function load_datatable (id, ordering, paging, info) {
+function load_datatable (id, ordering, paging, info, scroll_class) {
 	if (ordering == undefined) {
 		ordering = true;
 	}
@@ -101,18 +101,21 @@ function load_datatable (id, ordering, paging, info) {
 	if (info == undefined) {
 		info = true;
 	}
+	if (scroll_class == undefined) {
+		scroll_class = '';
+	}
     var table = $(id).DataTable({
 		"dom": '<"top"f>rt<"bottom"lp><"clear">', 
 		"ordering": ordering,
 		"paging":   paging,
         "info":     info,
 		"lengthMenu": [[10, 50, 100, -1], [10, 50, 100, "All"]],
-		"iDisplayLength": 10,
+		"iDisplayLength": 100,
 		initComplete: function () {
         create_dropdown_show_hide_column(id);
     }
     });
-	$(id).wrap('<div style="overflow-x: auto; resize: vertical;"></div>');
+	$(id).wrap('<div style="overflow-x: auto; resize: vertical;" class="' + scroll_class + '"></div>');
 	$('input.toggle-vis').on( 'click', function (e) {
 		var column_number = $(this).val();
 		if (column_number != 0){

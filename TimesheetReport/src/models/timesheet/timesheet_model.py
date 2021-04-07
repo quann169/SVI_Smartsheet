@@ -29,7 +29,7 @@ class Timesheet():
         self.all_final_task = {}
         self.list_user = list_user
         
-    def parse(self):
+    def parse(self, sheet_user=None):
         config_obj  = Configuration()
         config_obj.get_all_user_information()
         self.user_ids    = config_obj.user_ids
@@ -50,6 +50,11 @@ class Timesheet():
         
         for sheet_id  in self.sheet_ids:
             sheet_id    = int(sheet_id)
+            if sheet_user:
+                if sheet_user.get(sheet_id):
+                    self.list_user = sheet_user[sheet_id]
+                else:
+                    self.list_user = None
             sheet_name      = sheet_ids[sheet_id][DbHeader.SHEET_NAME]
             sheet_type      = sheet_ids[sheet_id][DbHeader.SHEET_TYPE]
             sheet_obj   = Sheet(self, sheet_id, sheet_name, sheet_type)

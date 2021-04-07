@@ -12,7 +12,8 @@ import logging
 from src.commons.utils import save_file_from_request, get_request_form_ajax, get_request_args, \
                                 get_saved_password, save_password
 from src.controllers.controllers import Controllers as ctrl
-from src.commons.enums import DbTable, DbHeader, SessionKey, Template, Route, AnalyzeCFGKeys
+from src.commons.enums import DbTable, DbHeader, SessionKey, Template, Route, AnalyzeCFGKeys, \
+                                OtherKeys
 from src.models.database.connection_model import Connection
 from src.commons.utils import println
 import config
@@ -22,6 +23,10 @@ timesheet_bp = Blueprint('timesheet_bp', __name__)
 
 @timesheet_bp.before_request
 def before_request():
+    """ Validate role, login before request page
+    :param : 
+    :return: 
+    """
     method = request.method 
     path = request.path
     enum_route = Route()
@@ -36,9 +41,13 @@ def before_request():
         if not role in list_role_required:
             return abort(403, MsgError.E005)
  
-@timesheet_bp.route(Route.INDEX, methods=['POST', 'GET'])
+@timesheet_bp.route(Route.INDEX, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
 def index():
-    println(Route.INDEX, 'debug')
+    """ Starting page
+    :param : 
+    :return: home or login page
+    """
+    println(Route.INDEX, OtherKeys.LOGING_DEBUG)
     try:  
         ctrl_obj   = ctrl()
         if not session.get(SessionKey.SIDEBAR):
@@ -54,12 +63,16 @@ def index():
             else:
                 return (redirect(url_for("timesheet_bp.login")))
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.LOGIN, methods=['POST', 'GET'])
+@timesheet_bp.route(Route.LOGIN, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
 def login():
-    println(Route.LOGIN, 'debug')
+    """ Login page
+    :param : 
+    :return: login page
+    """
+    println(Route.LOGIN, OtherKeys.LOGING_DEBUG)
     try:
         session.clear()
         ctrl_obj   = ctrl()
@@ -72,12 +85,16 @@ def login():
                                route = Route(), template= Template(), session_enum = SessionKey(), \
                                request_dict = request_dict, current_user=current_user)
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.AUTH, methods=['POST'])
+@timesheet_bp.route(Route.AUTH, methods=[OtherKeys.METHOD_POST])
 def auth():
-    println(Route.AUTH, 'debug')
+    """ Authenticate user and domain password
+    :param : 
+    :return: (1 or 0, error message)
+    """
+    println(Route.AUTH, OtherKeys.LOGING_DEBUG)
     request_dict = get_request_form_ajax()
     password = request_dict[SessionKey.PASSWORD]
     username = request_dict[SessionKey.USERNAME].strip()
@@ -86,113 +103,157 @@ def auth():
     result = ctrl_obj.authenticate_account(username, password, remember)
     return jsonify({'result': result})
 
-@timesheet_bp.route(Route.HOME, methods=['POST', 'GET'])
+@timesheet_bp.route(Route.HOME, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
 def home():
-    println(Route.HOME, 'debug')
+    """ Home page
+    :param : 
+    :return: home page
+    """
+    println(Route.HOME, OtherKeys.LOGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
         return render_template(Template.HOME, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , \
                                session_enum = SessionKey(), template= Template())
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.GET_NEWEST_DATA, methods=['POST'])
+@timesheet_bp.route(Route.GET_NEWEST_DATA, methods=[OtherKeys.METHOD_POST])
 def get_newest_data():
-    println(Route.GET_NEWEST_DATA, 'debug')
+    """ Get task from smartsheet and add to database
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.GET_NEWEST_DATA, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().get_newest_data(from_date=request_dict[SessionKey.FROM], to_date=request_dict[SessionKey.TO], sheet_ids=request_dict[SessionKey.SHEETS])
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.GET_NEWEST_DATA_LOG, methods=['POST'])
+@timesheet_bp.route(Route.GET_NEWEST_DATA_LOG, methods=[OtherKeys.METHOD_POST])
 def get_newest_data_log():
-    println(Route.GET_NEWEST_DATA_LOG, 'debug')
+    """ Get log of 'get newest data' feature
+    :param : 
+    :return: text
+    """
+    println(Route.GET_NEWEST_DATA_LOG, OtherKeys.LOGING_DEBUG)
     try:
         result = ctrl().get_newest_data_log()
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
-@timesheet_bp.route(Route.ADD_TO_FINAL, methods=['POST'])
+@timesheet_bp.route(Route.ADD_TO_FINAL, methods=[OtherKeys.METHOD_POST])
 def add_to_final():
-    println(Route.ADD_TO_FINAL, 'debug')
+    """ Move task to final table
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.ADD_TO_FINAL, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().add_to_final(from_date=request_dict[SessionKey.FROM], to_date=request_dict[SessionKey.TO], sheet_ids=request_dict[SessionKey.SHEETS])
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
-@timesheet_bp.route(Route.UPLOAD_FILE, methods=['POST'])
+@timesheet_bp.route(Route.UPLOAD_FILE, methods=[OtherKeys.METHOD_POST])
 def upload_file():
-    println(Route.UPLOAD_FILE, 'debug')
+    """ Upload file from client
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.UPLOAD_FILE, OtherKeys.LOGING_DEBUG)
     try:
         result = save_file_from_request()
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.DOWNLOAD_FILE, methods=['GET', 'POST'])
+@timesheet_bp.route(Route.DOWNLOAD_FILE, methods=[OtherKeys.METHOD_GET, OtherKeys.METHOD_POST])
 def download_file():
-    println(Route.DOWNLOAD_FILE, 'debug')
+    """ download file from server
+    :param : 
+    :return: file obj
+    """
+    println(Route.DOWNLOAD_FILE, OtherKeys.LOGING_DEBUG)
     request_dict = get_request_args()
     path = os.path.join(config.WORKING_PATH, request_dict[SessionKey.FILE_NAME])
     return send_file(path, as_attachment=True, cache_timeout=0)
 
-@timesheet_bp.route(Route.EXPORT, methods=['POST'])
+@timesheet_bp.route(Route.EXPORT, methods=[OtherKeys.METHOD_POST])
 def export():
-    println(Route.EXPORT, 'debug')
+    """ Export timesheet to excel file
+    :param : 
+    :return: (0, error) or (1, file_name)
+    """
+    println(Route.EXPORT, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().export_excel(from_date=request_dict[SessionKey.FROM], to_date=request_dict[SessionKey.TO], sheet_ids=request_dict[SessionKey.SHEETS])
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
 
 
 @timesheet_bp.route(Route.TIMEOFF)
 def timeoff():
-    println(Route.TIMEOFF, 'debug')
+    """ Time-Off setting 
+    :param : 
+    :return: timeoff setting page
+    """
+    println(Route.TIMEOFF, OtherKeys.LOGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
         return render_template(Template.SETTING_TIMEOFF, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.IMPORT_TIMEOFF, methods=['POST'])
+@timesheet_bp.route(Route.IMPORT_TIMEOFF, methods=[OtherKeys.METHOD_POST])
 def import_timeoff():
-    println(Route.IMPORT_TIMEOFF, 'debug')
+    """ Import timeoff
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.IMPORT_TIMEOFF, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().import_timeoff(file_name=request_dict['file_name'])
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
 @timesheet_bp.route(Route.LOG)
 def log():
-    println(Route.LOG, 'debug')
+    """ Log page
+    :param : 
+    :return: log page
+    """
+    println(Route.LOG, OtherKeys.LOGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
         return render_template(Template.LOG, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
 @timesheet_bp.route(Route.SHEET)
 def sheet():
-    println(Route.SHEET, 'debug')
+    """ sheet setting page
+    :param : 
+    :return: sheet setting page
+    """
+    println(Route.SHEET, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
@@ -200,12 +261,16 @@ def sheet():
         return render_template(Template.SETTING_SHEET, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , \
                                template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
 @timesheet_bp.route(Route.OTHER_SETTING)
 def other_setting():
-    println(Route.OTHER_SETTING, 'debug')
+    """ other setting page
+    :param : 
+    :return: other setting page
+    """
+    println(Route.OTHER_SETTING, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
@@ -213,135 +278,183 @@ def other_setting():
                                template= Template(), session_enum = SessionKey(), request_dict = request_dict,\
                                analyze_cfg_key = AnalyzeCFGKeys())
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
-@timesheet_bp.route(Route.IMPORT_SHEET, methods=['POST'])
+@timesheet_bp.route(Route.IMPORT_SHEET, methods=[OtherKeys.METHOD_POST])
 def import_sheet():
-    println(Route.IMPORT_SHEET, 'debug')
+    """ import sheet by excel file
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.IMPORT_SHEET, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().import_sheet(file_name=request_dict['file_name'])
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
 @timesheet_bp.route(Route.RESOURCE)
 def resource():
-    println(Route.RESOURCE, 'debug')
+    """ resource setting page
+    :param : 
+    :return: resource setting page
+    """
+    println(Route.RESOURCE, OtherKeys.LOGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
         return render_template(Template.SETTING_RESOURCE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.IMPORT_RESOURCE, methods=['POST'])
+@timesheet_bp.route(Route.IMPORT_RESOURCE, methods=[OtherKeys.METHOD_POST])
 def import_resource():
-    println(Route.IMPORT_RESOURCE, 'debug')
+    """ import resource by excel file
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.IMPORT_RESOURCE, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().import_resource(file_name=request_dict['file_name'])
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
 @timesheet_bp.route(Route.HOLIDAY)
 def holiday():
-    println(Route.HOLIDAY, 'debug')
+    """ holiday setting page
+    :param : 
+    :return: holiday setting page
+    """
+    println(Route.HOLIDAY, OtherKeys.LOGING_DEBUG)
     try:
         ctrl_obj    = ctrl()
         return render_template(Template.SETTING_HOLIDAY, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.IMPORT_HOLIDAY, methods=['POST'])
+@timesheet_bp.route(Route.IMPORT_HOLIDAY, methods=[OtherKeys.METHOD_POST])
 def import_holiday():
-    println(Route.IMPORT_HOLIDAY, 'debug')
+    """ import holiday by excel
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.IMPORT_HOLIDAY, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().import_holiday(file_name=request_dict['file_name'])
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.UPDATE_SESSION, methods=['POST'])
+@timesheet_bp.route(Route.UPDATE_SESSION, methods=[OtherKeys.METHOD_POST])
 def update_session():
-    println(Route.UPDATE_SESSION, 'debug')
+    """ update sessionkey
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.UPDATE_SESSION, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().update_session(request_dict['session_key'], request_dict['session_value'], )
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
 @timesheet_bp.route(Route.DETAIL)
 def daily_timesheet():
-    println(Route.DETAIL, 'debug')
+    """ detail timesheet page
+    :param : 
+    :return: detail timesheet page
+    """
+    println(Route.DETAIL, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
         ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
         return render_template(Template.TIMESHEET_DETAIL, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
 @timesheet_bp.route(Route.RESOURCE_TIMESHEET)
 def resource_timesheet():
-    println(Route.RESOURCE_TIMESHEET, 'debug')
+    """ resource timesheet page
+    :param : 
+    :return: resource timesheet page
+    """
+    println(Route.RESOURCE_TIMESHEET, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
         ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
         return render_template(Template.TIMESHEET_RESOURCE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
 @timesheet_bp.route(Route.PROJECT_TIMESHEET)
 def project_timesheet():
-    println(Route.PROJECT_TIMESHEET, 'debug')
+    """ project timesheet page
+    :param : 
+    :return: project timesheet page
+    """
+    println(Route.PROJECT_TIMESHEET, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
         ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
         return render_template(Template.TIMESHEET_PROJECT, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
 @timesheet_bp.route(Route.ANALYZE)
 def analyze():
-    println(Route.ANALYZE, 'debug')
+    """ analyze timesshet before add final task
+    :param : 
+    :return: analyze page
+    """
+    println(Route.ANALYZE, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_args()
         request_dict[SessionKey.TASK_FILTER] = 'current'
         ctrl_obj   = ctrl()
         return render_template(Template.TIMESHEET_ANALYZE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
 @timesheet_bp.route(Route.CONFLICT_DATE)
 def conflict_final_date():
-    println(Route.CONFLICT_DATE, 'debug')
+    """ conflict date page
+    :param : 
+    :return: conflict date page
+    """
+    println(Route.CONFLICT_DATE, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
         return render_template(Template.TIMESHEET_CONFLICT_DATE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.CHECK_LOADING_SMARTSHEET, methods=['POST'])
+@timesheet_bp.route(Route.CHECK_LOADING_SMARTSHEET, methods=[OtherKeys.METHOD_POST])
 def check_loading_smartsheet():
-    println(Route.CHECK_LOADING_SMARTSHEET, 'debug')
+    """ checking sheet is loading task
+    :param : 
+    :return: (1 or 0, list_sheet)
+    """
+    println(Route.CHECK_LOADING_SMARTSHEET, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         try:
@@ -351,45 +464,61 @@ def check_loading_smartsheet():
         result = ctrl().check_get_newest_data_feature_is_running(sheet_ids)
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.SAVE_SHEET_SETTING, methods=['POST'])
+@timesheet_bp.route(Route.SAVE_SHEET_SETTING, methods=[OtherKeys.METHOD_POST])
 def save_sheet_setting():
-    println(Route.SAVE_SHEET_SETTING, 'debug')
+    """ save all the changes on GUI of sheet setting
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.SAVE_SHEET_SETTING, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().save_sheet_setting(request_dict)
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.SAVE_OTHER_SETTING, methods=['POST'])
+@timesheet_bp.route(Route.SAVE_OTHER_SETTING, methods=[OtherKeys.METHOD_POST])
 def save_other_setting():
-    println(Route.SAVE_OTHER_SETTING, 'debug')
+    """ save all the changes on GUI of other setting
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.SAVE_OTHER_SETTING, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().save_other_setting(request_dict)
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
-@timesheet_bp.route(Route.GET_SYNC_SHEET, methods=['POST', 'GET'])
+@timesheet_bp.route(Route.GET_SYNC_SHEET, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
 def get_sync_sheet():
-    println(Route.GET_SYNC_SHEET, 'debug')
+    """ get sheet info from smartsheet
+    :param : 
+    :return: info
+    """
+    println(Route.GET_SYNC_SHEET, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().get_sync_sheet(request_dict)
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.GET_TEMPLATE_CONTENT, methods=['POST', 'GET'])
+@timesheet_bp.route(Route.GET_TEMPLATE_CONTENT, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
 def get_template_content():
-    println(Route.GET_TEMPLATE_CONTENT, 'debug')
+    """ get template content
+    :param : 
+    :return: template content
+    """
+    println(Route.GET_TEMPLATE_CONTENT, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         file_path = request_dict['path']
@@ -400,32 +529,36 @@ def get_template_content():
             result = f.read()
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.UPDATE_SYNC_SHEET, methods=['POST', 'GET'])
+@timesheet_bp.route(Route.UPDATE_SYNC_SHEET, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
 def update_sync_sheet():
-    println(Route.UPDATE_SYNC_SHEET, 'debug')
+    """ Update sheet info by 'sync sheet' feature
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.UPDATE_SYNC_SHEET, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().update_sync_sheet(request_dict)
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
 @timesheet_bp.route('/test')
 def test():
-    println('/test', 'debug')
+    println('/test', OtherKeys.LOGING_DEBUG)
     try:
         
         ctrl_obj   = ctrl()       
         return render_template("test.html", ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
-@timesheet_bp.route('/test-ajax', methods=['POST', 'GET'])
+@timesheet_bp.route('/test-ajax', methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
 def test_ajax():
     try:
         request_dict = get_request_form_ajax()
@@ -434,7 +567,7 @@ def test_ajax():
         time.sleep(5)
         return jsonify({'result': result})
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e) 
     
     

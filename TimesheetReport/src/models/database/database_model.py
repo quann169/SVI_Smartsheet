@@ -30,7 +30,8 @@ class Configuration(Connection):
         self.team               = {}
         self.team_ids           = {}
         self.sheet_user         = {}
-        
+        self.sheet_user2        = {}
+        self.sheet_user3        = {}
      
     def get_sheet_config(self, list_sheet_id=None, is_parse=False, is_active=True):
         condition = ''
@@ -152,7 +153,7 @@ class Configuration(Connection):
             DbTable.USER, DbHeader.USER_ID, DbTable.PROJECT_USER, DbHeader.USER_ID,
             )
         query_result    = self.db_query(query)
-        result          = ()
+        
         if query_result:
             for row in query_result:
                 sheet_id    = row[DbHeader.SHEET_ID]
@@ -161,6 +162,14 @@ class Configuration(Connection):
                 if not self.sheet_user.get(sheet_id):
                     self.sheet_user[sheet_id] = []
                 self.sheet_user[sheet_id].append(user_id)
+                
+                if not self.sheet_user2.get(sheet_id):
+                    self.sheet_user2[sheet_id] = []
+                self.sheet_user2[sheet_id].append(user_name)
+                
+                if not self.sheet_user3.get(user_id):
+                    self.sheet_user3[user_id] = []
+                self.sheet_user3[user_id].append(sheet_id)
                 
     def add_sheet(self):
         query   = """INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES ("%s", "%s", "%s", "%s", "%s", "%s");

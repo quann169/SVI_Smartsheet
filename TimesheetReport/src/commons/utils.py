@@ -7,7 +7,7 @@ import os, sys, re, copy
 import datetime, calendar
 import ast
 from src.commons.message import Msg, MsgError, MsgWarning
-from src.commons.enums import DateTime, SessionKey, ExcelColor, SettingKeys
+from src.commons.enums import DateTime, SessionKey, ExcelColor, SettingKeys, OtherKeys
 import logging
 import config
 from flask import request
@@ -81,7 +81,7 @@ def save_file_from_request():
             userfile.save(os.path.join(upload_folder, userfile.filename))
         return 1, ''
     except Exception as e:
-        println(e, 'exception')
+        println(e, OtherKeys.LOGING_EXCEPTION)
         return 0, e.args[0]
 
 def stuck(message='', logging_level=None):
@@ -101,24 +101,24 @@ def convert_request_dict_to_url(request_dict, more_option=[]):
     return result   
     
 def println(message, logging_level=None):
-    if logging_level == 'critical':
+    if logging_level == OtherKeys.LOGING_CRITICAL:
         logging.critical(message)
         print (message)
-    elif logging_level == 'exception':
+    elif logging_level == OtherKeys.LOGING_EXCEPTION:
         logging.exception(message)
 #         traceback.print_exc('')
         print (message)
-    elif logging_level == 'error':
+    elif logging_level == OtherKeys.LOGING_ERROR:
         logging.error(message)
         print (message)
-    elif logging_level == 'warning':
+    elif logging_level == OtherKeys.LOGING_WARNING:
         logging.warn(message)
         print (message)
-    elif logging_level == 'info':
+    elif logging_level == OtherKeys.LOGING_INFO:
         logging.info(message)
         print (message)
-    elif logging_level == 'debug':
-        if config.LOGGING_LEVEL.lower() ==  'debug':
+    elif logging_level == OtherKeys.LOGING_DEBUG:
+        if config.LOGGING_LEVEL.lower() ==  OtherKeys.LOGING_DEBUG:
             logging.debug(message)
             print (message)
 
@@ -169,7 +169,7 @@ def message_generate(message, *argv):
         result  = message.format(*var_tuple)
         return result
     except Exception as e:
-        stuck(e, 'exception')
+        stuck(e, OtherKeys.LOGING_EXCEPTION)
 
 def search_pattern(string, pattern):
     obj_search = re.search(pattern, string)
@@ -183,15 +183,15 @@ def select_logging_level(logging_level):
     level = ''
     if logging_level == 0:
         level = logging.WARNING
-    elif logging_level.lower() == 'debug':
+    elif logging_level.lower() == OtherKeys.LOGING_DEBUG:
         level = logging.DEBUG
-    elif logging_level.lower() == 'info':
+    elif logging_level.lower() == OtherKeys.LOGING_INFO:
         level = logging.INFO
-    elif logging_level.lower() == 'warning':
+    elif logging_level.lower() == OtherKeys.LOGING_WARNING:
         level = logging.WARNING
-    elif logging_level.lower() == 'error':
+    elif logging_level.lower() == OtherKeys.LOGING_ERROR:
         level = logging.ERROR
-    elif logging_level.lower() == 'critical':
+    elif logging_level.lower() == OtherKeys.LOGING_CRITICAL:
         level = logging.CRITICAL
     else:
         level = logging.WARNING
@@ -201,7 +201,7 @@ def logging_setting(file_name):
     try:
         logging_lv      = config.LOGGING_LEVEL
     except  AttributeError:
-        logging_lv      = 'ERROR'
+        logging_lv      = OtherKeys.LOGING_ERROR
     logging_level       = select_logging_level(logging_lv)
     log_formatter       = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
     log_name            = os.path.join(config.WORKING_PATH, file_name)
@@ -228,7 +228,7 @@ def str_to_date(string):
                         obj_date = datetime.datetime.strptime(string, '%m/%d/%Y')
                     except:
                         message      = message_generate(MsgError.E001, string)
-                        stuck(message, 'exception')
+                        stuck(message, OtherKeys.LOGING_EXCEPTION)
     year    = obj_date.year
     month   = obj_date.month
     day     = obj_date.day
@@ -477,19 +477,19 @@ def save_password(password):
 
 def check_domain_password(username, password, domain_name='SVI'):
     try:
-#         token = win32security.LogonUser(
-#             username,
-#             domain_name,
-#             password,
-#             win32security.LOGON32_LOGON_NETWORK,
-#             win32security.LOGON32_PROVIDER_DEFAULT)
-#         result = bool(token)
-        result = True
+        token = win32security.LogonUser(
+            username,
+            domain_name,
+            password,
+            win32security.LOGON32_LOGON_NETWORK,
+            win32security.LOGON32_PROVIDER_DEFAULT)
+        result = bool(token)
+#         result = True
         if result:
             return True, ''
         else:
             return False, MsgError.E004
     except Exception as e:
-        println(str(e.args), 'exception')
+        println(str(e.args), OtherKeys.LOGING_EXCEPTION)
         return False, MsgError.E004
     

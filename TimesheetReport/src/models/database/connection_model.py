@@ -6,7 +6,7 @@ Created on Feb 17, 2021
 
 import pymysql
 from pymysql.constants import CLIENT
-from src.commons.enums import Connect
+from src.commons.enums import Connect, OtherKeys
 from src.commons.utils import println
 from pprint import pprint
 from flask import g
@@ -57,7 +57,7 @@ class Connection:
                             )
             return connection
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
         return connection
     
     def create_pool_connection (self ):
@@ -86,7 +86,7 @@ class Connection:
             )
             return pool_conn
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
         return pool_conn
         
     def check_connection(self):
@@ -110,10 +110,10 @@ class Connection:
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 connection.commit()
-            println(query, 'debug')
+            println(query, OtherKeys.LOGING_DEBUG)
         except Exception as e:
-            println(query, 'exception')
-            println(e, 'exception')
+            println(query, OtherKeys.LOGING_EXCEPTION)
+            println(e, OtherKeys.LOGING_EXCEPTION)
             raise Exception(e)
         finally:
             connection.close()
@@ -128,11 +128,11 @@ class Connection:
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 connection.commit()
-            println(query, 'debug')
+            println(query, OtherKeys.LOGING_DEBUG)
             return cursor.lastrowid
         except Exception as e:
-            println(query, 'exception')
-            println(e, 'exception')
+            println(query, OtherKeys.LOGING_EXCEPTION)
+            println(e, OtherKeys.LOGING_EXCEPTION)
             raise Exception(e)
         finally:
             connection.close()
@@ -147,10 +147,10 @@ class Connection:
             with connection.cursor() as cursor:
                 cursor.executemany(query, list_record)
                 connection.commit()
-            println(query, 'debug')
+            println(query, OtherKeys.LOGING_DEBUG)
         except Exception as e:
-            println(query, 'exception')
-            println(e, 'exception')
+            println(query, OtherKeys.LOGING_EXCEPTION)
+            println(e, OtherKeys.LOGING_EXCEPTION)
             raise Exception(e)
         finally:
             connection.close()
@@ -165,14 +165,14 @@ class Connection:
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 rows                = cursor.fetchall()
-            println(query, 'debug')
+            println(query, OtherKeys.LOGING_DEBUG)
             if rows:
                 return rows
             else:
                 return None
         except Exception as e:
-            println(query, 'exception')
-            println(e, 'exception')
+            println(query, OtherKeys.LOGING_EXCEPTION)
+            println(e, OtherKeys.LOGING_EXCEPTION)
             raise Exception(e)         
         finally:
             connection.close()

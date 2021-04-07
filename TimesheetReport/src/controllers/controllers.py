@@ -6,7 +6,7 @@ Created on Feb 22, 2021
 from src.models.smartsheet.smartsheet_model import SmartSheets
 from src.models.database.database_model import Configuration, DbTask
 from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, \
-                            DateTime, AnalyzeCFGKeys, Route, Role
+                            DateTime, AnalyzeCFGKeys, Route, Role, OtherKeys
 from src.commons.message import MsgError, MsgWarning, Msg, AnalyzeItem
 from src.commons.utils import search_pattern, message_generate, println, remove_path, split_patern,\
                             get_prev_date_by_time_delta, get_work_week, convert_date_to_string,\
@@ -33,7 +33,7 @@ class Controllers:
     def parse_smarsheet_and_update_task(self, from_date=None, to_date=None, list_sheet_id=None, log=None):
         if log:
             write_message_into_file(log, 'Starting parse smartsheet\n')
-        println('Starting parse smartsheet', 'info')
+        println('Starting parse smartsheet', OtherKeys.LOGING_INFO)
         start_time = time.time()
         config_obj = Configuration()
         sheet_info  = config_obj.get_sheet_config(list_sheet_id)
@@ -65,7 +65,7 @@ class Controllers:
             if is_parse:
                 if log:
                     write_message_into_file(log, '[%d/%d] Updating sheet: %s\n'%(count, total, sheet_name))
-                println('[%d/%d] Updating sheet: %s'%(count, total, sheet_name), 'info')
+                println('[%d/%d] Updating sheet: %s'%(count, total, sheet_name), OtherKeys.LOGING_INFO)
                 config_obj.set_attr(sheet_id            = sheet_id,
                                     latest_modified     = latest_modified,
                                     parsed_date         = sms_obj.timedelta,
@@ -132,16 +132,16 @@ class Controllers:
                 config_obj.update_parsed_date_of_sheet()
                 config_obj.set_attr(is_loading          = 0)
                 config_obj.update_is_loading_of_sheet()
-                println('[%d/%d] Update database for %s - Done'%(count, total, sheet_name), 'info')
+                println('[%d/%d] Update database for %s - Done'%(count, total, sheet_name), OtherKeys.LOGING_INFO)
                 if log:
                     write_message_into_file(log, '[%d/%d] Update database for %s - Done\n'%(count, total, sheet_name))
             else:
-                println('[%d/%d] Skip update database for %s'%(count, total, sheet_name), 'info')
+                println('[%d/%d] Skip update database for %s'%(count, total, sheet_name), OtherKeys.LOGING_INFO)
                 if log:
                     write_message_into_file(log, '[%d/%d] Skip update database for %s\n'%(count, total, sheet_name))
         for user in missing_user:
             message = message_generate(MsgWarning.W002, user)
-            println('Warning: %s'%(message), 'info')
+            println('Warning: %s'%(message), OtherKeys.LOGING_INFO)
             if log:
                 write_message_into_file(log, 'Warning: %s\n'%(message))
         end_time = time.time()
@@ -202,7 +202,7 @@ class Controllers:
                 try:
                     unuse = exist_id[id_timeoff]
                     message = message_generate(MsgWarning.W001, id_timeoff)
-                    println(message, 'debug')
+                    println(message, OtherKeys.LOGING_DEBUG)
                     continue
                 except KeyError:
                     exist_id[id_timeoff] = ''
@@ -244,7 +244,7 @@ class Controllers:
             remove_path(file_path)
             return 1, Msg.M001
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
         
     def get_timeoff_info(self):
@@ -265,7 +265,7 @@ class Controllers:
             remove_path(file_path)
             return 1, Msg.M001
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
     def get_session(self, key=None):
@@ -301,7 +301,7 @@ class Controllers:
             
             return 1, ''
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
     def update_resource_of_sheet(self, info = {}):
@@ -381,7 +381,7 @@ class Controllers:
             remove_path(file_path)
             return 1, Msg.M001
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]         
     
     def get_resource_config(self):
@@ -448,7 +448,7 @@ class Controllers:
             remove_path(file_path)
             return 1, Msg.M001
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
         
     def get_list_sheet_name(self):
@@ -527,7 +527,7 @@ class Controllers:
             return result
             
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
     def get_newest_data(self, from_date, to_date, sheet_ids):
@@ -544,7 +544,7 @@ class Controllers:
             time.sleep(2)
             return 1, Msg.M002
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             write_message_into_file(log_file, '[ERROR] %s'%(e.args[0]))
             return 1, '[ERROR] %s'%(e.args[0])
     
@@ -750,7 +750,7 @@ class Controllers:
             return result
             
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
     def export_excel(self, from_date, to_date, sheet_ids):
@@ -907,7 +907,7 @@ class Controllers:
             
             #weekly Project
             weekly_project_wb = wb.add_sheet('Weekly Project')
-            w_project_info, list_week = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='weekly')
+            w_project_info, list_week, no_enought, total = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='weekly')
             start_col, start_row = (0, 0)
             row_num, col_num = (0, 0)
             # create  header
@@ -964,7 +964,7 @@ class Controllers:
             
             #monthly Project
             monthly_project_wb = wb.add_sheet('Monthly Project')
-            m_project_info, list_month = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='monthly')
+            m_project_info, list_month, no_enought, total = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='monthly')
             start_col, start_row = (0, 0)
             row_num, col_num = (0, 0)
             # create  header
@@ -1031,7 +1031,7 @@ class Controllers:
             return 1, file_name
         
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
     def add_to_final(self, from_date, to_date, sheet_ids, overwrite=False):
@@ -1059,7 +1059,7 @@ class Controllers:
                 # missing input
                 return 0, MsgError.E003
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
     def calculate_conflict_to_add_final_task(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, mode='exist'):
@@ -1173,27 +1173,35 @@ class Controllers:
             i3_status = False
         i3_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'equal'], [SessionKey.TASK_FILTER, task_filter]])
         
-        unuse, i5_status, i5_count_fail, i5_total = self.calculate_conflict_to_add_final_task(from_date=from_date, 
+        unuse, i4_status, i4_count_fail, i4_total = self.calculate_conflict_to_add_final_task(from_date=from_date, 
                                                                                               to_date=to_date, 
                                                                                               sheet_ids=sheet_ids, 
                                                                                               mode='exist')
-        i5_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'exist'], 
+        i4_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'exist'], 
                                                                [SessionKey.TITLE, AnalyzeItem.A004]])
         
         
-        unuse, i6_status, i6_count_fail, i6_total = self.calculate_conflict_to_add_final_task(from_date=from_date, 
+        unuse, i5_status, i5_count_fail, i5_total = self.calculate_conflict_to_add_final_task(from_date=from_date, 
                                                                                               to_date=to_date, 
                                                                                               sheet_ids=sheet_ids, 
                                                                                               mode='continuity')
-        i6_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'continuity'],
+        i5_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'continuity'],
                                                                [SessionKey.TITLE, AnalyzeItem.A005]])
+        
+        info, list_sub_column, i6_count_fail, i6_total = self.get_project_timesheet_info(request_dict, is_caculate=True)
+        if i6_total - i6_count_fail == i6_total:
+            i6_status = True
+        else:
+            i6_status = False
+        i6_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'sheet_user'], [SessionKey.TASK_FILTER, task_filter]])
         
         result = [
             [AnalyzeItem.A001, i1_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i1_method), no_missing, total_resource],
             [AnalyzeItem.A002, i2_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i2_method), no_redundant, total_resource],
             [AnalyzeItem.A003, i3_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i3_method), no_enought, total_resource],
-            [AnalyzeItem.A004, i5_status, False, '%s?%s'%(Route.CONFLICT_DATE, i5_method), i5_count_fail, i5_total],
-            [AnalyzeItem.A005, i6_status, False, '%s?%s'%(Route.CONFLICT_DATE, i6_method), i6_count_fail, i6_total]
+            [AnalyzeItem.A004, i4_status, False, '%s?%s'%(Route.CONFLICT_DATE, i4_method), i4_count_fail, i4_total],
+            [AnalyzeItem.A005, i5_status, False, '%s?%s'%(Route.CONFLICT_DATE, i5_method), i5_count_fail, i5_total],
+            [AnalyzeItem.A006, i6_status, True, '%s?%s'%(Route.PROJECT_TIMESHEET, i6_method), i6_count_fail, i6_total]
             ]        
         return result
     
@@ -1219,7 +1227,7 @@ class Controllers:
         return result 
         
     def get_project_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter='weekly', 
-                                   mode='all', task_filter='both', list_user=None):
+                                   mode='all', task_filter='both', list_user=None, is_caculate=False):
         try:
             missing_method = False
             if request_dict:
@@ -1239,17 +1247,40 @@ class Controllers:
                     missing_method = True
             
             if not filter or not sheet_ids or not to_date or not from_date or missing_method:
-                return ({}, [])
+                return ({}, [], 0, 0)
+            sheet_user2 = None
+            sheet_user3 = None
+            config_obj      = Configuration()
+            
+            if is_caculate or mode == 'sheet_user':
+                config_obj.get_sheet_user_info()
+                sheet_user2 = config_obj.sheet_user2
+                sheet_user3 = config_obj.sheet_user3
+                
             timesheet_obj   = Timesheet(from_date, to_date, task_filter, sheet_ids, list_user)
-            timesheet_obj.parse()
+            timesheet_obj.parse(sheet_user=sheet_user2)
             user_ids        = timesheet_obj.user_ids
             eng_type_ids    = timesheet_obj.eng_type_ids
             team_ids        = timesheet_obj.team_ids
-            config_obj      = Configuration()
+            time_off_info   = timesheet_obj.time_off
             config_obj.get_list_holiday(is_parse=True)
             holidays  = config_obj.holidays
             info            = {}
-             
+            
+            # caculate timeoff by week/month
+            timeoff_info_2 = {}
+            for user_id in time_off_info:
+                for date, week, timeoff_per_day, obj in time_off_info[user_id]:
+                    if filter == 'monthly':
+                        name     = get_month_name_of_date(date)
+                    else:
+                        name     = get_start_week_of_date(date)
+                    if not  timeoff_info_2.get(user_id):
+                        timeoff_info_2[user_id] = {}
+                    if not timeoff_info_2[user_id].get(name):
+                        timeoff_info_2[user_id][name] = 0
+                    timeoff_info_2[user_id][name] += timeoff_per_day
+                    
             if filter == 'monthly':
                 list_month   = get_work_month(from_date=from_date, to_date=to_date, holidays=holidays)
                 cols_element = list_month
@@ -1282,12 +1313,13 @@ class Controllers:
                         else:
                             col_element  = task_obj.start_week
                         if not info.get(sheet_name):
-                            info[sheet_name]  = {'resource': {}, 'total': {}}
+                            info[sheet_name]  = {'resource': {}, 'total': {}, 'sheet_id': sheet_id}
                              
                         if not info[sheet_name]['resource'].get(user_name):
                             info[sheet_name]['resource'][user_name]  = {'eng_type': eng_type, 
                                                                         'team': team_name,
-                                                                        'timesheet': {}} 
+                                                                        'timesheet': {},
+                                                                        'user_id': user_id} 
                         for element in cols_element:
                             if filter == 'monthly':
                                 month, year, max_hour = element
@@ -1323,10 +1355,70 @@ class Controllers:
                         else:
                             info[sheet_name]['total'][col_name]  += work_hour
                         info[sheet_name]['total'][col_name]  = round_num(info[sheet_name]['total'][col_name])
-            result = (info, list_sub_col)
+            total    = 0
+            no_enought   = 0
+            
+            if is_caculate or mode == 'sheet_user':
+                remove_sheet = []
+                for sheet_name in info:
+                    sheet_id = info[sheet_name]['sheet_id']
+                    if sheet_user2.get(sheet_id):
+                        for user_name in sheet_user2[sheet_id]:
+                            resource_info = info[sheet_name]['resource']
+                            if not resource_info.get(user_name):
+                                no_enought += 1
+                                total += 1
+                                if not info[sheet_name]['resource'].get(user_name):
+                                    info[sheet_name]['resource'][user_name]  = {'eng_type': '', 
+                                                                                'team': '',
+                                                                                'timesheet': {}} 
+                                for element in cols_element:
+                                    if filter == 'monthly':
+                                        month, year, max_hour = element
+                                        col_name    = DateTime.LIST_MONTH[month]
+                                    else:
+                                        col_name, max_hour = element
+                                    if not info[sheet_name]['resource'][user_name]['timesheet'].get(col_name):
+                                        info[sheet_name]['resource'][user_name]['timesheet'][col_name]  = {'work_hour': 0,
+                                                                                                           'max_hour': max_hour,
+                                                                                                           'href': ''
+                                                                                                           }
+                                    timeoff_per_sheet = 0
+                                    if timeoff_info_2.get(user_id) and timeoff_info_2[user_id].get(col_name):
+                                        timeoff_hour = timeoff_info_2[user_id][col_name]
+                                        if sheet_user3.get(user_id):
+                                            number_sheet = len(sheet_user3[user_id])
+                                            timeoff_per_sheet = timeoff_hour / number_sheet
+                                            timeoff_per_sheet = round_num(timeoff_per_sheet)
+                                    resource_info[user_name]['timesheet'][col_name]['max_hour'] -= timeoff_per_sheet
+                            else:
+                                is_enought = True 
+                                user_id = resource_info[user_name]['user_id']
+                                for col_name in resource_info[user_name]['timesheet']:
+                                    timeoff_per_sheet = 0
+                                    if timeoff_info_2.get(user_id) and timeoff_info_2[user_id].get(col_name):
+                                        timeoff_hour = timeoff_info_2[user_id][col_name]
+                                        if sheet_user3.get(user_id):
+                                            number_sheet = len(sheet_user3[user_id])
+                                            timeoff_per_sheet = timeoff_hour / number_sheet
+                                            timeoff_per_sheet = round_num(timeoff_per_sheet)
+                                    resource_info[user_name]['timesheet'][col_name]['max_hour'] -= timeoff_per_sheet
+                                    work_hour = resource_info[user_name]['timesheet'][col_name]['work_hour']
+                                    max_hour = resource_info[user_name]['timesheet'][col_name]['max_hour']
+                                    if max_hour != work_hour:
+                                        is_enought = False
+                                        break
+                                if not is_enought:
+                                    no_enought += 1
+                                total += 1
+                    else:
+                        remove_sheet.append(sheet_name)
+                for name in remove_sheet:
+                    del info[name]
+            result = (info, list_sub_col, no_enought, total)
             return result
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]  
     
     def get_resource_and_role_name(self):
@@ -1389,7 +1481,7 @@ class Controllers:
                         config_obj.remove_users_of_sheet(remove_record)
             return 1, ''
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
     def save_other_setting(self, request_dict):
@@ -1402,7 +1494,7 @@ class Controllers:
                 config_obj.update_analyze_config()
             return 1, ''
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
         
     def get_sync_sheet(self, request_dict={}):
@@ -1449,6 +1541,6 @@ class Controllers:
                 
             return 1, 'Synchronize successfully'
         except Exception as e:
-            println(e, 'exception')
+            println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
         

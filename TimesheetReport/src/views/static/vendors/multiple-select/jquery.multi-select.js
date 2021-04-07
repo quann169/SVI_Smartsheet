@@ -404,12 +404,26 @@
           'overflow': ''
         });
       }
+	//Toan Nguyen
+		try {
+		document.getElementsByClassName('scroll-data-table')[0].style.height = 'unset';
+		var height = document.getElementsByClassName('scroll-data-table')[0].scrollHeight
+		document.getElementsByClassName('scroll-data-table')[0].style.height = (height + 20) +'px';
+		} catch {
+		}//Toan Nguyen
     },
 
     menuHide: function() {
       this.$container.removeClass(this.settings['activeClass']);
       this.$container.removeClass(this.settings['positionedMenuClass']);
       this.$menu.css('width', 'auto');
+		//Toan Nguyen
+		try {
+		document.getElementsByClassName('scroll-data-table')[0].style.height = 'unset';
+		var height = document.getElementsByClassName('scroll-data-table')[0].scrollHeight
+		document.getElementsByClassName('scroll-data-table')[0].style.height = (height + 20) +'px';
+		} catch {
+		}//Toan Nguyen
     },
 
     menuToggle: function() {

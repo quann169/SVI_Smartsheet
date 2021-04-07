@@ -53,12 +53,12 @@
 			<tr>
 				  <td>2</td>
 				  <td>Time Delta Before</td>
-				  <td><input type='number' name='{{analyze_cfg_key.TIME_DELTA_BEFORE}}' class='w-50-px' value="{{analyze_config[analyze_cfg_key.TIME_DELTA_BEFORE]}}"> weeks</td>
+				  <td><input type='number' name='{{analyze_cfg_key.TIME_DELTA_BEFORE}}' class='w-50-px' min='0' value="{{analyze_config[analyze_cfg_key.TIME_DELTA_BEFORE]}}"> weeks</td>
 		    </tr>
 			<tr>
 				  <td>3</td>
 				  <td>Time Delta After</td>
-				  <td><input type='number' name='{{analyze_cfg_key.TIME_DELTA_AFTER}}' class='w-50-px' value="{{analyze_config[analyze_cfg_key.TIME_DELTA_AFTER]}}" > weeks</td>
+				  <td><input type='number' name='{{analyze_cfg_key.TIME_DELTA_AFTER}}' class='w-50-px' min='0' value="{{analyze_config[analyze_cfg_key.TIME_DELTA_AFTER]}}" > weeks</td>
 		    </tr>
 		</tbody>
 	</table>

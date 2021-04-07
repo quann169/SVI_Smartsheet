@@ -18,7 +18,7 @@ from src.commons.utils import get_prev_date_by_time_delta, stuck, convert_date_t
                              get_work_days, str_to_date, compare_date,  write_message_into_file, \
                              is_caculate_sheet
 
-from src.commons.enums import SmartsheetCfgKeys, SettingKeys, DbHeader
+from src.commons.enums import SmartsheetCfgKeys, SettingKeys, DbHeader, OtherKeys
 import copy
 
 class SmartSheets:
@@ -43,12 +43,12 @@ class SmartSheets:
     def connect_smartsheet(self):
         if self.log:
             write_message_into_file(self.log, 'Connecting to smartsheet\n')
-        println('Connecting to smartsheet', 'info')
+        println('Connecting to smartsheet', OtherKeys.LOGING_INFO)
         self.connection = Smartsheet(self.token)
         self.get_available_sheet_name()
         if self.log:
             write_message_into_file(self.log, 'Connect to smartsheet - Done\n')
-        println('Connect to smartsheet - Done', 'info')
+        println('Connect to smartsheet - Done', OtherKeys.LOGING_INFO)
         
     def get_available_sheet_name(self):
         sheets = self.connection.sheets.list()
@@ -88,7 +88,7 @@ class SmartSheets:
                     sheet_type = sheet_in_db[sheet_name][DbHeader.SHEET_TYPE]
                     is_active = sheet_in_db[sheet_name][DbHeader.IS_ACTIVE]
                 result[sheet_name] = {'is_valid': is_valid, 'sheet_type': sheet_type, 'is_active': is_active, 'missing_cols': require_col}
-            println('Caculate [%d/%d] %s sheet: %s'%(count, total_sheet, is_skip, sheet_name), 'info')
+            println('Caculate [%d/%d] %s sheet: %s'%(count, total_sheet, is_skip, sheet_name), OtherKeys.LOGING_INFO)
         return result
         
     def parse(self):
@@ -141,14 +141,14 @@ class Sheet():
         
         modified_at = convert_date_to_string(sheet.modified_at)
         if self.latest_modified == modified_at and is_go:
-            println('[%d/%d] Skip parsing sheet: %s'%(self.count, self.total, self.name), 'info')
+            println('[%d/%d] Skip parsing sheet: %s'%(self.count, self.total, self.name), OtherKeys.LOGING_INFO)
             if self.log:
                 write_message_into_file(self.log, '[%d/%d] Skip parsing sheet: %s\n'%(self.count, self.total, self.name))
             self.is_parse       = False
         else:
             if self.log:
                 write_message_into_file(self.log, '[%d/%d] Parsing sheet: %s\n'%(self.count, self.total, self.name))
-            println('[%d/%d] Parsing sheet: %s'%(self.count, self.total, self.name), 'info')
+            println('[%d/%d] Parsing sheet: %s'%(self.count, self.total, self.name), OtherKeys.LOGING_INFO)
             self.latest_modified    = modified_at
             count = 0
             for col  in cols:

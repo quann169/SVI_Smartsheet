@@ -26,4 +26,6 @@ class AnalyzeItem:
     A002 = 'No. resource have redundant working hours' 
     A003 = 'No. resource have enough working hours' 
     A004 = 'No conflict with final date'  
-    A005 = 'Continuity with final date' 
+    A005 = 'Continuity with final date'
+    A006 = 'No. resource in project have enough task' 
+    A007 = 'All tasks are mapping with resource' 

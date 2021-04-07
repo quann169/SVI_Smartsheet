@@ -5,6 +5,7 @@ Created on Feb 5, 2021
 '''
 
 class SmartsheetCfgKeys:
+    
     TASK_NAME   = 'Task Name'
     START_DATE  = 'Start Date'
     END_DATE    = 'End Date'
@@ -32,6 +33,7 @@ class SmartsheetCfgKeys:
         ]
 
 class Connect:
+    
     DB_HOST_NAME            = 'db_host_name'
     DB_PORT                 = 'db_port'
     DB_USER                 = 'db_user'
@@ -40,6 +42,7 @@ class Connect:
     CHAR_SET                = 'utf8mb4'
 
 class DbTable:
+    
     ANALYSIS_CONFIG         = 'analysis_config'
     ENG_LEVEL               = 'eng_level'
     ENG_TYPE                = 'eng_type'
@@ -61,12 +64,14 @@ class DbTable:
     FINAL_EVIDENCE          = 'final_evidence'
     
 class AnalyzeCFGKeys:
+    
     TOKEN   = 'Token'
     TIME_DELTA  = 'Time Delta'
     TIME_DELTA_BEFORE  = 'Time Delta Before'
     TIME_DELTA_AFTER  = 'Time Delta After'
     
 class DateTime():
+    
     LIST_MONTH = {
         1 : 'Jan', 
         2 :'Feb', 
@@ -85,6 +90,7 @@ class DateTime():
     START_WEEK = 'Monday'
 
 class ExcelHeader:
+    
     ID          = 'ID'
     REQUESTER   = 'Requester'
     DEPARTMENT  = 'Department'
@@ -107,18 +113,33 @@ class ExcelHeader:
     IS_ACTIVE   = 'Is Active'
     
 class DefaulteValue:
+    
     DATETIME    = '0000-00-00 00:00:00'
     
     
 class SettingKeys:
+    
     EMPTY_CELL          = ['', 'NaT', 'nan', 'NaN', '#REF']
     NA_VALUE            = 'NA'
     SKIP_SHEET      = [
         'Cash usd', 'EDA', 'Interview List', 'NDA list', 'New Sheet', 'Operation Cost', 'Overtime Record', 'QA_Handover', \
         'Request to Hire', 'Time card', 'Validation- iCUE Tasks (VN)'
         ]
-
+    
+class OtherKeys:
+    
+    METHOD_POST         = 'POST'
+    METHOD_GET          = 'GET'
+    LOGING_DEBUG        = 'debug'
+    LOGING_INFO         = 'info'
+    LOGING_WARNING      = 'warning'
+    LOGING_ERROR        = 'error'
+    LOGING_EXCEPTION    = 'exception'
+    LOGING_CRITICAL     = 'critical'
+    
+    
 class SessionKey:
+    
     USERNAME        = 'username'
     PASSWORD        = 'password'
     SIDEBAR         = 'sidebar'
@@ -201,22 +222,25 @@ class DbHeader:
     IS_VALID                = 'is_valid'
 
 class ExcelColor:
+    
     LIST_COLOR = [
         'lime', 'orange', 'tan', 'gray_ega', 'gray25', 'ice_blue', 'white', 'light_turquoise', 'green', 'red', 'blue'
         ]
 
 class Role:
+    
     ADMIN = 'Admin'
     PM    = 'PM'
     DM    = 'DM'
     USER  = 'User'
 
 class Template:
+    
     SETTING_HOLIDAY     = 'screens/setting/holiday.html'
     SETTING_RESOURCE    = 'screens/setting/resource.html'
     SETTING_SHEET       = 'screens/setting/sheet.html'
     SETTING_TIMEOFF     = 'screens/setting/timeoff.html'
-    SETTING_OTHER     = 'screens/setting/other_setting.html'
+    SETTING_OTHER       = 'screens/setting/other_setting.html'
     
     ADMIN               = 'screens/admin/admin.html'
     

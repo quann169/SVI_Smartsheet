@@ -29,7 +29,7 @@
 {% endblock scripts %}
 
 {% block main %}
-<form id='timesheet_form' class='{% if session_enum.MODE in request_dict and request_dict[session_enum.MODE] in ['view']%}d-none{% endif %}'>
+<form id='timesheet_form' class='{% if session_enum.MODE in request_dict and request_dict[session_enum.MODE] in ['view', 'sheet_user']%}d-none{% endif %}'>
 	{% set sheet_info = ctrl_obj.get_list_sheet_name() %}
 	<div class='row'>
 		<div class='col-md-10 d-flex align-items-center'>
@@ -61,7 +61,7 @@
 <br>
 <div class='table-content'>
 	<table id="project_timesheet" class="table table-striped table-bordered " cellspacing="0" width='100%'>
-		{% set info, list_sub_column = ctrl_obj.get_project_timesheet_info(request_dict) %}
+		{% set info, list_sub_column, no_enought, total = ctrl_obj.get_project_timesheet_info(request_dict) %}
 		
 	  <thead>
 	    <tr>
