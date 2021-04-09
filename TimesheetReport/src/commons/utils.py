@@ -17,7 +17,12 @@ from decimal import Decimal
 import xlwt, socket
 import urllib
 import win32security
-
+from win32com import client
+from jinja2 import Environment
+from jinja2.loaders import FileSystemLoader
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 def get_request_form():
     # for post method
@@ -493,3 +498,42 @@ def check_domain_password(username, password, domain_name='SVI'):
         println(str(e.args), OtherKeys.LOGING_EXCEPTION)
         return False, MsgError.E004
     
+def render_jinja2_template(template_path, file_name,  dict_variable):
+    systemFile1 = FileSystemLoader(template_path)
+    j2_env1 = Environment(loader=systemFile1, trim_blocks=True)
+    run_template = j2_env1.get_template(file_name)
+    result = run_template.render(dict_variable)
+    return result
+    
+def send_mail(user_name, password, recepient, cc_recepient, subject, message):
+    try:
+        sender = "%s@savarti.com"%user_name
+        recepient = ['toannguyen@savarti.com']
+        # Create message container - the correct MIME type is multipart/alternative.
+        msg = MIMEMultipart('alternative')
+        msg['From'] = sender
+        msg['To'] = '; '.join(recepient)
+        msg['Subject'] = subject
+        
+        # see the code below to use template as body
+        # Create the body of the message (a plain-text and an HTML version).
+        # Record the MIME types of both parts - text/plain and text/html.
+        part = MIMEText(message, 'html')
+        # Attach parts into message container.
+        # According to RFC 2046, the last part of a multipart message, in this case
+        # the HTML message, is best and preferred.
+        msg.attach(part)
+        
+        # Send the message via local SMTP server.
+        mail = smtplib.SMTP("smtp.outlook.office365.com", 587, timeout=20)
+
+        # if tls = True                
+        mail.starttls()               
+        mail.login(sender, password)        
+        mail.sendmail(sender, recepient, msg.as_string())        
+        mail.quit()
+        return 1, ''
+    except Exception as e:
+        println(str(e.args), OtherKeys.LOGING_EXCEPTION)
+        return 0, 'Send mail fail'
+        

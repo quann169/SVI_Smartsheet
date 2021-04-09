@@ -1,3 +1,22 @@
+function get_analyze_evidence(){
+	var out = [];
+	var item_name = $('.item-name');
+	var item_counter = $('.item-counter');
+	var item_approve = $('.item-approve');
+	var item_comment = $('.item-comment');
+	for (var idx=0; idx < item_name.length; idx++) {
+		var name = item_name[idx].textContent;
+		var counter = item_counter[idx].textContent;
+		var approve = item_approve[idx].checked;
+		var approve1 = 0;
+		if (approve) {
+			approve1 = 1;
+		}
+		var comment = item_comment[idx].value;
+		out.push([name, counter, approve1, comment]);
+	}
+	return out;
+}
 
 $(document).ready(function () {
 	$('#add_final').click(function(event) {
@@ -6,11 +25,12 @@ $(document).ready(function () {
 		var data = url_info[1];
 		var from_date = data[SESSION_FROM];
 		var to_date = data[SESSION_TO];
+		var info = get_analyze_evidence();
+		data['data'] = info;
 		if (! confirm("Are you sure you want to mark final task from " + from_date + " to " + to_date + "?")) {
 			return null;
 		} else {
 			$('#overlay_loader').show();
-			console.log(data);
 			$.ajax({
 				   url: ADD_TO_FINAL,
 				   type: "POST",

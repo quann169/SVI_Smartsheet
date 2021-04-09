@@ -13,8 +13,9 @@ from src.commons.utils import search_pattern, message_generate, println, remove_
                             get_work_month, round_num, defined_color, \
                             get_work_days, write_message_into_file, convert_request_dict_to_url,\
                             str_to_date, get_end_week_of_date, get_start_week_of_date, get_month_name_of_date, \
-                            calculate_start_end_date_by_option, check_domain_password, save_password, get_saved_password
-                            
+                            calculate_start_end_date_by_option, check_domain_password, save_password, get_saved_password,\
+                            render_jinja2_template, send_mail
+from flask import g   
 from src.models.timesheet.timesheet_model import Timesheet
 from flask import session
 from pprint import pprint
@@ -474,7 +475,7 @@ class Controllers:
         result  = [sheet_info, list_week]
         return result
         
-    def get_daily_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, task_filter=None, list_user=None):
+    def get_daily_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, task_filter=None, list_user=None, mode=None):
         try:
             missing_method = False
             if request_dict:
@@ -486,6 +487,8 @@ class Controllers:
                         task_filter      = request_dict[SessionKey.TASK_FILTER]
                     if request_dict.get(SessionKey.USERS):
                         list_user      = request_dict[SessionKey.USERS]
+                    if request_dict.get(SessionKey.MODE):
+                        mode        = request_dict[SessionKey.MODE]
                 except KeyError:
                     missing_method = True
             if not task_filter or not sheet_ids or not to_date or not from_date or missing_method:
@@ -497,7 +500,7 @@ class Controllers:
             eng_type_ids   = timesheet_obj.eng_type_ids
             team_ids        = timesheet_obj.team_ids
             time_off_info   = timesheet_obj.time_off
-
+            
             for sheet_id in timesheet_obj.sheets:
                 sheet_obj   = timesheet_obj.sheets[sheet_id]
                 sheet_type  = sheet_obj.sheet_type
@@ -505,6 +508,8 @@ class Controllers:
                 for user_id in sheet_obj.resource:
                     for task_obj in sheet_obj.resource[user_id]:
                         user_name   = task_obj.user_name
+                        if mode == 'na_user' and not user_name == SettingKeys.NA_VALUE:
+                            continue
                         eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
                         team_name   = team_ids[user_ids[user_id].team_id]
                         week_number = task_obj.week_number
@@ -824,7 +829,10 @@ class Controllers:
             
             #weekly resource
             weekly_resource_wb = wb.add_sheet('Weekly Resource')
-            w_resource_info, list_week, no_missing, no_redundant, no_enought, count_overlap, total_resource = self.get_resource_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='weekly')
+            w_resource_info, list_week, no_missing, no_redundant, no_enought, count_overlap, total_resource = self.get_resource_timesheet_info(from_date=from_date, 
+                                                                                                                                               to_date=to_date, 
+                                                                                                                                               sheet_ids=sheet_ids, 
+                                                                                                                                               filter='weekly')
             start_col, start_row = (0, 0)
             row_num, col_num = (0, 0)
             # create  header
@@ -866,7 +874,10 @@ class Controllers:
             
             #monthly resource
             monthly_resource_wb = wb.add_sheet('Monthly Resource')
-            m_resource_info, list_month, no_missing, no_redundant, no_enought, count_overlap, total_resource = self.get_resource_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='monthly')
+            m_resource_info, list_month, no_missing, no_redundant, no_enought, count_overlap, total_resource = self.get_resource_timesheet_info(from_date=from_date, 
+                                                                                                                                                to_date=to_date, 
+                                                                                                                                                sheet_ids=sheet_ids, 
+                                                                                                                                                filter='monthly')
             start_col, start_row = (0, 0)
             row_num, col_num = (0, 0)
             # create  header
@@ -907,7 +918,8 @@ class Controllers:
             
             #weekly Project
             weekly_project_wb = wb.add_sheet('Weekly Project')
-            w_project_info, list_week, no_enought, total = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='weekly')
+            w_project_info, list_week, no_enought, total = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, 
+                                                                                           sheet_ids=sheet_ids, filter='weekly')
             start_col, start_row = (0, 0)
             row_num, col_num = (0, 0)
             # create  header
@@ -964,7 +976,8 @@ class Controllers:
             
             #monthly Project
             monthly_project_wb = wb.add_sheet('Monthly Project')
-            m_project_info, list_month, no_enought, total = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, filter='monthly')
+            m_project_info, list_month, no_enought, total = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, 
+                                                                                            sheet_ids=sheet_ids, filter='monthly')
             start_col, start_row = (0, 0)
             row_num, col_num = (0, 0)
             # create  header
@@ -1034,26 +1047,51 @@ class Controllers:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
-    def add_to_final(self, from_date, to_date, sheet_ids, overwrite=False):
-        workdays = get_work_days(from_date=from_date, to_date=to_date)
-        list_date = []
-        for date, week in workdays:
-            list_date.append(date)
+    def add_to_final(self, from_date, to_date, sheet_ids, overwrite=False, data=None):
         try:
+            workdays = get_work_days(from_date=from_date, to_date=to_date)
+            list_date = []
+            user_name = session[SessionKey.USERNAME]
+            password = session[SessionKey.PASSWORD]
+            for date, week in workdays:
+                list_date.append(date)
+            task_obj    = DbTask()
+            config_obj = Configuration()
+            config_obj.get_sheet_config(is_parse=True)
+            sheet_ids_info = config_obj.sheet_ids
+            analyze_item = task_obj.get_analyze_item()
             if from_date and to_date and sheet_ids:
-                task_obj    = DbTask()
+                list_sheet_name = []
                 for sheet_id in sheet_ids:
+                    list_sheet_name.append(sheet_ids_info[int(sheet_id)][DbHeader.SHEET_NAME])
                     task_obj.set_attr(sheet_id  = str(sheet_id),
                                       start_date = from_date,
                                       end_date   = to_date)
                     # if overwrite:
 #                         task_obj.remove_final_task_information()
                     task_obj.move_task_to_final()
-                    list_record = []
                     for date in list_date:
-                        list_record.append((date, sheet_id))
-                    
-                    task_obj.add_final_date(list_record)
+                        final_date_id = task_obj.add_final_date(date=date, sheet_id=sheet_id)
+                        for row in data:
+                            item_name = row[0]
+                            counter = row[1]
+                            is_approve = row[2]
+                            comment = row[3]
+                            analyze_item_id = analyze_item[item_name]
+                            task_obj.add_final_evidence(final_date_id, analyze_item_id, is_approve, counter, comment, user_name)
+                template_path = g.template_path
+                tool_path    = g.tool_path
+                template_path = os.path.join(os.path.join(os.path.join(tool_path, template_path), 'components'), 'sending_mail')
+                dict_variable = {}
+                dict_variable['info'] = data
+                dict_variable['user_name'] = user_name
+                dict_variable['from_date'] = from_date
+                dict_variable['to_date'] = to_date
+                dict_variable['sheets'] = ', '.join(list_sheet_name)
+                content = render_jinja2_template(template_path, 'analyze_table.html', dict_variable)
+                send_mail_status = send_mail(user_name, password, [], [], 'Timesheet Report: Add final task', content)
+                if not send_mail_status[0]:
+                    return send_mail_status
                 return 1, Msg.M003
             else:
                 # missing input
@@ -1152,9 +1190,10 @@ class Controllers:
                 missing_method = True
         if not filter or not sheet_ids or not to_date or not from_date or missing_method:
             return []
-        
+#         config_obj = Configuration()
+#         analyze_item = config_obj.get_analyze_item()
+#         
         info, list_sub_column, no_missing, no_redundant, no_enought, count_overlap, total_resource = self.get_resource_timesheet_info(request_dict, is_caculate=True)
-        
         if no_missing == total_resource:
             i1_status = True
         else:
@@ -1195,13 +1234,32 @@ class Controllers:
             i6_status = False
         i6_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'sheet_user'], [SessionKey.TASK_FILTER, task_filter]])
         
+        #
+        from_date   = request_dict[SessionKey.FROM]
+        to_date     = request_dict[SessionKey.TO]
+        sheet_ids   = request_dict[SessionKey.SHEETS]
+        task_filter = None
+        if request_dict.get(SessionKey.TASK_FILTER):
+            task_filter      = request_dict[SessionKey.TASK_FILTER]
+        list_user = None
+        if request_dict.get(SessionKey.USERS):
+            list_user      = request_dict[SessionKey.USERS]
+        
+        info = self.get_daily_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, 
+                                             task_filter=task_filter, list_user=list_user, mode='na_user')
+        i7_status = True
+        if len(info):
+            i7_status = False
+        i7_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'na_user'], [SessionKey.TASK_FILTER, task_filter]])
+        i7_count_fail, i7_total = len(info), None
         result = [
             [AnalyzeItem.A001, i1_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i1_method), no_missing, total_resource],
             [AnalyzeItem.A002, i2_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i2_method), no_redundant, total_resource],
             [AnalyzeItem.A003, i3_status, True, '%s?%s'%(Route.RESOURCE_TIMESHEET, i3_method), no_enought, total_resource],
             [AnalyzeItem.A004, i4_status, False, '%s?%s'%(Route.CONFLICT_DATE, i4_method), i4_count_fail, i4_total],
             [AnalyzeItem.A005, i5_status, False, '%s?%s'%(Route.CONFLICT_DATE, i5_method), i5_count_fail, i5_total],
-            [AnalyzeItem.A006, i6_status, True, '%s?%s'%(Route.PROJECT_TIMESHEET, i6_method), i6_count_fail, i6_total]
+            [AnalyzeItem.A006, i6_status, True, '%s?%s'%(Route.PROJECT_TIMESHEET, i6_method), i6_count_fail, i6_total],
+            [AnalyzeItem.A007, i7_status, True, '%s?%s'%(Route.DETAIL, i7_method), i7_count_fail, i7_total]
             ]        
         return result
     

@@ -1,3 +1,6 @@
+* {
+	font-family: 'Poppins', sans-serif !important;
+}
 
 body {
     font-family: 'Poppins', sans-serif;
@@ -450,6 +453,12 @@ table, table.dataTable {
 }
 .w-300-px {
 	width: 300px;
+}
+.w-400-px {
+	width: 400px;
+}
+.w-500-px {
+	width: 500px;
 }
 .w-20-px {
 	width: 20px;

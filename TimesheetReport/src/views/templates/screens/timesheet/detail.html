@@ -30,7 +30,7 @@
 {% endblock scripts %}
 
 {% block main %}
-<form id='timesheet_form' class='{% if session_enum.MODE in request_dict and request_dict[session_enum.MODE] in ['view'] %}d-none{% endif %}'>
+<form id='timesheet_form' class='{% if session_enum.MODE in request_dict and request_dict[session_enum.MODE] in ['view', 'na_user'] %}d-none{% endif %}'>
 	{% set sheet_info = ctrl_obj.get_list_sheet_name() %}
 	<div class='row'>
 		<div class='col-md-10 d-flex align-items-center'>

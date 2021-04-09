@@ -53,7 +53,8 @@ class SmartSheets:
     def get_available_sheet_name(self):
         sheets = self.connection.sheets.list()
         for sheet in sheets:
-            self.available_name[sheet.name] = sheet.id
+            if is_caculate_sheet(sheet.name):
+                self.available_name[sheet.name] = sheet.id
             
             
     def get_sheet_name_and_validate_column(self, sheet_in_db={}):
@@ -64,31 +65,28 @@ class SmartSheets:
         count = 0
         for sheet_name in self.available_name:
             count += 1
-            is_skip = 'Skip'
-            if is_caculate_sheet(sheet_name):
-                sheet_id = self.available_name[sheet_name]
-                require_col = copy.deepcopy(SmartsheetCfgKeys.LIST_HEADER) 
-                # Get all columns.
-                response = sms.Sheets.get_columns(sheet_id, include_all=False)
-                columns = response.data
-                is_valid = 0
-                if len(columns) >= len(require_col):
-                    for col in columns:
-                        col_name = col.title
-                        try:
-                            require_col.remove(col_name)
-                        except ValueError:
-                            pass
-                    if not len(require_col):
-                        is_valid = 1
-                is_skip = ''
-                sheet_type = SettingKeys.NA_VALUE
-                is_active = 0
-                if sheet_in_db.get(sheet_name):
-                    sheet_type = sheet_in_db[sheet_name][DbHeader.SHEET_TYPE]
-                    is_active = sheet_in_db[sheet_name][DbHeader.IS_ACTIVE]
-                result[sheet_name] = {'is_valid': is_valid, 'sheet_type': sheet_type, 'is_active': is_active, 'missing_cols': require_col}
-            println('Caculate [%d/%d] %s sheet: %s'%(count, total_sheet, is_skip, sheet_name), OtherKeys.LOGING_INFO)
+            sheet_id = self.available_name[sheet_name]
+            require_col = copy.deepcopy(SmartsheetCfgKeys.LIST_HEADER) 
+            # Get all columns.
+            response = sms.Sheets.get_columns(sheet_id)
+            columns = response.data
+            is_valid = 0
+            if len(columns) >= len(require_col):
+                for col in columns:
+                    col_name = col.title
+                    try:
+                        require_col.remove(col_name)
+                    except ValueError:
+                        pass
+                if not len(require_col):
+                    is_valid = 1
+            sheet_type = SettingKeys.NA_VALUE
+            is_active = 0
+            if sheet_in_db.get(sheet_name):
+                sheet_type = sheet_in_db[sheet_name][DbHeader.SHEET_TYPE]
+                is_active = sheet_in_db[sheet_name][DbHeader.IS_ACTIVE]
+            result[sheet_name] = {'is_valid': is_valid, 'sheet_type': sheet_type, 'is_active': is_active, 'missing_cols': require_col}
+            println('Check [%d/%d] sheet: %s'%(count, total_sheet, sheet_name), OtherKeys.LOGING_INFO)
         return result
         
     def parse(self):

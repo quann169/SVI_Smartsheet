@@ -22,12 +22,12 @@ host        = "localhost"
 tool_path = os.path.abspath(os.path.dirname(__file__))
 logging_setting('TimesheetReport.log')
 
-tempalte_path =  'src/views/templates'
+template_path =  'src/views/templates'
 static_path =  'src/views/static'
-# tempalte_path =  '.data/views/templates'
+# template_path =  '.data/views/templates'
 # static_path =  '.data/views/static'
 
-app = Flask( __name__ , static_folder="%s/%s"%(tool_path, static_path), template_folder="%s/%s"%(tool_path, tempalte_path))
+app = Flask( __name__ , static_folder="%s/%s"%(tool_path, static_path), template_folder="%s/%s"%(tool_path, template_path))
 app.config['SECRET_KEY']                    = 'SECRET_KEY'
 
 app.register_blueprint(timesheet_bp)
@@ -45,7 +45,8 @@ pool_conn = connect_obj.create_pool_connection()
 def create_connection():
     g.pool_conn = pool_conn
     g.tool_path = tool_path
-#     ctrl().get_sync_sheet()
+    g.template_path = template_path
+
 if __name__ == "__main__":
     app.run(port=port, host=host, debug=True, use_reloader=True, threaded=True)
 #     thread  = threading.Thread(name='open GUI', target = app.run,  args=(host, port), kwargs={'threaded': True})

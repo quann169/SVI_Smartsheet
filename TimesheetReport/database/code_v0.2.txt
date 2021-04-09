@@ -458,7 +458,8 @@ INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (
 INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (3, 'No. resource have enough working hours');
 INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (4, 'No conflict with final date');
 INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (5, 'Continuity with final date');
-
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (6, 'No. resource in project have enough task');
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (7, 'No. tasks are not mapping with resource');
 -- role
 INSERT INTO `timesheet`.`role` (`role_id`, `role_name`) VALUES (1, 'Admin');
 INSERT INTO `timesheet`.`role` (`role_id`, `role_name`) VALUES (2, 'PM');

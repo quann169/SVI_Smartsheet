@@ -1,0 +1,55 @@
+<style>
+tr {
+	background-color: white !important;
+    border: 1px solid #aaa !important;
+    white-space: nowrap;
+}
+th {
+	background-color: #007BA9 !important;
+	border: 1px solid #aaa !important;
+	color: white;
+	font-weight: bold;
+	box-sizing: content-box;
+	padding: 5px;
+}
+td {
+	border: 1px solid #aaa !important;
+	padding: 5px;
+}
+
+table {
+	border-collapse: collapse !important;
+}
+</style>
+Hi all,<br/>
+<br/>
+The final task ({{from_date}} to {{to_date}} ) has been added by {{user_name}}. Below is the summary information:<br/>
+<b>Sheet_name:</b> {{sheets}}<br/>
+<b>Analyze Information:</b><br/>
+<table class=''>
+  <thead>
+    <tr>
+    	<th class="">#</th>
+		<th class="">Items</th>
+		<th class="">Counter</th>
+		<th class="">Approve</th>
+		<th class="">Comment</th>
+    </tr>
+  </thead>
+  <tbody>
+	{% for row in info %}
+		{% set item_name, counter, approve, comment = row %}
+		<tr>
+	  		<td>{{loop.index}}</td>
+			<td><label class='item-name'>{{item_name}}<label></td>
+			<td><b class='item-counter'>{{counter}}</b></td>
+			<td>
+				{% if approve %} yes {% else %} no {% endif %}
+			</td>
+			<td>
+				{{comment}}
+			</td>
+		</tr>
+	{% endfor %}
+  </tbody>
+</table>

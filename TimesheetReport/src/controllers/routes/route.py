@@ -156,7 +156,10 @@ def add_to_final():
     println(Route.ADD_TO_FINAL, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
-        result = ctrl().add_to_final(from_date=request_dict[SessionKey.FROM], to_date=request_dict[SessionKey.TO], sheet_ids=request_dict[SessionKey.SHEETS])
+        result = ctrl().add_to_final(from_date=request_dict[SessionKey.FROM], to_date=request_dict[SessionKey.TO], 
+                                     sheet_ids=request_dict[SessionKey.SHEETS],
+                                     data=request_dict['data'],)
+        
         return jsonify({'result': result})
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)

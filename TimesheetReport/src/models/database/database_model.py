@@ -776,17 +776,27 @@ class DbTask(Connection):
         
         self.milestone_id = self.db_execute(query)
     
-    def add_final_date(self, list_record):
-        query   = '''INSERT INTO `%s` 
-                        (`%s`, `%s`)
-                    '''%(DbTable.FINAL_DATE,\
-                    DbHeader.DATE, DbHeader.SHEET_ID)
-        query   += '''
-                    VALUES
-                        (%s, %s)
-                    ;'''
-        self.db_execute_many(query, list_record)
-        
+    def add_final_date(self, list_record=None, date=None, sheet_id=None):
+        if list_record:
+            query   = '''INSERT INTO `%s` 
+                            (`%s`, `%s`)
+                        '''%(DbTable.FINAL_DATE,\
+                        DbHeader.DATE, DbHeader.SHEET_ID)
+            query   += '''
+                        VALUES
+                            (%s, %s)
+                        ;'''
+            self.db_execute_many(query, list_record)
+        else:
+            query   = '''INSERT INTO `%s` 
+                            (`%s`, `%s`)
+                        VALUES
+                            ('%s', '%s')
+                        ;'''%(DbTable.FINAL_DATE,\
+                        DbHeader.DATE, DbHeader.SHEET_ID,\
+                        date, sheet_id)
+            id = self.db_execute_2(query)
+            return id
     def get_final_date(self):
         query = """
                 SELECT `%s`, `%s`
@@ -808,7 +818,30 @@ class DbTask(Connection):
                 date_str = convert_date_to_string(row[DbHeader.DATE], '%Y-%m-%d')
                 result[row[DbHeader.SHEET_ID]].append(date_str)
         return result  
-      
+    
+    def get_analyze_item(self):
+        query = """
+            SELECT `%s`, `%s`
+            FROM `%s`;
+        """%(DbHeader.ANALYZE_ITEM_ID, DbHeader.ITEM_NAME, DbTable.ANALYZE_ITEM)
+        query_result = self.db_query(query)
+        result = {}
+        if query_result:
+            for row in query_result:
+                result[row[DbHeader.ITEM_NAME]] = row[DbHeader.ANALYZE_ITEM_ID]
+        return result
+    
+    def add_final_evidence(self, final_date_id, analyze_item_id, is_approve, counter, comment, updated_by):
+        query   = '''INSERT INTO `%s` 
+                        (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`)
+                    VALUES
+                        ('%s', '%s', '%s', '%s', '%s', '%s')
+                    ;'''%(DbTable.FINAL_EVIDENCE,\
+                    DbHeader.FINAL_DATE_ID, DbHeader.ANALYZE_ITEM_ID, DbHeader.IS_APPROVE, \
+                    DbHeader.COUNTER, DbHeader.COMMENT, DbHeader.UPDATED_BY,\
+                    final_date_id, analyze_item_id, is_approve, counter, comment, updated_by)
+        self.db_execute(query)
+        
         
 class DbUsers(Connection):
     def __init__(self, info=None):
