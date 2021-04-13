@@ -14,9 +14,10 @@ class Configuration(Connection):
     def __init__(self):
         Connection.__init__(self)
         self.users              = {}
-        self.other_name         = {}
+        self.others_name         = {}
         self.users_full_name    = {}
         self.user_ids           = {}
+        self.user_email           = {}
         self.sheets             = {}
         self.sheet_ids          = {}
         self.holidays           = []
@@ -247,6 +248,7 @@ class Configuration(Connection):
                     `%s`,
                     `%s`,
                     `%s`,
+                    `%s`,
                     `%s`
                 FROM
                     `%s`; 
@@ -262,6 +264,7 @@ class Configuration(Connection):
             DbHeader.ENG_LEVEL_ID,
             DbHeader.ENG_TYPE_ID,
             DbHeader.TEAM_ID,
+            DbHeader.LEADER_ID,
             DbTable.USER,
             )
         query_result    = self.db_query(query)
@@ -271,10 +274,11 @@ class Configuration(Connection):
                 self.users[user_obj.user_name] = user_obj
                 self.users_full_name[user_obj.full_name] = user_obj
                 self.user_ids[user_obj.user_id] = user_obj
+                self.user_email[user_obj.email] = user_obj
                 for name in user_obj.other_name:
                     name = name.strip()
                     if name:
-                        self.other_name[name] = user_obj.user_id
+                        self.others_name[name] = user_obj.user_id
         else:
             pass
     
@@ -421,6 +425,7 @@ class Configuration(Connection):
                         `%s`.`%s`,
                         `%s`.`%s`,
                         `%s`.`%s`,
+                        `%s`.`%s`,
                         `%s`.`%s`
                 FROM `%s`
                 INNER JOIN `%s`
@@ -431,6 +436,7 @@ class Configuration(Connection):
                 ON `%s`.`%s`=`%s`.`%s`
                 ORDER BY `%s`.`%s`;
         """%(
+            DbTable.USER, DbHeader.LEADER_ID, 
             DbTable.USER, DbHeader.USER_ID, 
             DbTable.USER, DbHeader.USER_NAME, 
             DbTable.USER, DbHeader.FULL_NAME, 
@@ -549,6 +555,12 @@ class Configuration(Connection):
                DbHeader.USER_NAME, self.user_name)
         self.db_execute(query)
     
+    def update_resource_leader(self, list_record):
+        query   = '''UPDATE `user` SET
+                        `leader_id`=%s WHERE `user_id`=%s;
+                    '''
+        self.db_execute_many(query, list_record)
+        
     def remove_all_user_of_sheet(self, list_id=[]):
         condition_list = []
         for sheet_id in  list_id:
@@ -857,6 +869,7 @@ class DbUsers(Connection):
         self.eng_level_id   = None
         self.eng_type_id    = None
         self.team_id        = None
+        self.leader_id        = None
         self. add_info(info)
         
     def add_info(self, info):
@@ -872,6 +885,8 @@ class DbUsers(Connection):
             self.eng_level_id   = int(info[DbHeader.ENG_LEVEL_ID])
             self.eng_type_id    = int(info[DbHeader.ENG_TYPE_ID])
             self.team_id        = int(info[DbHeader.TEAM_ID])
+            if isinstance(info[DbHeader.LEADER_ID], int):
+                self.leader_id        = int(info[DbHeader.LEADER_ID])
 
 class TimeOff(Connection):
     def __init__(self, info=None):

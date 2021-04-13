@@ -220,6 +220,7 @@ class DbHeader:
     IS_APPROVE              = 'is_approve'
     COUNTER                 = 'counter'
     IS_VALID                = 'is_valid'
+    LEADER_ID               = 'leader_id'
 
 class ExcelColor:
     
@@ -253,6 +254,7 @@ class Template:
     TIMESHEET_DETAIL     = 'screens/timesheet/detail.html'
     TIMESHEET_RESOURCE   = 'screens/timesheet/resource.html'
     TIMESHEET_PROJECT   = 'screens/timesheet/project.html'
+    REPORT              = 'screens/timesheet/report.html'
     
     BREADCRUMB          = 'components/breadcrumb/breadcrumb.html'
     NAVBAR              = 'components/navbar/navbar.html'
@@ -294,6 +296,8 @@ class Route:
     GET_SYNC_SHEET   = '/get-sync-sheet'
     UPDATE_SYNC_SHEET   = '/update-sync-sheet'
     SAVE_OTHER_SETTING   = '/save-other-setting'
+    REPORT   = '/report'
+    SEND_REPORT   = '/send-report'
     
     # DEFINE ROUTE REQUIRE ROLE 
     role = Role()

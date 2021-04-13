@@ -14,7 +14,7 @@ from src.controllers.controllers import Controllers as ctrl
 
 
         
-__version__  = 'v0.1'
+__version__  = 'v0.2'
 
 port        = 6602
 # port = get_free_tcp_port()
@@ -39,7 +39,7 @@ def open_browser():
     webbrowser.open_new(url)
 
 connect_obj = Connection()
-pool_conn = connect_obj.create_pool_connection()
+pool_conn = connect_obj.create_pool_connection(is_exit=True)
 
 @app.before_request
 def create_connection():
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 #             print('Starting browser...')
 #             break
 #         else:
-#             print('Checking RUL: %s...'%url)
+#             print('Checking URL: %s...'%url)
 #         time.sleep(1)
 #     Timer(1, open_browser).start()
 #     print('Start browser: Done')

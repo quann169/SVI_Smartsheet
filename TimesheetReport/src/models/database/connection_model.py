@@ -12,6 +12,7 @@ from pprint import pprint
 from flask import g
 from dbutils.pooled_db import PooledDB
 from src.models.database.db_setting import DbSetting
+import sys
 
 class Connection:
     def __init__(self, db_setting = None):
@@ -60,7 +61,7 @@ class Connection:
             println(e, OtherKeys.LOGING_EXCEPTION)
         return connection
     
-    def create_pool_connection (self ):
+    def create_pool_connection (self, is_exit=False):
         """ create a pool connection to the MYSQL database
         specified by db_file
         :param : None
@@ -86,7 +87,10 @@ class Connection:
             )
             return pool_conn
         except Exception as e:
-            println(e, OtherKeys.LOGING_EXCEPTION)
+            println('Can not connect to database', OtherKeys.LOGING_EXCEPTION)
+            if is_exit:
+                sys.exit()
+            raise Exception('Can not connect to database')
         return pool_conn
         
     def check_connection(self):
@@ -112,8 +116,8 @@ class Connection:
                 connection.commit()
             println(query, OtherKeys.LOGING_DEBUG)
         except Exception as e:
-            println(query, OtherKeys.LOGING_EXCEPTION)
-            println(e, OtherKeys.LOGING_EXCEPTION)
+            println(query, OtherKeys.LOGING_EXCEPTION, is_print=False)
+            println(e, OtherKeys.LOGING_EXCEPTION, is_print=False)
             raise Exception(e)
         finally:
             connection.close()
@@ -131,8 +135,8 @@ class Connection:
             println(query, OtherKeys.LOGING_DEBUG)
             return cursor.lastrowid
         except Exception as e:
-            println(query, OtherKeys.LOGING_EXCEPTION)
-            println(e, OtherKeys.LOGING_EXCEPTION)
+            println(query, OtherKeys.LOGING_EXCEPTION, is_print=False)
+            println(e, OtherKeys.LOGING_EXCEPTION, is_print=False)
             raise Exception(e)
         finally:
             connection.close()
@@ -149,8 +153,8 @@ class Connection:
                 connection.commit()
             println(query, OtherKeys.LOGING_DEBUG)
         except Exception as e:
-            println(query, OtherKeys.LOGING_EXCEPTION)
-            println(e, OtherKeys.LOGING_EXCEPTION)
+            println(query, OtherKeys.LOGING_EXCEPTION, is_print=False)
+            println(e, OtherKeys.LOGING_EXCEPTION, is_print=False)
             raise Exception(e)
         finally:
             connection.close()
@@ -171,8 +175,8 @@ class Connection:
             else:
                 return None
         except Exception as e:
-            println(query, OtherKeys.LOGING_EXCEPTION)
-            println(e, OtherKeys.LOGING_EXCEPTION)
+            println(query, OtherKeys.LOGING_EXCEPTION, is_print=False)
+            println(e, OtherKeys.LOGING_EXCEPTION, is_print=False)
             raise Exception(e)         
         finally:
             connection.close()

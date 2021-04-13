@@ -1,0 +1,66 @@
+#report_timesheet a:hover {
+	cursor: pointer;
+	color: red;
+}
+.review-e-popup {
+	background-color: white;
+	border: 1px solid #aaa;
+	border-radius: 5px;
+	position: absolute;
+    left: 50%;
+    top: 50%;
+    height: 80vh;
+    width: 80vw;
+    transform: translate(-50%, -50%);
+	display: grid;
+	grid-template-columns: 270px auto;
+	grid-template-rows: 25px auto 40px;
+	grid-template-areas: 
+		"review-e-title review-e-title"
+		"review-e-menu review-e-content"
+		"review-e-footer review-e-footer";
+}
+.review-e-popup ul {
+	list-style: none;
+	margin: 0px;
+	padding: 0px;
+}
+.review-e-popup ul li {
+	padding: 5px 5px 5px 10px;
+}
+.review-e-popup ul li span{
+	margin-left: 5px;
+}
+.review-e-popup ul li span:hover{
+	text-decoration: underline;
+	cursor: pointer;
+	color: blue;
+}
+.review-e-title {
+	grid-area: review-e-title;
+	text-align: center;
+	padding: 5px;
+	border-bottom: 1px solid #aaa;
+	font-weight: bold;
+}
+.review-e-menu {
+	grid-area: review-e-menu;
+	border: 1px solid #aaa;
+	overflow: auto;
+}
+.review-e-content {
+	grid-area: review-e-content;
+	border: 1px solid #aaa;
+	padding: 10px;
+	overflow: auto;
+}
+.review-e-footer {
+	grid-area: review-e-footer;
+	text-align: right;
+	padding: 5px;
+	border: 1px solid #aaa;
+}
+.select-email:hover {
+	cursor: pointer;
+	
+}

@@ -409,8 +409,7 @@
 		document.getElementsByClassName('scroll-data-table')[0].style.height = 'unset';
 		var height = document.getElementsByClassName('scroll-data-table')[0].scrollHeight
 		document.getElementsByClassName('scroll-data-table')[0].style.height = (height + 20) +'px';
-		} catch {
-		}//Toan Nguyen
+		} catch(er) {}//Toan Nguyen
     },
 
     menuHide: function() {
@@ -422,8 +421,7 @@
 		document.getElementsByClassName('scroll-data-table')[0].style.height = 'unset';
 		var height = document.getElementsByClassName('scroll-data-table')[0].scrollHeight
 		document.getElementsByClassName('scroll-data-table')[0].style.height = (height + 20) +'px';
-		} catch {
-		}//Toan Nguyen
+		} catch(er) {}//Toan Nguyen
     },
 
     menuToggle: function() {

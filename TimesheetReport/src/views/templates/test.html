@@ -1,71 +1,36 @@
-{% extends "screens/layout/layout.html" %}
-{% block sidebar %}
-	{% set active_sidebar = 'home' %}
-	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
-		{% include "components/sidebar/sidebar.html" %}
-	{% endwith %}
-{% endblock sidebar %}
-{% block breadcrumb %}
-	{% set br_items = [('/home', 'Home', True)] %}
-	{% with br_items=br_items %}
-		{% include "components/breadcrumb/breadcrumb.html" %}
-	{% endwith %}
-{% endblock breadcrumb %}
+<head>
+	<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/bootstrap-4.5.3/css/bootstrap.min.css') }}" />  
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/DataTables/datatables.min.css') }}" /> 
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/multiple-select/example-styles.css') }}" /> 
+	<!-- Our Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/fontawesome/css/all.css') }}" />
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/timesheet/report.css') }}" />
+</head>
 
-{% block main %}
-<style>
-	.conflict {
-		
-		border: 1px solid red;
-		border-radius: 5px;
-		background-color: red;
-		color: white;
-		padding: 5px 10px;
-	}
-	.no-conflict {
-		
-		border: 1px solid green;
-		border-radius: 5px;
-		background-color: green;
-		color: white;
-		padding: 5px 10px;
-	}
-	td {
-		padding: 5px;
-	}
-</style>
-<div class='table-content'>
-	<table width='100%'>
+<div class='review-e-popup'>
+		<div class='review-e-title'>
+			<span>Send Report</span>
+		</div>
+		<div  class='review-e-menu'>
+			<ul><li><input type='checkbox' data-target='#cnt_1'><span data-target='#cnt_1'>NA</span></li><li><input type='checkbox' data-target='#cnt_2'><span data-target='#cnt_2'>phile@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_3'><span data-target='#cnt_3'>locho@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_4'><span data-target='#cnt_4'>quannguyen@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_5'><span data-target='#cnt_5'>hatran@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_6'><span data-target='#cnt_6'>thanhhoang@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_7'><span data-target='#cnt_7'>nhatthai@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_8'><span data-target='#cnt_8'>hieunguyen@savarti.com</span></li></ul>
+		</div>
+		<div class='review-e-content'><div id='cnt_1' class='mail-ctn dp-block' >1</div><div id='cnt_2' class='mail-ctn dp-none' >2</div><div id='cnt_3' class='mail-ctn dp-none' >3</div><div id='cnt_4' class='mail-ctn dp-none' >4</div><div id='cnt_5' class='mail-ctn dp-none' >5</div><div id='cnt_6' class='mail-ctn dp-none' >6</div><div id='cnt_7' class='mail-ctn dp-none' >7</div><div id='cnt_8' class='mail-ctn dp-none' >8</div></div>
+		<div class='review-e-footer'>
+			<button type='button' >Cancel</button>
+			<button type='button' >Send</button>
+		</div>
+	</div>
+<script src="{{url_for('static', filename='js/enum.js')}}"></script>
+<script src="{{url_for('static', filename='vendors/fontawesome/js/solid.js')}}" ></script>
+<script src="{{url_for('static', filename='vendors/fontawesome/js/fontawesome.js')}}"></script>
+<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.js')}}"></script>
+<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.slim.min.js')}}"></script>
+<script src="{{url_for('static', filename='vendors/poper/popper-1.14.0.min.js')}}"></script>
+<script src="{{url_for('static', filename='vendors/bootstrap-4.5.3/js/bootstrap.min.js')}}"></script>
+<script src="{{url_for('static', filename='vendors/DataTables/datatables.min.js')}}"></script>
+<script src="{{url_for('static', filename='vendors/multiple-select/jquery.multi-select.js')}}"></script>
 
-			<tr>
-			  <td><i class="far fa-check-circle"></i></td>
-		      <td>Sheet 1</td>
-			  <td>
-				<lable class='conflict'>20-03</lable>
-				<lable class='no-conflict'>20-03</lable>
-				<lable class='conflict'>20-03</lable>
-				<lable class='conflict'>20-03</lable>
-				<lable class='conflict'>20-03</lable>
-			</td>
-			  
-			  
-		    </tr>
-			<tr>
-			  <td><i class="far fa-check-circle"></i></td>
-		      <td>Sheet 1</td>
-			  <td>
-				<lable class='conflict'>20-03</lable>
-				<lable class='no-conflict'>20-03</lable>
-				<lable class='conflict'>20-03</lable>
-				<lable class='conflict'>20-03</lable>
-				<lable class='conflict'>20-03</lable>
-			</td>
-			  
-			  
-		    </tr>
-	
-	  </tbody>
-	  
-	</table>
-</div>
-{% endblock main%}
+<script src="{{url_for('static', filename='js/common.js')}}"></script>
+<script src="{{url_for('static', filename='js/report.js')}}"></script>

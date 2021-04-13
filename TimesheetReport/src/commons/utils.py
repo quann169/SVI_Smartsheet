@@ -105,27 +105,33 @@ def convert_request_dict_to_url(request_dict, more_option=[]):
     result = urllib.parse.quote(str(request_dict_cp))
     return result   
     
-def println(message, logging_level=None):
+def println(message, logging_level=None, is_print=True):
     if logging_level == OtherKeys.LOGING_CRITICAL:
         logging.critical(message)
-        print (message)
+        if is_print:
+            print (message)
     elif logging_level == OtherKeys.LOGING_EXCEPTION:
         logging.exception(message)
 #         traceback.print_exc('')
-        print (message)
+        if is_print:
+            print (message)
     elif logging_level == OtherKeys.LOGING_ERROR:
         logging.error(message)
-        print (message)
+        if is_print:
+            print (message)
     elif logging_level == OtherKeys.LOGING_WARNING:
         logging.warn(message)
-        print (message)
+        if is_print:
+            print (message)
     elif logging_level == OtherKeys.LOGING_INFO:
         logging.info(message)
-        print (message)
+        if is_print:
+            print (message)
     elif logging_level == OtherKeys.LOGING_DEBUG:
         if config.LOGGING_LEVEL.lower() ==  OtherKeys.LOGING_DEBUG:
             logging.debug(message)
-            print (message)
+            if is_print:
+                print (message)
 
 def is_caculate_sheet(sheet_name):
     result = True
@@ -509,24 +515,21 @@ def send_mail(user_name, password, recepient, cc_recepient, subject, message):
     try:
         sender = "%s@savarti.com"%user_name
         recepient = ['toannguyen@savarti.com']
+        cc_recepient = ['toannguyen@savarti.com']
         # Create message container - the correct MIME type is multipart/alternative.
         msg = MIMEMultipart('alternative')
         msg['From'] = sender
         msg['To'] = '; '.join(recepient)
         msg['Subject'] = subject
-        
-        # see the code below to use template as body
-        # Create the body of the message (a plain-text and an HTML version).
-        # Record the MIME types of both parts - text/plain and text/html.
+        msg['CC'] = '; '.join(cc_recepient)
+
         part = MIMEText(message, 'html')
-        # Attach parts into message container.
-        # According to RFC 2046, the last part of a multipart message, in this case
-        # the HTML message, is best and preferred.
+        
         msg.attach(part)
         
         # Send the message via local SMTP server.
         mail = smtplib.SMTP("smtp.outlook.office365.com", 587, timeout=20)
-
+        
         # if tls = True                
         mail.starttls()               
         mail.login(sender, password)        
@@ -535,5 +538,5 @@ def send_mail(user_name, password, recepient, cc_recepient, subject, message):
         return 1, ''
     except Exception as e:
         println(str(e.args), OtherKeys.LOGING_EXCEPTION)
-        return 0, 'Send mail fail'
+        return 0, 'Fail to send mail.'
         

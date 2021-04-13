@@ -394,6 +394,22 @@ function get_template_content(path, handle_output) {
 		      }
 	   });
 }
+
+function get_template_content_asyn(path) {
+	var data = {'path': path};
+	var out = '';
+	$.ajax({
+		   url: GET_TEMPLATE_CONTENT,
+		   type: "POST",
+			async: false,
+		   data: encodeURIComponent(JSON.stringify(data)),
+		   success: function(resp){
+			   var result = resp.result;
+				out = result;
+		      }
+	   });
+	return out;
+}
 function parse_serialize(serialize){
 	var out = {}
 	var elements = serialize.split('&');

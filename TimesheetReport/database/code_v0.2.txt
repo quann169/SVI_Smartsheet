@@ -175,6 +175,7 @@ CREATE TABLE IF NOT EXISTS `timesheet`.`user` (
   `eng_level_id` INT(11) NULL DEFAULT NULL,
   `eng_type_id` INT(11) NULL DEFAULT NULL,
   `team_id` INT(11) NULL DEFAULT NULL,
+  `leader_id` INT(11) NULL DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE INDEX `email_UNIQUE` (`email` ASC) ,
   UNIQUE INDEX `user_name_UNIQUE` (`user_name` ASC) ,

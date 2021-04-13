@@ -6,7 +6,7 @@ Created on Feb 22, 2021
 from src.models.smartsheet.smartsheet_model import SmartSheets
 from src.models.database.database_model import Configuration, DbTask
 from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, \
-                            DateTime, AnalyzeCFGKeys, Route, Role, OtherKeys
+                            DateTime, AnalyzeCFGKeys, Route, Role, OtherKeys, DbTable
 from src.commons.message import MsgError, MsgWarning, Msg, AnalyzeItem
 from src.commons.utils import search_pattern, message_generate, println, remove_path, split_patern,\
                             get_prev_date_by_time_delta, get_work_week, convert_date_to_string,\
@@ -50,7 +50,7 @@ class Controllers:
         sms_obj.parse()
         config_obj.get_all_user_information()
         user_info = config_obj.users
-        other_name_info = config_obj.other_name
+        other_name_info = config_obj.others_name
         task_obj    = DbTask()
         total = len(sms_obj.info)
         count = 0
@@ -400,11 +400,12 @@ class Controllers:
 
             config_obj.get_eng_level_info(is_parse=True)
             eng_level_info = config_obj.eng_level
-
+            user_name = session[SessionKey.USERNAME]
             teams  = config_obj.get_team_info(is_parse=True)
             teams_info = config_obj.team
-
-            config_obj.set_attr(updated_by  = 'root')
+            config_obj.set_attr(updated_by  = user_name)
+            user_leader = []
+            
             for index in range(0, len(df[ExcelHeader.RESOURCE])):
                 resource          = str(df[ExcelHeader.RESOURCE][index]).strip()
                 eng_type          = str(df[ExcelHeader.ENG_TYPE][index])
@@ -412,7 +413,7 @@ class Controllers:
                 email             = str(df[ExcelHeader.EMAIL][index])
                 full_name         = str(df[ExcelHeader.FULL_NAME][index])
                 team              = str(df[ExcelHeader.TEAM][index])
-                leader            = str(df[ExcelHeader.LEADER][index])
+                leader            = str(df[ExcelHeader.LEADER][index]).strip()
                 is_active         = str(df[ExcelHeader.IS_ACTIVE][index])
                 other_name        = str(df[ExcelHeader.OTHER_NAME][index])
                 if resource not in SettingKeys.EMPTY_CELL:
@@ -432,7 +433,7 @@ class Controllers:
                         
                     if other_name in SettingKeys.EMPTY_CELL:
                         other_name  = ''
-                    
+                    user_leader.append([resource, leader])
                     config_obj.set_attr(user_name      = resource,
                                         eng_type_id   = str(eng_type_id),
                                         eng_level_id   = str(eng_level_id),
@@ -441,11 +442,27 @@ class Controllers:
                                         full_name   = str(full_name),
                                         is_active   = str(is_active),
                                         other_name   = str(other_name))
-                   
+                    
                     if config_obj.is_exist_resource():
                         config_obj.update_resource()
                     else:
                         config_obj.add_resource()
+            #add leader
+            config_obj.get_all_user_information()
+            user_email = config_obj.user_email
+            users = config_obj.users
+            list_record = []
+            for element in user_leader:
+                resource_name, leader_email = element
+                if leader_email not in SettingKeys.EMPTY_CELL:
+                    if user_email.get(leader_email):
+                        leader_name = user_email[leader_email].user_name
+                        if users.get(leader_name):
+                            leader_id = users[leader_name].user_id
+                            user_id = users[resource_name].user_id
+                            list_record.append((leader_id, user_id))
+            if len(list_record):
+                config_obj.update_resource_leader(list_record)
             remove_path(file_path)
             return 1, Msg.M001
         except Exception as e:
@@ -456,6 +473,15 @@ class Controllers:
         config_obj      = Configuration()
         sheet_info      = config_obj.get_sheet_config()
         return sheet_info
+    
+    def get_all_resource_information(self):
+        config_obj      = Configuration()
+        config_obj.get_all_user_information()
+        user_email = config_obj.user_email
+        users = config_obj.users
+        user_ids = config_obj.user_ids
+        others_name = config_obj.others_name
+        return user_email, users, user_ids, others_name
     
     def get_sheet_information(self, list_sheet_id=None):
         config_obj      = Configuration()
@@ -1570,6 +1596,58 @@ class Controllers:
                 }
         return info
     
+    def get_information_to_report_timesheet(self, request_dict=None):
+        missing_method = False
+        if request_dict:
+            try:
+                from_date   = request_dict[SessionKey.FROM]
+                to_date     = request_dict[SessionKey.TO]
+                sheet_ids   = request_dict[SessionKey.SHEETS]
+            except KeyError:
+                missing_method = True
+        if not sheet_ids or not to_date or not from_date or missing_method:
+            return []
+        rt_info, list_week, unuse1, unuse2, unuse3, unuse4, unuse5 = self.get_resource_timesheet_info(from_date=from_date, 
+                                                                                                   to_date=to_date, 
+                                                                                                   sheet_ids=sheet_ids, 
+                                                                                                   task_filter='current',
+                                                                                                   filter='weekly')
+        info = {}
+        user_email, users, user_ids, others_name = self.get_all_resource_information()
+        for eng_type in rt_info:
+            for team in rt_info[eng_type]:
+                for resource in rt_info[eng_type][team]:
+                    for week in rt_info[eng_type][team][resource]:
+                        max_hours = rt_info[eng_type][team][resource][week]['max_hour']
+                        sheets = rt_info[eng_type][team][resource][week]['sheets']
+                        work_hours = rt_info[eng_type][team][resource][week]['summary'][0]
+                        timeoff = rt_info[eng_type][team][resource][week]['summary'][1]
+                        if timeoff + work_hours != max_hours:
+                            if not info.get(week):
+                                info[week] = {}
+                            leader_id = users[resource].leader_id
+                            resource_mail = users[resource].email
+                            if leader_id:
+                                leader_email = user_ids[leader_id].email
+                            else:
+                                leader_email = SettingKeys.NA_VALUE
+                            if not info[week].get(leader_email):
+                                info[week][leader_email] = []
+                            detail = ''
+                            for sheet in sheets:
+                                detail += '%s(%s), '%(sheet, sheets[sheet][0])
+                            info[week][leader_email].append({
+                                'resource': resource,
+                                'resource_mail': resource_mail,
+                                'work_hours': work_hours,
+                                'timeoff': timeoff,
+                                'total': work_hours + timeoff,
+                                'detail': detail})
+
+        return info
+        
+        
+        
     def update_sync_sheet(self, request_dict):
         try:
             info = request_dict['info']
@@ -1601,4 +1679,23 @@ class Controllers:
         except Exception as e:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
+        
+    def send_report(self, request_dict):
+        try:
+            user_name = session[SessionKey.USERNAME]
+            password = session[SessionKey.PASSWORD]
+            for lead_email in request_dict:
+                body = request_dict[lead_email]['body']
+                cc = request_dict[lead_email]['cc']
+                cc_list = cc.split('; ')
+                send_mail_status = send_mail(user_name, password, [lead_email], cc_list, 'Report Timesheet', body)
+                if not send_mail_status[0]:
+                    return 0, 'Fail to send report.'
+                
+        except Exception as e:
+            println(e, OtherKeys.LOGING_EXCEPTION)
+            return 0, 'Fail to send report.'
+        return 1, 'Send Successfully.'
+        
+        
         

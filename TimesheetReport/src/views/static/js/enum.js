@@ -48,12 +48,14 @@ const CONFLICT_DATE   = '/conflict-date';
 const CHECK_LOADING_SMARTSHEET = '/check-loading-smartsheet';
 const LOGIN = '/login';
 const AUTH = '/auth';
-const SAVE_SHEET_SETTING = '/save-sheet-setting'
-const GET_TEMPLATE_CONTENT   = '/get-template-content'
-const GET_SYNC_SHEET   = '/get-sync-sheet'
-const UPDATE_SYNC_SHEET   = '/update-sync-sheet'
-const OTHER_SETTING   = '/other-setting'
-const SAVE_OTHER_SETTING   = '/save-other-setting'
+const SAVE_SHEET_SETTING = '/save-sheet-setting';
+const GET_TEMPLATE_CONTENT   = '/get-template-content';
+const GET_SYNC_SHEET   = '/get-sync-sheet';
+const UPDATE_SYNC_SHEET   = '/update-sync-sheet';
+const OTHER_SETTING   = '/other-setting';
+const SAVE_OTHER_SETTING   = '/save-other-setting';
+const REPORT   = '/report';
+const SEND_REPORT   = '/send-report';
 
 var FOCUS_MULTISELECT = null;
 

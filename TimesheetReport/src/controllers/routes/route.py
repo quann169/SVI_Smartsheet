@@ -526,6 +526,7 @@ def get_template_content():
         request_dict = get_request_form_ajax()
         file_path = request_dict['path']
         tool_path = g.tool_path
+        
         template_path = os.path.join(os.path.join(tool_path, 'src/views/templates'), file_path)
         result = ''
         with open(template_path, 'r') as f:
@@ -545,6 +546,37 @@ def update_sync_sheet():
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().update_sync_sheet(request_dict)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.REPORT)
+def report():
+    """ report page
+    :param : 
+    :return: report page
+    """
+    println(Route.REPORT, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_args()
+        ctrl_obj   = ctrl()
+        ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'current'})
+        return render_template(Template.REPORT, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.SEND_REPORT, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
+def send_report():
+    """ Send weekly timesheet
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.SEND_REPORT, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().send_report(request_dict)
         return jsonify({'result': result})
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)

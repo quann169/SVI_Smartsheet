@@ -33,6 +33,7 @@
 <div class='table-content'>
 	<table id="resource_table" class="table table-striped table-bordered " cellspacing="0" width='100%'>
 	  {% set resource_info = ctrl_obj.get_resource_config() %}
+	  {% set user_email, users, user_ids, others_name = ctrl_obj.get_all_resource_information()%}
 	  <thead>
 	    <tr>
 		  <th class="th-sm">#
@@ -67,7 +68,7 @@
 		      <td>{{row[db_header.LEVEL]}}</td>
 	          <td>{{row[db_header.EMAIL]}}</td>
 		      <td>{{row[db_header.TEAM_NAME] | string }}</td>
-	          <td></td>
+	          <td>{% if user_ids[row[db_header.LEADER_ID]] %}{{user_ids[row[db_header.LEADER_ID]].user_name}}{%endif%}</td>
 			  <td>{{row[db_header.IS_ACTIVE]}}</td>
 	          <td>{{row[db_header.OTHER_NAME]}}</td>
 		    </tr>
