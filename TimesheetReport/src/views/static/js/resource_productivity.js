@@ -35,7 +35,7 @@ function draw_stack_column_chart(id, data, label_angle) {
 		},
 		axisY:{
            interval: 10,
-		   valueFormatString: ("#'%'") 
+		   //valueFormatString: ("#'%'") 
 		 },
 		axisX:{
 	        labelAngle: label_angle,
@@ -104,8 +104,7 @@ function creat_productivity_data(row_data, headers, group_id, title) {
 			list_type.push(headers['2'][idx2]);
 		}
 	}
-	
-	
+
 	// group data
 	for (var idx3=0; idx3 < row_data.length; idx3++) {
 		if (group_id == -1) {

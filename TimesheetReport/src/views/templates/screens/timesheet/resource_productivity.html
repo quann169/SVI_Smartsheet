@@ -54,7 +54,7 @@
 	</div>
 </form>
 <br>
-{% set info, list_sub_col = ctrl_obj.get_resource_productivity_info(request_dict)%}
+{% set info, list_sub_col, cols_element = ctrl_obj.get_resource_productivity_info(request_dict)%}
 <div class='table-content' style='overflow-x: auto;'>
 	<table id="productivity" class="" cellspacing="0" width='100%'>
 	  <thead>
@@ -64,8 +64,8 @@
 			<th class="w-100-px" rowspan='2'>Resource</th>
 			<th class="w-20-px" rowspan='2'>Eng Type</th>
 			<th class="w-20-px" rowspan='2'>Team</th>
-			{% for col in list_sub_col %}
-				<th class="" colspan='6' style='text-align: center;'>{{col}}</th>
+			{% for name, max_hours in cols_element %}
+				<th class="" colspan='6' style='text-align: center;' data-target='{{max_hours}}'>{{name}}</th>
 			{% endfor %}
 			
 	    </tr>

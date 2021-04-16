@@ -1826,7 +1826,7 @@ class Controllers:
                         if info[leader_name][user_name]['timesheet'][col_element]['sheet_type']['Non-WH'] <= 0:
                             info[leader_name][user_name]['timesheet'][col_element]['sheet_type']['Non-WH'] = 0
             
-            return info, list_sub_col
+            return info, list_sub_col, cols_element
         except Exception as e:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
