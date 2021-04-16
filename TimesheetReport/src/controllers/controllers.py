@@ -1646,8 +1646,6 @@ class Controllers:
 
         return info
         
-        
-        
     def update_sync_sheet(self, request_dict):
         try:
             info = request_dict['info']
@@ -1684,18 +1682,151 @@ class Controllers:
         try:
             user_name = session[SessionKey.USERNAME]
             password = session[SessionKey.PASSWORD]
+            if request_dict.get(SettingKeys.NA_VALUE):
+                message = 'Email error: NA'
+                println(message, 'error')
+                return 0, message
             for lead_email in request_dict:
                 body = request_dict[lead_email]['body']
                 cc = request_dict[lead_email]['cc']
                 cc_list = cc.split('; ')
                 send_mail_status = send_mail(user_name, password, [lead_email], cc_list, 'Report Timesheet', body)
                 if not send_mail_status[0]:
-                    return 0, 'Fail to send report.'
+                    message = 'Fail to send report.'
+                    println(message, 'error')
+                    return 0, message
                 
         except Exception as e:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, 'Fail to send report.'
         return 1, 'Send Successfully.'
         
-        
-        
+    def get_resource_productivity_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, 
+                                    filter='weekly', task_filter='both'):
+        try:
+            missing_method = False
+            if request_dict:
+                try:
+                    from_date   = request_dict[SessionKey.FROM]
+                    to_date     = request_dict[SessionKey.TO]
+                    sheet_ids   = request_dict[SessionKey.SHEETS]
+                    if request_dict.get(SessionKey.TASK_FILTER):
+                        task_filter = request_dict[SessionKey.TASK_FILTER]
+                except KeyError:
+                    missing_method = True
+            if not filter or not sheet_ids or not to_date or not from_date or missing_method:
+                return ({}, [], 0, 0, 0, 0, 0)
+            timesheet_obj   = Timesheet(from_date, to_date, task_filter, sheet_ids)
+            timesheet_obj.parse()
+            user_ids        = timesheet_obj.user_ids
+            eng_type_ids    = timesheet_obj.eng_type_ids
+            team_ids        = timesheet_obj.team_ids
+            time_off_info   = timesheet_obj.time_off
+            config_obj      = Configuration()
+            config_obj.get_list_holiday(is_parse=True)
+            holidays  = config_obj.holidays
+            user_email, users, user_ids, others_name = self.get_all_resource_information()
+            info            = {}
+            if filter == 'monthly':
+                list_month   = get_work_month(from_date=from_date, to_date=to_date, holidays=holidays)
+                cols_element = list_month
+                list_sub_col       = []
+                for col in cols_element:
+                    month, year, max_hour = col
+                    col_name    = DateTime.LIST_MONTH[month]
+                    list_sub_col.append(col_name)
+            else:
+                list_week   = get_work_week(from_date=from_date, to_date=to_date, holidays=holidays)
+                cols_element = list_week
+                list_sub_col       = []
+                for col in cols_element:
+                    list_sub_col.append(col[0])
+             
+            # caculate timeoff by week/month
+            timeoff_info_2 = {}
+            for user_id in time_off_info:
+                for date, week, timeoff_per_day, obj in time_off_info[user_id]:
+                    if filter == 'monthly':
+                        name     = get_month_name_of_date(date)
+                    else:
+                        name     = get_start_week_of_date(date)
+                    if not  timeoff_info_2.get(user_id):
+                        timeoff_info_2[user_id] = {}
+                    if not timeoff_info_2[user_id].get(name):
+                        timeoff_info_2[user_id][name] = 0
+                    timeoff_info_2[user_id][name] += timeoff_per_day
+            
+            for sheet_id in timesheet_obj.sheets:
+                sheet_obj   = timesheet_obj.sheets[sheet_id]
+                sheet_name  = sheet_obj.sheet_name
+                sheet_type  = sheet_obj.sheet_type
+                for user_id in sheet_obj.resource:
+                    for task_obj in sheet_obj.resource[user_id]:
+                        user_name   = task_obj.user_name
+                        eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
+                        team_name   = team_ids[user_ids[user_id].team_id]
+                        task_date   = task_obj.date
+                        allocation  = task_obj.allocation
+                        work_hour   = 8*(allocation)/100
+                        timeoff     = 0
+                        work_hour   = round_num(work_hour)
+                        if filter == 'monthly':
+                            col_element = task_obj.month_name
+                        else:
+                            col_element  = task_obj.start_week
+                        if timeoff_info_2.get(user_id):
+                            if timeoff_info_2[user_id].get(col_element):
+                                timeoff = timeoff_info_2[user_id][col_element]
+                        
+                        #Skip user not in PROCDUCTIVITY_ENG
+                        if eng_type not in OtherKeys.PROCDUCTIVITY_ENG:
+                            continue
+                        #get leader name
+                        leader_id = users[user_name].leader_id
+                        if leader_id:
+                            leader_name = user_ids[leader_id].user_name
+                        else:
+                            leader_name = SettingKeys.NA_VALUE
+                        
+                        if not info.get(leader_name):
+                            info[leader_name] = {}
+                        
+                        if not info[leader_name].get(user_name):
+                            info[leader_name][user_name] = {
+                                'eng_type': eng_type,
+                                'team_name': team_name,
+                                'timesheet': {}
+                                }
+                            for element in cols_element:
+                                if filter == 'monthly':
+                                    month, year, max_hour = element
+                                    col_name    = DateTime.LIST_MONTH[month]
+                                else:
+                                    col_name, max_hour = element
+                                info[leader_name][user_name]['timesheet'][col_name] = {
+                                    'timeoff' : timeoff,
+                                    'sheet_type': {},
+                                    'max_hours': max_hour
+                                    }
+                                for element in OtherKeys.PROCDUCTIVITY_SHEET_TYPE:
+                                    if element in ['Non-WH']:
+                                        if timeoff_info_2.get(user_id):
+                                            if timeoff_info_2[user_id].get(col_name):
+                                                timeoff = timeoff_info_2[user_id][col_name]
+                                        info[leader_name][user_name]['timesheet'][col_name]['sheet_type'][element] = max_hour - timeoff
+                                    else:
+                                        info[leader_name][user_name]['timesheet'][col_name]['sheet_type'][element] = 0
+                            
+                        info[leader_name][user_name]['timesheet'][col_element]['sheet_type'][sheet_type] += work_hour
+                        info[leader_name][user_name]['timesheet'][col_element]['sheet_type']['Non-WH'] -= work_hour
+                        #info[leader_name][user_name]['timesheet'][col_element]['timeoff'] = timeoff
+                        if info[leader_name][user_name]['timesheet'][col_element]['sheet_type'][sheet_type] > info[leader_name][user_name]['timesheet'][col_element]['max_hours']:
+                            info[leader_name][user_name]['timesheet'][col_element]['sheet_type'][sheet_type] = info[leader_name][user_name]['timesheet'][col_element]['max_hours']
+                        
+                        if info[leader_name][user_name]['timesheet'][col_element]['sheet_type']['Non-WH'] <= 0:
+                            info[leader_name][user_name]['timesheet'][col_element]['sheet_type']['Non-WH'] = 0
+            
+            return info, list_sub_col
+        except Exception as e:
+            println(e, OtherKeys.LOGING_EXCEPTION)
+            return 0, e.args[0]

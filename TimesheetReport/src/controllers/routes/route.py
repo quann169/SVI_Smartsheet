@@ -531,6 +531,7 @@ def get_template_content():
         result = ''
         with open(template_path, 'r') as f:
             result = f.read()
+        result = result.replace('\n', '')
         return jsonify({'result': result})
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
@@ -567,6 +568,24 @@ def report():
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
+@timesheet_bp.route(Route.RESOURCE_PRODUCTIVITY)
+def resource_productivity():
+    """ resource productivity page
+    :param : 
+    :return: resource productivity page
+    """
+    println(Route.RESOURCE_PRODUCTIVITY, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_args()
+        ctrl_obj   = ctrl()
+        ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
+        return render_template(Template.RESOURCE_PRODUCTIVITY, ctrl_obj = ctrl_obj, db_header = DbHeader(),\
+                               route = Route() , template= Template(), session_enum = SessionKey(), \
+                               other_keys= OtherKeys(), request_dict = request_dict)
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+    
 @timesheet_bp.route(Route.SEND_REPORT, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
 def send_report():
     """ Send weekly timesheet

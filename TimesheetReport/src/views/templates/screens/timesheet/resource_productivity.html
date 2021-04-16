@@ -1,0 +1,112 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Resource Productivity 
+{% endblock title %}
+{% block sidebar %}
+	{% set active_sidebar = route.RESOURCE_PRODUCTIVITY %}
+	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block breadcrumb %}
+	{% set br_items = [(route.RESOURCE_PRODUCTIVITY, 'Resource Productivity ', True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+
+{% block styles %}
+	{{super()}}
+	<link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap-select-1.13.1/css/bootstrap-select.css') }}" /> 
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/timesheet/resource_productivity.css') }}" /> 
+{% endblock styles %}
+
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='lib/bootstrap-4.5.3/js/bootstrap.bundle.min.js')}}"></script>
+	<script src="{{url_for('static', filename='js/resource_productivity.js')}}"></script>
+{% endblock scripts %}
+
+{% block main %}
+<form id='timesheet_form' class=''>
+	{% set sheet_info = ctrl_obj.get_list_sheet_name() %}
+	<div class='row'>
+		<div class='col-md-10 d-flex align-items-center'>
+			<select id="list_sheet" class='mt-1' multiple="multiple">
+
+				{% for row in sheet_info %}
+		        	<option value="{{row[db_header.SHEET_ID]}}" {% if row[db_header.SHEET_ID] in request_dict[session_enum.SHEETS]%} selected {% endif %} >{{row[db_header.SHEET_NAME]}}</option>
+		    	{% endfor %}
+		    </select>
+			<input type='date' name='from_date' id='from_date' placeholder='From date' class='mx-1 px-2' value='{{request_dict[session_enum.FROM]}}'>
+			<input type='date' name='to_date' id='to_date' placeholder='To date' class='mx-1 px-2' value='{{request_dict[session_enum.TO]}}'>
+			<button type='button' id='load' class='mx-1 px-3' data-toggle="tooltip" title="Load"><i class="fas fa-sync-alt"></i></button>
+			<button type='button' id='get_newest_data' class='mx-1' data-toggle="tooltip" title="Get Newest Data"><i class="fas fa-cloud-download-alt"></i></button>
+			<button type='button' id='view_chart' class='mx-1' data-toggle="tooltip" title="View Chart"><i class="fas fa-chart-bar"></i></button>
+		</div>
+		<div class='col-md-2 d-flex justify-content-end'>
+			<select id="task_filter" name="task_filter">
+		        <option value="current" {% if request_dict[session_enum.TASK_FILTER] == 'current' %}selected{% endif %}>Current</option>
+		        <option value="final" {% if request_dict[session_enum.TASK_FILTER] == 'final' %}selected{% endif %}>Final</option>
+		        <option value="both"  {% if request_dict[session_enum.TASK_FILTER] == 'both' %}selected{% endif %}>Both</option>
+		    </select>
+		</div>
+	</div>
+</form>
+<br>
+{% set info, list_sub_col = ctrl_obj.get_resource_productivity_info(request_dict)%}
+<div class='table-content' style='overflow-x: auto;'>
+	<table id="productivity" class="" cellspacing="0" width='100%'>
+	  <thead>
+	    <tr class='header'>
+			<th class="w-100-px" rowspan='2' colspan='2'>Modified</th>
+			<th class="w-100-px" rowspan='2'>Leader</th>
+			<th class="w-100-px" rowspan='2'>Resource</th>
+			<th class="w-20-px" rowspan='2'>Eng Type</th>
+			<th class="w-20-px" rowspan='2'>Team</th>
+			{% for col in list_sub_col %}
+				<th class="" colspan='6' style='text-align: center;'>{{col}}</th>
+			{% endfor %}
+			
+	    </tr>
+		<tr class='header'>
+			{% for col in list_sub_col %}
+				<th class="" style='background-color: #5c9ad2 !important;'>NRE</th>
+				<th class="" style='background-color: #dc847c !important;'>RnD</th>
+				<th class="" style='background-color: #ffd963 !important;'>TRN</th>
+				<th class="" style='background-color: #deccec !important;'>Pre-sale</th>
+				<th class="" style='background-color: #a367dc !important;'>Support</th>
+				<th class="" style='background-color: #a8d18d !important;'>Non-WH</th>
+			{% endfor %}
+	    </tr>
+	  </thead>
+	  <tbody>
+			{% for leader_name in info %}
+				{% for resource in info[leader_name] %}
+					{% set eng_type = info[leader_name][resource]['eng_type'] %}
+					{% set team_name = info[leader_name][resource]['team_name'] %}
+					{% set timesheet = info[leader_name][resource]['timesheet'] %}
+					<tr>
+						<td class="w-50-px"><a><i class="fas fa-plus-circle add-row"></i></a></td>
+						<td class="w-50-px"><a><i class="fas fa-minus-circle remove-row"></i></a></td>
+						<td contenteditable='true' class="">{{leader_name}}</td>
+						<td contenteditable='true' class="">{{resource}}</td>
+						<td contenteditable='true' class="">{{eng_type}}</td>
+						<td contenteditable='true' class="">{{team_name}}</td>
+						{% for col in list_sub_col %}
+							{% for key in other_keys.PROCDUCTIVITY_SHEET_TYPE %}
+								<td contenteditable='true' class="w-50-px">{{timesheet[col]['sheet_type'][key]}}</td>
+							{% endfor %}
+						{% endfor %}
+					</tr>
+				{% endfor %}
+
+			{% endfor %}
+		
+			
+	  </tbody>
+	  
+	</table>
+</div>
+
+{% endblock main%}

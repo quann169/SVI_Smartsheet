@@ -59,9 +59,9 @@
 			<th class="w-20-px"></th>
 	    	<th class="w-100-px">Leader (Email)</th>
 			<th class="w-100-px">Resource</th>
-			<th class="w-100-px">Resource Mail</th>
-			<th class="w-20-px">Working Hours</th>
-			<th class="w-20-px">Time Off</th>
+			<th class="w-100-px">Resource (Email)</th>
+			<th class="w-20-px">W.H</th>
+			<th class="w-20-px">T.O</th>
 			<th class="w-20-px">Total</th>
 			<th class="w-20-px">Detail</th>
 			<th class="">Comment</th>
@@ -70,7 +70,7 @@
 	  <tbody>
 		{% for week in info %}
 			<tr class='week'>
-				<td colspan='8' class='bg-grey bold'>{{week}}</td>
+				<td colspan='9' class='bg-grey bold'>{{week}}</td>
 			</tr>
 			{% for email in info[week] %}
 				{% for row in info[week][email]%}

@@ -136,7 +136,8 @@ class OtherKeys:
     LOGING_ERROR        = 'error'
     LOGING_EXCEPTION    = 'exception'
     LOGING_CRITICAL     = 'critical'
-    
+    PROCDUCTIVITY_ENG   = ['Jr. Engineer', 'Sr. Engineer']
+    PROCDUCTIVITY_SHEET_TYPE   = ['NRE', 'RnD', 'TRN', 'Pre-sale', 'Support', 'Non-WH']
     
 class SessionKey:
     
@@ -255,11 +256,13 @@ class Template:
     TIMESHEET_RESOURCE   = 'screens/timesheet/resource.html'
     TIMESHEET_PROJECT   = 'screens/timesheet/project.html'
     REPORT              = 'screens/timesheet/report.html'
+    RESOURCE_PRODUCTIVITY = 'screens/timesheet/resource_productivity.html'
     
     BREADCRUMB          = 'components/breadcrumb/breadcrumb.html'
     NAVBAR              = 'components/navbar/navbar.html'
     SIDEBAR             = 'components/sidebar/sidebar.html'
     LOGIN               = 'screens/auth/login.html'
+    
     
 class Route:
     
@@ -298,6 +301,7 @@ class Route:
     SAVE_OTHER_SETTING   = '/save-other-setting'
     REPORT   = '/report'
     SEND_REPORT   = '/send-report'
+    RESOURCE_PRODUCTIVITY   = '/resource-productivity'
     
     # DEFINE ROUTE REQUIRE ROLE 
     role = Role()

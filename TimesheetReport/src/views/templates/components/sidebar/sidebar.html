@@ -8,9 +8,9 @@
         <a href="{{route.HOME}}"><i class="fas fa-home"></i>&nbsp;&nbsp;Home</a>
     </li>
 	<li>
-        <a href="#timesheets" data-toggle="collapse" aria-expanded="{% if active_sidebar in [route.RESOURCE_TIMESHEET, route.DETAIL, route.PROJECT_TIMESHEET, route.REPORT] %}true{%else%}false{% endif %}" 
+        <a href="#timesheets" data-toggle="collapse" aria-expanded="{% if active_sidebar in [route.RESOURCE_TIMESHEET, route.DETAIL, route.PROJECT_TIMESHEET, route.REPORT, route.RESOURCE_PRODUCTIVITY] %}true{%else%}false{% endif %}" 
  			class="dropdown-toggle"><i class="fas fa-hourglass-start"></i>&nbsp;&nbsp;Timesheet</a>
-        <ul class="collapse list-unstyled {% if active_sidebar in [route.RESOURCE_TIMESHEET, route.DETAIL, route.PROJECT_TIMESHEET, route.REPORT] %}show{% endif %}" id="timesheets">
+        <ul class="collapse list-unstyled {% if active_sidebar in [route.RESOURCE_TIMESHEET, route.DETAIL, route.PROJECT_TIMESHEET, route.REPORT, route.RESOURCE_PRODUCTIVITY] %}show{% endif %}" id="timesheets">
             <li class="{% if active_sidebar == route.DETAIL %} active{% endif %}">
                 <a href="{{route.DETAIL}}"><i class="fas fa-info-circle"></i>&nbsp;&nbsp;Detail</a>
             </li>
@@ -22,6 +22,9 @@
             </li>
 			<li class="{% if active_sidebar == route.REPORT %} active{% endif %}">
                 <a href="{{route.REPORT}}"><i class="fas fa-envelope"></i>&nbsp;&nbsp;Report</a>
+            </li>
+			<li class="{% if active_sidebar == route.RESOURCE_PRODUCTIVITY %} active{% endif %}">
+                <a href="{{route.RESOURCE_PRODUCTIVITY}}"><i class="fas fa-envelope"></i>&nbsp;&nbsp;Resource Productivity</a>
             </li>
         </ul>
 	</li>

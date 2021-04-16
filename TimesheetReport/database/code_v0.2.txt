@@ -443,7 +443,7 @@ INSERT INTO `timesheet`.`sheet_type` (`sheet_type`) VALUES ('RnD'), ('NRE'), ('P
 
 -- team
 INSERT INTO `timesheet`.`team` (`team_id`, `team_name`) VALUES (1, 'NA');
-INSERT INTO `timesheet`.`team` (`team_name`) VALUES ('CAD'), ('QA'), ('PD'), ('CKT'), ('IT'), ('LAY'), ('Manager'), ('RTL'), ('UVM');
+INSERT INTO `timesheet`.`team` (`team_name`) VALUES ('CAD'), ('QA'), ('PD'), ('CKT'), ('IT'), ('LAY'), ('Manager'), ('RTL'), ('UVM'), ('MDL'), ('FPGA'), ('PM'), ('Accounting'), ('Admin');
 
 
 

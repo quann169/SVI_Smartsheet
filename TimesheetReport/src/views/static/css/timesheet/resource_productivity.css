@@ -1,0 +1,28 @@
+.productivity-block {
+	width: 70%;
+    position: absolute;
+    height: 90vh;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+	background-color: white;
+	display: flex;
+	flex-direction: column;
+	border-radius: 5px;
+}
+.productivity-taskbar {
+	border-bottom: 1px solid #aaa;
+	box-shadow: 0px 7px 6px -6px #aaa
+}
+.productivity-ctn {
+	overflow: auto;
+	margin-top: 5px;
+}
+#productivity .remove-row:hover {
+	cursor: pointer;
+	color: red;
+}
+#productivity .add-row:hover {
+	cursor: pointer;
+	color: blue;
+}

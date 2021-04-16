@@ -56,6 +56,7 @@ const OTHER_SETTING   = '/other-setting';
 const SAVE_OTHER_SETTING   = '/save-other-setting';
 const REPORT   = '/report';
 const SEND_REPORT   = '/send-report';
+const RESOURCE_PRODUCTIVITY   = '/resource-productivity';
 
 var FOCUS_MULTISELECT = null;
 

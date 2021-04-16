@@ -1,36 +1,119 @@
+<!DOCTYPE html>
+<html>
 <head>
-	<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
-	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/bootstrap-4.5.3/css/bootstrap.min.css') }}" />  
-	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/DataTables/datatables.min.css') }}" /> 
-	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/multiple-select/example-styles.css') }}" /> 
-	<!-- Our Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/fontawesome/css/all.css') }}" />
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/timesheet/report.css') }}" />
+<style>
+.canvas
+{
+	
+}
+</style>
 </head>
+<body>
 
-<div class='review-e-popup'>
-		<div class='review-e-title'>
-			<span>Send Report</span>
-		</div>
-		<div  class='review-e-menu'>
-			<ul><li><input type='checkbox' data-target='#cnt_1'><span data-target='#cnt_1'>NA</span></li><li><input type='checkbox' data-target='#cnt_2'><span data-target='#cnt_2'>phile@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_3'><span data-target='#cnt_3'>locho@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_4'><span data-target='#cnt_4'>quannguyen@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_5'><span data-target='#cnt_5'>hatran@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_6'><span data-target='#cnt_6'>thanhhoang@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_7'><span data-target='#cnt_7'>nhatthai@savarti.com</span></li><li><input type='checkbox' data-target='#cnt_8'><span data-target='#cnt_8'>hieunguyen@savarti.com</span></li></ul>
-		</div>
-		<div class='review-e-content'><div id='cnt_1' class='mail-ctn dp-block' >1</div><div id='cnt_2' class='mail-ctn dp-none' >2</div><div id='cnt_3' class='mail-ctn dp-none' >3</div><div id='cnt_4' class='mail-ctn dp-none' >4</div><div id='cnt_5' class='mail-ctn dp-none' >5</div><div id='cnt_6' class='mail-ctn dp-none' >6</div><div id='cnt_7' class='mail-ctn dp-none' >7</div><div id='cnt_8' class='mail-ctn dp-none' >8</div></div>
-		<div class='review-e-footer'>
-			<button type='button' >Cancel</button>
-			<button type='button' >Send</button>
-		</div>
-	</div>
-<script src="{{url_for('static', filename='js/enum.js')}}"></script>
-<script src="{{url_for('static', filename='vendors/fontawesome/js/solid.js')}}" ></script>
-<script src="{{url_for('static', filename='vendors/fontawesome/js/fontawesome.js')}}"></script>
-<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.js')}}"></script>
-<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.slim.min.js')}}"></script>
-<script src="{{url_for('static', filename='vendors/poper/popper-1.14.0.min.js')}}"></script>
-<script src="{{url_for('static', filename='vendors/bootstrap-4.5.3/js/bootstrap.min.js')}}"></script>
-<script src="{{url_for('static', filename='vendors/DataTables/datatables.min.js')}}"></script>
-<script src="{{url_for('static', filename='vendors/multiple-select/jquery.multi-select.js')}}"></script>
+<canvas class="canvas" id="myCanvas" width="1024" height="768">
+Your browser does not support the HTML5 canvas tag.</canvas>
 
-<script src="{{url_for('static', filename='js/common.js')}}"></script>
-<script src="{{url_for('static', filename='js/report.js')}}"></script>
+<script>
+	var  mainData = [
+		{"Month":"Jan","Sales":"990"},
+		{"Month":"Feb","Sales":"2000"},
+		{"Month":"Mar","Sales":"1000"},
+		{"Month":"Apr","Sales":"8000"},
+		{"Month":"May","Sales":"12000"},
+		{"Month":"Jun","Sales":"5000"},
+		{"Month":"Jul","Sales":"6000"},
+		{"Month":"Aug","Sales":"7000"},
+		{"Month":"Sep","Sales":"8000"},
+		{"Month":"Oct","Sales":"9000"},
+		{"Month":"Nov","Sales":"9000"},
+		{"Month":"Dec","Sales":"9000"}											];
+
+var maximumYValue = 0;
+maximumYValue = parseInt(mainData[0].Sales);
+for (var i=0; i<mainData.length; i++)
+    {
+		if (maximumYValue < parseInt(mainData[i].Sales))
+		{
+			maximumYValue = parseInt(mainData[i].Sales);
+		}
+    }
+	var c=document.getElementById("myCanvas");
+	var ctx=c.getContext("2d");
+	var maxX = c.width -70;
+	var maxY = c.height -70;
+	var minX = 70;
+	var minY = 70;
+ctx.beginPath();
+//Horizontal Axis
+	ctx.lineWidth=2.0;
+	ctx.lineCap = 'round';
+	ctx.moveTo(minX,maxY);
+	ctx.lineTo(maxX,maxY);
+
+//Horizontal Axis Arrow
+	ctx.moveTo(maxX-10,maxY-5);
+	ctx.lineTo(maxX,maxY);
+	ctx.lineTo(maxX-10,maxY+5);
+
+//Vertical Axis
+	ctx.moveTo(minX,maxY);
+	ctx.lineTo(minX,minY);
+
+//Vertical Axis Arrow
+	ctx.moveTo(minX-5,minY+10);
+	ctx.lineTo(minX,minY);
+	ctx.lineTo(minX+5,minY+10);
+ctx.stroke();
+
+//Min Ticks
+        ctx.lineWidth = 0.5;
+        var noOfGrids = 5;
+        var vGridDiff = (maxY - minY)/noOfGrids;
+        ctx.font="12px Helvetica";
+        for (var i =1; i<noOfGrids;i++)
+        {
+          ctx.moveTo(minX,maxY-i*vGridDiff);
+	  ctx.lineTo(maxX,maxY-i*vGridDiff);
+	  ctx.fillText((i*maximumYValue/noOfGrids),20,maxY-i*vGridDiff);
+        }
+        ctx.stroke();
+
+var padding = 20;
+var maxHeight = Math.round((maxY - minY)*1.0);
+ctx.fillStyle = "rgba(0, 0, 0, 0.65)"
+ctx.beginPath();
+
+for (var i =0; i<mainData.length; i++)
+{
+	ctx.rect(20+minX+i*padding+i*40,maxY-((parseInt(mainData[i].Sales)/maximumYValue)*maxHeight),30,parseInt(mainData[i].Sales)/maximumYValue*maxHeight-1);	
+}
+ctx.closePath();
+ctx.stroke();
+ctx.fill();
+
+ctx.beginPath();
+ctx.fillStyle = "rgba(0, 0, 0, 0.75)"
+for (var i =0; i<mainData.length; i++)
+{
+	ctx.fillText(mainData[i].Month,25+minX+i*padding+i*40,maxY+20);
+}
+ctx.closePath();
+ctx.fill();
+
+//X Label
+ctx.font="15px Helvetica light";
+ctx.fillText("Month",c.width/2,maxY+45);
+
+//Title
+ctx.font="22px Helvetica light";
+ctx.fillText("Column Chart Title",c.width/2-100,20);
+
+//Y Label
+ctx.font="15px Helvetica light";
+ctx.translate(18, c.height/2);
+ctx.rotate(-Math.PI / 2);
+ctx.fillText("Sales",0,0);
+
+</script>
+</body>
+</html>

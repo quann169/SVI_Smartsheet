@@ -28,6 +28,10 @@
 .review-e-popup ul li {
 	padding: 5px 5px 5px 10px;
 }
+.review-e-popup ul li:first-child {
+	border-bottom: 1px solid #aaa;
+    box-shadow: 1px 1px 7px 0px #aaa;
+}
 .review-e-popup ul li span{
 	margin-left: 5px;
 }

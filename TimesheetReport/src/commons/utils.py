@@ -511,18 +511,23 @@ def render_jinja2_template(template_path, file_name,  dict_variable):
     result = run_template.render(dict_variable)
     return result
     
-def send_mail(user_name, password, recepient, cc_recepient, subject, message):
+def send_mail(user_name, password, recipient, cc_recipient, subject, message):
     try:
+        message = message.replace('\n', '<br>\n')
+        print ('Recipient: %s'%(str(recipient)))
+        print ('CC Recipient: %s'%(str(cc_recipient)))
+        print ('Subject: %s'%(subject))
+        print ('Body: %s'%(message))
         sender = "%s@savarti.com"%user_name
-        recepient = ['toannguyen@savarti.com']
-        cc_recepient = ['toannguyen@savarti.com']
+        recipient = ['toannguyen@savarti.com']
+        cc_recipient = ['toannguyen@savarti.com']
         # Create message container - the correct MIME type is multipart/alternative.
         msg = MIMEMultipart('alternative')
         msg['From'] = sender
-        msg['To'] = '; '.join(recepient)
+        msg['To'] = '; '.join(recipient)
         msg['Subject'] = subject
-        msg['CC'] = '; '.join(cc_recepient)
-
+        msg['CC'] = '; '.join(cc_recipient)
+        
         part = MIMEText(message, 'html')
         
         msg.attach(part)
@@ -533,7 +538,7 @@ def send_mail(user_name, password, recepient, cc_recepient, subject, message):
         # if tls = True                
         mail.starttls()               
         mail.login(sender, password)        
-        mail.sendmail(sender, recepient, msg.as_string())        
+#         mail.sendmail(sender, recipient, msg.as_string())
         mail.quit()
         return 1, ''
     except Exception as e:

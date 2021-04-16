@@ -93,7 +93,7 @@ function create_send_mail_popup(data) {
 			<span>Send Report</span>
 		</div>
 		<div  class='review-e-menu'>
-			<ul>`
+			<ul><li class='bold'>Send To</li>`
 	var count = 0;
 	var ctn = '';
 	var template = get_template_content_asyn('components/sending_mail/report_timesheet.html');
@@ -151,7 +151,7 @@ function create_send_mail_popup(data) {
 	}
     popup_ctn += `</ul>
 	</div>
-	<div class='review-e-content'>`;
+	<div class='review-e-content' >`;
 	popup_ctn += ctn;	
 	popup_ctn += `</div>
 	<div class='review-e-footer'>
@@ -164,7 +164,7 @@ function create_send_mail_popup(data) {
 
 $(document).ready(function () {
 	$(document).on('click', '#send', function(){
-		if (! confirm("Are you sure you want to be continue?")) {
+		if (! confirm("Are you sure you want to continue?")) {
 			return null;
 		}
 		$('#overlay_loader').show();
