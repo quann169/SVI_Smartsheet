@@ -426,6 +426,14 @@ ADD COLUMN `end_date` DATETIME NULL AFTER `start_date`;
 ALTER TABLE `timesheet`.`sheet` 
 ADD COLUMN `is_valid` TINYINT NULL AFTER `is_loading`;
 
+CREATE TABLE `timesheet`.`other_config` (
+  `other_config_id` INT NOT NULL AUTO_INCREMENT,
+  `config_name` VARCHAR(100) NULL,
+  `config_value` TEXT NULL,
+  PRIMARY KEY (`other_config_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
 
 -- Master value
 

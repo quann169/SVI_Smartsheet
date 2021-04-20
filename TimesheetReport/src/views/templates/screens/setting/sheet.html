@@ -27,15 +27,19 @@
 {% block main %}
 <form id='import_sheet' method="post" enctype="multipart/form-data">
 	<div class='row'>
-		<!-- <div class="custom-file col-md-2">
-		    <input type="file" name='sheet_file' id='sheet_file' accept='.xlsx' class="custom-file-input " >
-		    <label class="custom-file-label" for="sheet_file">Choose file</label>
-		</div> -->
-		<div class='col-md-10'>
-			<!-- <button type='submit' class='mg-l-5' id='btn_import' disabled data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>-->
-			<button type='button' class='mg-l-5' id='save' disabled data-toggle="tooltip" title="Save"><i class="fas fa-save"></i></button>
-			<button type='button' id='sync_sheet' class='mx-1' data-toggle="tooltip" title="Synchronize sheet"><i class="fas fa-cloud-download-alt"></i></button>
-		</div>
+		
+			<!-- <div class="custom-file col-md-2">
+			    <input type="file" name='sheet_file' id='sheet_file' accept='.xlsx' class="custom-file-input " >
+			    <label class="custom-file-label" for="sheet_file">Choose file</label>
+			</div> -->
+			<div class='col-md-10'>
+				<!-- <button type='submit' class='mg-l-5' id='btn_import' disabled data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>-->
+				{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+				<button type='button' class='mg-l-5' id='save' disabled data-toggle="tooltip" title="Save"><i class="fas fa-save"></i></button>
+				<button type='button' id='sync_sheet' class='mx-1' data-toggle="tooltip" title="Synchronize sheet"><i class="fas fa-cloud-download-alt"></i></button>
+				{% endif %}
+			</div>
+		
 		<div class='col-md-2 d-flex justify-content-end'>
 			<select id="mode" name="mode">
 		        <option value="active" {% if request_dict[session_enum.MODE] == 'active' %}selected{% endif %}>Active</option>
@@ -81,14 +85,16 @@
 				  <td>{{loop.index}}</td>
 				  <td>{{row[db_header.SHEET_NAME]}}</td>
 		          <td>
-					  <select id="sheet_{{row[db_header.SHEET_ID]}}_type" name="sheet_{{row[db_header.SHEET_ID]}}_type">
+					  <select id="sheet_{{row[db_header.SHEET_ID]}}_type" name="sheet_{{row[db_header.SHEET_ID]}}_type"
+						{% if not ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %} disabled {%endif%}>
 						{% for sheet_type in sheet_types%}
 							<option value='{{sheet_types[sheet_type]}}' {% if sheet_type == row[db_header.SHEET_TYPE]%}selected{% endif %}>{{sheet_type}}</option>
 						{% endfor %}
 					  </select>
 				  </td>
 				  <td>
-					  <select class='mt-1' multiple="multiple"  name="sheet_{{row[db_header.SHEET_ID]}}_resource">
+					  <select class='mt-1' multiple="multiple"  name="sheet_{{row[db_header.SHEET_ID]}}_resource"
+							{% if not ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %} disabled {%endif%}>
 							{% for row2 in resource_info %}
 					        	<option value="{{row2[db_header.USER_ID]}}" 
 								{% if row2[db_header.USER_ID] in project_user[row[db_header.SHEET_ID]]%} selected {% endif %} >
@@ -99,6 +105,7 @@
 				  </td>
 			      <td>{{row[db_header.LATEST_MODIFIED] | string }}</td>
 				  <td><input type='checkbox' id="sheet_{{row[db_header.SHEET_ID]}}_active" name="sheet_{{row[db_header.SHEET_ID]}}_active"
+					{% if not ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %} disabled {%endif%} 
 					 value='' {% if row[db_header.IS_ACTIVE] %} checked {% endif %} {% if row[db_header.IS_VALID] == 0 %}disabled{% endif %}></td>
 				  <td>
 					{% if row[db_header.IS_VALID] == 1 %}

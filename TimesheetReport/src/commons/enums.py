@@ -62,13 +62,23 @@ class DbTable:
     USER_ROLE               = 'user_role'
     ANALYZE_ITEM            = 'analyze_item'
     FINAL_EVIDENCE          = 'final_evidence'
+    USER_VERSION            = 'user_version'
+    OTHER_CONFIG            = 'other_config'
+    
     
 class AnalyzeCFGKeys:
-    
     TOKEN   = 'Token'
     TIME_DELTA  = 'Time Delta'
     TIME_DELTA_BEFORE  = 'Time Delta Before'
     TIME_DELTA_AFTER  = 'Time Delta After'
+    
+class OtherCFGKeys:
+    LATEST_VERSION      = 'Latest Version'
+    VERSION_DOWNLOAD    = 'Version Download'
+    GUIDELINE           = 'Guideline'
+    BCC_MAIL            = 'BCC Mail'
+    FORCE_UPGRADE       = 'Force Upgrade'
+    
     
 class DateTime():
     
@@ -157,6 +167,9 @@ class SessionKey:
     USER_ID         = 'user_id'
     RESOURCE_NAME   = 'resource_name'
     ROLE_NAME       = 'role_name'
+    IS_NOTIFY_VERSION = 'is_notify_version'
+    IS_UPDATE_VERSION = 'is_update_version'
+    USER_VERSION    = 'user_version'
     
 class DbHeader:
     
@@ -222,6 +235,11 @@ class DbHeader:
     COUNTER                 = 'counter'
     IS_VALID                = 'is_valid'
     LEADER_ID               = 'leader_id'
+    OTHER_CONFIG_ID         = 'other_config_id'
+    CONFIG_NAME             = 'config_name'
+    CONFIG_VALUE            = 'config_value'
+    USER_VERSION_ID         = 'user_version_id'
+    VERSION                 = 'version'
 
 class ExcelColor:
     
@@ -302,19 +320,28 @@ class Route:
     REPORT   = '/report'
     SEND_REPORT   = '/send-report'
     RESOURCE_PRODUCTIVITY   = '/resource-productivity'
+    IMPORT_PRODUCTIVITY     = '/import-productivity'
+    EXPORT_PRODUCTIVITY     = '/export-productivity'
+    CHECK_VERSION     = '/check-version'
+    LOCK_SYNC     = '/lock-sync'
     
     # DEFINE ROUTE REQUIRE ROLE 
     role = Role()
     REQUIRE_ROLE_OF_ROUTE = {
         ADD_TO_FINAL: [role.PM],
-        UPLOAD_FILE: [role.PM],
         IMPORT_TIMEOFF: [role.PM],
         IMPORT_SHEET: [role.PM],
         IMPORT_RESOURCE: [role.PM],
         IMPORT_HOLIDAY: [role.PM],
         ANALYZE: [role.PM],
         CONFLICT_DATE: [role.PM],
-        SAVE_SHEET_SETTING: [role.PM]
+        SAVE_SHEET_SETTING: [role.PM],
+        GET_SYNC_SHEET: [role.PM],
+        UPDATE_SYNC_SHEET: [role.PM],
+        SAVE_OTHER_SETTING: [role.PM],
+        REPORT: [role.PM],
+        SEND_REPORT: [role.PM],
+        LOCK_SYNC: [role.PM],
         }
      
     

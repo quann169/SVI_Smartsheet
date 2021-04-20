@@ -252,7 +252,11 @@ function parse_url() {
 	var url = new URL(url_string);
 	var method_get_str = url.search;
 	var method_str = method_get_str.replace("?", "");
-	var data = JSON.parse(decodeURIComponent(method_str));
+	if (method_str.trim()) {
+		var data = JSON.parse(decodeURIComponent(method_str));
+	} else {
+		var data = {};
+	}
 	var output = [method_get_str, data];
 	return output;
 }
@@ -269,23 +273,24 @@ function check_loading_smartsheet() {
 	        	var result = resp.result;
 				var is_running = result[0];
 				var list_sheet_name = result[1];
-				var ctn = '<a class="cl-yellow" id="is_loading_smartsheet">WARNING:</a>' + 'Process to get data for "' + list_sheet_name + '" is running.';
+				//var ctn = '<a class="cl-yellow" id="is_loading_smartsheet">WARNING:</a>' + 'Process to get data for "' + list_sheet_name + '" is running.';
 				if (is_running) {
-					$('#notify_content').html(ctn);
-					$('#notify').show();
+					//$('#notify_content').html(ctn);
+					//$('#notify').show();
 					$('#get_newest_data').attr('disabled', true);
-					$('#notify_close').hide();
+					//$('#notify_close').hide();
 				} else {
-					if ($('#is_loading_smartsheet').length) {
-						$('#notify_close').show();
-						$('#notify').hide();
+					//if ($('#is_loading_smartsheet').length) {
+						//$('#notify_close').show();
+					//$('#notify').hide();
 						$('#get_newest_data').attr('disabled', false);
-					}
+					//}
 				}
 				
 			 }
 		 });
 	} catch(err) {
+		console.log(err);
 		return null;	
 	}
 };
@@ -361,6 +366,32 @@ $(document).ready(function () {
 			      }
 		   });
 	});
+	$('#lock').click(function(event) {
+		var disable_sync = $('#get_newest_data').prop('disabled');
+		var is_loading = 0;
+		if (disable_sync) {
+			var lock = 'Unlock';
+			
+		} else {
+			var lock = 'Lock';
+			is_loading = 1;
+		}
+		if (! confirm("Are you sure you want to " + lock + " 'Synchronize Data' feature?")) {
+			return null;
+		}
+		var data = {'is_loading': is_loading}; 
+		$('#overlay_loader').show();
+		$.ajax({
+			   url: LOCK_SYNC,
+			   type: "POST",
+			   data: encodeURIComponent(JSON.stringify(data)),
+			   success: function(resp){
+					check_loading_smartsheet();
+				   $('#overlay_loader').hide();
+					
+			      }
+		   });
+	});
 });
 
 function show_log_get_newest_data() {
@@ -419,7 +450,5 @@ function parse_serialize(serialize){
 	}
 	return out;
 }
-
-
 
 INTERVAL_CHECK_SMARTSHEET = setInterval(function() {check_loading_smartsheet(); }, 10000);

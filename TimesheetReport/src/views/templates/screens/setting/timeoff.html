@@ -22,11 +22,13 @@
 {% block main %}
 <form id='import_timeoff' method="post" enctype="multipart/form-data">
 	<div class='dp-flex'>
-		<div class="custom-file col-4">
-		    <input type="file" name='timeoff_file' id='timeoff_file' accept='.xlsx' class="custom-file-input " >
-		    <label class="custom-file-label" for="timeoff_file">Choose file</label>
-		</div>
-		<button type='submit' class='mg-l-5' id='btn_import' disabled data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
+		{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+			<div class="custom-file col-4">
+			    <input type="file" name='timeoff_file' id='timeoff_file' accept='.xlsx' class="custom-file-input " >
+			    <label class="custom-file-label" for="timeoff_file">Choose file</label>
+			</div>
+			<button type='submit' class='mg-l-5' id='btn_import' disabled data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
+		{% endif %}
 	</div>
 </form>
 <br>

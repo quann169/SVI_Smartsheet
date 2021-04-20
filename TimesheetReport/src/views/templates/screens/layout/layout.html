@@ -89,7 +89,14 @@
 			<script src="{{url_for('static', filename='js/common.js')}}"></script>
 			
 	    {%- endblock scripts %}
-		
+		{% set is_notify, link = ctrl_obj.check_version() %}
+		{% if is_notify %}
+			<script>
+				if ( confirm("A new version of Timesheet Report is available, download now?")) {
+					window.open('{{link}}', '_blank');
+				}
+			</script>
+		{% endif %}
 	    
 	</body>
 

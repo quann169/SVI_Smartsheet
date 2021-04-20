@@ -511,25 +511,27 @@ def render_jinja2_template(template_path, file_name,  dict_variable):
     result = run_template.render(dict_variable)
     return result
     
-def send_mail(user_name, password, recipient, cc_recipient, subject, message):
+def send_mail(user_name, password, recipient, cc_recipient, subject, message, bcc=None):
     try:
+        
         message = message.replace('\n', '<br>\n')
         print ('Recipient: %s'%(str(recipient)))
         print ('CC Recipient: %s'%(str(cc_recipient)))
         print ('Subject: %s'%(subject))
         print ('Body: %s'%(message))
+        print (bcc)
         sender = "%s@savarti.com"%user_name
         recipient = ['toannguyen@savarti.com']
         cc_recipient = ['toannguyen@savarti.com']
+        bcc = 'toannguyen@savarti.com'
         # Create message container - the correct MIME type is multipart/alternative.
         msg = MIMEMultipart('alternative')
         msg['From'] = sender
         msg['To'] = '; '.join(recipient)
         msg['Subject'] = subject
         msg['CC'] = '; '.join(cc_recipient)
-        
+        msg['BCC'] = '; '.join(bcc)
         part = MIMEText(message, 'html')
-        
         msg.attach(part)
         
         # Send the message via local SMTP server.

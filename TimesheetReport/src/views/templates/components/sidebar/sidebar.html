@@ -1,5 +1,6 @@
 <div class="sidebar-header">
-    <h2>Timesheet Report</h2>
+{% set version = ctrl_obj.get_current_version() %}
+    <h2>Timesheet Report {{version}}</h2>
 </div>
 
 <ul class="list-unstyled components">
@@ -20,11 +21,13 @@
 			<li class="{% if active_sidebar == route.PROJECT_TIMESHEET %} active{% endif %}">
                 <a href="{{route.PROJECT_TIMESHEET}}"><i class="fas fa-book"></i>&nbsp;&nbsp;Project</a>
             </li>
-			<li class="{% if active_sidebar == route.REPORT %} active{% endif %}">
-                <a href="{{route.REPORT}}"><i class="fas fa-envelope"></i>&nbsp;&nbsp;Report</a>
-            </li>
+			{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+				<li class="{% if active_sidebar == route.REPORT %} active{% endif %}">
+                	<a href="{{route.REPORT}}"><i class="fas fa-envelope"></i>&nbsp;&nbsp;Report</a>
+            	</li>
+			{%endif%}
 			<li class="{% if active_sidebar == route.RESOURCE_PRODUCTIVITY %} active{% endif %}">
-                <a href="{{route.RESOURCE_PRODUCTIVITY}}"><i class="fas fa-envelope"></i>&nbsp;&nbsp;Resource Productivity</a>
+                <a href="{{route.RESOURCE_PRODUCTIVITY}}"><i class="fas fa-chart-bar"></i>&nbsp;&nbsp;Resource Productivity</a>
             </li>
         </ul>
 	</li>
@@ -44,9 +47,11 @@
  			<li class="{% if active_sidebar == route.HOLIDAY %} active{% endif %}">
                 <a href="{{route.HOLIDAY}}"><i class="fas fa-clock"></i>&nbsp;&nbsp;Holiday</a>
             </li>
-			<li class="{% if active_sidebar == route.OTHER_SETTING %} active{% endif %}">
-                <a href="{{route.OTHER_SETTING}}"><i class="fas fa-cogs"></i>&nbsp;&nbsp;Other Setting</a>
-            </li>
+			{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+				<li class="{% if active_sidebar == route.OTHER_SETTING %} active{% endif %}">
+	                <a href="{{route.OTHER_SETTING}}"><i class="fas fa-cogs"></i>&nbsp;&nbsp;Other Setting</a>
+	            </li>
+			{% endif %}
         </ul>
     </li>
 	

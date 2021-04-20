@@ -622,7 +622,72 @@ class Configuration(Connection):
         """%( DbTable.SHEET, DbHeader.IS_LOADING, str(self.is_loading),
                DbHeader.SHEET_ID, self.sheet_id)
         self.db_execute(query)
+    
+    def get_other_config_info(self):
+        query   = """SELECT `%s`, `%s`, `%s` FROM `%s`;"""%( 
+            DbHeader.OTHER_CONFIG_ID, DbHeader.CONFIG_NAME, DbHeader.CONFIG_VALUE, DbTable.OTHER_CONFIG)
+        query_result    = self.db_query(query)
+        result = {}
+        if query_result:
+            for row in query_result:
+                result[row[DbHeader.CONFIG_NAME]] = row[DbHeader.CONFIG_VALUE]
+        return result
+    
+    def check_exist_config_info(self):
+        query   = """SELECT `%s` FROM `%s` WHERE `%s`="%s";"""%( 
+            DbHeader.OTHER_CONFIG_ID, DbTable.OTHER_CONFIG, DbHeader.CONFIG_NAME, self.config_name)
+        query_result    = self.db_query(query)
+        if query_result:
+            return True
+        else:
+            return False
+    
+    def update_other_config_info(self):
+        query   = """UPDATE `%s` SET `%s`="%s"
+                    WHERE `%s`="%s";
+        """%( DbTable.OTHER_CONFIG, DbHeader.CONFIG_VALUE, self.config_value,
+               DbHeader.CONFIG_NAME, self.config_name)
+        self.db_execute(query)
+    
+    def add_other_config_info(self):
+        query   = """INSERT INTO `%s` (`%s`, `%s`)
+                    VALUES ("%s", "%s");
+        """%(DbTable.OTHER_CONFIG, DbHeader.CONFIG_VALUE, DbHeader.CONFIG_NAME, self.config_value, self.config_name)
+        self.db_execute(query)
+    
+    def get_user_version(self):
+        query   = """SELECT `%s`, `%s`, `%s`,  FROM `%s`;"""%( 
+            DbHeader.VERSION, DbHeader.USER_VERSION_ID, DbHeader.USER_ID, DbTable.USER_VERSION)
+        query_result    = self.db_query(query)
+        result = {}
+        if query_result:
+            for row in query_result:
+                result[row[DbHeader.USER_ID]] = [row[DbHeader.USER_VERSION_ID], row[DbHeader.VERSION]]
+        return result
+    
+    def check_exist_user_version(self):
+        query   = """SELECT `%s` FROM `%s` WHERE `%s`="%s";"""%( 
+            DbHeader.USER_VERSION_ID, DbTable.USER_VERSION, DbHeader.USER_ID, self.user_id)
+        query_result    = self.db_query(query)
+        if query_result:
+            return True
+        else:
+            return False
+    
+    def update_user_version(self):
+        query   = """UPDATE `%s` SET `%s`="%s"
+                    WHERE `%s`="%s";
+        """%( DbTable.USER_VERSION, DbHeader.VERSION, self.version,
+               DbHeader.USER_ID, self.user_id)
+        self.db_execute(query)
+    
+    def add_user_version(self):
+        query   = """INSERT INTO `%s` (`%s`, `%s`)
+                    VALUES ("%s", "%s");
+        """%(DbTable.USER_VERSION, DbHeader.USER_ID, DbHeader.VERSION, self.user_id, self.version)
+        self.db_execute(query)
         
+    
 class DbTask(Connection):
     def __init__(self):
         Connection.__init__(self)

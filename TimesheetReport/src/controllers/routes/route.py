@@ -13,7 +13,7 @@ from src.commons.utils import save_file_from_request, get_request_form_ajax, get
                                 get_saved_password, save_password
 from src.controllers.controllers import Controllers as ctrl
 from src.commons.enums import DbTable, DbHeader, SessionKey, Template, Route, AnalyzeCFGKeys, \
-                                OtherKeys
+                                OtherKeys, Role
 from src.models.database.connection_model import Connection
 from src.commons.utils import println
 import config
@@ -27,6 +27,7 @@ def before_request():
     :param : 
     :return: 
     """
+    
     method = request.method 
     path = request.path
     enum_route = Route()
@@ -40,7 +41,10 @@ def before_request():
         role = session[SessionKey.ROLE_NAME]
         if not role in list_role_required:
             return abort(403, MsgError.E005)
- 
+    if (not session.get(SessionKey.USER_VERSION) ) or (session.get(SessionKey.USER_VERSION) != g.version):
+        ctrl().add_current_version_of_user()
+        
+        
 @timesheet_bp.route(Route.INDEX, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
 def index():
     """ Starting page
@@ -81,7 +85,7 @@ def login():
         current_user = getpass.getuser()
         request_dict = get_request_args()
         
-        return render_template(Template.LOGIN, ctrl_obj = ctrl_obj, db_header = DbHeader(), \
+        return render_template(Template.LOGIN, ctrl_obj = ctrl_obj, role = Role(), db_header = DbHeader(), \
                                route = Route(), template= Template(), session_enum = SessionKey(), \
                                request_dict = request_dict, current_user=current_user)
     except Exception as e:
@@ -112,7 +116,8 @@ def home():
     println(Route.HOME, OtherKeys.LOGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
-        return render_template(Template.HOME, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , \
+        return render_template(Template.HOME, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , \
                                session_enum = SessionKey(), template= Template())
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
@@ -127,7 +132,9 @@ def get_newest_data():
     println(Route.GET_NEWEST_DATA, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
-        result = ctrl().get_newest_data(from_date=request_dict[SessionKey.FROM], to_date=request_dict[SessionKey.TO], sheet_ids=request_dict[SessionKey.SHEETS])
+        result = ctrl().get_newest_data(from_date=request_dict[SessionKey.FROM], \
+                                        to_date=request_dict[SessionKey.TO], \
+                                        sheet_ids=request_dict[SessionKey.SHEETS])
         return jsonify({'result': result})
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
@@ -156,7 +163,8 @@ def add_to_final():
     println(Route.ADD_TO_FINAL, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
-        result = ctrl().add_to_final(from_date=request_dict[SessionKey.FROM], to_date=request_dict[SessionKey.TO], 
+        result = ctrl().add_to_final(from_date=request_dict[SessionKey.FROM], \
+                                     to_date=request_dict[SessionKey.TO], 
                                      sheet_ids=request_dict[SessionKey.SHEETS],
                                      data=request_dict['data'],)
         
@@ -199,7 +207,9 @@ def export():
     println(Route.EXPORT, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
-        result = ctrl().export_excel(from_date=request_dict[SessionKey.FROM], to_date=request_dict[SessionKey.TO], sheet_ids=request_dict[SessionKey.SHEETS])
+        result = ctrl().export_excel(from_date=request_dict[SessionKey.FROM], \
+                                     to_date=request_dict[SessionKey.TO], \
+                                     sheet_ids=request_dict[SessionKey.SHEETS])
         return jsonify({'result': result})
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
@@ -216,7 +226,9 @@ def timeoff():
     println(Route.TIMEOFF, OtherKeys.LOGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
-        return render_template(Template.SETTING_TIMEOFF, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
+        return render_template(Template.SETTING_TIMEOFF, ctrl_obj = ctrl_obj, \
+                               role = Role(), db_header = DbHeader(), route = Route() , \
+                               template= Template())
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
@@ -245,7 +257,8 @@ def log():
     println(Route.LOG, OtherKeys.LOGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
-        return render_template(Template.LOG, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
+        return render_template(Template.LOG, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template())
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
@@ -261,7 +274,8 @@ def sheet():
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
         ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.MODE: 'active'})
-        return render_template(Template.SETTING_SHEET, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , \
+        return render_template(Template.SETTING_SHEET, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , \
                                template= Template(), session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
@@ -277,7 +291,8 @@ def other_setting():
     try:
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
-        return render_template(Template.SETTING_OTHER, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , \
+        return render_template(Template.SETTING_OTHER, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , \
                                template= Template(), session_enum = SessionKey(), request_dict = request_dict,\
                                analyze_cfg_key = AnalyzeCFGKeys())
     except Exception as e:
@@ -308,7 +323,8 @@ def resource():
     println(Route.RESOURCE, OtherKeys.LOGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
-        return render_template(Template.SETTING_RESOURCE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
+        return render_template(Template.SETTING_RESOURCE, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template())
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
@@ -337,7 +353,8 @@ def holiday():
     println(Route.HOLIDAY, OtherKeys.LOGING_DEBUG)
     try:
         ctrl_obj    = ctrl()
-        return render_template(Template.SETTING_HOLIDAY, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
+        return render_template(Template.SETTING_HOLIDAY, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template())
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
@@ -383,7 +400,9 @@ def daily_timesheet():
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
         ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
-        return render_template(Template.TIMESHEET_DETAIL, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
+        return render_template(Template.TIMESHEET_DETAIL, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template(), \
+                               session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
@@ -399,7 +418,9 @@ def resource_timesheet():
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
         ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
-        return render_template(Template.TIMESHEET_RESOURCE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
+        return render_template(Template.TIMESHEET_RESOURCE, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template(), \
+                               session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
@@ -415,7 +436,9 @@ def project_timesheet():
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
         ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
-        return render_template(Template.TIMESHEET_PROJECT, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
+        return render_template(Template.TIMESHEET_PROJECT, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template(), \
+                               session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
@@ -431,7 +454,9 @@ def analyze():
         request_dict = get_request_args()
         request_dict[SessionKey.TASK_FILTER] = 'current'
         ctrl_obj   = ctrl()
-        return render_template(Template.TIMESHEET_ANALYZE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
+        return render_template(Template.TIMESHEET_ANALYZE, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template(), \
+                               session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
@@ -446,7 +471,9 @@ def conflict_final_date():
     try:
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
-        return render_template(Template.TIMESHEET_CONFLICT_DATE, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
+        return render_template(Template.TIMESHEET_CONFLICT_DATE, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template(), \
+                               session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
@@ -563,7 +590,9 @@ def report():
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
         ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'current'})
-        return render_template(Template.REPORT, ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template(), session_enum = SessionKey(), request_dict = request_dict)
+        return render_template(Template.REPORT, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template(), \
+                               session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
@@ -579,7 +608,7 @@ def resource_productivity():
         request_dict = get_request_args()
         ctrl_obj   = ctrl()
         ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
-        return render_template(Template.RESOURCE_PRODUCTIVITY, ctrl_obj = ctrl_obj, db_header = DbHeader(),\
+        return render_template(Template.RESOURCE_PRODUCTIVITY, ctrl_obj = ctrl_obj, role = Role(), db_header = DbHeader(),\
                                route = Route() , template= Template(), session_enum = SessionKey(), \
                                other_keys= OtherKeys(), request_dict = request_dict)
     except Exception as e:
@@ -600,6 +629,53 @@ def send_report():
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
+
+@timesheet_bp.route(Route.IMPORT_PRODUCTIVITY, methods=[OtherKeys.METHOD_POST])
+def import_productivity():
+    """ Import productivity
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.IMPORT_PRODUCTIVITY, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().import_productivity(file_name=request_dict['file_name'], from_date=request_dict[SessionKey.FROM],\
+                                            to_date=request_dict[SessionKey.TO])
+        
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.EXPORT_PRODUCTIVITY, methods=[OtherKeys.METHOD_POST])
+def export_productivity():
+    """ Export productivity to excel file
+    :param : 
+    :return: (0, error) or (1, file_name)
+    """
+    println(Route.EXPORT_PRODUCTIVITY, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().export_productiviity(request_dict)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.LOCK_SYNC, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
+def lock_sync():
+    """ check version 
+    :param : 
+    :return: 
+    """
+    println(Route.LOCK_SYNC, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().lock_sync(request_dict)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
     
 @timesheet_bp.route('/test')
 def test():
@@ -607,7 +683,8 @@ def test():
     try:
         
         ctrl_obj   = ctrl()       
-        return render_template("test.html", ctrl_obj = ctrl_obj, db_header = DbHeader(), route = Route() , template= Template())
+        return render_template("test.html", ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template())
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
@@ -617,8 +694,6 @@ def test_ajax():
     try:
         request_dict = get_request_form_ajax()
         result = [1, 1]
-        import time
-        time.sleep(5)
         return jsonify({'result': result})
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)

@@ -4,7 +4,7 @@ sys.path.insert(0, './3rd-src')
 from src.commons.utils import logging_setting, get_free_tcp_port
 import requests, time
 import config
-from flask import Flask, g
+from flask import Flask, g, session
 from src.controllers.routes.route import timesheet_bp
 import webbrowser, threading
 from threading import Timer
@@ -14,7 +14,7 @@ from src.controllers.controllers import Controllers as ctrl
 
 
         
-__version__  = 'v0.2'
+version  = 'v0.1'
 
 port        = 6602
 # port = get_free_tcp_port()
@@ -46,6 +46,7 @@ def create_connection():
     g.pool_conn = pool_conn
     g.tool_path = tool_path
     g.template_path = template_path
+    g.version       = version
 
 if __name__ == "__main__":
     app.run(port=port, host=host, debug=True, use_reloader=True, threaded=True)
@@ -54,7 +55,7 @@ if __name__ == "__main__":
 #     while True:
 #         # Waiting for Flask start server
 #         request = requests.get(url)
-#         if request.status_code == 200:
+#         if request.status_code in [200]:
 #             print('Starting browser...')
 #             break
 #         else:

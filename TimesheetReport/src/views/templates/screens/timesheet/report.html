@@ -43,7 +43,11 @@
 			<input type='date' name='to_date' id='to_date' placeholder='To date' class='mx-1 px-2' value='{{request_dict[session_enum.TO]}}'>
 			<button type='button' id='load' class='mx-1 px-3' data-toggle="tooltip" title="Load"><i class="fas fa-sync-alt"></i></button>
 			<button type='button' id='get_newest_data' class='mx-1' data-toggle="tooltip" title="Get Newest Data"><i class="fas fa-cloud-download-alt"></i></button>
-			<button type='button' id='send_mail' class='mx-1' data-toggle="tooltip" title="Send Report"><i class="fas fa-envelope"></i></button>
+			{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+				<button type='button' id='lock' class='mx-1' data-toggle="tooltip" title="Lock/Unlock 'Get Newest Data' feature"><i class="fas fa-lock"></i></button>
+				<button type='button' id='send_mail' class='mx-1' data-toggle="tooltip" title="Send Report"><i class="fas fa-envelope"></i></button>
+			{% endif %}
+			
 		</div>
 		<div class='col-md-2 d-flex justify-content-end'>
 		</div>

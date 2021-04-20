@@ -21,6 +21,7 @@
 
 {% block main %}
 <form id='import_resource' method="post" enctype="multipart/form-data">
+{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
 	<div class='dp-flex'>
 		<div class="custom-file col-4">
 		    <input type="file" name='resource_file' id='resource_file' accept='.xlsx' class="custom-file-input " >
@@ -28,6 +29,7 @@
 		</div>
 		<button type='submit' class='mg-l-5' id='btn_import' disabled data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
 	</div>
+{% endif %}
 </form>
 <br>
 <div class='table-content'>

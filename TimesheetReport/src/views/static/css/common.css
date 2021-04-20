@@ -291,6 +291,9 @@ input[type=text], input[type=button], input[type=search], input[type=submit], in
 	border-radius: 5px;
 	border: 1px solid #aaa;
 }
+input[type=date] {
+	width: 150px;
+}
 button {
 	box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 40%);
 	padding: 0px 5px;

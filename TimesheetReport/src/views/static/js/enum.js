@@ -20,6 +20,7 @@ const SESSION_MODE 		= 'mode'
 var INTERVAL_GET_DATA  = null;
 var INTERVAL_CHECK_SMARTSHEET  = null;
 var INTERVAL_SHOW_LOADER  = null;
+var INTERVAL_CHECK_VERSION  = null;
 
 // ROUTE
 const INDEX   = '/';
@@ -57,6 +58,10 @@ const SAVE_OTHER_SETTING   = '/save-other-setting';
 const REPORT   = '/report';
 const SEND_REPORT   = '/send-report';
 const RESOURCE_PRODUCTIVITY   = '/resource-productivity';
+const IMPORT_PRODUCTIVITY     =  '/import-productivity';
+const EXPORT_PRODUCTIVITY     =   '/export-productivity';
+const CHECK_VERSION     = '/check-version';
+const LOCK_SYNC     = '/lock-sync'
 
 var FOCUS_MULTISELECT = null;
 

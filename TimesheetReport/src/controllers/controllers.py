@@ -6,7 +6,8 @@ Created on Feb 22, 2021
 from src.models.smartsheet.smartsheet_model import SmartSheets
 from src.models.database.database_model import Configuration, DbTask
 from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, \
-                            DateTime, AnalyzeCFGKeys, Route, Role, OtherKeys, DbTable
+                            DateTime, AnalyzeCFGKeys, Route, Role, OtherKeys, DbTable,\
+    OtherCFGKeys
 from src.commons.message import MsgError, MsgWarning, Msg, AnalyzeItem
 from src.commons.utils import search_pattern, message_generate, println, remove_path, split_patern,\
                             get_prev_date_by_time_delta, get_work_week, convert_date_to_string,\
@@ -26,6 +27,7 @@ import xlwt
 import xlrd
 import time
 from xlwt import Workbook
+from xls2xlsx import XLS2XLSX
 
 class Controllers:
     def __init__(self):
@@ -61,7 +63,6 @@ class Controllers:
             child_tasks         = sms_obj.info[sheet_name].children_task
             sheet_id            = sms_obj.info[sheet_name].sheet_id
             latest_modified     = sms_obj.info[sheet_name].latest_modified
-            
             is_parse            = sms_obj.info[sheet_name].is_parse
             if is_parse:
                 if log:
@@ -1086,6 +1087,8 @@ class Controllers:
             config_obj.get_sheet_config(is_parse=True)
             sheet_ids_info = config_obj.sheet_ids
             analyze_item = task_obj.get_analyze_item()
+            o_config = config_obj.get_other_config_info()
+            bcc = o_config.get(OtherCFGKeys.BCC_MAIL)
             if from_date and to_date and sheet_ids:
                 list_sheet_name = []
                 for sheet_id in sheet_ids:
@@ -1115,7 +1118,7 @@ class Controllers:
                 dict_variable['to_date'] = to_date
                 dict_variable['sheets'] = ', '.join(list_sheet_name)
                 content = render_jinja2_template(template_path, 'analyze_table.html', dict_variable)
-                send_mail_status = send_mail(user_name, password, [], [], 'Timesheet Report: Add final task', content)
+                send_mail_status = send_mail(user_name, password, ['svi_pm@savarti.com'], [], 'Timesheet Report: Add final task', content, bcc)
                 if not send_mail_status[0]:
                     return send_mail_status
                 return 1, Msg.M003
@@ -1290,24 +1293,25 @@ class Controllers:
         return result
     
     def check_get_newest_data_feature_is_running(self, sheet_ids=[]):
-        
-        if len(sheet_ids):
-            config_obj  = Configuration()
-            dict_id     = config_obj.get_sheet_loading_smartsheet()
-            list_sheet = []
-            for sheet_id in sheet_ids:
-                sheet_id = int(sheet_id)
-                if dict_id.get(sheet_id):
-                    list_sheet.append(dict_id[sheet_id])
-                    if len(list_sheet) == 2:
-                        break
-            if len(list_sheet):
-                result = (True, list_sheet)
-            else:
-                result = (False, [])
+        config_obj  = Configuration()
+        if not len(sheet_ids):
+            config_obj.get_sheet_config(is_parse=True)
+            sheet_ids_dict = config_obj.sheet_ids
+            sheet_ids = []
+            for key in sheet_ids_dict.keys():
+                sheet_ids.append(key)
+        dict_id     = config_obj.get_sheet_loading_smartsheet()
+        list_sheet = []
+        for sheet_id in sheet_ids:
+            sheet_id = int(sheet_id)
+            if dict_id.get(sheet_id):
+                list_sheet.append(dict_id[sheet_id])
+                if len(list_sheet) == 2:
+                    break
+        if len(list_sheet):
+            result = (True, list_sheet)
         else:
             result = (False, [])
-        
         return result 
         
     def get_project_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter='weekly', 
@@ -1725,6 +1729,7 @@ class Controllers:
             config_obj      = Configuration()
             config_obj.get_list_holiday(is_parse=True)
             holidays  = config_obj.holidays
+            
             user_email, users, user_ids, others_name = self.get_all_resource_information()
             info            = {}
             if filter == 'monthly':
@@ -1830,3 +1835,186 @@ class Controllers:
         except Exception as e:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
+    
+    def export_productiviity(self, request_dict):
+        try:
+            
+            data = request_dict['data']
+            headers = request_dict['headers']
+            wb = Workbook()
+            file_name = 'Productivity.xls'
+            output_path   = os.path.join(config.WORKING_PATH, file_name)
+            file_name2 = 'Productivity.xlsx'
+            output_path2   = os.path.join(config.WORKING_PATH, file_name2)
+            if os.path.exists(output_path):
+                os.remove(output_path)
+            start_col, start_row = (0, 0)
+            
+            # style 
+            color_style = defined_color()
+            style_header = color_style['lime']
+            
+            # export daily timesheet
+            
+            prd_wb = wb.add_sheet('Productivity')
+            row_num, col_num = (0, 0)
+            count_2 = 0
+            for idx in range(2, len(headers['1'])):
+                prd_wb.col(col_num).width = 256 * 14
+                header = headers['1'][idx]
+                if count_2 > 0:
+                    count_2 -= 1
+                    col_num += 1
+                    continue
+                if idx > 5:
+                    prd_wb.write_merge(row_num, row_num, col_num, col_num + 5, header, style_header)
+                    count_2 = 5
+                else:
+                    prd_wb.write_merge(row_num, row_num + 1, col_num, col_num, header, style_header)
+                col_num += 1
+            col_num = 4
+            row_num += 1
+            
+            for idx2 in range(6, len(headers['2'])):
+                header2 = headers['2'][idx2]
+                prd_wb.write(row_num, col_num, header2, color_style['gray25'])
+                col_num += 1
+            col_num = start_col
+            row_num += 1
+
+            for row in data:
+                for idx3 in range(2, len(row)):
+                    val = row[idx3]
+                    prd_wb.write(row_num, col_num, val)
+                    col_num += 1
+                col_num = start_col
+                row_num += 1
+            color_wb = wb.add_sheet('Color')
+            row_num, col_num = (0, 0)
+            for color in color_style:
+                color_wb.write(row_num, col_num, color, color_style[color])
+                col_num = start_col
+                row_num += 1
+            wb.save(output_path)
+            
+            x2x = XLS2XLSX(output_path)
+            remove_path(output_path)
+            x2x.to_xlsx(output_path2)
+            return 1, file_name2
+        
+        except Exception as e:
+            println(e, OtherKeys.LOGING_EXCEPTION)
+            return 0, e.args[0]
+        
+    def import_productivity(self, file_name, from_date, to_date):
+        try:
+            config_obj      = Configuration()
+            config_obj.get_list_holiday(is_parse=True)
+            holidays  = config_obj.holidays
+            list_week   = get_work_week(from_date=from_date, to_date=to_date, holidays=holidays)
+            week_std_hour = {}
+            weeks = []
+            for row in list_week:
+                week, hour = row
+                weeks.append(week)
+                week_std_hour[week] = hour
+            
+            file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
+            df          = pd.read_excel (file_path, sheet_name='Productivity', engine='openpyxl', header=[0, 1])
+            df_key = {}
+            output = []
+            list_header_1 = []
+            for col_elm in df.columns.tolist():
+                header_1, header_2 = col_elm
+                if header_1 not in list_header_1:
+                    list_header_1.append(header_1)
+                if not df_key.get(header_1):
+                    df_key[header_1] = []
+                df_key[header_1].append(header_2)
+            count_head = 0
+            for h1 in list_header_1:
+                count_head += 1
+                h1_str = convert_date_to_string(h1, format_str='%Y-%m-%d')
+                std_hour = 0
+                if count_head < 5 or h1_str in weeks:
+                    if week_std_hour.get(h1_str):
+                        std_hour = week_std_hour.get(h1_str)
+                        del week_std_hour[h1_str]
+                    for h2 in df_key[h1]:
+                        count = 0
+                        for row_val in df[h1][h2]:
+                            if str(row_val) in SettingKeys.EMPTY_CELL:
+                                row_val = ''
+                            try:
+                                unuse = output[count]
+                            except IndexError:
+                                output.append([])
+                            output[count].append([row_val, std_hour])
+                            count += 1
+            if len(week_std_hour):
+                string = ', '.join(week_std_hour.keys())
+                return 0, 'Missing data for %s'%string
+            remove_path(file_path)
+            
+            return 1, output
+        except Exception as e:
+            println(e, OtherKeys.LOGING_EXCEPTION)
+            return 0, e.args[0]
+        
+    def get_current_version(self):
+        version = g.version
+        return version
+    
+    def is_in_require_role(self, list_role):
+        user_role = session[SessionKey.ROLE_NAME]
+        if user_role in list_role:
+            return True
+        else:
+            return False
+    
+    def add_current_version_of_user(self):
+        config_obj = Configuration()
+        user_id = session[SessionKey.USER_ID]
+        current_version     = g.version
+        config_obj.set_attr(user_id = user_id,
+                            version = current_version)
+        if config_obj.check_exist_user_version():
+            config_obj.update_user_version()
+        else:
+            config_obj.add_user_version()
+        session[SessionKey.IS_UPDATE_VERSION] = 1
+        session[SessionKey.USER_VERSION] = current_version
+        
+    def check_version (self):
+        current_version = g.version
+        notify_ver =  session.get(SessionKey.IS_NOTIFY_VERSION)
+        if notify_ver == 1 or notify_ver == None:
+            config_obj = Configuration()
+            o_config = config_obj.get_other_config_info()
+            latest_ver = o_config.get(OtherCFGKeys.LATEST_VERSION)
+            if latest_ver:
+                down_link  = o_config.get(OtherCFGKeys.VERSION_DOWNLOAD)
+                if current_version == latest_ver:
+                    result = [0, '']
+                else:
+                    result = [1, down_link]
+            else:
+                result = [0, '']
+        else:
+            result = [0, '']
+        session[SessionKey.IS_NOTIFY_VERSION] = 0
+        # 0-> skip, 1-> notify | link 
+        return result
+    
+    def lock_sync(self, request_dict):
+        is_loading = request_dict.get('is_loading')
+        config_obj      = Configuration()
+        config_obj.get_sheet_config(is_parse=True)
+        sheet_ids = config_obj.sheet_ids
+        
+        for sheet_id in sheet_ids:
+            config_obj.set_attr(is_loading          = is_loading,
+                                sheet_id            = sheet_id)
+            config_obj.update_is_loading_of_sheet()
+        
+        return 1
