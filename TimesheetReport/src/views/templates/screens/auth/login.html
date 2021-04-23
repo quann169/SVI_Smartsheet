@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}"/>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}"/>
-<link rel="stylesheet" href="{{ url_for('static', filename='vendors/fontawesome/css/all.css') }}" />
+	<title>Login</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/bootstrap-4.5.3/css/bootstrap.min.css') }}" />  
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/DataTables/datatables.min.css') }}" /> 
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/multiple-select/example-styles.css') }}" /> 
+	<!-- Our Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/fontawesome/css/all.css') }}" />
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}"/>
 
 </head>
 	<body>
@@ -29,9 +34,10 @@
 				</div>
 			</form>
 		</div>
+		<script src="{{url_for('static', filename='js/enum.js')}}"></script>
+		<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.js')}}"></script>
+		<script src="{{url_for('static', filename='js/login.js')}}"></script>
 	</body>
-	<script src="{{url_for('static', filename='js/enum.js')}}"></script>
-	<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.js')}}"></script>
-	<script src="{{url_for('static', filename='js/login.js')}}"></script>
+	
 	
 </html>

@@ -950,7 +950,7 @@ class Controllers:
             start_col, start_row = (0, 0)
             row_num, col_num = (0, 0)
             # create  header
-            list_header = ['Sheet', 'Resource', 'Eng Type', 'Team'] + list_week
+            list_header = ['Sheet', 'Resource', 'Eng Type', 'Team'] + list_week + ['Total']
             for header in list_header:
                 weekly_project_wb.col(col_num).width = 256 * 14
                 weekly_project_wb.write(row_num, col_num, header, style_header)
@@ -969,6 +969,7 @@ class Controllers:
                 for column in list_week:
                     weekly_project_wb.write(row_num, col_num, w_project_info[sheet_name]['total'][column], color_style['light_turquoise'])
                     col_num += 1
+                weekly_project_wb.write(row_num, col_num, w_project_info[sheet_name]['total_row'], color_style['light_turquoise'])
                 col_num = start_col
                 row_num += 1
                 for user_name in w_project_info[sheet_name]['resource']:
@@ -976,6 +977,7 @@ class Controllers:
                     team = w_project_info[sheet_name]['resource'][user_name]['team']
                     eng_type = w_project_info[sheet_name]['resource'][user_name]['eng_type']
                     timesheet = w_project_info[sheet_name]['resource'][user_name]['timesheet']
+                    r_total = w_project_info[sheet_name]['resource'][user_name]['total']
                     weekly_project_wb.write(row_num, col_num, '')
                     col_num += 1
                     weekly_project_wb.write(row_num, col_num, user_name)
@@ -997,6 +999,8 @@ class Controllers:
                         else:
                             weekly_project_wb.write(row_num, col_num, work_hour, color_style['tan'])
                             col_num += 1
+                    weekly_project_wb.write(row_num, col_num, r_total, color_style['white'])
+                    col_num += 1
                     col_num = start_col
                     row_num += 1
             #end project
@@ -1008,7 +1012,7 @@ class Controllers:
             start_col, start_row = (0, 0)
             row_num, col_num = (0, 0)
             # create  header
-            list_header = ['Sheet', 'Resource', 'Eng Type', 'Team'] + list_month
+            list_header = ['Sheet', 'Resource', 'Eng Type', 'Team'] + list_month + ['Total']
             for header in list_header:
                 monthly_project_wb.col(col_num).width = 256 * 14
                 monthly_project_wb.write(row_num, col_num, header, style_header)
@@ -1027,6 +1031,7 @@ class Controllers:
                 for column in list_month:
                     monthly_project_wb.write(row_num, col_num, m_project_info[sheet_name]['total'][column], color_style['light_turquoise'])
                     col_num += 1
+                monthly_project_wb.write(row_num, col_num, m_project_info[sheet_name]['total_row'], color_style['light_turquoise'])
                 col_num = start_col
                 row_num += 1
                 for user_name in m_project_info[sheet_name]['resource']:
@@ -1034,6 +1039,7 @@ class Controllers:
                     team = m_project_info[sheet_name]['resource'][user_name]['team']
                     eng_type = m_project_info[sheet_name]['resource'][user_name]['eng_type']
                     timesheet = m_project_info[sheet_name]['resource'][user_name]['timesheet']
+                    r_total = m_project_info[sheet_name]['resource'][user_name]['total']
                     monthly_project_wb.write(row_num, col_num, '')
                     col_num += 1
                     monthly_project_wb.write(row_num, col_num, user_name)
@@ -1055,6 +1061,7 @@ class Controllers:
                         else:
                             monthly_project_wb.write(row_num, col_num, work_hour, color_style['tan'])
                             col_num += 1
+                    monthly_project_wb.write(row_num, col_num, r_total, color_style['white'])
                     col_num = start_col
                     row_num += 1
             #end project
@@ -1089,6 +1096,7 @@ class Controllers:
             analyze_item = task_obj.get_analyze_item()
             o_config = config_obj.get_other_config_info()
             bcc = o_config.get(OtherCFGKeys.BCC_MAIL)
+            
             if from_date and to_date and sheet_ids:
                 list_sheet_name = []
                 for sheet_id in sheet_ids:
@@ -1118,7 +1126,7 @@ class Controllers:
                 dict_variable['to_date'] = to_date
                 dict_variable['sheets'] = ', '.join(list_sheet_name)
                 content = render_jinja2_template(template_path, 'analyze_table.html', dict_variable)
-                send_mail_status = send_mail(user_name, password, ['svi_pm@savarti.com'], [], 'Timesheet Report: Add final task', content, bcc)
+                send_mail_status = send_mail(user_name, password, ['svi_pm@savarti.com'], [], 'Timesheet Report: Add final task', content, bcc, False)
                 if not send_mail_status[0]:
                     return send_mail_status
                 return 1, Msg.M003
@@ -1401,13 +1409,14 @@ class Controllers:
                         else:
                             col_element  = task_obj.start_week
                         if not info.get(sheet_name):
-                            info[sheet_name]  = {'resource': {}, 'total': {}, 'sheet_id': sheet_id}
+                            info[sheet_name]  = {'resource': {}, 'total': {}, 'sheet_id': sheet_id, 'total_row': 0}
                              
                         if not info[sheet_name]['resource'].get(user_name):
                             info[sheet_name]['resource'][user_name]  = {'eng_type': eng_type, 
                                                                         'team': team_name,
                                                                         'timesheet': {},
-                                                                        'user_id': user_id} 
+                                                                        'user_id': user_id, 
+                                                                        'total': 0} 
                         for element in cols_element:
                             if filter == 'monthly':
                                 month, year, max_hour = element
@@ -1421,6 +1430,8 @@ class Controllers:
                                                                                                    }
                             if not info[sheet_name]['total'].get(col_name):
                                 info[sheet_name]['total'][col_name]  = 0
+                        info[sheet_name]['resource'][user_name]['total']  += work_hour
+                        info[sheet_name]['resource'][user_name]['total']  = round_num(info[sheet_name]['resource'][user_name]['total'])
                         info[sheet_name]['resource'][user_name]['timesheet'][col_element]['work_hour']  += work_hour
                         info[sheet_name]['resource'][user_name]['timesheet'][col_element]['work_hour']  = round_num(info[sheet_name]['resource'][user_name]['timesheet'][col_element]['work_hour'])
                         start, end = calculate_start_end_date_by_option(date, from_date, to_date, filter)
@@ -1440,9 +1451,13 @@ class Controllers:
                         max_hour = info[sheet_name]['resource'][user_name]['timesheet'][col_name]['max_hour']
                         if work_hour > max_hour:
                             info[sheet_name]['total'][col_name]  += max_hour
+                            info[sheet_name]['total_row'] += max_hour
                         else:
                             info[sheet_name]['total'][col_name]  += work_hour
+                            info[sheet_name]['total_row'] += work_hour
+                            
                         info[sheet_name]['total'][col_name]  = round_num(info[sheet_name]['total'][col_name])
+                        info[sheet_name]['total_row']  = round_num(info[sheet_name]['total_row'])
             total    = 0
             no_enought   = 0
             
@@ -1515,11 +1530,11 @@ class Controllers:
         config_obj = Configuration()
         role_name = Role.USER
         user_id, name = config_obj.get_user_by_email(email)
+        
         if user_id:
             role_name2 = config_obj.get_role_by_user_id(user_id)
             if role_name2:
                 role_name = role_name2
-        
         return user_id, name, role_name
         
     def authenticate_account(self, username, password, remember=0):
@@ -1531,6 +1546,8 @@ class Controllers:
             if remember:
                 save_password(password)
             user_id, name, role_name = self.get_resource_and_role_name()
+            if user_id == None or name == None:
+                return [False, 'User "%s" does not exist.'%username]
             session[SessionKey.RESOURCE_NAME] = name
             session[SessionKey.USER_ID] = user_id
             session[SessionKey.ROLE_NAME] = role_name
@@ -1889,12 +1906,12 @@ class Controllers:
                     col_num += 1
                 col_num = start_col
                 row_num += 1
-            color_wb = wb.add_sheet('Color')
-            row_num, col_num = (0, 0)
-            for color in color_style:
-                color_wb.write(row_num, col_num, color, color_style[color])
-                col_num = start_col
-                row_num += 1
+#             color_wb = wb.add_sheet('Color')
+#             row_num, col_num = (0, 0)
+#             for color in color_style:
+#                 color_wb.write(row_num, col_num, color, color_style[color])
+#                 col_num = start_col
+#                 row_num += 1
             wb.save(output_path)
             
             x2x = XLS2XLSX(output_path)

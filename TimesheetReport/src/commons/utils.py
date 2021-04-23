@@ -511,26 +511,31 @@ def render_jinja2_template(template_path, file_name,  dict_variable):
     result = run_template.render(dict_variable)
     return result
     
-def send_mail(user_name, password, recipient, cc_recipient, subject, message, bcc=None):
+def send_mail(user_name, password, recipient, cc_recipient, subject, message, bcc=None, break_line=True):
     try:
+        if break_line:
+            message = message.replace('\n', '<br>\n')
         
-        message = message.replace('\n', '<br>\n')
-        print ('Recipient: %s'%(str(recipient)))
-        print ('CC Recipient: %s'%(str(cc_recipient)))
-        print ('Subject: %s'%(subject))
-        print ('Body: %s'%(message))
-        print (bcc)
+#         print ('Recipient: %s'%(str(recipient)))
+#         print ('CC Recipient: %s'%(str(cc_recipient)))
+#         print ('Subject: %s'%(subject))
+#         print ('Body: %s'%(message))
+#         print (bcc)
         sender = "%s@savarti.com"%user_name
-        recipient = ['toannguyen@savarti.com']
-        cc_recipient = ['toannguyen@savarti.com']
-        bcc = 'toannguyen@savarti.com'
+#         recipient = ['toannguyen@savarti.com']
+#         cc_recipient = ['toannguyen@savarti.com']
+#         bcc = 'toannguyen@savarti.com'
+        if bcc:
+            bcc_recipient = list(filter(None, re.split(' |;|,', bcc)))
+        else:
+            bcc_recipient = []
         # Create message container - the correct MIME type is multipart/alternative.
         msg = MIMEMultipart('alternative')
         msg['From'] = sender
         msg['To'] = '; '.join(recipient)
         msg['Subject'] = subject
         msg['CC'] = '; '.join(cc_recipient)
-        msg['BCC'] = '; '.join(bcc)
+        msg['BCC'] = '; '.join(bcc_recipient)
         part = MIMEText(message, 'html')
         msg.attach(part)
         
@@ -540,7 +545,7 @@ def send_mail(user_name, password, recipient, cc_recipient, subject, message, bc
         # if tls = True                
         mail.starttls()               
         mail.login(sender, password)        
-#         mail.sendmail(sender, recipient, msg.as_string())
+        mail.sendmail(sender, recipient + bcc_recipient, msg.as_string())
         mail.quit()
         return 1, ''
     except Exception as e:

@@ -32,17 +32,19 @@ def before_request():
     path = request.path
     enum_route = Route()
     # check login
-    if not session.get(SessionKey.IS_LOGIN) or not session.get(SessionKey.IS_LOGIN):
+    if not session.get(SessionKey.IS_LOGIN) or not session.get(SessionKey.IS_LOGIN) or not session.get(SessionKey.USER_ID):
         if path not in [Route().LOGIN, Route().AUTH]:
             return (redirect(url_for("timesheet_bp.login")))
     # check role
     list_role_required = enum_route.REQUIRE_ROLE_OF_ROUTE.get(path)
     if list_role_required:
-        role = session[SessionKey.ROLE_NAME]
-        if not role in list_role_required:
-            return abort(403, MsgError.E005)
+        if path not in [Route().LOGIN, Route().AUTH]:
+            role = session[SessionKey.ROLE_NAME]
+            if not role in list_role_required:
+                return abort(403, MsgError.E005)
     if (not session.get(SessionKey.USER_VERSION) ) or (session.get(SessionKey.USER_VERSION) != g.version):
-        ctrl().add_current_version_of_user()
+        if path not in [Route().LOGIN, Route().AUTH]:
+            ctrl().add_current_version_of_user()
         
         
 @timesheet_bp.route(Route.INDEX, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
@@ -689,14 +691,6 @@ def test():
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
-@timesheet_bp.route('/test-ajax', methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
-def test_ajax():
-    try:
-        request_dict = get_request_form_ajax()
-        result = [1, 1]
-        return jsonify({'result': result})
-    except Exception as e:
-        println(e, OtherKeys.LOGING_EXCEPTION)
-        return abort(500, e) 
+
     
     

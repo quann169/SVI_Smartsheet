@@ -8,7 +8,7 @@ function draw_stack_column_chart(id, data, label_angle) {
 	var row_type = data.type;
 	var chart_data = []
 	var chart_type = 'stackedColumn';
-	var color_maping = ['#5c9ad2', '#dc847c', '#ffd963', '#deccec', '#a367dc', '#a8d18d'];
+	var color_maping = ['#456cb4', '#abc98a', '#f2bc0f', '#f19bf4', '#d7e3f2', '#d50f11'];
 	for (var i = 0; i < row_type.length; i++) {
 		var temp = {
 				type: chart_type,

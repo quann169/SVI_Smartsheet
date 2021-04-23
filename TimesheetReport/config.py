@@ -1,3 +1,3 @@
-LOGGING_LEVEL   = 'ERROR'
-# WORKING_PATH    = ".data\workspace"
-WORKING_PATH    = "D:\workspace"
+LOGGING_LEVEL   = 'INFO'
+WORKING_PATH    = ".data\workspace"
+# WORKING_PATH    = "D:\WORKSPACE\WORKSPACE"

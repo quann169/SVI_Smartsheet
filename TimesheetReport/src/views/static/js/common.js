@@ -261,6 +261,25 @@ function parse_url() {
 	return output;
 }
 
+function is_synchronize_task(data) {
+	try {
+		var out = [false, []];
+	    $.ajax({
+	        url: CHECK_LOADING_SMARTSHEET,
+	        type: "POST",
+			async: false,
+	        data: encodeURIComponent(JSON.stringify(data)),
+	        success: function (resp) {
+	        	var result = resp.result;
+				out = result;
+			 }
+		 });
+		return out;
+	} catch(err) {
+		out = [false, []];
+		return out;
+	}
+}
 function check_loading_smartsheet() {
 	try {
 		var method_info = parse_url();
@@ -293,7 +312,7 @@ function check_loading_smartsheet() {
 		console.log(err);
 		return null;	
 	}
-};
+}
 $(document).ready(function() {
 	$(window).scroll(function() {
 		if ($(this).scrollTop() > 300) {
@@ -347,6 +366,11 @@ $(document).ready(function () {
 		var data = colect_config_date();
 		var method_get_url = encodeURIComponent(JSON.stringify(data));
 		if (! confirm("This process will take about 1-5 minutes. Do you want to continue?")) {
+			return null;
+		}
+		var is_running = is_synchronize_task(data);
+		if (is_running[0]) {
+			custom_alert('Process to synchronize data from smartsheet is running. Plelease try again later!');
 			return null;
 		}
 		var cnt = "<div id='get_newest_data_console'><div class='cnt1'><div align='center' class='b-bottom '><b>Console</b><a class='close-p dp-none' onclick='close_overlay();'><i class='fas fa-times '></i></a></div><div class='cnt2'></div></div></div>";

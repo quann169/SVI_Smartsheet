@@ -147,7 +147,7 @@ function create_send_mail_popup(data) {
 		var list_cc = Object.keys(cc_recepient);
 		var cc_str = list_cc.join('; ');
 		ctn += "<div id='cnt_" + count + "_cc' class='cc-content dp-none' >" + cc_str + "</div>";
-		ctn += "<div id='cnt_" + count + "' class='mail-ctn " + block + "' >" + mail_content + "</div>";
+		ctn += "<div id='cnt_" + count + "' class='mail-ctn " + block + "' contenteditable='true'>" + mail_content + "</div>";
 	}
     popup_ctn += `</ul>
 	</div>

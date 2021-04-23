@@ -10,7 +10,7 @@ class MsgError:
     E003    = "Missing parameter"
     E004    = "Incorrect username or password"
     E005    = "Access denied: You don't have permission to access"
-
+    
 
 class MsgWarning:
     W001    = 'Skip ID duplicate id :{}'
@@ -20,6 +20,7 @@ class Msg:
     M001    = 'Import successfully'
     M002    = 'Get data successfully'
     M003    = 'Add to final task successfully'
+    
 
 class AnalyzeItem:
     A001 = 'No. resource lack of working hours' 

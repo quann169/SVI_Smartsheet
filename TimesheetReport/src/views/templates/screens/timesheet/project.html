@@ -75,6 +75,7 @@
 			{% for column in list_sub_column %}
 				<th class="th-sm">{{column}}</th>
 			{% endfor %}
+			<th class="th-sm">Total</th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -88,12 +89,14 @@
 						<b class='' >{{info[sheet_name]['total'][column]}}</b>
 					</td>
 				{% endfor %}
+				<td><b>{{info[sheet_name]['total_row']}}</b></td>
 			</tr>
 			{% for user_name in info[sheet_name]['resource'] %}
 				{% set eng_type = info[sheet_name]['resource'][user_name]['eng_type'] %}
 				{% set team = info[sheet_name]['resource'][user_name]['team'] %}
 				{% set eng_type = info[sheet_name]['resource'][user_name]['eng_type'] %}
 				{% set timesheet = info[sheet_name]['resource'][user_name]['timesheet'] %}
+				{% set total_resource = info[sheet_name]['resource'][user_name]['total'] %}
 				<tr>
 			  		<td></td>
 					<td>{{user_name}}</td>
@@ -113,6 +116,7 @@
 							{% endif %}
 						</td>
 					{% endfor %}
+					<td><a class='bold'>{{total_resource}}</a></td>
 				</tr>
 			{% endfor %}
 		{% endfor %}

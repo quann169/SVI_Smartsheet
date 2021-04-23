@@ -1,31 +1,36 @@
-<style>
-tr {
-	background-color: white !important;
-    border: 1px solid #aaa !important;
-    white-space: nowrap;
-}
-th {
-	background-color: #007BA9 !important;
-	border: 1px solid #aaa !important;
-	color: white;
-	font-weight: bold;
-	box-sizing: content-box;
-	padding: 5px;
-}
-td {
-	border: 1px solid #aaa !important;
-	padding: 5px;
-}
-
-table {
-	border-collapse: collapse !important;
-}
-</style>
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+	tr {
+		background-color: white !important;
+	    border: 1px solid #aaa !important;
+	    white-space: nowrap;
+	}
+	th {
+		background-color: #007BA9 !important;
+		border: 1px solid #aaa !important;
+		color: white;
+		font-weight: bold;
+		box-sizing: content-box;
+		padding: 5px;
+	}
+	td {
+		border: 1px solid #aaa !important;
+		padding: 5px;
+	}
+	
+	table {
+		border-collapse: collapse !important;
+	}
+	</style>
+</head>
+<body>
 Hi all,<br/>
 <br/>
-The final task ({{from_date}} to {{to_date}} ) has been added by {{user_name}}. Below is the summary information:<br/>
-<b>Sheet_name:</b> {{sheets}}<br/>
-<b>Analyze Information:</b><br/>
+This commited tasks ({{from_date}} to {{to_date}} ) have been added by {{user_name}}.<br>
+Below is the summary information:<br>
+<br>
 <table class=''>
   <thead>
     <tr>
@@ -53,3 +58,5 @@ The final task ({{from_date}} to {{to_date}} ) has been added by {{user_name}}. 
 	{% endfor %}
   </tbody>
 </table>
+</body>
+</html>
