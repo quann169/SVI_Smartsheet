@@ -1,0 +1,59 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Home
+{% endblock title %}
+{% block sidebar %}
+	{% set active_sidebar = route.HOME %}
+	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block breadcrumb %}
+	{% set br_items = [(route.HOME, 'Home', True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/home.js')}}"></script>
+{% endblock scripts %}
+{% block main %}
+<div class='table-content'>
+	<table id="home_table" class="table table-striped table-bordered " cellspacing="0" width='100%'>
+	  {% set sheet_info, list_week = ctrl_obj.get_sheet_information() %}
+	  <thead>
+	    <tr>
+		  <th class="th-sm">#
+	      </th>
+	      <th class="th-sm">Sheet Name
+	      </th>
+		  <th class="th-sm">Sheet Type
+	      </th>
+		  <th class="th-sm">Latest Modified
+	      </th>
+		  {% for week in list_week %}
+			  <th class="th-sm">{{week}}
+		      </th>
+		  {% endfor %}
+	    </tr>
+	  </thead>
+	  <tbody>
+		{% for row in sheet_info %}
+			<tr>
+			  <td>{{loop.index}}</td>
+				{% set href = ctrl_obj.convert_request_dict_to_url({session_enum.SHEETS: [row[db_header.SHEET_ID]]})%}
+		      <td><a href='{{route.DETAIL}}?{{href}}' class='cl-blue '>{{row[db_header.SHEET_NAME]}}</a></td>
+			  <td>{{row[db_header.SHEET_TYPE]}}</td>
+			  <td>{{row[db_header.LATEST_MODIFIED]}}</td>
+			  {% for week in list_week %}
+				  <td></td>
+			  {% endfor %}
+		    </tr>
+		{% endfor %}
+	
+	  </tbody>
+	  
+	</table>
+</div>
+{% endblock main%}
