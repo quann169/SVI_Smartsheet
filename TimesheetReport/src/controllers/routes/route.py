@@ -556,7 +556,7 @@ def get_template_content():
         file_path = request_dict['path']
         tool_path = g.tool_path
         
-        template_path = os.path.join(os.path.join(tool_path, 'src/views/templates'), file_path)
+        template_path = os.path.join(os.path.join(tool_path, g.template_path), file_path)
         result = ''
         with open(template_path, 'r') as f:
             result = f.read()

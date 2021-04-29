@@ -1790,15 +1790,15 @@ class Controllers:
                         task_date   = task_obj.date
                         allocation  = task_obj.allocation
                         work_hour   = 8*(allocation)/100
-                        timeoff     = 0
+                        
                         work_hour   = round_num(work_hour)
                         if filter == 'monthly':
                             col_element = task_obj.month_name
                         else:
                             col_element  = task_obj.start_week
-                        if timeoff_info_2.get(user_id):
-                            if timeoff_info_2[user_id].get(col_element):
-                                timeoff = timeoff_info_2[user_id][col_element]
+#                         if timeoff_info_2.get(user_id):
+#                             if timeoff_info_2[user_id].get(col_element):
+#                                 timeoff = timeoff_info_2[user_id][col_element]
                         
                         #Skip user not in PROCDUCTIVITY_ENG
                         if eng_type not in OtherKeys.PROCDUCTIVITY_ENG:
@@ -1820,11 +1820,16 @@ class Controllers:
                                 'timesheet': {}
                                 }
                             for element in cols_element:
+                                timeoff     = 0
                                 if filter == 'monthly':
                                     month, year, max_hour = element
                                     col_name    = DateTime.LIST_MONTH[month]
                                 else:
                                     col_name, max_hour = element
+                                if timeoff_info_2.get(user_id):
+                                    if timeoff_info_2[user_id].get(col_name):
+                                        timeoff = timeoff_info_2[user_id][col_name]
+                                                
                                 info[leader_name][user_name]['timesheet'][col_name] = {
                                     'timeoff' : timeoff,
                                     'sheet_type': {},
@@ -1832,9 +1837,7 @@ class Controllers:
                                     }
                                 for element in OtherKeys.PROCDUCTIVITY_SHEET_TYPE:
                                     if element in ['Non-WH']:
-                                        if timeoff_info_2.get(user_id):
-                                            if timeoff_info_2[user_id].get(col_name):
-                                                timeoff = timeoff_info_2[user_id][col_name]
+                                        
                                         info[leader_name][user_name]['timesheet'][col_name]['sheet_type'][element] = max_hour - timeoff
                                     else:
                                         info[leader_name][user_name]['timesheet'][col_name]['sheet_type'][element] = 0

@@ -515,16 +515,18 @@ def send_mail(user_name, password, recipient, cc_recipient, subject, message, bc
     try:
         if break_line:
             message = message.replace('\n', '<br>\n')
-        
-#         print ('Recipient: %s'%(str(recipient)))
-#         print ('CC Recipient: %s'%(str(cc_recipient)))
-#         print ('Subject: %s'%(subject))
-#         print ('Body: %s'%(message))
-#         print (bcc)
+
         sender = "%s@savarti.com"%user_name
-#         recipient = ['toannguyen@savarti.com']
-#         cc_recipient = ['toannguyen@savarti.com']
-#         bcc = 'toannguyen@savarti.com'
+        if not config.IS_PRODUCT:
+            print ('Recipient: %s'%(str(recipient)))
+            print ('CC Recipient: %s'%(str(cc_recipient)))
+            print ('Subject: %s'%(subject))
+            print ('Body: %s'%(message))
+            print (bcc)
+            recipient = ['toannguyen@savarti.com']
+            cc_recipient = ['toannguyen@savarti.com']
+            bcc = 'toannguyen@savarti.com'
+            
         if bcc:
             bcc_recipient = list(filter(None, re.split(' |;|,', bcc)))
         else:
