@@ -196,6 +196,7 @@ class Controllers:
             config_obj.get_all_user_information()
             users_info  = config_obj.users
             user_full_name_info = config_obj.users_full_name
+            other_name_info = config_obj.others_name
             exist_id     = {}
             
             list_record = []
@@ -226,7 +227,11 @@ class Controllers:
                     try:
                         user_id = user_full_name_info[requester].user_id
                     except KeyError:
-                        pass
+                        try:
+                            user_id = other_name_info[requester]
+                        except KeyError:
+                            pass
+                        
 
                 list_record.append(
                     (
@@ -1707,10 +1712,12 @@ class Controllers:
                 message = 'Email error: NA'
                 println(message, 'error')
                 return 0, message
+            pm_cc = ['vantran@savarti.com', 'thaonguyen@savarti.com']
             for lead_email in request_dict:
                 body = request_dict[lead_email]['body']
                 cc = request_dict[lead_email]['cc']
                 cc_list = cc.split('; ')
+                cc_list = cc_list + pm_cc
                 send_mail_status = send_mail(user_name, password, [lead_email], cc_list, 'Report Timesheet', body)
                 if not send_mail_status[0]:
                     message = 'Fail to send report.'
