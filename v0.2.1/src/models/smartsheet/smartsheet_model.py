@@ -59,17 +59,19 @@ class SmartSheets:
             
     def get_sheet_name_and_validate_column(self, sheet_in_db={}):
         self.get_available_sheet_name()
-        sms = smartsheet.Smartsheet(self.token)
+#         sms = smartsheet.Smartsheet(self.token)
         result = {}
         total_sheet = len(self.available_name)
         count = 0
+        sms_obj = self.connection
         for sheet_name in self.available_name:
             count += 1
-            sheet_id = self.available_name[sheet_name]
+#             sheet_id = self.available_name[sheet_name]
             require_col = copy.deepcopy(SmartsheetCfgKeys.LIST_HEADER) 
             # Get all columns.
-            response = sms.Sheets.get_columns(sheet_id)
-            columns = response.data
+            columns = sms_obj.sheets.get(sheet_name).columns
+#             response = sms.Sheets.get_columns(sheet_id)
+#             columns = response.data
             is_valid = 0
             if len(columns) >= len(require_col):
                 for col in columns:

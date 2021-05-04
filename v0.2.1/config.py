@@ -1,3 +1,6 @@
 LOGGING_LEVEL   = 'INFO'
-# WORKING_PATH    = ".data\workspace"
-WORKING_PATH    = "D:\WORKSPACE\WORKSPACE"
+IS_PRODUCT      = True
+if IS_PRODUCT:
+    WORKING_PATH    = ".data\workspace"
+else:
+    WORKING_PATH    = "D:\WORKSPACE\WORKSPACE"

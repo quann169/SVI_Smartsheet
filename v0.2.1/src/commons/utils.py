@@ -513,18 +513,55 @@ def render_jinja2_template(template_path, file_name,  dict_variable):
     
 def send_mail(user_name, password, recipient, cc_recipient, subject, message, bcc=None, break_line=True):
     try:
+        mail_style_css = """
+<style>
+    * {
+		font-family: 'Poppins', sans-serif !important;
+	}
+	tr {
+		background-color: white !important;
+	    border: 1px solid #aaa !important;
+	    white-space: nowrap;
+	}
+	th {
+		background-color: #007BA9 !important;
+		border: 1px solid #aaa !important;
+		color: white;
+		font-weight: bold;
+		box-sizing: content-box;
+		padding: 5px;
+	}
+	td {
+		border: 1px solid #aaa !important;
+		padding: 5px;
+	}
+	
+	table {
+		border-collapse: collapse !important;
+    }
+	.cl-red {
+		color: red;
+	}
+	.cl-blue {
+		color: blue;
+	}
+</style>
+        
+        """
         if break_line:
             message = message.replace('\n', '<br>\n')
-        
-#         print ('Recipient: %s'%(str(recipient)))
-#         print ('CC Recipient: %s'%(str(cc_recipient)))
-#         print ('Subject: %s'%(subject))
-#         print ('Body: %s'%(message))
-#         print (bcc)
+        message = mail_style_css + message
         sender = "%s@savarti.com"%user_name
-        recipient = ['toannguyen@savarti.com']
-        cc_recipient = ['toannguyen@savarti.com']
-        bcc = 'toannguyen@savarti.com'
+        if not config.IS_PRODUCT:
+            print ('Recipient: %s'%(str(recipient)))
+            print ('CC Recipient: %s'%(str(cc_recipient)))
+            print ('Subject: %s'%(subject))
+            print ('Body: %s'%(message))
+            print (bcc)
+            recipient = ['toannguyen@savarti.com']
+            cc_recipient = ['toannguyen@savarti.com']
+            bcc = 'toannguyen@savarti.com'
+            
         if bcc:
             bcc_recipient = list(filter(None, re.split(' |;|,', bcc)))
         else:
