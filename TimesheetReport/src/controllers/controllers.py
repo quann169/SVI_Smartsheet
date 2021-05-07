@@ -460,13 +460,14 @@ class Controllers:
             list_record = []
             for element in user_leader:
                 resource_name, leader_email = element
-                if leader_email not in SettingKeys.EMPTY_CELL:
-                    if user_email.get(leader_email):
-                        leader_name = user_email[leader_email].user_name
-                        if users.get(leader_name):
-                            leader_id = users[leader_name].user_id
-                            user_id = users[resource_name].user_id
-                            list_record.append((leader_id, user_id))
+                if leader_email in SettingKeys.EMPTY_CELL:
+                    leader_email = SettingKeys.NA_VALUE
+                if user_email.get(leader_email):
+                    leader_name = user_email[leader_email].user_name
+                    if users.get(leader_name):
+                        leader_id = users[leader_name].user_id
+                        user_id = users[resource_name].user_id
+                        list_record.append((leader_id, user_id))
             if len(list_record):
                 config_obj.update_resource_leader(list_record)
             remove_path(file_path)
@@ -790,7 +791,158 @@ class Controllers:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
-    def export_excel(self, from_date, to_date, sheet_ids):
+    def export_detail_timesheet(self, wb, from_date, to_date, sheet_ids, color_style, options):
+        style_header = color_style['gray25']
+        start_col, start_row = (0, 0)
+        for task_filter in options['detail'][SessionKey.TASK_FILTER]:
+            # export daily timesheet
+            daily_timesheet_info = self.get_daily_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, task_filter=task_filter)
+            daily_timesheet_wb = wb.add_sheet('detail timesheet ' + task_filter)
+            row_num, col_num = (0, 0)
+            
+            # create  header
+            list_header = ['Sheet Name', 'Type', 'Resource', 'Eng Type', 'Team', 'WW No.', 'Date', 'Task', 'Start Date', \
+                           'End Date', 'Allocation', 'Work Hours', 'Time Off', 'STD Hours']
+            for header in list_header:
+                if col_num == 7:
+                    daily_timesheet_wb.col(col_num).width = 256 * 50
+                else:
+                    daily_timesheet_wb.col(col_num).width = 256 * 14
+                daily_timesheet_wb.write(row_num, col_num, header, style_header)
+                col_num += 1
+            col_num = start_col
+            row_num += 1
+            
+            # create  body
+            for row in daily_timesheet_info:
+                for cell in row:
+                    daily_timesheet_wb.write(row_num, col_num, cell)
+                    col_num += 1
+                col_num = start_col
+                row_num += 1
+            # end daily timesheet
+    
+    def export_resource_timesheet(self, wb, from_date, to_date, sheet_ids, color_style, options):
+        style_header = color_style['gray25']
+        start_col, start_row = (0, 0)
+        # export resource timesheet
+        for task_filter in options['resource'][SessionKey.TASK_FILTER]:
+            for filter in options['resource'][SessionKey.FILTER]:
+                resource_wb = wb.add_sheet('%s resource  %s'%(filter, task_filter))
+                w_resource_info, list_week, u1, u2, u3, u4, u5 = self.get_resource_timesheet_info(from_date=from_date, 
+                                                                                                   to_date=to_date, 
+                                                                                                   sheet_ids=sheet_ids, 
+                                                                                                   task_filter=task_filter,
+                                                                                                   filter=filter)
+                start_col, start_row = (0, 0)
+                row_num, col_num = (0, 0)
+                # create  header
+                list_header = ['Eng Type', 'Team', 'Resource'] + list_week
+                for header in list_header:
+                    resource_wb.col(col_num).width = 256 * 14
+                    resource_wb.write(row_num, col_num, header, style_header)
+                    col_num += 1
+                col_num = start_col
+                row_num += 1
+                for eng_type in w_resource_info:
+                    for team in w_resource_info[eng_type]:
+                        for user_name in w_resource_info[eng_type][team]:
+                            timesheet = w_resource_info[eng_type][team][user_name]
+                            resource_wb.write(row_num, col_num, eng_type)
+                            col_num += 1
+                            resource_wb.write(row_num, col_num, team)
+                            col_num += 1
+                            resource_wb.write(row_num, col_num, user_name)
+                            col_num += 1
+                            for column in list_week:
+                                hours = timesheet[column]['summary']
+                                details = timesheet[column]['sheets']
+                                max_hour = timesheet[column]['max_hour']
+                                value = max_hour
+                                color = ''
+                                if hours[0] + hours[1] > max_hour:
+                                    color = 'orange'
+                                elif hours[0] + hours[1] == max_hour:
+                                    color = 'lime'
+                                else:
+                                    color = 'tan'
+                                    value  = hours[0] + hours[1]
+                                resource_wb.write(row_num, col_num, value, color_style[color])
+                                col_num += 1
+                            col_num = start_col
+                            row_num += 1
+        #end resource
+    def export_project_timesheet(self, wb, from_date, to_date, sheet_ids, color_style, options):
+        style_header = color_style['gray25']
+        start_col, start_row = (0, 0)
+        # export resource timesheet
+        for task_filter in options['project'][SessionKey.TASK_FILTER]:
+            for filter in options['project'][SessionKey.FILTER]:
+                # Project timesheet
+                project_wb = wb.add_sheet('%s project  %s'%(filter, task_filter))
+                w_project_info, list_week, u1, u2 = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, 
+                                                                                               sheet_ids=sheet_ids, \
+                                                                                               task_filter=task_filter,
+                                                                                               filter=filter)
+                start_col, start_row = (0, 0)
+                row_num, col_num = (0, 0)
+                # create  header
+                list_header = ['Sheet', 'Resource', 'Eng Type', 'Team'] + list_week + ['Total']
+                for header in list_header:
+                    project_wb.col(col_num).width = 256 * 14
+                    project_wb.write(row_num, col_num, header, style_header)
+                    col_num += 1
+                col_num = start_col
+                row_num += 1
+                for sheet_name in w_project_info:
+                    project_wb.write(row_num, col_num, sheet_name, color_style['light_turquoise'])
+                    col_num += 1
+                    project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                    col_num += 1
+                    project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                    col_num += 1
+                    project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                    col_num += 1
+                    for column in list_week:
+                        project_wb.write(row_num, col_num, w_project_info[sheet_name]['total'][column], color_style['light_turquoise'])
+                        col_num += 1
+                    project_wb.write(row_num, col_num, w_project_info[sheet_name]['total_row'], color_style['light_turquoise'])
+                    col_num = start_col
+                    row_num += 1
+                    for user_name in w_project_info[sheet_name]['resource']:
+                        eng_type = w_project_info[sheet_name]['resource'][user_name]['eng_type']
+                        team = w_project_info[sheet_name]['resource'][user_name]['team']
+                        eng_type = w_project_info[sheet_name]['resource'][user_name]['eng_type']
+                        timesheet = w_project_info[sheet_name]['resource'][user_name]['timesheet']
+                        r_total = w_project_info[sheet_name]['resource'][user_name]['total']
+                        project_wb.write(row_num, col_num, '')
+                        col_num += 1
+                        project_wb.write(row_num, col_num, user_name)
+                        col_num += 1
+                        project_wb.write(row_num, col_num, eng_type)
+                        col_num += 1
+                        project_wb.write(row_num, col_num, team)
+                        col_num += 1
+                        
+                        for column in list_week:
+                            work_hour = timesheet[column]['work_hour']
+                            max_hour = timesheet[column]['max_hour']
+                            if work_hour > max_hour:
+                                project_wb.write(row_num, col_num, max_hour, color_style['orange'])
+                                col_num += 1
+                            elif work_hour  == max_hour:
+                                project_wb.write(row_num, col_num, max_hour, color_style['lime'])
+                                col_num += 1
+                            else:
+                                project_wb.write(row_num, col_num, work_hour, color_style['tan'])
+                                col_num += 1
+                        project_wb.write(row_num, col_num, r_total, color_style['white'])
+                        col_num += 1
+                        col_num = start_col
+                        row_num += 1
+                #end project
+                
+    def export_excel(self, from_date, to_date, sheet_ids, options):
         try:
             if not (from_date and to_date and sheet_ids):
                 return 0, MsgError.E003
@@ -798,288 +950,22 @@ class Controllers:
             file_name = 'Report.xls'
             output_path   = os.path.join(config.WORKING_PATH, file_name)
             if os.path.exists(output_path):
-                os.remove(output_path)
-            start_col, start_row = (0, 0)
-            
+                os.remove(output_path)           
             # style 
             color_style = defined_color()
-            style_header = color_style['gray25']
             
             # export daily timesheet
-            daily_timesheet_info = self.get_daily_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, task_filter='current')
-            daily_timesheet_wb = wb.add_sheet('Detail Timesheet')
-            row_num, col_num = (0, 0)
+            self.export_detail_timesheet(wb, from_date, to_date, sheet_ids, color_style, options)
             
-            # create  header
-            list_header = ['Sheet Name', 'Type', 'Resource', 'Eng Type', 'Team', 'WW No.', 'Date', 'Task', 'Start Date', \
-                           'End Date', 'Allocation', 'Work Hours', 'Time Off', 'STD Hours']
-            for header in list_header:
-                if col_num == 7:
-                    daily_timesheet_wb.col(col_num).width = 256 * 50
-                else:
-                    daily_timesheet_wb.col(col_num).width = 256 * 14
-                daily_timesheet_wb.write(row_num, col_num, header, style_header)
-                col_num += 1
-            col_num = start_col
-            row_num += 1
+            # export resource timesheet
+            self.export_resource_timesheet(wb, from_date, to_date, sheet_ids, color_style, options)
             
-            # create  body
-            for row in daily_timesheet_info:
-                for cell in row:
-                    daily_timesheet_wb.write(row_num, col_num, cell)
-                    col_num += 1
-                col_num = start_col
-                row_num += 1
-            # end daily timesheet
-            
-            # export daily timesheet final
-            daily_timesheet_info = self.get_daily_timesheet_info(from_date=from_date, to_date=to_date, sheet_ids=sheet_ids, task_filter='final')
-            daily_timesheet_wb = wb.add_sheet('Detail Timesheet Final')
-            row_num, col_num = (0, 0)
-            
-            # create  header
-            list_header = ['Sheet Name', 'Type', 'Resource', 'Eng Type', 'Team', 'WW No.', 'Date', 'Task', 'Start Date', \
-                           'End Date', 'Allocation', 'Work Hours', 'Time Off', 'STD Hours']
-            for header in list_header:
-                if col_num == 7:
-                    daily_timesheet_wb.col(col_num).width = 256 * 50
-                else:
-                    daily_timesheet_wb.col(col_num).width = 256 * 14
-                daily_timesheet_wb.write(row_num, col_num, header, style_header)
-                col_num += 1
-            col_num = start_col
-            row_num += 1
-            
-            # create  body
-            for row in daily_timesheet_info:
-                for cell in row:
-                    daily_timesheet_wb.write(row_num, col_num, cell)
-                    col_num += 1
-                col_num = start_col
-                row_num += 1
-            # end daily timesheet
-            
-            #weekly resource
-            weekly_resource_wb = wb.add_sheet('Weekly Resource')
-            w_resource_info, list_week, no_missing, no_redundant, no_enought, count_overlap, total_resource = self.get_resource_timesheet_info(from_date=from_date, 
-                                                                                                                                               to_date=to_date, 
-                                                                                                                                               sheet_ids=sheet_ids, 
-                                                                                                                                               filter='weekly')
-            start_col, start_row = (0, 0)
-            row_num, col_num = (0, 0)
-            # create  header
-            list_header = ['Eng Type', 'Team', 'Resource'] + list_week
-            for header in list_header:
-                weekly_resource_wb.col(col_num).width = 256 * 14
-                weekly_resource_wb.write(row_num, col_num, header, style_header)
-                col_num += 1
-            col_num = start_col
-            row_num += 1
-            for eng_type in w_resource_info:
-                for team in w_resource_info[eng_type]:
-                    for user_name in w_resource_info[eng_type][team]:
-                        timesheet = w_resource_info[eng_type][team][user_name]
-                        weekly_resource_wb.write(row_num, col_num, eng_type)
-                        col_num += 1
-                        weekly_resource_wb.write(row_num, col_num, team)
-                        col_num += 1
-                        weekly_resource_wb.write(row_num, col_num, user_name)
-                        col_num += 1
-                        for column in list_week:
-                            hours = timesheet[column]['summary']
-                            details = timesheet[column]['sheets']
-                            max_hour = timesheet[column]['max_hour']
-                            value = max_hour
-                            color = ''
-                            if hours[0] + hours[1] > max_hour:
-                                color = 'orange'
-                            elif hours[0] + hours[1] == max_hour:
-                                color = 'lime'
-                            else:
-                                color = 'tan'
-                                value  = hours[0] + hours[1]
-                            weekly_resource_wb.write(row_num, col_num, value, color_style[color])
-                            col_num += 1
-                        col_num = start_col
-                        row_num += 1
-            #end resource
-            
-            #monthly resource
-            monthly_resource_wb = wb.add_sheet('Monthly Resource')
-            m_resource_info, list_month, no_missing, no_redundant, no_enought, count_overlap, total_resource = self.get_resource_timesheet_info(from_date=from_date, 
-                                                                                                                                                to_date=to_date, 
-                                                                                                                                                sheet_ids=sheet_ids, 
-                                                                                                                                                filter='monthly')
-            start_col, start_row = (0, 0)
-            row_num, col_num = (0, 0)
-            # create  header
-            list_header = ['Eng Type', 'Team', 'Resource'] + list_month
-            for header in list_header:
-                monthly_resource_wb.col(col_num).width = 256 * 14
-                monthly_resource_wb.write(row_num, col_num, header, style_header)
-                col_num += 1
-            col_num = start_col
-            row_num += 1
-            for eng_type in m_resource_info:
-                for team in m_resource_info[eng_type]:
-                    for user_name in m_resource_info[eng_type][team]:
-                        timesheet = m_resource_info[eng_type][team][user_name]
-                        monthly_resource_wb.write(row_num, col_num, eng_type)
-                        col_num += 1
-                        monthly_resource_wb.write(row_num, col_num, team)
-                        col_num += 1
-                        monthly_resource_wb.write(row_num, col_num, user_name)
-                        col_num += 1
-                        for column in list_month:
-                            hours = timesheet[column]['summary']
-                            details = timesheet[column]['sheets']
-                            max_hour = timesheet[column]['max_hour']
-                            value = max_hour
-                            color = ''
-                            if hours[0] + hours[1] > max_hour:
-                                color = 'orange'
-                            elif hours[0] + hours[1] == max_hour:
-                                color = 'lime'
-                            else:
-                                color = 'tan'
-                                value  = hours[0] + hours[1]
-                            monthly_resource_wb.write(row_num, col_num, value, color_style[color])
-                            col_num += 1
-                        col_num = start_col
-                        row_num += 1
-            
-            #weekly Project
-            weekly_project_wb = wb.add_sheet('Weekly Project')
-            w_project_info, list_week, no_enought, total = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, 
-                                                                                           sheet_ids=sheet_ids, filter='weekly')
-            start_col, start_row = (0, 0)
-            row_num, col_num = (0, 0)
-            # create  header
-            list_header = ['Sheet', 'Resource', 'Eng Type', 'Team'] + list_week + ['Total']
-            for header in list_header:
-                weekly_project_wb.col(col_num).width = 256 * 14
-                weekly_project_wb.write(row_num, col_num, header, style_header)
-                col_num += 1
-            col_num = start_col
-            row_num += 1
-            for sheet_name in w_project_info:
-                weekly_project_wb.write(row_num, col_num, sheet_name, color_style['light_turquoise'])
-                col_num += 1
-                weekly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
-                col_num += 1
-                weekly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
-                col_num += 1
-                weekly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
-                col_num += 1
-                for column in list_week:
-                    weekly_project_wb.write(row_num, col_num, w_project_info[sheet_name]['total'][column], color_style['light_turquoise'])
-                    col_num += 1
-                weekly_project_wb.write(row_num, col_num, w_project_info[sheet_name]['total_row'], color_style['light_turquoise'])
-                col_num = start_col
-                row_num += 1
-                for user_name in w_project_info[sheet_name]['resource']:
-                    eng_type = w_project_info[sheet_name]['resource'][user_name]['eng_type']
-                    team = w_project_info[sheet_name]['resource'][user_name]['team']
-                    eng_type = w_project_info[sheet_name]['resource'][user_name]['eng_type']
-                    timesheet = w_project_info[sheet_name]['resource'][user_name]['timesheet']
-                    r_total = w_project_info[sheet_name]['resource'][user_name]['total']
-                    weekly_project_wb.write(row_num, col_num, '')
-                    col_num += 1
-                    weekly_project_wb.write(row_num, col_num, user_name)
-                    col_num += 1
-                    weekly_project_wb.write(row_num, col_num, eng_type)
-                    col_num += 1
-                    weekly_project_wb.write(row_num, col_num, team)
-                    col_num += 1
-                    
-                    for column in list_week:
-                        work_hour = timesheet[column]['work_hour']
-                        max_hour = timesheet[column]['max_hour']
-                        if work_hour > max_hour:
-                            weekly_project_wb.write(row_num, col_num, max_hour, color_style['orange'])
-                            col_num += 1
-                        elif work_hour  == max_hour:
-                            weekly_project_wb.write(row_num, col_num, max_hour, color_style['lime'])
-                            col_num += 1
-                        else:
-                            weekly_project_wb.write(row_num, col_num, work_hour, color_style['tan'])
-                            col_num += 1
-                    weekly_project_wb.write(row_num, col_num, r_total, color_style['white'])
-                    col_num += 1
-                    col_num = start_col
-                    row_num += 1
-            #end project
-            
-            #monthly Project
-            monthly_project_wb = wb.add_sheet('Monthly Project')
-            m_project_info, list_month, no_enought, total = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, 
-                                                                                            sheet_ids=sheet_ids, filter='monthly')
-            start_col, start_row = (0, 0)
-            row_num, col_num = (0, 0)
-            # create  header
-            list_header = ['Sheet', 'Resource', 'Eng Type', 'Team'] + list_month + ['Total']
-            for header in list_header:
-                monthly_project_wb.col(col_num).width = 256 * 14
-                monthly_project_wb.write(row_num, col_num, header, style_header)
-                col_num += 1
-            col_num = start_col
-            row_num += 1
-            for sheet_name in m_project_info:
-                monthly_project_wb.write(row_num, col_num, sheet_name, color_style['light_turquoise'])
-                col_num += 1
-                monthly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
-                col_num += 1
-                monthly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
-                col_num += 1
-                monthly_project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
-                col_num += 1
-                for column in list_month:
-                    monthly_project_wb.write(row_num, col_num, m_project_info[sheet_name]['total'][column], color_style['light_turquoise'])
-                    col_num += 1
-                monthly_project_wb.write(row_num, col_num, m_project_info[sheet_name]['total_row'], color_style['light_turquoise'])
-                col_num = start_col
-                row_num += 1
-                for user_name in m_project_info[sheet_name]['resource']:
-                    eng_type = m_project_info[sheet_name]['resource'][user_name]['eng_type']
-                    team = m_project_info[sheet_name]['resource'][user_name]['team']
-                    eng_type = m_project_info[sheet_name]['resource'][user_name]['eng_type']
-                    timesheet = m_project_info[sheet_name]['resource'][user_name]['timesheet']
-                    r_total = m_project_info[sheet_name]['resource'][user_name]['total']
-                    monthly_project_wb.write(row_num, col_num, '')
-                    col_num += 1
-                    monthly_project_wb.write(row_num, col_num, user_name)
-                    col_num += 1
-                    monthly_project_wb.write(row_num, col_num, eng_type)
-                    col_num += 1
-                    monthly_project_wb.write(row_num, col_num, team)
-                    col_num += 1
-                    
-                    for column in list_month:
-                        work_hour = timesheet[column]['work_hour']
-                        max_hour = timesheet[column]['max_hour']
-                        if work_hour > max_hour:
-                            monthly_project_wb.write(row_num, col_num, max_hour, color_style['orange'])
-                            col_num += 1
-                        elif work_hour  == max_hour:
-                            monthly_project_wb.write(row_num, col_num, max_hour, color_style['lime'])
-                            col_num += 1
-                        else:
-                            monthly_project_wb.write(row_num, col_num, work_hour, color_style['tan'])
-                            col_num += 1
-                    monthly_project_wb.write(row_num, col_num, r_total, color_style['white'])
-                    col_num = start_col
-                    row_num += 1
-            #end project
-            
-#             color_wb = wb.add_sheet('Color')
-#             row_num, col_num = (0, 0)
-#             for color in color_style:
-#                 color_wb.write(row_num, col_num, color, color_style[color])
-#                 col_num = start_col
-#                 row_num += 1
-
-            
-            wb.save(output_path)
+            #Export Project timesheet
+            self.export_project_timesheet(wb, from_date, to_date, sheet_ids, color_style, options)
+            try:
+                wb.save(output_path)
+            except IndexError:
+                return 0, 'Can not export file because there are no sheets in the output workbook.'
             return 1, file_name
         
         except Exception as e:
@@ -1113,7 +999,7 @@ class Controllers:
 #                         task_obj.remove_final_task_information()
                     task_obj.move_task_to_final()
                     for date in list_date:
-                        final_date_id = task_obj.add_final_date(date=date, sheet_id=sheet_id)
+                        final_date_id = task_obj.add_final_date(date=date, sheet_id=sheet_id, from_date=from_date, to_date=to_date)
                         for row in data:
                             item_name = row[0]
                             counter = row[1]
@@ -1161,9 +1047,11 @@ class Controllers:
         enable_add = True
         config_obj  = Configuration()
         config_obj.get_sheet_config(is_parse=True)
+        config_obj.get_list_holiday(is_parse=True)
+        holidays  = config_obj.holidays
         cfg_sheet_ids = config_obj.sheet_ids
         task_obj  = DbTask()
-        workdays = get_work_days(from_date=from_date, to_date=to_date)
+        workdays = get_work_days(from_date=from_date, to_date=to_date, holidays=holidays)
         list_date = []
         for date, week in workdays:
             list_date.append(date)

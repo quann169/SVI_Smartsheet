@@ -211,7 +211,8 @@ def export():
         request_dict = get_request_form_ajax()
         result = ctrl().export_excel(from_date=request_dict[SessionKey.FROM], \
                                      to_date=request_dict[SessionKey.TO], \
-                                     sheet_ids=request_dict[SessionKey.SHEETS])
+                                     sheet_ids=request_dict[SessionKey.SHEETS],
+                                     options=request_dict['options'])
         return jsonify({'result': result})
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)

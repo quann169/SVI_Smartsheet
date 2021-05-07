@@ -20,6 +20,7 @@
 				<!-- Our Custom CSS -->
 			    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/fontawesome/css/all.css') }}" />
 				<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
+				<link rel="stylesheet" href="{{ url_for('static', filename='css/components/export.css') }}" />
 			{%- endblock styles %}
 		{%- endblock head %}
 	</head>
@@ -87,7 +88,7 @@
 			<script src="{{url_for('static', filename='vendors/canvas/canvasjs.min.js')}}"></script>
 			
 			<script src="{{url_for('static', filename='js/common.js')}}"></script>
-			
+			<script src="{{url_for('static', filename='js/components/export.js')}}"></script>
 	    {%- endblock scripts %}
 		{% set is_notify, link = ctrl_obj.check_version() %}
 		{% if is_notify %}

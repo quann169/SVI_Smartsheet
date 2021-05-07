@@ -191,40 +191,8 @@ function get_data_from_form(form_id) {
 	return data;
 }
 
-function export_file (form_id) {
-	$('#notify').hide();
-	$('#overlay_loader').show();
-	var data = get_data_from_form(form_id);
-	if (! data) {
-		return null;
-	}
-    $.ajax({
-	   url: EXPORT,
-	   type: "POST",
-	   data: encodeURIComponent(JSON.stringify(data)),
-	   success: function(resp){
-		   var result = resp.result;
-			if (result[0]) {
-					var file_name = result[1];
-					var data = {}
-					data[SESSION_FILE_NAME] = file_name;
-					var method_url = encodeURIComponent(JSON.stringify(data));
-					var link = DOWNLOAD_FILE + '?' + method_url;
-					var ctn = 'Export successfully. Click here to download:' + '<a class="cl-blue" href="' + link + '"><u>  ' + file_name + '</u></a>'
-					$('#notify_content').html(ctn);
-					$('#notify').show();
-					$('#overlay_loader').hide();
-				} else {
-					custom_alert(result[1], 'error');
-				}
-	      }
-   });
-}
-$(document).ready(function () {
-	$('#export').click(function(event) {
-		export_file('form');
-	});
-});
+
+
 
 function custom_alert(message, type) {
 	$('#overlay_loader').hide();
