@@ -545,6 +545,11 @@ class Configuration(Connection):
         else:
             return False
     
+    def inactive_all_resource(self, ):
+        query   = """UPDATE `%s` SET `%s`="0";
+        """%( DbTable.USER, DbHeader.IS_ACTIVE)
+        self.db_execute(query)
+        
     def update_resource(self, ):
         query   = """UPDATE `%s` SET `%s`="%s", `%s`="%s" , `%s`="%s" , `%s`="%s" , `%s`="%s" , `%s`="%s" , `%s`="%s" , `%s`="%s"
                     WHERE `%s`="%s";
@@ -853,27 +858,28 @@ class DbTask(Connection):
         
         self.milestone_id = self.db_execute(query)
     
-    def add_final_date(self, list_record=None, date=None, sheet_id=None):
+    def add_final_date(self, list_record=None, date=None, sheet_id=None, from_date=None, to_date=None):
         if list_record:
             query   = '''INSERT INTO `%s` 
-                            (`%s`, `%s`)
+                            (`%s`, `%s`, `%s`, `%s`)
                         '''%(DbTable.FINAL_DATE,\
-                        DbHeader.DATE, DbHeader.SHEET_ID)
+                        DbHeader.DATE, DbHeader.SHEET_ID, DbHeader.START_DATE, DbHeader.END_DATE)
             query   += '''
                         VALUES
-                            (%s, %s)
+                            (%s, %s, %s, %s)
                         ;'''
             self.db_execute_many(query, list_record)
         else:
             query   = '''INSERT INTO `%s` 
-                            (`%s`, `%s`)
+                            (`%s`, `%s`, `%s`, `%s`)
                         VALUES
-                            ('%s', '%s')
+                            ('%s', '%s', '%s', '%s')
                         ;'''%(DbTable.FINAL_DATE,\
-                        DbHeader.DATE, DbHeader.SHEET_ID,\
-                        date, sheet_id)
+                        DbHeader.DATE, DbHeader.SHEET_ID, DbHeader.START_DATE, DbHeader.END_DATE, \
+                        date, sheet_id, from_date, to_date)
             id = self.db_execute_2(query)
             return id
+        
     def get_final_date(self):
         query = """
                 SELECT `%s`, `%s`

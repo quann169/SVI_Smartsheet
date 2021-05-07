@@ -13,7 +13,7 @@ from pprint import pprint
 
 class Timesheet():
     
-    def __init__(self, from_date, to_date, filter, sheet_ids, list_user=None, exclude=False):
+    def __init__(self, from_date, to_date, filter, sheet_ids, list_user=None, exclude=True):
         self.sheets     = {}
         self.resource   = {}
         self.from_date  = from_date

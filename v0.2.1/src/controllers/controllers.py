@@ -411,7 +411,7 @@ class Controllers:
             teams_info = config_obj.team
             config_obj.set_attr(updated_by  = user_name)
             user_leader = []
-            
+            config_obj.inactive_all_resource()
             for index in range(0, len(df[ExcelHeader.RESOURCE])):
                 resource          = str(df[ExcelHeader.RESOURCE][index]).strip()
                 eng_type          = str(df[ExcelHeader.ENG_TYPE][index])
@@ -460,13 +460,14 @@ class Controllers:
             list_record = []
             for element in user_leader:
                 resource_name, leader_email = element
-                if leader_email not in SettingKeys.EMPTY_CELL:
-                    if user_email.get(leader_email):
-                        leader_name = user_email[leader_email].user_name
-                        if users.get(leader_name):
-                            leader_id = users[leader_name].user_id
-                            user_id = users[resource_name].user_id
-                            list_record.append((leader_id, user_id))
+                if leader_email in SettingKeys.EMPTY_CELL:
+                    leader_email = SettingKeys.NA_VALUE
+                if user_email.get(leader_email):
+                    leader_name = user_email[leader_email].user_name
+                    if users.get(leader_name):
+                        leader_id = users[leader_name].user_id
+                        user_id = users[resource_name].user_id
+                        list_record.append((leader_id, user_id))
             if len(list_record):
                 config_obj.update_resource_leader(list_record)
             remove_path(file_path)
@@ -1113,7 +1114,7 @@ class Controllers:
 #                         task_obj.remove_final_task_information()
                     task_obj.move_task_to_final()
                     for date in list_date:
-                        final_date_id = task_obj.add_final_date(date=date, sheet_id=sheet_id)
+                        final_date_id = task_obj.add_final_date(date=date, sheet_id=sheet_id, from_date=from_date, to_date=to_date)
                         for row in data:
                             item_name = row[0]
                             counter = row[1]
@@ -1161,9 +1162,11 @@ class Controllers:
         enable_add = True
         config_obj  = Configuration()
         config_obj.get_sheet_config(is_parse=True)
+        config_obj.get_list_holiday(is_parse=True)
+        holidays  = config_obj.holidays
         cfg_sheet_ids = config_obj.sheet_ids
         task_obj  = DbTask()
-        workdays = get_work_days(from_date=from_date, to_date=to_date)
+        workdays = get_work_days(from_date=from_date, to_date=to_date, holidays=holidays)
         list_date = []
         for date, week in workdays:
             list_date.append(date)

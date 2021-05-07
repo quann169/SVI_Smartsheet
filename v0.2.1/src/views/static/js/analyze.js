@@ -63,8 +63,9 @@ function control_add_to_final_button() {
 		$('#add_final').attr('disabled', true);
 	}
 }
-control_add_to_final_button();
+
 $(document).ready(function () {
+	control_add_to_final_button();
 	$('.analyze-enable-checkbox').click(function(event) {
 		control_add_to_final_button();
 	});
