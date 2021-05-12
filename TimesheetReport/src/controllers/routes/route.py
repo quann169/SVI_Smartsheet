@@ -19,6 +19,8 @@ from src.commons.utils import println
 import config
 import getpass
 from src.commons.message import MsgError
+from src.models.database.database_model import Configuration, DbTask
+
 timesheet_bp = Blueprint('timesheet_bp', __name__)
 
 @timesheet_bp.before_request
@@ -31,7 +33,16 @@ def before_request():
     method = request.method 
     path = request.path
     enum_route = Route()
+    ctrl_obj   = ctrl()
     # check login
+    password = get_saved_password()
+    username = getpass.getuser()
+
+    if session.get(SessionKey.IS_LOGIN) == None:
+        if path not in [Route().LOGIN, Route().AUTH]:
+            check_password = ctrl_obj.authenticate_account(username, password)
+            if not check_password[0]:
+                return (redirect(url_for("timesheet_bp.login")))
     if not session.get(SessionKey.IS_LOGIN) or not session.get(SessionKey.IS_LOGIN) or not session.get(SessionKey.USER_ID):
         if path not in [Route().LOGIN, Route().AUTH]:
             return (redirect(url_for("timesheet_bp.login")))
@@ -675,6 +686,153 @@ def lock_sync():
     try:
         request_dict = get_request_form_ajax()
         result = ctrl().lock_sync(request_dict)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+#admin
+@timesheet_bp.route(Route.ADMIN)
+def admin():
+    """ Admin page
+    :param : 
+    :return: Admin page
+    """
+    println(Route.ADMIN, OtherKeys.LOGING_DEBUG)
+    return (redirect(url_for("timesheet_bp.admin_dashboard")))
+
+@timesheet_bp.route(Route.ADMIN_DASHBOARD)
+def admin_dashboard():
+    """ dashboard page
+    :param : 
+    :return: dashboard page
+    """
+    println(Route.ADMIN_DASHBOARD, OtherKeys.LOGING_DEBUG)
+    try:
+        ctrl_obj   = ctrl()
+        return render_template(Template.ADMIN_DASH_BOARD, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template())
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.ADMIN_USER_ROLE)
+def admin_user_role():
+    """ admin user role page
+    :param : 
+    :return: admin user role page
+    """
+    println(Route.ADMIN_USER_ROLE, OtherKeys.LOGING_DEBUG)
+    try:
+        ctrl_obj   = ctrl()
+        return render_template(Template.ADMIN_USER_ROLE, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template())
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.GET_LIST_ROLE, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
+def get_list_role():
+    """
+    :param : 
+    :return: 
+    """
+    println(Route.GET_LIST_ROLE, OtherKeys.LOGING_DEBUG)
+    try:
+        config_obj = Configuration()
+        result  = config_obj.get_list_role()
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.GET_LIST_USER, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
+def get_list_user():
+    """
+    :param : 
+    :return: 
+    """
+    println(Route.GET_LIST_USER, OtherKeys.LOGING_DEBUG)
+    try:
+        
+        config_obj = Configuration()
+        result  = config_obj.get_list_resource()
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+    
+@timesheet_bp.route(Route.GET_USER_ROLE, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
+def get_user_role():
+    """
+    :param : 
+    :return: 
+    """
+    println(Route.GET_USER_ROLE, OtherKeys.LOGING_DEBUG)
+    try:
+        config_obj = Configuration()
+        result  = config_obj.get_user_role()
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.UPDATE_ADMIN_USER_ROLE, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
+def update_admin_user_role():
+    """
+    :param : 
+    :return: 
+    """
+    println(Route.UPDATE_ADMIN_USER_ROLE, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_form_ajax()
+        ctrl_obj   = ctrl()
+        result = ctrl_obj.update_user_role(request_dict)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+    
+@timesheet_bp.route(Route.ADMIN_VERSION)
+def admin_version():
+    """ admin version page
+    :param : 
+    :return: version role page
+    """
+    println(Route.ADMIN_VERSION, OtherKeys.LOGING_DEBUG)
+    try:
+        ctrl_obj   = ctrl()
+        return render_template(Template.ADMIN_OTHER_SETTING, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template())
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.GET_VERSION_INFO, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
+def get_version_info():
+    """
+    :param : 
+    :return: 
+    """
+    println(Route.GET_VERSION_INFO, OtherKeys.LOGING_DEBUG)
+    try:
+        config_obj = Configuration()
+        result = config_obj.get_other_config_info(is_parse=False)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.UPDATE_ADMIN_VERSION, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
+def update_admin_version():
+    """
+    :param : 
+    :return: 
+    """
+    println(Route.UPDATE_ADMIN_VERSION, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_form_ajax()
+        ctrl_obj   = ctrl()
+        result = ctrl_obj.update_other_config(request_dict)
         return jsonify({'result': result})
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)

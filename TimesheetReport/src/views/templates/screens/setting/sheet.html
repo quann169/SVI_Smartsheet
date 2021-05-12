@@ -16,12 +16,12 @@
 {% endblock sidebar %}
 {% block styles %}
 	{{super()}}
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/setting/sheet.css') }}" />
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/screens/setting/sheet.css') }}" />
 {% endblock styles %}
 
 {% block scripts %}
 	{{super()}}
-	<script src="{{url_for('static', filename='js/setting/sheet.js')}}"></script>
+	<script src="{{url_for('static', filename='js/screens/setting/sheet.js')}}"></script>
 {% endblock scripts %}
 
 {% block main %}

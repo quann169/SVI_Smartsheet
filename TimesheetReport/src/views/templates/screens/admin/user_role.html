@@ -1,0 +1,45 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Admin User Resource
+{% endblock title %}
+{% block breadcrumb %}
+	{% set br_items = [(route.ADMIN_USER_ROLE, 'User Role', True)] %}
+	{% with br_item=br_item %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+{% block sidebar %}
+	{% set active_sidebar = route.ADMIN_USER_ROLE %}
+	{% with active_sidebar=active_sidebar , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/screens/admin/user_role.js')}}"></script>
+{% endblock scripts %}
+{% block styles %}
+	{{super()}}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/screens/admin/user_role.css') }}" />
+{% endblock styles %}
+{% block main %}
+    <div class="ctcard">
+        <div class="ctcard_body">
+            <label class="ctcard__title">Role</label>
+            <a class='ctcard__new' id='new_role'>New</a>
+            <div class="ctcard__content" id='role_block'>
+                
+            </div>
+        </div>
+        <div class="ctcard_body">
+            <label class="ctcard__title">User Role</label>
+            <a class='ctcard__new' id='new_user_role'>New</a>
+            <div class="ctcard__content" id='user_role_block'>
+                
+            </div>
+        </div>
+        <div class="ctcard__footer">
+            <button type='button' id='save' disabled data-toggle="tooltip" title="Save"><i class="fas fa-save"></i></button>
+        </div>
+    </div>
+{% endblock main %}

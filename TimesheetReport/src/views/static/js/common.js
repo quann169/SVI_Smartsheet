@@ -282,7 +282,7 @@ function check_loading_smartsheet() {
 	}
 }
 $(document).ready(function() {
-	$(window).scroll(function() {
+	$('#main_div').scroll(function() {
 		if ($(this).scrollTop() > 300) {
 			$('#to_top_btn').fadeIn();
 		} else {
@@ -291,7 +291,7 @@ $(document).ready(function() {
 	});
 		
 	$('#to_top_btn').click(function() {
-	$("html, body").animate({
+	$("#main_div").animate({
 		scrollTop: 0
 		}, 1000);
 	return false;

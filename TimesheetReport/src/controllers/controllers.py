@@ -411,7 +411,7 @@ class Controllers:
             teams_info = config_obj.team
             config_obj.set_attr(updated_by  = user_name)
             user_leader = []
-            
+            config_obj.inactive_all_resource()
             for index in range(0, len(df[ExcelHeader.RESOURCE])):
                 resource          = str(df[ExcelHeader.RESOURCE][index]).strip()
                 eng_type          = str(df[ExcelHeader.ENG_TYPE][index])
@@ -1931,5 +1931,47 @@ class Controllers:
             config_obj.set_attr(is_loading          = is_loading,
                                 sheet_id            = sheet_id)
             config_obj.update_is_loading_of_sheet()
+        return 1
+    
+    def update_user_role(self, request_dict):
+        role_info = request_dict['role']
+        user_role_info = request_dict['user_role']
+        config_obj = Configuration()
+        current_role = config_obj.get_list_role()
+        current_user_role = config_obj.get_user_role()
         
+        #add new role
+        for role_name in role_info:
+            if not config_obj.check_exist_role(role_name):
+                config_obj.add_role(role_name)
+        #remove missing role
+        for elm in current_role:
+            role_name = elm[DbHeader.ROLE_NAME]
+            if role_name not in role_info:
+                config_obj.remove_role(role_name)
+        avail_id = {}
+        #add new user role
+        for elm in user_role_info:
+            user_id = elm[0]
+            role_id = elm[1]
+            avail_id['%s-%s'%(user_id, role_id)] = 1
+            if not config_obj.check_exist_user_role(user_id, role_id):
+                config_obj.add_user_role(user_id, role_id)
+        #remove missing user role
+        for elm in current_user_role:
+            user_id = elm[DbHeader.USER_ID]
+            role_id = elm[DbHeader.ROLE_ID] 
+            grp_id = '%s-%s'%(user_id, role_id)
+            if not avail_id.get(grp_id):
+                config_obj.remove_user_role(user_id, role_id)
+        return 1
+    def update_other_config(self, request_dict):
+        other_config_info = request_dict['other_info']
+        config_obj = Configuration()
+        for elm in other_config_info:
+            config_name = elm[0]
+            config_value = elm[1]
+            config_obj.set_attr(config_name=config_name, config_value=config_value)
+            if config_obj.check_exist_config_info():
+                config_obj.update_other_config_info()
         return 1

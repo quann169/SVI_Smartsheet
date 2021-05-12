@@ -11,7 +11,7 @@ from threading import Timer
 from src.models.database.connection_model import Connection
 from src.controllers.controllers import Controllers as ctrl
         
-version  = 'v0.2.1'
+version  = 'v0.3'
 if config.IS_PRODUCT:
     port = get_free_tcp_port()
     template_path =  '.data/views/templates'
@@ -20,7 +20,7 @@ else:
     port        = 6602
     template_path =  'src/views/templates'
     static_path =  'src/views/static'
-    
+
 host        = "localhost"
 tool_path = os.path.abspath(os.path.dirname(__file__))
 logging_setting('TimesheetReport.log')

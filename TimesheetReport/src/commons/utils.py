@@ -5,7 +5,7 @@ Created on Feb 5, 2021
 '''
 import os, sys, re, copy
 import datetime, calendar
-import ast
+import ast, getpass
 from src.commons.message import Msg, MsgError, MsgWarning
 from src.commons.enums import DateTime, SessionKey, ExcelColor, SettingKeys, OtherKeys
 import logging
@@ -470,24 +470,42 @@ def decrypt(message):
     return new_str
 
 def get_saved_password():
-    working_path = config.WORKING_PATH
-    file_name = os.path.join(working_path, '.pswd.txt')
-    password = None
-    if os.path.exists(file_name):
+    username = getpass.getuser()
+    user_file = os.path.join(os.path.join('C:\\Users', username), '.pswd.txt')
+    password = ''
+    if os.path.exists(user_file):
+        file_name = user_file
         with open(file_name, 'r') as f:
             encrypt_ctn = f.read()
             password = decrypt(encrypt_ctn)
-    return password
+        return password
+    else:
+        working_path = config.WORKING_PATH
+        file_name = os.path.join(working_path, '.pswd.txt')
+        if os.path.exists(file_name):
+            with open(file_name, 'r') as f:
+                encrypt_ctn = f.read()
+                password = decrypt(encrypt_ctn)
+        return password
 
 def save_password(password):
-    working_path = config.WORKING_PATH
-    file_name = os.path.join(working_path, '.pswd.txt')
-    with open(file_name, 'w') as f:
-        encrypt_ctn = encrypt(password)
-        f.write(encrypt_ctn)
-
+    try:
+        username = getpass.getuser()
+        file_name = os.path.join(os.path.join('C:\\Users', username), '.pswd.txt')
+        with open(file_name, 'w') as f:
+            encrypt_ctn = encrypt(password)
+            f.write(encrypt_ctn)
+    except:
+        working_path = config.WORKING_PATH
+        file_name = os.path.join(working_path, '.pswd.txt')
+        with open(file_name, 'w') as f:
+            encrypt_ctn = encrypt(password)
+            f.write(encrypt_ctn)
+            
 def check_domain_password(username, password, domain_name='SVI'):
     try:
+        if not password:
+            return False, 'Missing password'
         token = win32security.LogonUser(
             username,
             domain_name,
@@ -495,7 +513,7 @@ def check_domain_password(username, password, domain_name='SVI'):
             win32security.LOGON32_LOGON_NETWORK,
             win32security.LOGON32_PROVIDER_DEFAULT)
         result = bool(token)
-#         result = True
+        # result = True
         if result:
             return True, ''
         else:
@@ -582,7 +600,7 @@ def send_mail(user_name, password, recipient, cc_recipient, subject, message, bc
         # if tls = True                
         mail.starttls()               
         mail.login(sender, password)        
-        mail.sendmail(sender, recipient + bcc_recipient, msg.as_string())
+        mail.sendmail(sender, recipient + bcc_recipient + cc_recipient, msg.as_string())
         mail.quit()
         return 1, ''
     except Exception as e:

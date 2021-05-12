@@ -307,6 +307,35 @@ class Configuration(Connection):
         if query_result:
             result = query_result[0][DbHeader.ROLE_NAME]
         return result
+    
+    def get_user_role(self):
+        query = """SELECT `%s`.`%s`, `%s`.`%s`, `%s`.`%s`, `%s`.`%s` 
+        FROM `%s` 
+        INNER JOIN `%s` ON `%s`.`%s`=`%s`.`%s`
+        INNER JOIN `%s` ON `%s`.`%s`=`%s`.`%s`;"""%(
+            DbTable.ROLE, DbHeader.ROLE_NAME, DbTable.ROLE, DbHeader.ROLE_ID, 
+            DbTable.USER, DbHeader.USER_NAME, DbTable.USER, DbHeader.USER_ID, 
+            DbTable.USER_ROLE, DbTable.ROLE, 
+            DbTable.ROLE, DbHeader.ROLE_ID, DbTable.USER_ROLE, DbHeader.ROLE_ID,
+            DbTable.USER, 
+            DbTable.USER, DbHeader.USER_ID, DbTable.USER_ROLE, DbHeader.USER_ID
+            )
+        query_result    = self.db_query(query)
+        result = []
+        if query_result:
+            result = query_result
+        return result
+    
+    def get_list_role(self):
+        query = """SELECT `%s`, `%s` FROM `%s`;"""%(
+             DbHeader.ROLE_NAME, DbHeader.ROLE_ID, DbTable.ROLE)
+        query_result    = self.db_query(query)
+        result = []
+        if query_result:
+            result = query_result
+        return result
+        
+    
         
     def add_list_timeoff(self, list_record):
         query   = '''INSERT INTO `%s` 
@@ -555,6 +584,11 @@ class Configuration(Connection):
                DbHeader.USER_NAME, self.user_name)
         self.db_execute(query)
     
+    def inactive_all_resource(self, ):
+        query   = """UPDATE `%s` SET `%s`="0";
+        """%( DbTable.USER, DbHeader.IS_ACTIVE)
+        self.db_execute(query)
+        
     def update_resource_leader(self, list_record):
         query   = '''UPDATE `user` SET
                         `leader_id`=%s WHERE `user_id`=%s;
@@ -623,14 +657,19 @@ class Configuration(Connection):
                DbHeader.SHEET_ID, self.sheet_id)
         self.db_execute(query)
     
-    def get_other_config_info(self):
+    def get_other_config_info(self, is_parse=True):
         query   = """SELECT `%s`, `%s`, `%s` FROM `%s`;"""%( 
             DbHeader.OTHER_CONFIG_ID, DbHeader.CONFIG_NAME, DbHeader.CONFIG_VALUE, DbTable.OTHER_CONFIG)
         query_result    = self.db_query(query)
-        result = {}
-        if query_result:
-            for row in query_result:
-                result[row[DbHeader.CONFIG_NAME]] = row[DbHeader.CONFIG_VALUE]
+        if is_parse:
+            result = {}
+            if query_result:
+                for row in query_result:
+                    result[row[DbHeader.CONFIG_NAME]] = row[DbHeader.CONFIG_VALUE]
+        else:
+            result = []
+            if query_result:
+                result = query_result
         return result
     
     def check_exist_config_info(self):
@@ -686,8 +725,47 @@ class Configuration(Connection):
                     VALUES ("%s", "%s");
         """%(DbTable.USER_VERSION, DbHeader.USER_ID, DbHeader.VERSION, self.user_id, self.version)
         self.db_execute(query)
-        
     
+    def check_exist_role(self, role_name):
+        query   = """SELECT `%s` FROM `%s` WHERE `%s`="%s";"""%( 
+            DbHeader.ROLE_ID, DbTable.ROLE, DbHeader.ROLE_NAME, role_name)
+        query_result    = self.db_query(query)
+        if query_result:
+            return True
+        else:
+            return False
+        
+    def add_role(self, role_name):
+        query   = """INSERT INTO `%s` (`%s`)
+                    VALUES ("%s");
+        """%(DbTable.ROLE, DbHeader.ROLE_NAME, role_name)
+        self.db_execute(query)
+    
+    def remove_role(self, role_name):
+        query   = """DELETE FROM `%s` WHERE `%s`="%s";
+        """%(DbTable.ROLE, DbHeader.ROLE_NAME, role_name)
+        self.db_execute(query)
+    
+    def check_exist_user_role(self, user_id, role_id):
+        query   = """SELECT `%s` FROM `%s` WHERE `%s`="%s" AND `%s`="%s";"""%( 
+            DbHeader.USER_ROLE_ID, DbTable.USER_ROLE, DbHeader.ROLE_ID, role_id, DbHeader.USER_ID, user_id)
+        query_result    = self.db_query(query)
+        if query_result:
+            return True
+        else:
+            return False
+        
+    def add_user_role(self, user_id, role_id):
+        query   = """INSERT INTO `%s` (`%s`, `%s`)
+                    VALUES ("%s", "%s");
+        """%(DbTable.USER_ROLE, DbHeader.ROLE_ID, DbHeader.USER_ID, role_id, user_id)
+        self.db_execute(query)
+    
+    def remove_user_role(self, user_id, role_id):
+        query   = """DELETE FROM `%s` WHERE `%s`="%s" AND `%s`="%s";
+        """%(DbTable.USER_ROLE, DbHeader.ROLE_ID, role_id, DbHeader.USER_ID, user_id)
+        self.db_execute(query)
+         
 class DbTask(Connection):
     def __init__(self):
         Connection.__init__(self)
@@ -874,6 +952,7 @@ class DbTask(Connection):
                         date, sheet_id, from_date, to_date)
             id = self.db_execute_2(query)
             return id
+        
     def get_final_date(self):
         query = """
                 SELECT `%s`, `%s`

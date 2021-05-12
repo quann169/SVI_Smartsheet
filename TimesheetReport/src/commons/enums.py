@@ -281,6 +281,10 @@ class Template:
     SIDEBAR             = 'components/sidebar/sidebar.html'
     LOGIN               = 'screens/auth/login.html'
     
+    #admin
+    ADMIN_DASH_BOARD    = 'screens/admin/dashboard.html'
+    ADMIN_USER_ROLE     = 'screens/admin/user_role.html'
+    ADMIN_OTHER_SETTING = 'screens/admin/other_setting.html'
     
 class Route:
     
@@ -299,7 +303,7 @@ class Route:
     IMPORT_SHEET    = '/import-sheet'
     RESOURCE    = '/resource'
     OTHER_SETTING    = '/other-setting'
-    ADMIN           = '/admin'
+    
     IMPORT_RESOURCE    = '/import-resource'
     HOLIDAY    = '/holiday'
     IMPORT_HOLIDAY    = '/import-holiday'
@@ -325,6 +329,22 @@ class Route:
     CHECK_VERSION     = '/check-version'
     LOCK_SYNC     = '/lock-sync'
     
+    # admin route
+    ADMIN           = '/admin'
+    ADMIN_USER_ROLE = '/user-role'
+    ADMIN_DASHBOARD = '/dashboard'
+    GET_LIST_ROLE   = '/get-list-role'
+    GET_LIST_USER   = '/get-list-user'
+    GET_USER_ROLE   = '/get-user-role'
+    UPDATE_ADMIN_USER_ROLE   = '/update-admin-user-role'
+    
+    ADMIN_VERSION   = '/version'
+    GET_VERSION_INFO = '/get-version-info'
+    UPDATE_ADMIN_VERSION   = '/update-admin-version'
+    
+    LIST_SETTING_ROUTE      = [HOLIDAY, RESOURCE, SHEET, TIMEOFF, OTHER_SETTING]
+    LIST_TIMESHEET_ROUTE    = [RESOURCE_TIMESHEET, DETAIL, PROJECT_TIMESHEET, REPORT, RESOURCE_PRODUCTIVITY]
+    LIST_ADMIN_ROUTE        = [ADMIN_USER_ROLE, ADMIN_DASHBOARD, ADMIN_VERSION, LOG]
     # DEFINE ROUTE REQUIRE ROLE 
     role = Role()
     REQUIRE_ROLE_OF_ROUTE = {

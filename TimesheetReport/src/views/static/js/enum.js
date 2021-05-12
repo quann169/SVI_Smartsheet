@@ -61,7 +61,14 @@ const RESOURCE_PRODUCTIVITY   = '/resource-productivity';
 const IMPORT_PRODUCTIVITY     =  '/import-productivity';
 const EXPORT_PRODUCTIVITY     =   '/export-productivity';
 const CHECK_VERSION     = '/check-version';
-const LOCK_SYNC     = '/lock-sync'
+const LOCK_SYNC     = '/lock-sync';
+const GET_LIST_ROLE   = '/get-list-role';
+const GET_LIST_USER   = '/get-list-user';
+const GET_USER_ROLE   = '/get-user-role';
+const UPDATE_ADMIN_USER_ROLE   = '/update-admin-user-role';
+const ADMIN_VERSION   = '/version';
+const GET_VERSION_INFO = '/get-version-info';
+const UPDATE_ADMIN_VERSION   = '/update-admin-version';
 
 var FOCUS_MULTISELECT = null;
 

@@ -13,7 +13,7 @@ from pprint import pprint
 
 class Timesheet():
     
-    def __init__(self, from_date, to_date, filter, sheet_ids, list_user=None, exclude=False):
+    def __init__(self, from_date, to_date, filter, sheet_ids, list_user=None, exclude=True):
         self.sheets     = {}
         self.resource   = {}
         self.from_date  = from_date
@@ -41,6 +41,8 @@ class Timesheet():
         self.team_ids       = config_obj.team_ids
         config_obj.get_eng_type_info(is_parse=True)
         self.eng_type_ids     = config_obj.eng_type_ids
+        config_obj.get_list_holiday(is_parse=True)
+        self.holidays  = config_obj.holidays
         db_task_obj  = DbTask()
         db_task_obj.set_attr(start_date      = self.from_date,
                             end_date        = self.to_date
@@ -78,6 +80,8 @@ class Sheet():
                 tasks  = []
             for row in tasks:
                 task_obj    = Task(self, row)
+                if task_obj.date in self.timesheet_obj.holidays:
+                    continue
                 if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
                     continue
                 
@@ -94,6 +98,8 @@ class Sheet():
                 tasks  = []
             for row in tasks:
                 task_obj    = Task(self, row, is_final = True)
+                if task_obj.date in self.timesheet_obj.holidays:
+                    continue
                 if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
                     continue
                 if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
@@ -111,6 +117,8 @@ class Sheet():
                 tasks  = []
             for row in tasks:
                 task_obj    = Task(self, row, is_final = True)
+                if task_obj.date in self.timesheet_obj.holidays:
+                    continue
                 if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
                     continue
                 if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
@@ -129,6 +137,8 @@ class Sheet():
                 tasks  = []
             for row in tasks:
                 task_obj    = Task(self, row)
+                if task_obj.date in self.timesheet_obj.holidays:
+                    continue
                 if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
                     continue
                 if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
