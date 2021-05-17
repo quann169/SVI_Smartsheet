@@ -1,0 +1,480 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema timesheet
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema timesheet
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `timesheet` DEFAULT CHARACTER SET utf8mb4 ;
+USE `timesheet` ;
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`analysis_config`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`analysis_config` (
+  `analysis_config_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `config_name` VARCHAR(100) NOT NULL,
+  `config_value` TEXT NOT NULL,
+  `updated_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  `updated_by` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`analysis_config_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`final_date`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`final_date` (
+  `final_date_id` INT NOT NULL AUTO_INCREMENT,
+  `date` DATETIME NOT NULL,
+  `sheet_id` INT NOT NULL,
+  PRIMARY KEY (`final_date_id`),
+  INDEX `final_date_sheet_idx` (`sheet_id` ASC) ,
+  CONSTRAINT `final_date_sheet`
+    FOREIGN KEY (`sheet_id`)
+    REFERENCES `timesheet`.`sheet` (`sheet_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+    
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`eng_level`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`eng_level` (
+  `eng_level_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `level` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`eng_level_id`),
+  UNIQUE INDEX `level_UNIQUE` (`level` ASC) )
+ENGINE = InnoDB
+AUTO_INCREMENT = 12
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`eng_type`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`eng_type` (
+  `eng_type_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `eng_type_name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`eng_type_id`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 6
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`holiday`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`holiday` (
+  `holiday_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `date` DATETIME NOT NULL,
+  PRIMARY KEY (`holiday_id`),
+  UNIQUE INDEX `date_UNIQUE` (`date` ASC) )
+ENGINE = InnoDB
+AUTO_INCREMENT = 14
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`sheet_type`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`sheet_type` (
+  `sheet_type_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `sheet_type` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`sheet_type_id`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 4
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`sheet`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`sheet` (
+  `sheet_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `sheet_type_id` INT(11) NOT NULL,
+  `sheet_name` VARCHAR(100) NOT NULL,
+  `is_active` TINYINT(4) NULL DEFAULT NULL,
+  `latest_modified` DATETIME NOT NULL,
+  `parsed_date` DATETIME NULL DEFAULT NULL,
+  `is_loading` TINYINT NULL DEFAULT NULL,
+  `updated_date` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
+  `updated_by` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`sheet_id`),
+  UNIQUE INDEX `sheet_name_UNIQUE` (`sheet_name` ASC) ,
+  INDEX `sheet_type_id_idx` (`sheet_type_id` ASC) ,
+  CONSTRAINT `sheet_type_id`
+    FOREIGN KEY (`sheet_type_id`)
+    REFERENCES `timesheet`.`sheet_type` (`sheet_type_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+AUTO_INCREMENT = 5
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`log`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`log` (
+  `log_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `sheet_id` INT(11) NOT NULL,
+  `old_value` MEDIUMTEXT NULL DEFAULT NULL,
+  `new_value` MEDIUMTEXT NULL DEFAULT NULL,
+  `updated_date` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
+  `updated_by` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  INDEX `log_sheet_id_idx` (`sheet_id` ASC) ,
+  CONSTRAINT `log_sheet_id`
+    FOREIGN KEY (`sheet_id`)
+    REFERENCES `timesheet`.`sheet` (`sheet_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`team`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`team` (
+  `team_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `team_name` VARCHAR(45) NOT NULL,
+  `team_lead_id` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`team_id`),
+  UNIQUE INDEX `name_UNIQUE` (`team_name` ASC) )
+ENGINE = InnoDB
+AUTO_INCREMENT = 10
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`user`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`user` (
+  `user_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `user_name` VARCHAR(45) NOT NULL,
+  `full_name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `other_name` VARCHAR(200) NULL DEFAULT NULL,
+  `is_active` INT(11) NOT NULL,
+  `updated_by` VARCHAR(45) NOT NULL,
+  `updated_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  `eng_level_id` INT(11) NULL DEFAULT NULL,
+  `eng_type_id` INT(11) NULL DEFAULT NULL,
+  `team_id` INT(11) NULL DEFAULT NULL,
+  `leader_id` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) ,
+  UNIQUE INDEX `user_name_UNIQUE` (`user_name` ASC) ,
+  INDEX `user_eng_level_id_idx` (`eng_level_id` ASC) ,
+  INDEX `user_eng_type_id_idx` (`eng_type_id` ASC) ,
+  INDEX `user_team_id_idx` (`team_id` ASC) ,
+  CONSTRAINT `user_eng_level_id`
+    FOREIGN KEY (`eng_level_id`)
+    REFERENCES `timesheet`.`eng_level` (`eng_level_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `user_eng_type_id`
+    FOREIGN KEY (`eng_type_id`)
+    REFERENCES `timesheet`.`eng_type` (`eng_type_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `user_team_id`
+    FOREIGN KEY (`team_id`)
+    REFERENCES `timesheet`.`team` (`team_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+AUTO_INCREMENT = 91
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`project_user`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`project_user` (
+  `project_user_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `sheet_id` INT(11) NULL DEFAULT NULL,
+  `user_id` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`project_user_id`),
+  INDEX `project_sheet_id_idx` (`sheet_id` ASC) ,
+  INDEX `project_user_idx_idx` (`user_id` ASC) ,
+  CONSTRAINT `project_sheet_id`
+    FOREIGN KEY (`sheet_id`)
+    REFERENCES `timesheet`.`sheet` (`sheet_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `project_user_idx`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`task`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`task` (
+  `task_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `sheet_id` INT(11) NOT NULL,
+  `user_id` INT(11) NULL DEFAULT NULL,
+  `sibling_id` VARCHAR(25) NULL DEFAULT NULL,
+  `parent_id` VARCHAR(25) NULL DEFAULT NULL,
+  `self_id` VARCHAR(25) NOT NULL,
+  `task_name` TEXT NOT NULL,
+  `date` DATETIME NULL DEFAULT NULL,
+  `start_date` DATETIME NULL DEFAULT NULL,
+  `end_date` DATETIME NULL DEFAULT NULL,
+  `duration` VARCHAR(45) NULL DEFAULT NULL,
+  `complete` INT(11) NULL DEFAULT NULL,
+  `predecessors` INT(11) NULL DEFAULT NULL,
+  `comment` TEXT NULL DEFAULT NULL,
+  `actual_end_date` DATETIME NULL DEFAULT NULL,
+  `status` TEXT NULL DEFAULT NULL,
+  `is_children` TINYINT(4) NOT NULL,
+  `allocation` FLOAT NULL DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  INDEX `task_sheet_id_idx` (`sheet_id` ASC) ,
+  INDEX `task_user_id_idx` (`user_id` ASC) ,
+  CONSTRAINT `task_sheet_id`
+    FOREIGN KEY (`sheet_id`)
+    REFERENCES `timesheet`.`sheet` (`sheet_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `task_user_id`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+AUTO_INCREMENT = 464
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`task_final`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`task_final` (
+  `task_final_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `sheet_id` INT(11) NOT NULL,
+  `user_id` INT(11) NULL DEFAULT NULL,
+  `self_id` VARCHAR(25) NOT NULL,
+  `parent_id` VARCHAR(25) NULL DEFAULT NULL,
+  `sibling_id` VARCHAR(25) NULL DEFAULT NULL,
+  `task_name` TEXT NOT NULL,
+  `date` DATETIME NULL DEFAULT NULL,
+  `start_date` DATETIME NULL DEFAULT NULL,
+  `end_date` DATETIME NULL DEFAULT NULL,
+  `duration` VARCHAR(45) NULL DEFAULT NULL,
+  `complete` INT(11) NULL DEFAULT NULL,
+  `predecessors` INT(11) NULL DEFAULT NULL,
+  `comment` TEXT NULL DEFAULT NULL,
+  `actual_end_date` DATETIME NULL DEFAULT NULL,
+  `status` TEXT NULL DEFAULT NULL,
+  `is_children` TINYINT(4) NOT NULL,
+  `allocation` FLOAT NULL DEFAULT NULL,
+  PRIMARY KEY (`task_final_id`),
+  INDEX `task_final_sheet_id_idx` (`sheet_id` ASC) ,
+  INDEX `task_final_user_id_idx` (`user_id` ASC) ,
+  CONSTRAINT `task_final_sheet_id`
+    FOREIGN KEY (`sheet_id`)
+    REFERENCES `timesheet`.`sheet` (`sheet_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `task_final_user_id`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`time_off`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `timesheet`.`time_off` (
+  `time_off_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `user_id` INT(11) NULL DEFAULT NULL,
+  `department` VARCHAR(100) NOT NULL,
+  `type` VARCHAR(100) NOT NULL,
+  `start_date` DATETIME NOT NULL,
+  `end_date` DATETIME NOT NULL,
+  `work_days` INT(11) NOT NULL,
+  `status` VARCHAR(45) NOT NULL,
+  `updated_date` DATETIME NULL DEFAULT NULL,
+  `updated_by` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`time_off_id`),
+  INDEX `time_off_user_id_idx` (`user_id` ASC) ,
+  CONSTRAINT `time_off_user_id`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+AUTO_INCREMENT = 9381
+DEFAULT CHARACTER SET = utf8mb4;
+
+--v0.2
+-- -----------------------------------------------------
+-- Table `timesheet`.`analyze_item`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`analyze_item` (
+  `analyze_item_id` INT NOT NULL AUTO_INCREMENT,
+  `item_name` VARCHAR(400) NOT NULL,
+  PRIMARY KEY (`analyze_item_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`role`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`role` (
+  `role_id` INT NOT NULL AUTO_INCREMENT,
+  `role_name` VARCHAR(45) NULL,
+  PRIMARY KEY (`role_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`user_version`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`user_version` (
+  `user_version_id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `version` VARCHAR(45) NULL,
+  PRIMARY KEY (`user_version_id`),
+  INDEX `user_version_fk_idx` (`user_id` ASC),
+  CONSTRAINT `user_version_fk`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`final_evidence`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`final_evidence` (
+  `final_evidence_id` INT NOT NULL AUTO_INCREMENT,
+  `final_date_id` INT NOT NULL,
+  `analyze_item_id` INT NOT NULL,
+  `is_approve` INT NOT NULL,
+  `counter` VARCHAR(45) NOT NULL,
+  `comment` TEXT NULL,
+  `updated_by` VARCHAR(45) NOT NULL,
+  `updated_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  PRIMARY KEY (`final_evidence_id`),
+  INDEX `final_date_fk_idx` (`final_date_id` ASC) ,
+  INDEX `analyze_item_fk_idx` (`analyze_item_id` ASC) ,
+  CONSTRAINT `final_date_fk`
+    FOREIGN KEY (`final_date_id`)
+    REFERENCES `timesheet`.`final_date` (`final_date_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `analyze_item_fk`
+    FOREIGN KEY (`analyze_item_id`)
+    REFERENCES `timesheet`.`analyze_item` (`analyze_item_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+-- -----------------------------------------------------
+-- Table `timesheet`.`user_role`
+-- -----------------------------------------------------
+CREATE TABLE `timesheet`.`user_role` (
+  `user_role_id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `role_id` INT NOT NULL,
+  PRIMARY KEY (`user_role_id`),
+  INDEX `user_role_u_fk_idx` (`user_id` ASC) ,
+  INDEX `user_role_r_fk_idx` (`role_id` ASC) ,
+  CONSTRAINT `user_role_u_fk`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `timesheet`.`user` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `user_role_r_fk`
+    FOREIGN KEY (`role_id`)
+    REFERENCES `timesheet`.`role` (`role_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+ALTER TABLE `timesheet`.`final_date` 
+ADD COLUMN `start_date` DATETIME NULL AFTER `date`,
+ADD COLUMN `end_date` DATETIME NULL AFTER `start_date`;
+
+ALTER TABLE `timesheet`.`sheet` 
+ADD COLUMN `is_valid` TINYINT NULL AFTER `is_loading`;
+
+CREATE TABLE `timesheet`.`other_config` (
+  `other_config_id` INT NOT NULL AUTO_INCREMENT,
+  `config_name` VARCHAR(100) NULL,
+  `config_value` TEXT NULL,
+  PRIMARY KEY (`other_config_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- Master value
+
+-- eng_type
+INSERT INTO `timesheet`.`eng_type` (`eng_type_id`, `eng_type_name`) VALUES (1, 'NA');
+INSERT INTO `timesheet`.`eng_type` (`eng_type_name`) VALUES ('Design Manager'), ('Director'), ('Jr. Engineer'), ('Sr. Engineer');
+
+-- eng_level
+INSERT INTO `timesheet`.`eng_level` (`eng_level_id`, `level`) VALUES (1, 'NA');
+INSERT INTO `timesheet`.`eng_level` (`level`) VALUES ('D2'), ('E0'), ('E1'), ('E2'), ('E3'), ('E4'), ('L1'), ('M1'), ('M2'), ('M3'), ('D1');
+
+-- sheet_type
+INSERT INTO `timesheet`.`sheet_type` (`sheet_type_id`, `sheet_type`) VALUES (1, 'NA');
+INSERT INTO `timesheet`.`sheet_type` (`sheet_type`) VALUES ('RnD'), ('NRE'), ('Pre-sale'), ('Post-sale'), ('TRN');
+
+-- team
+INSERT INTO `timesheet`.`team` (`team_id`, `team_name`) VALUES (1, 'NA');
+INSERT INTO `timesheet`.`team` (`team_name`) VALUES ('CAD'), ('QA'), ('PD'), ('CKT'), ('IT'), ('LAY'), ('Manager'), ('RTL'), ('UVM'), ('MDL'), ('FPGA'), ('PM'), ('Accounting'), ('Admin');
+
+
+
+-- user
+INSERT INTO `timesheet`.`user` (`user_name`, `full_name`, `email`, `other_name`, `is_active`, `updated_by`, `eng_level_id`, `eng_type_id`, `team_id`) VALUES ('NA', 'NA', 'NA', 'NA', '1', 'NA', '1', '1', '1');
+
+-- analyze config
+INSERT INTO `timesheet`.`analysis_config` (`config_name`, `config_value`, `updated_by`) VALUES ('Token', 'nls2smz4rzdckgfp9pcem9sg8y', 'root'), ('Time Delta', '1', 'root'), ('Time Delta Before', '1', 'root'), ('Time Delta After', '3', 'root');
+
+-- analyze item
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (1, 'No. resource lack of working hours');
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (2, 'No. resource have redundant working hours');
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (3, 'No. resource have enough working hours');
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (4, 'No conflict with final date');
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (5, 'Continuity with final date');
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (6, 'No. resource in project have enough task');
+INSERT INTO `timesheet`.`analyze_item` (`analyze_item_id`, `item_name`) VALUES (7, 'No. tasks are not mapping with resource');
+-- role
+INSERT INTO `timesheet`.`role` (`role_id`, `role_name`) VALUES (1, 'Admin');
+INSERT INTO `timesheet`.`role` (`role_id`, `role_name`) VALUES (2, 'PM');
+INSERT INTO `timesheet`.`role` (`role_id`, `role_name`) VALUES (3, 'DM');
+INSERT INTO `timesheet`.`role` (`role_id`, `role_name`) VALUES (4, 'User');
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

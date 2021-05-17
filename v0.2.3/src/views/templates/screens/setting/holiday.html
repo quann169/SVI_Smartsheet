@@ -1,0 +1,60 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Holiday Setting
+{% endblock title %}
+{% block breadcrumb %}
+	{% set br_items = [(route.HOLIDAY, 'Holiday', True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+{% block sidebar %}
+	{% set active_sidebar = route.HOLIDAY %}
+	{% with active_sidebar=active_sidebar , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/setting/holiday.js')}}"></script>
+{% endblock scripts %}
+{% block main %}
+<form id='import_holiday' method="post" enctype="multipart/form-data">
+	<div class='dp-flex'>
+		{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+			<div class="custom-file col-4">
+			    <input type="file" name='holiday_file' id='holiday_file' accept='.xlsx' class="custom-file-input " >
+			    <label class="custom-file-label" for="holiday_file">Choose file</label>
+			</div>
+			<button type='submit' class='mg-l-5' id='btn_import' disabled  data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
+		{% endif %}
+	</div>
+</form>
+<br>
+<div class='table-content'>
+	<table id="holiday_table" class="table table-striped table-bordered " cellspacing="0" width='100%'>
+	  {% set holiday_info = ctrl_obj.get_holiday_info() %}
+	  <thead>
+	    <tr>
+		  <th class="th-sm">#
+	      </th>
+	      <th class="th-sm">Date
+	      </th>
+		  <th class="th-sm">Detail
+	      </th>
+	    </tr>
+	  </thead>
+	  <tbody>
+		{% for row in holiday_info %}
+			<tr>
+			  <td>{{loop.index}}</td>
+		      <td>{{row[db_header.DATE].strftime('%Y-%m-%d')}}</td>
+			  <td></td>
+		    </tr>
+		{% endfor %}
+	
+	  </tbody>
+	  
+	</table>
+</div>
+{% endblock main %}

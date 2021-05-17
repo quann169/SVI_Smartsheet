@@ -1,0 +1,79 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Time-Off Setting
+{% endblock title %}
+{% block breadcrumb %}
+	{% set br_items = [(route.TIMEOFF, 'Time Off', True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+
+{% block sidebar %}
+	{% set active_sidebar = route.TIMEOFF %}
+	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/setting/time_off.js')}}"></script>
+{% endblock scripts %}
+{% block main %}
+<form id='import_timeoff' method="post" enctype="multipart/form-data">
+	<div class='dp-flex'>
+		{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+			<div class="custom-file col-4">
+			    <input type="file" name='timeoff_file' id='timeoff_file' accept='.xlsx' class="custom-file-input " >
+			    <label class="custom-file-label" for="timeoff_file">Choose file</label>
+			</div>
+			<button type='submit' class='mg-l-5' id='btn_import' disabled data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
+		{% endif %}
+	</div>
+</form>
+<br>
+<div class='table-content'>
+	<table id="timeoff_table" class="table table-striped table-bordered" cellspacing="0" width="100%">
+	  {% set timeoff_info = ctrl_obj.get_timeoff_info() %}
+	  <thead>
+	    <tr>
+		  <th class="th-sm">#
+	      </th>
+		  <th class="th-sm">ID
+	      </th>
+	      <th class="th-sm">Resource
+	      </th>
+	      <th class="th-sm">Department
+	      </th>
+	      <th class="th-sm">Type
+	      </th>
+	      <th class="th-sm">Start Date
+	      </th>
+	      <th class="th-sm">End date
+	      </th>
+	      <th class="th-sm">Hours
+	      </th>
+		  <th class="th-sm">Status
+	      </th>
+	    </tr>
+	  </thead>
+	  <tbody>
+		{% for row in timeoff_info %}
+			<tr>
+			  <td>{{loop.index}}</td>
+			  <td>{{row[db_header.TIME_OFF_ID]}}</td>
+		      <td>{{row[db_header.USER_NAME]}}</td>
+		      <td>{{row[db_header.DEPARTMENT]}}</td>
+		      <td>{{row[db_header.TYPE]}}</td>
+		      <td>{{row[db_header.START_DATE].strftime('%Y-%m-%d')}}</td>
+		      <td>{{row[db_header.END_DATE].strftime('%Y-%m-%d')}}</td>
+		      <td>{{row[db_header.WORK_DAYS]}}</td>
+			  <td>{{row[db_header.STATUS]}}</td>
+		    </tr>
+		{% endfor %}
+	
+	  </tbody>
+	  
+	</table>
+</div>
+{% endblock main %}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Login</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/bootstrap-4.5.3/css/bootstrap.min.css') }}" />  
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/DataTables/datatables.min.css') }}" /> 
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/multiple-select/example-styles.css') }}" /> 
+	<!-- Our Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/fontawesome/css/all.css') }}" />
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}"/>
+
+</head>
+	<body>
+		<div class="loading" id ='overlay_loader'>&#8230;</div>
+		<div class="login-container" align='center'>
+			<form action="{{route.HOME}}" method="post" id='login_form'>
+				<div class="login-contain-div" align='left'>
+					<h1 style="text-align:center" class='h2-size'><a><img src="{{ url_for('static', filename='img/svi_logo.png') }}" style = "width:80%;"alt="savarti.com"></a></h1>
+					<div class='error-div dp-none' id='error_div'><lable id='error_content'></lable><a onclick='$("#error_div").hide();' class='close-err'>x</a></div>
+					<br>
+					<i class="fa fa-user" aria-hidden="true"></i>&emsp;User name <font color="red">*</font><br>
+					<input type="text" name="user_name"  id="user_name" placeholder="User name" required value='{{current_user}}' disabled class='w-100-pc'><br>
+					<br>
+					<i class="fa fa-lock" aria-hidden="true"></i>&emsp;Password <font color="red">*</font><br>
+					<input type="password" name="password" id="password" placeholder="Domain password" value='' required class='w-100-pc'><br>
+					<br>
+					<input type="checkbox" name="remember" id="remember" checked><label for="remember">Remember password</label>
+					<br><br>
+					<button><i class="fas fa-sign-in-alt" aria-hidden="true"></i>&emsp;Login</button>
+					
+				</div>
+			</form>
+		</div>
+		<script src="{{url_for('static', filename='js/enum.js')}}"></script>
+		<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.js')}}"></script>
+		<script src="{{url_for('static', filename='js/login.js')}}"></script>
+	</body>
+	
+	
+</html>

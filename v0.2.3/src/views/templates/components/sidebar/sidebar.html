@@ -1,0 +1,61 @@
+<div class="sidebar-header">
+{% set version = ctrl_obj.get_current_version() %}
+    <h2>Timesheet Report {{version}}</h2>
+</div>
+
+<ul class="list-unstyled components">
+    <p></p>
+    <li class="{% if active_sidebar == route.HOME %} active{% endif %}">
+        <a href="{{route.HOME}}"><i class="fas fa-home"></i>&nbsp;&nbsp;Home</a>
+    </li>
+	<li>
+        <a href="#timesheets" data-toggle="collapse" aria-expanded="{% if active_sidebar in [route.RESOURCE_TIMESHEET, route.DETAIL, route.PROJECT_TIMESHEET, route.REPORT, route.RESOURCE_PRODUCTIVITY] %}true{%else%}false{% endif %}" 
+ 			class="dropdown-toggle"><i class="fas fa-hourglass-start"></i>&nbsp;&nbsp;Timesheet</a>
+        <ul class="collapse list-unstyled {% if active_sidebar in [route.RESOURCE_TIMESHEET, route.DETAIL, route.PROJECT_TIMESHEET, route.REPORT, route.RESOURCE_PRODUCTIVITY] %}show{% endif %}" id="timesheets">
+            <li class="{% if active_sidebar == route.DETAIL %} active{% endif %}">
+                <a href="{{route.DETAIL}}"><i class="fas fa-info-circle"></i>&nbsp;&nbsp;Detail</a>
+            </li>
+ 			<li class="{% if active_sidebar == route.RESOURCE_TIMESHEET %} active{% endif %}">
+                <a href="{{route.RESOURCE_TIMESHEET}}"><i class="fas fa-user-clock"></i>&nbsp;&nbsp;Resource</a>
+            </li>
+			<li class="{% if active_sidebar == route.PROJECT_TIMESHEET %} active{% endif %}">
+                <a href="{{route.PROJECT_TIMESHEET}}"><i class="fas fa-book"></i>&nbsp;&nbsp;Project</a>
+            </li>
+			{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+				<li class="{% if active_sidebar == route.REPORT %} active{% endif %}">
+                	<a href="{{route.REPORT}}"><i class="fas fa-envelope"></i>&nbsp;&nbsp;Report</a>
+            	</li>
+			{%endif%}
+			<li class="{% if active_sidebar == route.RESOURCE_PRODUCTIVITY %} active{% endif %}">
+                <a href="{{route.RESOURCE_PRODUCTIVITY}}"><i class="fas fa-chart-bar"></i>&nbsp;&nbsp;Resource Productivity</a>
+            </li>
+        </ul>
+	</li>
+    <li>
+        <a href="#setting" data-toggle="collapse" aria-expanded="{% if active_sidebar in [route.HOLIDAY, route.RESOURCE, route.SHEET, route.TIMEOFF, route.OTHER_SETTING] %}true{%else%}false{% endif %}" class="dropdown-toggle">
+			<i class="fas fa-cog"></i></i>&nbsp;&nbsp;Setting</a>
+        <ul class="collapse list-unstyled {% if active_sidebar in [route.HOLIDAY, route.RESOURCE, route.SHEET, route.TIMEOFF, route.OTHER_SETTING] %}show{% endif %}" id="setting">
+            <li class="{% if active_sidebar == route.TIMEOFF %} active{% endif %}">
+                <a href="{{route.TIMEOFF}}"><i class="fas fa-clock"></i>&nbsp;&nbsp;Time Off</a>
+            </li>
+            <li class="{% if active_sidebar == route.SHEET %} active{% endif %}">
+                <a href="{{route.SHEET}}"><i class="fas fa-book"></i>&nbsp;&nbsp;Sheet</a>
+            </li>
+            <li class="{% if active_sidebar == route.RESOURCE %} active{% endif %}">
+                <a href="{{route.RESOURCE}}"><i class="fas fa-users-cog"></i>&nbsp;&nbsp;Resource</a>
+            </li>
+ 			<li class="{% if active_sidebar == route.HOLIDAY %} active{% endif %}">
+                <a href="{{route.HOLIDAY}}"><i class="fas fa-clock"></i>&nbsp;&nbsp;Holiday</a>
+            </li>
+			{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+				<li class="{% if active_sidebar == route.OTHER_SETTING %} active{% endif %}">
+	                <a href="{{route.OTHER_SETTING}}"><i class="fas fa-cogs"></i>&nbsp;&nbsp;Other Setting</a>
+	            </li>
+			{% endif %}
+        </ul>
+    </li>
+	
+    <li class="{% if active_sidebar == route.LOG %} active{% endif %} dp-none">
+        <a href="{{route.LOG}}"><i class="fas fa-history"></i>&nbsp;&nbsp;Log</a>
+    </li>
+</ul>

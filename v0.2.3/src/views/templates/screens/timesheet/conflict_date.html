@@ -1,0 +1,75 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	{{request_dict[session_enum.TITLE]}}
+{% endblock title %}
+{% block sidebar %}
+	{% set active_sidebar = route.DETAIL %}
+	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block breadcrumb %}
+	{% set br_items = [(route.ANALYZE + '?' + ctrl_obj.convert_request_dict_to_url(request_dict), 'Analyze', False), (route.CONFLICT_DATE, request_dict[session_enum.TITLE], True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+
+{% block styles %}
+	{{super()}}
+	<link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap-select-1.13.1/css/bootstrap-select.css') }}" />
+	
+
+{% endblock styles %}
+
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='lib/bootstrap-4.5.3/js/bootstrap.bundle.min.js')}}"></script>
+	<script src="{{url_for('static', filename='lib/bootstrap-select-1.13.1/js/bootstrap-select.min.js')}}"></script>
+	<script src="{{url_for('static', filename='js/conflict_final_date.js')}}"></script>
+{% endblock scripts %}
+
+{% block main %}
+{% set final_date_info, enable_add, count_fail, total = ctrl_obj.calculate_conflict_to_add_final_task(request_dict) %}
+
+<form id='timesheet_form'>
+	{% set sheet_info = ctrl_obj.get_list_sheet_name() %}
+	<div class='row'>
+		<div class='col-md-10 d-flex align-items-center'>
+		</div>
+	</div>
+</form>
+<br>
+
+<div class='cfl-cnt'>
+	<table id='cfl-tb'>
+		{% for row in final_date_info %}
+			{% set is_conflict, sheet_name, date_info = row %}
+			<tr class='cfl-row'>
+				<td class='cfl-status'>
+					{% if is_conflict %}
+						<i class="fas fa-exclamation-circle cl-red"></i>
+					{% else %}
+						<i class="fas fa-check-circle cl-green"></i>
+					{% endif %}
+				</td>
+			  	<td class='cfl-sheet'><b>{{sheet_name}}</b></td>
+				<td>
+					<div class='cfl-date'>
+						{% for element in date_info %}
+							{% set date,is_exist = element %}
+							{% if is_exist == True %}
+								<div class='cfl' >{{date[5:]}}</div>
+							{% elif is_exist == False %}
+								<div class='no-cfl'>{{date[5:]}}</div>
+							{% elif is_exist == None %}
+								<div class='empty-cfl'>{{date[5:]}}</div>
+							{% endif %}
+						{% endfor %}
+					</div>
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+</div>
+{% endblock main%}

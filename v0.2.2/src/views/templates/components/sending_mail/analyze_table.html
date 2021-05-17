@@ -1,0 +1,32 @@
+Hi all,<br/>
+<br/>
+This commited tasks ({{from_date}} to {{to_date}} ) have been added by {{user_name}}.<br>
+Below is the summary information:<br>
+<br>
+<table class=''>
+  <thead>
+    <tr>
+    	<th class="">#</th>
+		<th class="">Items</th>
+		<th class="">Counter</th>
+		<th class="">Approve</th>
+		<th class="">Comment</th>
+    </tr>
+  </thead>
+  <tbody>
+	{% for row in info %}
+		{% set item_name, counter, approve, comment = row %}
+		<tr>
+	  		<td>{{loop.index}}</td>
+			<td><label class='item-name'>{{item_name}}<label></td>
+			<td><b class='item-counter'>{{counter}}</b></td>
+			<td>
+				{% if approve %} yes {% else %} no {% endif %}
+			</td>
+			<td>
+				{{comment}}
+			</td>
+		</tr>
+	{% endfor %}
+  </tbody>
+</table>

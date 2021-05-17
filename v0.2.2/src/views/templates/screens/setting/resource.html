@@ -1,0 +1,83 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Resource Setting
+{% endblock title %}
+{% block breadcrumb %}
+	{% set br_items = [(route.RESOURCE, 'Resource', True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+{% block sidebar %}
+	{% set active_sidebar = route.RESOURCE %}
+	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/setting/resource.js')}}"></script>
+{% endblock scripts %}
+
+{% block main %}
+<form id='import_resource' method="post" enctype="multipart/form-data">
+{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+	<div class='dp-flex'>
+		<div class="custom-file col-4">
+		    <input type="file" name='resource_file' id='resource_file' accept='.xlsx' class="custom-file-input " >
+		    <label class="custom-file-label" for="resource_file">Choose file</label>
+		</div>
+		<button type='submit' class='mg-l-5' id='btn_import' disabled data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
+	</div>
+{% endif %}
+</form>
+<br>
+<div class='table-content'>
+	<table id="resource_table" class="table table-striped table-bordered " cellspacing="0" width='100%'>
+	  {% set resource_info = ctrl_obj.get_resource_config() %}
+	  {% set user_email, users, user_ids, others_name = ctrl_obj.get_all_resource_information()%}
+	  <thead>
+	    <tr>
+		  <th class="th-sm">#
+	      </th>
+	      <th class="th-sm">Resource
+	      </th>
+		  <th class="th-sm">Full Name
+	      </th>
+	      <th class="th-sm">Eng Type
+	      </th>
+		  <th class="th-sm">Eng Level
+		  </th>
+		  <th class="th-sm">Email
+		  </th>
+		  <th class="th-sm">Team
+		  </th>
+		  <th class="th-sm">Leader
+		  </th>
+		  <th class="th-sm">Is Active
+	      </th>
+	      <th class="th-sm">Other Name
+		  </th>
+	    </tr>
+	  </thead>
+	  <tbody>
+		{% for row in resource_info %}
+			<tr>
+			  <td>{{loop.index}}</td>
+			  <td>{{row[db_header.USER_NAME]}}</td>
+	          <td>{{row[db_header.FULL_NAME]}}</td>
+		      <td>{{row[db_header.ENG_TYPE_NAME] | string }}</td>
+		      <td>{{row[db_header.LEVEL]}}</td>
+	          <td>{{row[db_header.EMAIL]}}</td>
+		      <td>{{row[db_header.TEAM_NAME] | string }}</td>
+	          <td>{% if user_ids[row[db_header.LEADER_ID]] %}{{user_ids[row[db_header.LEADER_ID]].user_name}}{%endif%}</td>
+			  <td>{{row[db_header.IS_ACTIVE]}}</td>
+	          <td>{{row[db_header.OTHER_NAME]}}</td>
+		    </tr>
+		{% endfor %}
+	
+	  </tbody>
+	  
+	</table>
+</div>
+{% endblock main %}

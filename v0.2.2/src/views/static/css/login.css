@@ -1,0 +1,64 @@
+#login_form * {
+	box-sizing: border-box;
+}
+.login-container {
+	background-color: #f2f2f2;
+	min-width: 100vw;
+	min-height: 100vh;
+	width: auto;
+	height: auto;
+} 
+.close-err {
+	float: right;
+}
+
+.close-err:hover {
+	cursor: pointer;
+}
+
+#login_form .login-contain-div {
+	padding: 0 20px;
+	width: 20%;
+	border: 1px solid #AAA;
+	border-radius: 5px;
+	background-color: #FFF;
+	padding-bottom: 50px;
+	min-width: 350px !important;
+	transform: translate(-50%, -50%);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+}
+#login_form .error-div {
+	background-image: linear-gradient(#E9E9E9, #FFF);
+	padding: 10px;
+	color: #C00;
+	border: 1px solid #e9e9e9;
+}
+/* style the submit button */
+#login_form button {
+  	background-color: #4F96D3; /*#4CAF50*/
+  	color: white;
+  	cursor: pointer;
+  	padding: 3px;
+	border-radius: 5px;
+	opacity: 1.0;
+	line-height: 20px;
+	text-decoration: none;
+	width: 100%;
+	height: 50px !important;
+	border-radius: 5px !important;
+}
+#login_form input[type=text], #login_form input[type=password] {
+	padding-left: 15px !important;
+	outline: medium none !important;
+	font-size: 14px !important;
+	transition: all 0.4s ease 0s !important;
+	height: 50px !important;
+	border-radius: 5px !important;
+	
+}
+#login_form button:hover {
+  	background-color: #71B8F5;/*#45a049*/
+}
+

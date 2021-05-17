@@ -1,0 +1,28 @@
+#sheet_table .multi-select-button {
+	max-width: 40em;
+}
+#synchonize_sheet_popup {
+	width: 60%;
+	height: 80%;
+	background-color: #fff;
+	transform: translate(-50%, -50%);
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	padding: 5px;
+	border-radius: 5px;
+	max-width: 1000px;
+}
+
+#synchonize_sheet_popup .cnt1 {
+	height: 100%;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+}
+
+#synchonize_sheet_popup .cnt2 {
+	background-color: white;
+    height: 100%;
+	overflow: auto;
+}
