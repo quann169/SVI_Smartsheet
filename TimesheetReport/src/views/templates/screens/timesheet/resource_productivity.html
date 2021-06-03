@@ -30,12 +30,20 @@
 {% block main %}
 <form id='timesheet_form' class=''>
 	{% set sheet_info = ctrl_obj.get_list_sheet_name() %}
+	{% set resource_info = ctrl_obj.get_resource_config() %}
 	<div class='row'>
 		<div class='col-md-10 d-flex align-items-center'>
 			<select id="list_sheet" class='mt-1' multiple="multiple">
 
 				{% for row in sheet_info %}
 		        	<option value="{{row[db_header.SHEET_ID]}}" {% if row[db_header.SHEET_ID] in request_dict[session_enum.SHEETS]%} selected {% endif %} >{{row[db_header.SHEET_NAME]}}</option>
+		    	{% endfor %}
+		    </select>
+		    <select id="list_user" class='mt-1 ' multiple="multiple" name="user">
+				{% for row2 in resource_info %}
+					{% if row2[db_header.IS_ACTIVE]%}
+		        		<option value="{{row2[db_header.USER_NAME]}}" {% if row2[db_header.USER_NAME] in request_dict[session_enum.USERS]%} selected {% endif %} >{{row2[db_header.USER_NAME]}}</option>
+		    		{% endif %}
 		    	{% endfor %}
 		    </select>
 			<input type='date' name='from_date' id='from_date' placeholder='From date' class='mx-1 px-2' value='{{request_dict[session_enum.FROM]}}'>
@@ -70,7 +78,6 @@
 		</div>
 	</div>
 </form>
-<br>
 {% set info, list_sub_col, cols_element = ctrl_obj.get_resource_productivity_info(request_dict)%}
 <div class='table-content' style='overflow-x: auto; resize: vertical;'>
 	<table id="productivity" class="" cellspacing="0" width='100%'>

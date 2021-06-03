@@ -136,12 +136,19 @@ function get_form_submit(form_id) {
     return data
 };
 
-function get_value_from_multiple_select() {
+function get_value_from_multiple_select(prefix) {
+	if (prefix == undefined) {
+		prefix = 'undefined';
+	}
 	var list_checkbox = $('.multi-select-menuitems').find('input');
 	var result = [];
 	list_checkbox.each(function(){
 		if ($(this).prop('checked') == true ) {
-			result.push($(this).val());
+			let id = $(this).attr('id');
+			if (id.startsWith(prefix)) {
+				result.push($(this).val());
+			}
+			
 		}
 	});
 	return result;
@@ -176,6 +183,19 @@ function get_data_from_form(form_id) {
 	for (var idx = 0; idx < sheet_ids.length; idx++) {
 		ids.push(sheet_ids[idx]);
 	}
+	var users1 = get_value_from_multiple_select('user');
+	
+	if (users1.length == 0) {
+		custom_alert('No user name selected', 'error');
+		return null;
+	} 
+	var users2 = [];
+	for (var idx = 0; idx < users1.length; idx++) {
+		if (users1[idx] == 'all') {
+			continue;
+		}
+		users2.push(users1[idx]);
+	}
 	var from_date 	= data['from_date'];
 	var to_date 	= data['to_date'];
 	var filter 		= data['task_filter'];
@@ -188,11 +208,9 @@ function get_data_from_form(form_id) {
 	data[SESSION_TO] = to_date;
 	data[SESSION_FILTER] = filter;
 	data[SESSION_SHEETS] = ids;
+	data[SESSION_USERS] = users2;
 	return data;
 }
-
-
-
 
 function custom_alert(message, type) {
 	$('#overlay_loader').hide();
@@ -304,15 +322,27 @@ function colect_config_date() {
 		custom_alert('No sheet name selected', 'error');
 		return null;
 	} 
-	var ids = []
+	var ids = [];
 	for (var idx = 0; idx < sheet_ids.length; idx++) {
 		if (sheet_ids[idx] == 'all') {
 			continue;
 		}
 		ids.push(sheet_ids[idx]);
 	}
+	var users1 = get_value_from_multiple_select('user');
 	
-	
+	if (users1.length == 0) {
+		custom_alert('No user name selected', 'error');
+		return null;
+	} 
+	var users2 = [];
+	for (var idx = 0; idx < users1.length; idx++) {
+		if (users1[idx] == 'all') {
+			continue;
+		}
+		users2.push(users1[idx]);
+	}
+
 	var from_date 	= data['from_date'];
 	var to_date 	= data['to_date'];
 	var filter 		= data['filter'];
@@ -326,6 +356,7 @@ function colect_config_date() {
 	data[SESSION_FILTER] = filter;
 	data[SESSION_TASK_FILTER] = task_filter;
 	data[SESSION_SHEETS] = ids;
+	data[SESSION_USERS] = users2;
 	return data;
 }
 $(document).ready(function () {

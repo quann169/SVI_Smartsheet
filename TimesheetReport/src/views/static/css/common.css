@@ -6,6 +6,7 @@ body {
     font-family: 'Poppins', sans-serif;
     background: #fafafa;
 	margin: 0px;
+   	min-width: 1050px;
 }
 
 p {
@@ -192,7 +193,9 @@ a.article:hover {
 	flex-grow: 1;
 	overflow-y: auto;
 }
-
+.multi-select-container {
+	margin-right: 5px;
+}
 .notify {
 	background-color:  #e1ecf4;
 	border: 1px solid #a0c7e4;
@@ -240,13 +243,16 @@ a.article:hover {
 ----------------------------------------------------- */
 .breadcrumb-item {
 	font-size: 1.25em;
+	padding: .5rem 1rem;
 }
+
 .breadcrumb-item:hover {
 	font-weight: bold;
 }
 .breadcrumb {
 	margin-bottom: 0px;
 	margin-left: 3px;
+	padding: 0rem;
 }
 
 /* ---------------------------------------------------
@@ -336,7 +342,9 @@ button:hover {
 	background-color: #007BA9;
 	cursor: pointer;
 }
-
+form {
+	margin-bottom: 5px;
+}
 tr {
 	background-color: white !important;
     border: 1px solid #aaa !important;
@@ -663,7 +671,7 @@ table, table.dataTable {
   right: 0;
   bottom: 0;
   background-color: rgba(0,0,0,0.5); /* Black background with opacity */
-  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  z-index: 100; /* Specify a stack order in case you're using a different order for other elements */
 }
 /* end overlay */
 

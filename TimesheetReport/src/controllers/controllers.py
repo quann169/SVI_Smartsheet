@@ -57,6 +57,8 @@ class Controllers:
         total = len(sms_obj.info)
         count = 0
         missing_user = {}
+        write_message_into_file(log, '%s\n'%('-'*75))
+        println('%s'%('-'*75), OtherKeys.LOGING_INFO)
         for sheet_name in sms_obj.info:
             count += 1
             # save children_task only
@@ -66,7 +68,7 @@ class Controllers:
             is_parse            = sms_obj.info[sheet_name].is_parse
             if is_parse:
                 if log:
-                    write_message_into_file(log, '[%d/%d] Updating sheet: %s\n'%(count, total, sheet_name))
+                    write_message_into_file(log, '[%d/%d] Updating sheet: <span class="bold cl-blue">%s</span>\n'%(count, total, sheet_name))
                 println('[%d/%d] Updating sheet: %s'%(count, total, sheet_name), OtherKeys.LOGING_INFO)
                 config_obj.set_attr(sheet_id            = sheet_id,
                                     latest_modified     = latest_modified,
@@ -136,11 +138,15 @@ class Controllers:
                 config_obj.update_is_loading_of_sheet()
                 println('[%d/%d] Update database for %s - Done'%(count, total, sheet_name), OtherKeys.LOGING_INFO)
                 if log:
-                    write_message_into_file(log, '[%d/%d] Update database for %s - Done\n'%(count, total, sheet_name))
+                    write_message_into_file(log, '[%d/%d] Update database for <span class="bold cl-blue">%s</span> - Done\n'%(count, total, sheet_name))
             else:
                 println('[%d/%d] Skip update database for %s'%(count, total, sheet_name), OtherKeys.LOGING_INFO)
                 if log:
-                    write_message_into_file(log, '[%d/%d] Skip update database for %s\n'%(count, total, sheet_name))
+                    write_message_into_file(log, '[%d/%d] Skip update database for <span class="bold cl-red">%s</span>\n'%(count, total, sheet_name))
+        
+        write_message_into_file(log, '%s\n'%('-'*75))
+        println('%s'%('-'*75), OtherKeys.LOGING_INFO)
+        
         for user in missing_user:
             message = message_generate(MsgWarning.W002, user)
             println('Warning: %s'%(message), OtherKeys.LOGING_INFO)
@@ -161,7 +167,8 @@ class Controllers:
         for key, val in more_option.items():
             if not request_dict.get(key):
                 request_dict[key] = val
-        if not request_dict.get(SessionKey.FROM) or not request_dict.get(SessionKey.TO) or not request_dict.get(SessionKey.SHEETS):
+        if not request_dict.get(SessionKey.FROM) or not request_dict.get(SessionKey.TO) or not request_dict.get(SessionKey.SHEETS) \
+        or not request_dict.get(SessionKey.USERS):
             config_obj = Configuration()
             analyze_config_info = config_obj.get_analyze_config()
             time_delta_before = int(analyze_config_info[AnalyzeCFGKeys.TIME_DELTA_BEFORE])
@@ -181,6 +188,15 @@ class Controllers:
                 for key in sheet_ids_dict.keys():
                     sheet_ids.append(key)
                 request_dict[SessionKey.SHEETS] = sheet_ids
+            if not request_dict.get(SessionKey.USERS):
+                users_info = config_obj.get_list_resource()
+                users = []
+                for row in users_info:
+                    user = row[DbHeader.USER_NAME]
+                    is_active = row[DbHeader.IS_ACTIVE]
+                    if is_active:
+                        users.append(user)
+                request_dict[SessionKey.USERS] = users
     
     def get_analyze_config(self):
         config_obj = Configuration()
@@ -508,7 +524,8 @@ class Controllers:
         result  = [sheet_info, list_week]
         return result
         
-    def get_daily_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, task_filter=None, list_user=None, mode=None):
+    def get_daily_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None,\
+                                  task_filter=None, list_user=None, mode=None, filter='separate'):
         try:
             missing_method = False
             if request_dict:
@@ -522,18 +539,27 @@ class Controllers:
                         list_user      = request_dict[SessionKey.USERS]
                     if request_dict.get(SessionKey.MODE):
                         mode        = request_dict[SessionKey.MODE]
+                    if request_dict.get(SessionKey.FILTER):
+                        filter        = request_dict[SessionKey.FILTER]
                 except KeyError:
                     missing_method = True
             if not task_filter or not sheet_ids or not to_date or not from_date or missing_method:
                 return []
+            if filter == 'merge':
+                is_merge = True
+            else:
+                is_merge = False
             result = []
-            timesheet_obj   = Timesheet(from_date, to_date, task_filter, sheet_ids, list_user)
+            timesheet_obj   = Timesheet(is_merge, from_date, to_date, task_filter, sheet_ids, list_user)
             timesheet_obj.parse()
             user_ids        = timesheet_obj.user_ids
             eng_type_ids   = timesheet_obj.eng_type_ids
             team_ids        = timesheet_obj.team_ids
             time_off_info   = timesheet_obj.time_off
-            
+            config_obj      = Configuration()
+            config_obj.get_list_holiday(is_parse=True)
+            holidays  = config_obj.holidays
+            list_date = get_work_days(from_date, to_date, holidays=holidays)
             for sheet_id in timesheet_obj.sheets:
                 sheet_obj   = timesheet_obj.sheets[sheet_id]
                 sheet_type  = sheet_obj.sheet_type
@@ -551,17 +577,32 @@ class Controllers:
                         start_date  = task_obj.start_date
                         end_date    = task_obj.end_date
                         allocation  = task_obj.allocation
-                        work_hour   = 8*(allocation)/100
-                        work_hour   = round_num(work_hour)
-                        timeoff     = 0
-                        if user_id in time_off_info:
-                            for date, week, timeoff_per_day, obj in time_off_info[user_id]:
-                                if date == task_date:
-                                    timeoff = timeoff_per_day
-                                    break
-                        
-                        sdt_hour    = work_hour - timeoff
-                        result.append((sheet_name, sheet_type, user_name, eng_type, team_name, week_number, task_date, task_name, start_date, end_date, allocation, work_hour, timeoff, sdt_hour))
+                        if is_merge:
+                            list_date2 = get_work_days(start_date, end_date, holidays=holidays)
+                            work_hour = 0
+                            for date in list_date2:
+                                if date in list_date:
+                                    work_hour   += 8*(allocation)/100
+                            work_hour   = round_num(work_hour)
+                            timeoff     = ''
+                            sdt_hour    = work_hour
+                            result.append((sheet_name, sheet_type, user_name, eng_type, team_name, \
+                                           week_number, task_date, task_name, start_date, end_date,\
+                                            allocation, work_hour, timeoff, sdt_hour))
+                        else:
+                            work_hour   = 8*(allocation)/100
+                            work_hour   = round_num(work_hour)
+                            timeoff     = 0
+                            if user_id in time_off_info:
+                                for date, week, timeoff_per_day, obj in time_off_info[user_id]:
+                                    if date == task_date:
+                                        timeoff = timeoff_per_day
+                                        break
+                            
+                            sdt_hour    = work_hour - timeoff
+                            result.append((sheet_name, sheet_type, user_name, eng_type, team_name,\
+                                            week_number, task_date, task_name, start_date, end_date,\
+                                             allocation, work_hour, timeoff, sdt_hour))
             return result
             
         except Exception as e:
@@ -596,7 +637,7 @@ class Controllers:
         return result  
         
     def get_resource_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, 
-                                    filter='weekly', task_filter='both', mode='all', is_caculate=False):
+                                    filter='weekly', task_filter='both', mode='all', is_caculate=False, list_user=None):
         try:
             missing_method = False
             if request_dict:
@@ -610,13 +651,14 @@ class Controllers:
                         mode        = request_dict[SessionKey.MODE]
                     if request_dict.get(SessionKey.TASK_FILTER):
                         task_filter = request_dict[SessionKey.TASK_FILTER]
-                    
+                    if request_dict.get(SessionKey.USERS):
+                        list_user = request_dict[SessionKey.USERS]
                 except KeyError:
                     missing_method = True
             
             if not filter or not sheet_ids or not to_date or not from_date or missing_method:
                 return ({}, [], 0, 0, 0, 0, 0)
-            timesheet_obj   = Timesheet(from_date, to_date, task_filter, sheet_ids)
+            timesheet_obj   = Timesheet(False, from_date, to_date, task_filter, sheet_ids, list_user)
             timesheet_obj.parse()
             user_ids        = timesheet_obj.user_ids
             eng_type_ids    = timesheet_obj.eng_type_ids
@@ -1246,7 +1288,7 @@ class Controllers:
                 sheet_user2 = config_obj.sheet_user2
                 sheet_user3 = config_obj.sheet_user3
                 
-            timesheet_obj   = Timesheet(from_date, to_date, task_filter, sheet_ids, list_user)
+            timesheet_obj   = Timesheet(False, from_date, to_date, task_filter, sheet_ids, list_user)
             timesheet_obj.parse(sheet_user=sheet_user2)
             user_ids        = timesheet_obj.user_ids
             eng_type_ids    = timesheet_obj.eng_type_ids
@@ -1632,7 +1674,7 @@ class Controllers:
                     missing_method = True
             if not filter or not sheet_ids or not to_date or not from_date or missing_method:
                 return ({}, [], 0, 0, 0, 0, 0)
-            timesheet_obj   = Timesheet(from_date, to_date, task_filter, sheet_ids)
+            timesheet_obj   = Timesheet(False, from_date, to_date, task_filter, sheet_ids)
             timesheet_obj.parse()
             user_ids        = timesheet_obj.user_ids
             eng_type_ids    = timesheet_obj.eng_type_ids
@@ -1965,6 +2007,7 @@ class Controllers:
             if not avail_id.get(grp_id):
                 config_obj.remove_user_role(user_id, role_id)
         return 1
+    
     def update_other_config(self, request_dict):
         other_config_info = request_dict['other_info']
         config_obj = Configuration()

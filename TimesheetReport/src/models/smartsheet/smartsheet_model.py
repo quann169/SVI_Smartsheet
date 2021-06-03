@@ -143,11 +143,11 @@ class Sheet():
         if self.latest_modified == modified_at and is_go:
             println('[%d/%d] Skip parsing sheet: %s'%(self.count, self.total, self.name), OtherKeys.LOGING_INFO)
             if self.log:
-                write_message_into_file(self.log, '[%d/%d] Skip parsing sheet: %s\n'%(self.count, self.total, self.name))
+                write_message_into_file(self.log, '[%d/%d] Skip parsing sheet: <span class="cl-red bold">%s</span>\n'%(self.count, self.total, self.name))
             self.is_parse       = False
         else:
             if self.log:
-                write_message_into_file(self.log, '[%d/%d] Parsing sheet: %s\n'%(self.count, self.total, self.name))
+                write_message_into_file(self.log, '[%d/%d] Parsing sheet: <span class="cl-blue bold">%s</span>\n'%(self.count, self.total, self.name))
             println('[%d/%d] Parsing sheet: %s'%(self.count, self.total, self.name), OtherKeys.LOGING_INFO)
             self.latest_modified    = modified_at
             count = 0

@@ -14,7 +14,7 @@ class MsgError:
 
 class MsgWarning:
     W001    = 'Skip ID duplicate id :{}'
-    W002    = "Can not found '{}' in list resource" 
+    W002    = "Can not found <span class='bold cl-orange'>'{}'</span> in list resource" 
 
 class Msg:
     M001    = 'Import successfully'

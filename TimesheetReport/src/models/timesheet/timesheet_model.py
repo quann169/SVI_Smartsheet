@@ -13,13 +13,14 @@ from pprint import pprint
 
 class Timesheet():
     
-    def __init__(self, from_date, to_date, filter, sheet_ids, list_user=None, exclude=True):
+    def __init__(self, is_merge_task, from_date, to_date, filter, sheet_ids, list_user=None, exclude=True):
         self.sheets     = {}
         self.resource   = {}
         self.from_date  = from_date
         self.to_date    = to_date
         self.filter     = filter
         self.sheet_ids  = sheet_ids
+        self.is_merge_task = is_merge_task
         self.time_off   = {}
         self.user_ids    = {}
         self.team_ids   = {}
@@ -41,8 +42,6 @@ class Timesheet():
         self.team_ids       = config_obj.team_ids
         config_obj.get_eng_type_info(is_parse=True)
         self.eng_type_ids     = config_obj.eng_type_ids
-        config_obj.get_list_holiday(is_parse=True)
-        self.holidays  = config_obj.holidays
         db_task_obj  = DbTask()
         db_task_obj.set_attr(start_date      = self.from_date,
                             end_date        = self.to_date
@@ -70,18 +69,19 @@ class Sheet():
         self.sheet_name     = sheet_name
         self.sheet_type     = sheet_type
         self.resource       = {}
-        self.parse()
-        
+        self.is_merge_task = timesheet_obj.is_merge_task
+        self.parse()        
     def parse(self):
+        
+        
         if self.timesheet_obj.filter == 'current':
             if self.timesheet_obj.all_task.get(self.sheet_id):
                 tasks = self.timesheet_obj.all_task[self.sheet_id]
             else:
                 tasks  = []
+            exist_task = {}
             for row in tasks:
                 task_obj    = Task(self, row)
-                if task_obj.date in self.timesheet_obj.holidays:
-                    continue
                 if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
                     continue
                 
@@ -90,22 +90,49 @@ class Sheet():
                 
                 if not self.resource.get(task_obj.user_id):
                     self.resource[task_obj.user_id] = []
-                self.resource[task_obj.user_id].append(task_obj)    
+                
+                if self.is_merge_task:
+                    user_id = task_obj.user_id
+                    task_name = task_obj.task_name
+                    start_date = task_obj.start_date
+                    end_date = task_obj.end_date
+                    allocation = task_obj.allocation
+                    text = '%s-%s-%s-%s-%s'%(str(user_id), start_date, end_date, str(allocation), task_name)
+                    if exist_task.get(text):
+                        continue
+                    else:
+                        exist_task[text] = 1
+                        task_obj.date = ''
+                        
+                self.resource[task_obj.user_id].append(task_obj)
+            
         elif self.timesheet_obj.filter == 'final':
             if self.timesheet_obj.all_final_task.get(self.sheet_id):
                 tasks = self.timesheet_obj.all_final_task[self.sheet_id]
             else:
                 tasks  = []
+            exist_task = {}
             for row in tasks:
                 task_obj    = Task(self, row, is_final = True)
-                if task_obj.date in self.timesheet_obj.holidays:
-                    continue
                 if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
                     continue
                 if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
                     continue
                 if not self.resource.get(task_obj.user_id):
                     self.resource[task_obj.user_id] = []
+                if self.is_merge_task:
+                    user_id = task_obj.user_id
+                    task_name = task_obj.task_name
+                    start_date = task_obj.start_date
+                    end_date = task_obj.end_date
+                    allocation = task_obj.allocation
+                    text = '%s-%s-%s-%s-%s'%(str(user_id), start_date, end_date, str(allocation), task_name)
+                    if exist_task.get(text):
+                        continue
+                    else:
+                        exist_task[text] = 1
+                        task_obj.date = ''
+                        
                 self.resource[task_obj.user_id].append(task_obj)
                     
         elif self.timesheet_obj.filter == 'both':
@@ -115,10 +142,9 @@ class Sheet():
                 tasks = self.timesheet_obj.all_final_task[self.sheet_id]
             else:
                 tasks  = []
+            exist_task = {}
             for row in tasks:
                 task_obj    = Task(self, row, is_final = True)
-                if task_obj.date in self.timesheet_obj.holidays:
-                    continue
                 if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
                     continue
                 if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
@@ -129,16 +155,28 @@ class Sheet():
                     self.final_exist_date[task_obj.user_id] = {}
                 if not self.final_exist_date[task_obj.user_id].get(task_obj.date):
                     self.final_exist_date[task_obj.user_id][task_obj.date] = None
+                if self.is_merge_task:
+                    user_id = task_obj.user_id
+                    task_name = task_obj.task_name
+                    start_date = task_obj.start_date
+                    end_date = task_obj.end_date
+                    allocation = task_obj.allocation
+                    text = '%s-%s-%s-%s-%s'%(str(user_id), start_date, end_date, str(allocation), task_name)
+                    if exist_task.get(text):
+                        continue
+                    else:
+                        exist_task[text] = 1
+                        task_obj.date = ''
+                        
                 self.resource[task_obj.user_id].append(task_obj)
             
             if self.timesheet_obj.all_task.get(self.sheet_id):
                 tasks = self.timesheet_obj.all_task[self.sheet_id]
             else:
                 tasks  = []
+            exist_task = {}
             for row in tasks:
                 task_obj    = Task(self, row)
-                if task_obj.date in self.timesheet_obj.holidays:
-                    continue
                 if self.timesheet_obj.exclude and not self.timesheet_obj.user_ids[task_obj.user_id].is_active:
                     continue
                 if self.timesheet_obj.list_user and task_obj.user_name not in self.timesheet_obj.list_user:
@@ -148,6 +186,18 @@ class Sheet():
                 except KeyError:
                     if not self.resource.get(task_obj.user_id):
                         self.resource[task_obj.user_id] = []
+                    if self.is_merge_task:
+                        user_id = task_obj.user_id
+                        task_name = task_obj.task_name
+                        start_date = task_obj.start_date
+                        end_date = task_obj.end_date
+                        allocation = task_obj.allocation
+                        text = '%s-%s-%s-%s-%s'%(str(user_id), start_date, end_date, str(allocation), task_name)
+                        if exist_task.get(text):
+                            continue
+                        else:
+                            exist_task[text] = 1
+                            task_obj.date = ''
                     self.resource[task_obj.user_id].append(task_obj)
                
 class Task():
@@ -175,6 +225,7 @@ class Task():
         self.week_number    = None
         self.sheet_obj      = sheet_obj
         self.is_final       = is_final
+        self.is_merge_task = sheet_obj.is_merge_task
         self.add_info(info)
         
     def add_info(self, info):
