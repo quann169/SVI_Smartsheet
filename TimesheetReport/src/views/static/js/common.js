@@ -351,13 +351,14 @@ function colect_config_date() {
 		custom_alert('Missing date', 'error');
 		return null;
 	}
-	data[SESSION_FROM] = from_date;
-	data[SESSION_TO] = to_date;
-	data[SESSION_FILTER] = filter;
-	data[SESSION_TASK_FILTER] = task_filter;
-	data[SESSION_SHEETS] = ids;
-	data[SESSION_USERS] = users2;
-	return data;
+	let out = {};
+	out[SESSION_FROM] = from_date;
+	out[SESSION_TO] = to_date;
+	out[SESSION_FILTER] = filter;
+	out[SESSION_TASK_FILTER] = task_filter;
+	out[SESSION_SHEETS] = ids;
+	out[SESSION_USERS] = users2;
+	return out;
 }
 $(document).ready(function () {
 	$('#get_newest_data').click(function(event) {

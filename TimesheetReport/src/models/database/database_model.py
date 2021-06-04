@@ -588,6 +588,11 @@ class Configuration(Connection):
         query   = """UPDATE `%s` SET `%s`="0";
         """%( DbTable.USER, DbHeader.IS_ACTIVE)
         self.db_execute(query)
+    
+    def active_resource(self, user_name):
+        query   = """UPDATE `%s` SET `%s`="1" WHERE `%s`="%s";
+        """%( DbTable.USER, DbHeader.IS_ACTIVE, DbHeader.USER_NAME, user_name)
+        self.db_execute(query)
         
     def update_resource_leader(self, list_record):
         query   = '''UPDATE `user` SET
@@ -765,7 +770,7 @@ class Configuration(Connection):
         query   = """DELETE FROM `%s` WHERE `%s`="%s" AND `%s`="%s";
         """%(DbTable.USER_ROLE, DbHeader.ROLE_ID, role_id, DbHeader.USER_ID, user_id)
         self.db_execute(query)
-         
+    
 class DbTask(Connection):
     def __init__(self):
         Connection.__init__(self)
@@ -1062,4 +1067,79 @@ class TimeOff(Connection):
             self.dates          = get_work_days(from_date=self.start_date, to_date=self.end_date)
             self.timeoff_per_day    = round_num(int(self.work_days / len(self.dates)))
 
-            
+class Log(Connection):
+    def __init__(self, table_name=None):
+        Connection.__init__(self)
+        self.table_name = table_name
+        
+    def get_action(self):
+        query   = """SELECT `%s`, `%s`  FROM `%s`;"""%( 
+            DbHeader.ACTION_ID, DbHeader.ACTION_NAME, DbTable.ACTION)
+        query_result    = self.db_query(query)
+        result = ()
+        if query_result:
+            result = query_result
+        return result
+    
+    def get_action_id(self):
+        query   = """SELECT `%s` FROM `%s` WHERE `%s`='%s';"""%( 
+            DbHeader.ACTION_ID, DbTable.ACTION, DbHeader.ACTION_NAME, self.action_name)
+        query_result    = self.db_query(query)
+        result = None
+        if query_result:
+            result = query_result[0][DbHeader.ACTION_ID]
+            self.action_id = result
+        return result
+        
+    def add_log(self):
+        query   = '''INSERT INTO `%s`
+                (`%s`, `%s`, `%s`, `%s`, `%s`)
+                VALUES 
+                ("%s", "%s", "%s", "%s", "%s");
+                '''%(
+                    DbTable.LOG, DbHeader.SHEET_ID, DbHeader.ACTION_ID, \
+                    DbHeader.OLD_VALUE, DbHeader.NEW_VALUE, DbHeader.UPDATED_BY, 
+                    self.sheet_id, self.action_id, self.old_value, self.new_value, self.updated_by)
+        self.db_execute(query)
+        
+    def get_log(self, from_date, to_date, action_ids):
+        condition = ''
+        if action_ids:
+            condition = ' AND ('
+            list_oparator = []
+            for action_id in action_ids:
+                list_oparator.append(" `%s`.`%s`='%d' "%(DbTable.ACTION, DbHeader.ACTION_ID, action_id))
+            condition +=  ' OR '.join(list_oparator) + ')'
+        query   = """SELECT `%s`.`%s`, 
+                            `%s`.`%s`, 
+                            `%s`.`%s`, 
+                            `%s`.`%s`, 
+                            `%s`.`%s`, 
+                            `%s`.`%s`, 
+                            `%s`.`%s`, 
+                            `%s`.`%s`
+                    FROM `%s`
+                    INNER JOIN `%s` ON `%s`.`%s`=`%s`.`%s`
+                    LEFT JOIN `%s` ON `%s`.`%s`=`%s`.`%s`
+                    WHERE `%s`.`%s`>='%s' AND `%s`.`%s`<='%s' %s;
+            ;"""%( 
+            DbTable.SHEET, DbHeader.SHEET_NAME,\
+            DbTable.SHEET, DbHeader.SHEET_ID,\
+            DbTable.ACTION, DbHeader.ACTION_ID,\
+            DbTable.ACTION, DbHeader.ACTION_NAME,\
+            DbTable.LOG, DbHeader.OLD_VALUE,\
+            DbTable.LOG, DbHeader.NEW_VALUE,\
+            DbTable.LOG, DbHeader.UPDATED_DATE,\
+            DbTable.LOG, DbHeader.UPDATED_BY,\
+            DbTable.LOG, \
+            DbTable.ACTION, DbTable.ACTION, DbHeader.ACTION_ID, DbTable.LOG, DbHeader.ACTION_ID,\
+            DbTable.SHEET, DbTable.SHEET, DbHeader.SHEET_ID, DbTable.LOG, DbHeader.SHEET_ID,\
+            DbTable.LOG, DbHeader.UPDATED_DATE, from_date, DbTable.LOG, DbHeader.UPDATED_DATE, to_date, \
+            condition)
+        query_result    = self.db_query(query)
+        result = ()
+        if query_result:
+            result = query_result
+        return result
+    
+    

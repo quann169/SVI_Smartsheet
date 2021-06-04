@@ -271,8 +271,11 @@ def log():
     println(Route.LOG, OtherKeys.LOGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
+        request_dict = get_request_args()
+        ctrl_obj.add_default_config_to_method_request(request_dict, more_option={})
         return render_template(Template.LOG, ctrl_obj = ctrl_obj, role = Role(), \
-                               db_header = DbHeader(), route = Route() , template= Template())
+                               db_header = DbHeader(), route = Route() , template= Template(),
+                               session_enum = SessionKey(), request_dict = request_dict)
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)

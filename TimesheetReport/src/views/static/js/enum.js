@@ -11,10 +11,11 @@ const SESSION_TITLE  = 'title';
 const SESSION_USERNAME  = 'username';
 const SESSION_PASSWORD  = 'password';
 const SESSION_IS_LOGIN  = 'is_login';
-const SESSION_USER_ID         = 'user_id'
-const SESSION_RESOURCE_NAME   = 'resource_name'
-const SESSION_ROLE_NAME       = 'role_name'
-const SESSION_MODE 		= 'mode'
+const SESSION_USER_ID         = 'user_id';
+const SESSION_RESOURCE_NAME   = 'resource_name';
+const SESSION_ROLE_NAME       = 'role_name';
+const SESSION_MODE 		= 'mode';
+const SESSION_ACTIONS          = 'actions';
 
 // INTERVAL KEY
 var INTERVAL_GET_DATA  = null;

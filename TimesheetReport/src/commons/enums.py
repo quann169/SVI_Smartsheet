@@ -64,7 +64,7 @@ class DbTable:
     FINAL_EVIDENCE          = 'final_evidence'
     USER_VERSION            = 'user_version'
     OTHER_CONFIG            = 'other_config'
-    
+    ACTION                  = 'action'
     
 class AnalyzeCFGKeys:
     TOKEN   = 'Token'
@@ -170,6 +170,17 @@ class SessionKey:
     IS_NOTIFY_VERSION = 'is_notify_version'
     IS_UPDATE_VERSION = 'is_update_version'
     USER_VERSION    = 'user_version'
+    ACTIONS          = 'actions'
+
+class LogKeys:
+    ACTION_ADD_FINAL_TASK = 'Add Final Task'
+    ACTION_ADD_RESOURCE     = 'Add Resource'
+    ACTION_ADD_HOLIDAY      = 'Add Holiday'
+    # Active Resource
+    # Inactive Resource
+    ACTION_ADD_SHEET      = 'Add Sheet'
+    # Active Sheet
+    # Inactive Sheet
     
 class DbHeader:
     
@@ -240,7 +251,9 @@ class DbHeader:
     CONFIG_VALUE            = 'config_value'
     USER_VERSION_ID         = 'user_version_id'
     VERSION                 = 'version'
-
+    ACTION_ID               = 'action_id'
+    ACTION_NAME               = 'action_name'
+    
 class ExcelColor:
     
     LIST_COLOR = [
@@ -266,7 +279,7 @@ class Template:
     
     HOME                = 'screens/home/home.html'
     LAYOUT              = 'screens/layout/layout.html'
-    LOG                 = 'screens/log/log.html'
+    LOG                 = 'screens/admin/log.html'
     
     TIMESHEET_ANALYZE   = 'screens/timesheet/analyze.html'
     TIMESHEET_CONFLICT_DATE  = 'screens/timesheet/conflict_date.html'

@@ -42,6 +42,9 @@ def get_request_args():
     if SessionKey.SHEETS in request_dict:
         for idx in range(0, len(request_dict[SessionKey.SHEETS])):
             request_dict[SessionKey.SHEETS][idx] = int(request_dict[SessionKey.SHEETS][idx])
+    if SessionKey.ACTIONS in request_dict:
+        for idx in range(0, len(request_dict[SessionKey.ACTIONS])):
+            request_dict[SessionKey.ACTIONS][idx] = int(request_dict[SessionKey.ACTIONS][idx])
     return request_dict
 
 def get_request_form_ajax():

@@ -4,10 +4,10 @@ Created on Feb 22, 2021
 @author: toannguyen
 '''
 from src.models.smartsheet.smartsheet_model import SmartSheets
-from src.models.database.database_model import Configuration, DbTask
+from src.models.database.database_model import Configuration, DbTask, Log
 from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, \
                             DateTime, AnalyzeCFGKeys, Route, Role, OtherKeys, DbTable,\
-    OtherCFGKeys
+    OtherCFGKeys, LogKeys
 from src.commons.message import MsgError, MsgWarning, Msg, AnalyzeItem
 from src.commons.utils import search_pattern, message_generate, println, remove_path, split_patern,\
                             get_prev_date_by_time_delta, get_work_week, convert_date_to_string,\
@@ -279,11 +279,13 @@ class Controllers:
         try:
             file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
             df          = pd.read_excel (file_path, sheet_name='Holiday', engine='openpyxl')
+            user_name   = session[SessionKey.USERNAME]
             config_obj  = Configuration()
             for index in range(0, len(df[ExcelHeader.HOLIDAY])):
                 date          = str(df[ExcelHeader.HOLIDAY][index])
                 if date not in SettingKeys.EMPTY_CELL:
                     if not config_obj.is_exist_holiday(date):
+                        self.record_to_log(0, LogKeys.ACTION_ADD_HOLIDAY, '', '%s'%(date), user_name)
                         config_obj.add_holiday(date)
             remove_path(file_path)
             return 1, Msg.M001
@@ -427,7 +429,8 @@ class Controllers:
             teams_info = config_obj.team
             config_obj.set_attr(updated_by  = user_name)
             user_leader = []
-            config_obj.inactive_all_resource()
+            config_obj.inactive_all_resource()#except 'NA User'
+            config_obj.active_resource(SettingKeys.NA_VALUE)
             for index in range(0, len(df[ExcelHeader.RESOURCE])):
                 resource          = str(df[ExcelHeader.RESOURCE][index]).strip()
                 eng_type          = str(df[ExcelHeader.ENG_TYPE][index])
@@ -468,6 +471,8 @@ class Controllers:
                     if config_obj.is_exist_resource():
                         config_obj.update_resource()
                     else:
+                        self.record_to_log(0, LogKeys.ACTION_ADD_RESOURCE, '', 
+                                           '%s - %s - %s - %s'%(resource, email, full_name, str(is_active)), user_name)
                         config_obj.add_resource()
             #add leader
             config_obj.get_all_user_information()
@@ -492,9 +497,9 @@ class Controllers:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
         
-    def get_list_sheet_name(self):
+    def get_list_sheet_name(self, is_active=True):
         config_obj      = Configuration()
-        sheet_info      = config_obj.get_sheet_config()
+        sheet_info      = config_obj.get_sheet_config(is_active=is_active)
         return sheet_info
     
     def get_all_resource_information(self):
@@ -1049,6 +1054,7 @@ class Controllers:
                             comment = row[3]
                             analyze_item_id = analyze_item[item_name]
                             task_obj.add_final_evidence(final_date_id, analyze_item_id, is_approve, counter, comment, user_name)
+                    self.record_to_log(sheet_id, LogKeys.ACTION_ADD_FINAL_TASK, '', 'From %s To %s'%(from_date, to_date), user_name)
                 template_path = g.template_path
                 tool_path    = g.tool_path
                 template_path = os.path.join(os.path.join(os.path.join(tool_path, template_path), 'components'), 'sending_mail')
@@ -1609,6 +1615,7 @@ class Controllers:
             config_obj.set_attr(updated_by  = session[SessionKey.USERNAME])
             config_obj.get_sheet_type_info(is_parse=True)
             sheet_type_info = config_obj.sheet_type
+            user_name = session[SessionKey.USERNAME]
             for element in info:
                 sheet_name = element[0]
                 sheet_type = element[1]
@@ -1627,6 +1634,7 @@ class Controllers:
                 if config_obj.is_exist_sheet():
                     config_obj.update_sheet()
                 else:
+                    self.record_to_log(0, LogKeys.ACTION_ADD_SHEET, '', sheet_name, user_name)
                     config_obj.add_sheet()
                 
             return 1, 'Synchronize successfully'
@@ -2018,3 +2026,32 @@ class Controllers:
             if config_obj.check_exist_config_info():
                 config_obj.update_other_config_info()
         return 1
+    
+    def record_to_log(self, sheet_id, action_name, old_value, new_value, updated_by):
+        log_obj = Log()
+        log_obj.set_attr(
+            sheet_id=sheet_id,
+            action_name=action_name,
+            old_value=old_value,
+            new_value=new_value,
+            updated_by=updated_by
+            )
+        log_obj.get_action_id()
+        log_obj.add_log()
+        
+    def get_log_action(self):
+        obj = Log()
+        result = obj.get_action()
+        return result
+    
+    def get_log_info(self, request_dict):
+        obj = Log()
+        from_date = request_dict[SessionKey.FROM]
+        to_date = request_dict[SessionKey.TO]
+        if request_dict.get(SessionKey.ACTIONS):
+            action_id = request_dict[SessionKey.ACTIONS]
+        else:
+            action_id = None
+        result = obj.get_log(from_date, to_date, action_id)
+        return result
+    
