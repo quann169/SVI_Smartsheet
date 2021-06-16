@@ -53,7 +53,7 @@
 			{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
 				<button type='button' id='lock' class='mx-1' data-toggle="tooltip" title="Lock/Unlock 'Get Newest Data' feature"><i class="fas fa-lock"></i></button>
 			{% endif%}
-			<button type='button' id='view_chart' class='mx-1' data-toggle="tooltip" title="View Chart"><i class="fas fa-chart-bar"></i></button>
+			<button type='button' id='view_chart' class='mx-1' ><i class="fas fa-chart-bar"></i></button>
 			<button type='button' id='export_productivity' class='mx-1 px-3' data-toggle="tooltip" title="Export"><i class="fas fa-file-export" ></i></button>
 			<div class="dropdown" id='drp_div'>
 			  <button onclick="toggleDropdown()" id='toggle_import' class="dropbtn" type='button' data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
@@ -95,12 +95,12 @@
 	    </tr>
 		<tr class='header'>
 			{% for col in list_sub_col %}
-				<th class="" style='background-color: #456cb4 !important;'>NRE</th>
+				<th class="" style='background-color: #7cb5ec !important;'>NRE</th>
 				<th class="" style='background-color: #abc98a !important;'>RnD</th>
-				<th class="" style='background-color: #f2bc0f !important;'>TRN</th>
-				<th class="" style='background-color: #f19bf4 !important;'>Pre-sale</th>
-				<th class="" style='background-color: #d7e3f2 !important;'>Support</th>
-				<th class="" style='background-color: #d50f11 !important;'>Non-WH</th>
+				<th class="" style='background-color: #e4d354 !important;'>TRN</th>
+				<th class="" style='background-color: #f7cbd6 !important;'>Pre-sale</th>
+				<th class="" style='background-color: #91e8e1 !important;'>Support</th>
+				<th class="" style='background-color: #f45b5b !important;'>Non-WH</th>
 			{% endfor %}
 	    </tr>
 	  </thead>

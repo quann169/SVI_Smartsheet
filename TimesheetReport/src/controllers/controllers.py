@@ -1470,13 +1470,16 @@ class Controllers:
         email = '%s@savarti.com'%user_name
         config_obj = Configuration()
         role_name = Role.USER
+        list_role = [Role.USER]
         user_id, name = config_obj.get_user_by_email(email)
         
         if user_id:
-            role_name2 = config_obj.get_role_by_user_id(user_id)
+            role_name2, list_role2 = config_obj.get_role_by_user_id(user_id)
             if role_name2:
                 role_name = role_name2
-        return user_id, name, role_name
+            if len(list_role):
+                list_role = list_role2
+        return user_id, name, role_name, list_role
         
     def authenticate_account(self, username, password, remember=0):
         result = check_domain_password(username, password)
@@ -1486,12 +1489,13 @@ class Controllers:
             session[SessionKey.IS_LOGIN] = True
             if remember:
                 save_password(password)
-            user_id, name, role_name = self.get_resource_and_role_name()
+            user_id, name, role_name, list_role = self.get_resource_and_role_name()
             if user_id == None or name == None:
                 return [False, 'User "%s" does not exist.'%username]
             session[SessionKey.RESOURCE_NAME] = name
             session[SessionKey.USER_ID] = user_id
             session[SessionKey.ROLE_NAME] = role_name
+            session[SessionKey.LIST_ROLE_NAME] = list_role
         else:
             session[SessionKey.IS_LOGIN] = False
         return result

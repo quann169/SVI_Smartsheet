@@ -21,6 +21,7 @@ import getpass
 from src.commons.message import MsgError
 from src.models.database.database_model import Configuration, DbTask
 
+
 timesheet_bp = Blueprint('timesheet_bp', __name__)
 
 @timesheet_bp.before_request
@@ -50,8 +51,12 @@ def before_request():
     list_role_required = enum_route.REQUIRE_ROLE_OF_ROUTE.get(path)
     if list_role_required:
         if path not in [Route().LOGIN, Route().AUTH]:
-            role = session[SessionKey.ROLE_NAME]
-            if not role in list_role_required:
+            isAllow = False
+            for role in session[SessionKey.LIST_ROLE_NAME]:
+                if role in list_role_required:
+                    isAllow = True
+                    break
+            if not isAllow:
                 return abort(403, MsgError.E005)
     if (not session.get(SessionKey.USER_VERSION) ) or (session.get(SessionKey.USER_VERSION) != g.version):
         if path not in [Route().LOGIN, Route().AUTH]:
@@ -514,7 +519,7 @@ def check_loading_smartsheet():
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
-@timesheet_bp.route(Route.SAVE_SHEET_SETTING, methods=[OtherKeys.METHOD_POST])
+@timesheet_bp.route(Route.SAVE_SHEET_SETTING, methods=[OtherKeys.METHOD_GET, OtherKeys.METHOD_POST])
 def save_sheet_setting():
     """ save all the changes on GUI of sheet setting
     :param : 
@@ -544,7 +549,7 @@ def save_other_setting():
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
-@timesheet_bp.route(Route.GET_SYNC_SHEET, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
+@timesheet_bp.route(Route.GET_SYNC_SHEET, methods=[OtherKeys.METHOD_GET])
 def get_sync_sheet():
     """ get sheet info from smartsheet
     :param : 

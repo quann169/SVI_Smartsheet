@@ -1,56 +1,148 @@
+// function draw_stack_column_chart(id, data, label_angle) {
+// 	if (label_angle == undefined) {
+// 		var label_angle = 0;
+// 	}
+// 	var title_text = data.title;
+// 	var info = data.info;
+// 	var column = data.column;
+// 	var row_type = data.type;
+// 	var chart_data = []
+// 	var chart_type = 'stackedColumn';
+// 	var color_maping = ['#7cb5ec', '#abc98a', '#e4d354', '#f7cbd6 ', '#91e8e1', '#f45b5b'];
+// 	for (var i = 0; i < row_type.length; i++) {
+// 		var temp = {
+// 				type: chart_type,
+// 				legendText: row_type[i],
+// 				showInLegend: "true",
+// 				color: color_maping[i], 
+// 				//indexLabel: "{y}",
+// 				//percentFormatString: "#",
+// 				//toolTipContent: "#percent%",
+// 				dataPoints: []
+// 			};
+			
+// 		for (var j = 0; j < column.length; j++) {
+			
+// 			temp['dataPoints'].push({ y: info[row_type[i]][column[j]]['value'] , label: column[j], x: info[row_type[i]][column[j]]['x'], indexLabel: info[row_type[i]][column[j]]['label']});
+			
+// 		}
+// 		chart_data.push(temp);
+// 	}
+//     var chart = new CanvasJS.Chart(id,
+// 	{
+// 		title:{
+// 			text: title_text
+// 		},
+// 		axisY:{
+// 			minimum: 0,
+// 			//maximum: 100,
+//            interval: 20,
+// 		   //valueFormatString: ("#'%'") 
+// 		 },
+// 		axisX:{
+// 	        labelAngle: label_angle,
+// 			interval: 1,
+// 	    	labelFormatter: function(e) {
+// 		      	return e.label ? e.label : "";
+// 		      }
+// 	      },
+// 		data: chart_data
+// 	});
+// 	chart.render();
+// }
 function draw_stack_column_chart(id, data, label_angle) {
+	let series_list = []
+	let dataLabel =  {
+		enabled: true,
+		color: '#000',
+		align: 'center',
+		// y: 10, // 10 pixels down from the top
+		style: {
+			// fontSize: '10px',
+			textShadow: false,
+			fontWeight: 'bold'
+	
+		},
+		formatter:function(){
+			if(this.y > 5)
+				return this.y;
+		}
+	}
+	var color_maping = ['#7cb5ec', '#abc98a', '#e4d354', '#f7cbd6 ', '#91e8e1', '#f45b5b'];
+	for (let idx = data.type.length - 1; idx >= 0; idx--) {
+		let type = data.type[idx];
+		let tmp_series = {stacked: '1', name: type, data: [], color: color_maping[idx], dataLabels: dataLabel};
+		for (let idx1 = 0; idx1 < data.category.length; idx1++) {
+			let name = data.category[idx1].name;
+			let list_category = data.category[idx1].categories;
+			for (let idx2 = 0; idx2 < list_category.length; idx2++){
+				let date = list_category[idx2];
+				let text = name + ' ' + date;
+				if (! data.info[type][text]) {
+					tmp_series.data.push(0);
+				} else {
+					
+					let value = data.info[type][text].value;
+					tmp_series.data.push(value);
+				}
+			}
+		}
+		series_list.push(tmp_series);
+	}
 	if (label_angle == undefined) {
 		var label_angle = 0;
 	}
-	var title_text = data.title;
-	var info = data.info;
-	var column = data.column;
-	var row_type = data.type;
-	var chart_data = []
-	var chart_type = 'stackedColumn';
-	var color_maping = ['#456cb4', '#abc98a', '#f2bc0f', '#f19bf4', '#d7e3f2', '#d50f11'];
-	for (var i = 0; i < row_type.length; i++) {
-		var temp = {
-				type: chart_type,
-				legendText: row_type[i],
-				showInLegend: "true",
-				color: color_maping[i], 
-				//indexLabel: "{y}",
-				//percentFormatString: "#",
-				//toolTipContent: "#percent%",
-				dataPoints: []
-			};
-			
-		for (var j = 0; j < column.length; j++) {
-			
-			temp['dataPoints'].push({ y: info[row_type[i]][column[j]]['value'] , label: column[j], x: info[row_type[i]][column[j]]['x'], indexLabel: info[row_type[i]][column[j]]['label']});
-			
-		}
-		chart_data.push(temp);
-	}
-    var chart = new CanvasJS.Chart(id,
-	{
-		title:{
-			text: title_text
+	let chart = Highcharts.chart(id, {
+		chart: {
+			type: 'column'
 		},
-		axisY:{
-			minimum: 0,
-			//maximum: 100,
-           interval: 20,
-		   //valueFormatString: ("#'%'") 
-		 },
-		axisX:{
-	        labelAngle: label_angle,
-			interval: 1,
-	    	labelFormatter: function(e) {
-		      	return e.label ? e.label : "";
-		      }
-	      },
-		data: chart_data
+		title: {
+			text: data.title
+		},
+		xAxis: {
+			tickWidth: 0,
+			labels: {
+				groupedOptions: [{
+					style: {
+						fontWeight: 'bold',
+						padding: '5px'
+					},
+					rotation: 0,
+				}],
+				style: {
+					fontWeight: 'bold',
+				},
+				rotation: label_angle
+			},
+			  categories: data.category
+		},
+		tooltip: {
+            enabled: true
+        },
+		yAxis: {
+			allowDecimals: false,
+			min: 0,
+			title: {
+				text: ''
+			}
+		},
+		plotOptions: {
+			column: {
+				stacking: 'normal'
+			},
+			series: {
+				grouping: false,
+				groupPadding: 0,
+				pointPadding: 0,
+			  }
+		},
+	
+		series: series_list
 	});
-	chart.render();
+	$(document).on('click', '#' + id, function(){
+		chart.reflow();
+	});
 }
-
 function get_list_herder(id) {
 	var tr = $(id).find('tr');
 	var head_num = 0;
@@ -168,6 +260,7 @@ function creat_productivity_data(row_data, headers, group_id, title, max_hours) 
 	out['info'] = {};
 	var list_group = Object.keys(data);
 	var list_col2 = []
+	
 	for (var idx5=0; idx5 < list_type.length; idx5++ ) {
 		var type_name = list_type[idx5];
 		
@@ -175,9 +268,11 @@ function creat_productivity_data(row_data, headers, group_id, title, max_hours) 
 			out['info'][type_name] = {};
 		}
 		var count  = 0;
+		var category_list = [];
 		for (var i = 0; i < list_group.length; i++){
 			count += 1;
 			var group = list_group[i];
+			var tmp_category = {};
 			for (var idx6=0; idx6 < list_col.length; idx6++ ) {
 				var week = list_col[idx6];
 				var day = week.split('-')[1] + '-' + week.split('-')[2];
@@ -191,12 +286,19 @@ function creat_productivity_data(row_data, headers, group_id, title, max_hours) 
 				if (! list_col2.includes(group  + ' ' + day)) {
 					list_col2.push(group + ' ' + day);
 				}
+				if (! tmp_category.hasOwnProperty('categories')) {
+					tmp_category = {name: group, categories: []}
+				}
+				tmp_category.categories.push(day);
 			}
+			category_list.push(tmp_category);
+			category_list.push({name: '', categories: ['']});
 		}
 	}
 	
 	out['column'] = list_col2;
 	out['type'] = list_type;
+	out['category'] = category_list;
 	return out;	
 	
 }
@@ -244,14 +346,14 @@ $(document).ready(function() {
 		<div class='productivity-block' align='center'>
 			<div class='productivity-taskbar' align='center' class='b-bottom '><b>Chart</b><a class='close-p' style='transform: translate(-165%, 0%) !important;' onclick='close_overlay();'><i class='fas fa-times '></i></a></div>
 			<div class='productivity-ctn'>
-				<div id="team_productivity" style="height: 400px; width: 100%;">
+				<div id="team_productivity" style="height: 400px; width: 95%; resize: both; border: 1px solid #aaa;">
 				</div><br>
-				<div id="field_productivity" style="height: 400px; width: 100%;">
+				<div id="field_productivity" style="height: 400px; width: 95%; resize: both; border: 1px solid #aaa;">
 				</div><br>
-				<div id="seniority_productivity" style="height: 400px; width: 50%;">
+				<div id="seniority_productivity" style="height: 400px; width: 50%; resize: both; border: 1px solid #aaa;">
 				</div><br>
-				<div id="headcount" style="height: 400px; width: 30%;">
-				</div>
+				<div id="headcount" style="height: 400px; width: 30%; resize: both; border: 1px solid #aaa;">
+				</div><br><br><br><br>
 			</div>
 		</div>
 		`

@@ -167,6 +167,7 @@ class SessionKey:
     USER_ID         = 'user_id'
     RESOURCE_NAME   = 'resource_name'
     ROLE_NAME       = 'role_name'
+    LIST_ROLE_NAME  = 'list_role_name'
     IS_NOTIFY_VERSION = 'is_notify_version'
     IS_UPDATE_VERSION = 'is_update_version'
     USER_VERSION    = 'user_version'

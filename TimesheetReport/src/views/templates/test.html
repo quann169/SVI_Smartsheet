@@ -1,36 +1,133 @@
-<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="http://blacklabel.github.io/grouped_categories/grouped-categories.js"></script>
 
-		<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
-		<link rel="stylesheet" href="{{ url_for('static', filename='vendors/bootstrap-4.5.3/css/bootstrap.min.css') }}" />  
-		<link rel="stylesheet" href="{{ url_for('static', filename='vendors/DataTables/datatables.min.css') }}" /> 
-		<link rel="stylesheet" href="{{ url_for('static', filename='vendors/multiple-select/example-styles.css') }}" /> 
-		<!-- Our Custom CSS -->
-		<link rel="stylesheet" href="{{ url_for('static', filename='vendors/fontawesome/css/all.css') }}" />
-		<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
-		<link rel="stylesheet" href="{{ url_for('static', filename='css/components/export.css') }}" />
-</head>
 
-<body>
-	<button id='export1'>Export</button>
-	<div class='overlay' id='overlay'>
-		
-	</div>
-	<script src="{{url_for('static', filename='js/enum.js')}}"></script>
-	<script src="{{url_for('static', filename='vendors/fontawesome/js/solid.js')}}" ></script>
-	<script src="{{url_for('static', filename='vendors/fontawesome/js/fontawesome.js')}}"></script>
-	<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.js')}}"></script>
-	<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.slim.min.js')}}"></script>
-	<script src="{{url_for('static', filename='vendors/poper/popper-1.14.0.min.js')}}"></script>
-	<script src="{{url_for('static', filename='vendors/bootstrap-4.5.3/js/bootstrap.min.js')}}"></script>
-	<script src="{{url_for('static', filename='vendors/DataTables/datatables.min.js')}}"></script>
-	<script src="{{url_for('static', filename='vendors/multiple-select/jquery.multi-select.js')}}"></script>
-	<script src="{{url_for('static', filename='vendors/canvas/canvasjs.min.js')}}"></script>
+<style>
 	
-	<script src="{{url_for('static', filename='js/common.js')}}"></script>
-	<script src="{{url_for('static', filename='js/components/export.js')}}"></script>
-
-</body>
+</style>
+<div id="container" class="chart-container" style="width: 500px; resize: both;"></div>
 
 
+<script>
+
+var chart = Highcharts.chart('container', {
+
+    chart: {
+        type: 'column'
+    },
+
+    title: {
+        text: 'Total fruit consumption, grouped by gender'
+    },
+
+    xAxis: {
+    	tickWidth: 0,
+    	labels: {
+            groupedOptions: [{
+            	style: {
+                    fontWeight: 'bold',
+                    padding: '5px'
+                },
+                rotation: 0,
+            }],
+            style: {
+                fontWeight: 'bold',
+            },
+            rotation: 90
+        },
+	      categories: [{
+	        name: "iSCI",
+	        categories: ["12-14hkjhkj", "12-15", "12-14", "12-15", "12-14"]
+	      }, {
+	        name: "",
+	        categories: [""]
+	      }, {
+	        name: "Data Center",
+	        categories: ["12-14", "12-15", "12-14", "12-15", "12-14"]
+	      }],
+    },
+
+    yAxis: {
+        allowDecimals: false,
+        min: 0,
+        title: {
+            text: 'Number of fruits'
+        }
+    },
 
 
+    plotOptions: {
+        column: {
+            stacking: 'normal'
+        },
+	    series: {
+	        grouping: false,
+	        groupPadding: 0,
+	        pointPadding: 0,
+	      }
+    },
+
+    series: [{
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    }]
+});
+$(document).ready(function(){
+	$(document).on('click', '#container', function(){
+		chart.reflow();
+	});
+});
+	</script>

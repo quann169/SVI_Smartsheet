@@ -304,9 +304,12 @@ class Configuration(Connection):
             )
         query_result    = self.db_query(query)
         result = None
+        list_role = []
         if query_result:
             result = query_result[0][DbHeader.ROLE_NAME]
-        return result
+            for row in query_result:
+                list_role.append(row[DbHeader.ROLE_NAME])
+        return result, list_role
     
     def get_user_role(self):
         query = """SELECT `%s`.`%s`, `%s`.`%s`, `%s`.`%s`, `%s`.`%s` 
