@@ -292,7 +292,10 @@ function creat_productivity_data(row_data, headers, group_id, title, max_hours) 
 				tmp_category.categories.push(day);
 			}
 			category_list.push(tmp_category);
-			category_list.push({name: '', categories: ['']});
+			if (i < list_group.length - 1) {
+				category_list.push({name: '', categories: ['']});
+			}
+			
 		}
 	}
 	
