@@ -65,6 +65,7 @@ class DbTable:
     USER_VERSION            = 'user_version'
     OTHER_CONFIG            = 'other_config'
     ACTION                  = 'action'
+    PRODUCTIVITY_CONFIG     = 'productivity_config'
     
 class AnalyzeCFGKeys:
     TOKEN   = 'Token'
@@ -121,6 +122,14 @@ class ExcelHeader:
     LEADER      = 'Leader'
     TEAM        = 'Team'
     IS_ACTIVE   = 'Is Active'
+    WEEK        = 'Week'
+    NRE         = 'NRE'
+    SUPPORT     = 'Support'
+    PRE_SALE    = 'Pre-sale'
+    POST_SALE   = 'Post-sale'
+    RND         = 'RnD'
+    TRN         = 'TRN'
+    NONE_WH     = 'Non-WH'
     
 class DefaulteValue:
     
@@ -253,7 +262,10 @@ class DbHeader:
     USER_VERSION_ID         = 'user_version_id'
     VERSION                 = 'version'
     ACTION_ID               = 'action_id'
-    ACTION_NAME               = 'action_name'
+    ACTION_NAME             = 'action_name'
+    PRODUCTIVITY_CONFIG_ID  = 'productivity_config_id'
+    WEEK                    = 'week'
+    WORK_HOUR               = 'work_hour'
     
 class ExcelColor:
     
@@ -275,6 +287,7 @@ class Template:
     SETTING_SHEET       = 'screens/setting/sheet.html'
     SETTING_TIMEOFF     = 'screens/setting/timeoff.html'
     SETTING_OTHER       = 'screens/setting/other_setting.html'
+    SETTING_PRODUCTIVITY = 'screens/setting/productivity_setting.html'
     
     ADMIN               = 'screens/admin/admin.html'
     
@@ -317,6 +330,8 @@ class Route:
     IMPORT_SHEET    = '/import-sheet'
     RESOURCE    = '/resource'
     OTHER_SETTING    = '/other-setting'
+    PRODUCTIVITY_SETTING    = '/productivity-setting'
+    IMPORT_PRODUCTIVITY_SETTING    = '/import-productivity-setting'
     
     IMPORT_RESOURCE    = '/import-resource'
     HOLIDAY    = '/holiday'
@@ -356,7 +371,7 @@ class Route:
     GET_VERSION_INFO = '/get-version-info'
     UPDATE_ADMIN_VERSION   = '/update-admin-version'
     
-    LIST_SETTING_ROUTE      = [HOLIDAY, RESOURCE, SHEET, TIMEOFF, OTHER_SETTING]
+    LIST_SETTING_ROUTE      = [HOLIDAY, RESOURCE, SHEET, TIMEOFF, OTHER_SETTING, PRODUCTIVITY_SETTING]
     LIST_TIMESHEET_ROUTE    = [RESOURCE_TIMESHEET, DETAIL, PROJECT_TIMESHEET, REPORT, RESOURCE_PRODUCTIVITY]
     LIST_ADMIN_ROUTE        = [ADMIN_USER_ROLE, ADMIN_DASHBOARD, ADMIN_VERSION, LOG]
     # DEFINE ROUTE REQUIRE ROLE 

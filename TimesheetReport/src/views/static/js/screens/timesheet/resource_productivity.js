@@ -64,13 +64,14 @@ function draw_stack_column_chart(id, data, label_angle) {
 	
 		},
 		formatter:function(){
-			if(this.y > 5)
+			if(this.y > 2)
 				return this.y;
 		}
 	}
 	var color_maping = ['#7cb5ec', '#abc98a', '#e4d354', '#f7cbd6 ', '#91e8e1', '#f45b5b'];
-	for (let idx = data.type.length - 1; idx >= 0; idx--) {
-		let type = data.type[idx];
+	let sheet_type_order = ["NRE", "RnD", "TRN", "Non-WH", "Support", "Pre-sale"];
+	for (let idx = sheet_type_order.length - 1; idx >= 0; idx--) {
+		let type = sheet_type_order[idx];
 		let tmp_series = {stacked: '1', name: type, data: [], color: color_maping[idx], dataLabels: dataLabel};
 		for (let idx1 = 0; idx1 < data.category.length; idx1++) {
 			let name = data.category[idx1].name;
@@ -124,6 +125,11 @@ function draw_stack_column_chart(id, data, label_angle) {
 			min: 0,
 			title: {
 				text: ''
+			}
+		},
+		legend: {
+			itemHiddenStyle: {
+				color: '#ffffff'
 			}
 		},
 		plotOptions: {

@@ -396,6 +396,37 @@ def import_holiday():
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
+@timesheet_bp.route(Route.PRODUCTIVITY_SETTING)
+def productivity_setting():
+    """ productivity setting page
+    :param : 
+    :return: productivity setting page
+    """
+    println(Route.PRODUCTIVITY_SETTING, OtherKeys.LOGING_DEBUG)
+    try:
+        ctrl_obj    = ctrl()
+        return render_template(Template.SETTING_PRODUCTIVITY, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template())
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.IMPORT_PRODUCTIVITY_SETTING, methods=[OtherKeys.METHOD_POST])
+def import_productivity_setting():
+    """ import productivity setting by excel
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.IMPORT_PRODUCTIVITY_SETTING, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().import_productivity_setting(file_name=request_dict['file_name'])
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+    
+    
 @timesheet_bp.route(Route.UPDATE_SESSION, methods=[OtherKeys.METHOD_POST])
 def update_session():
     """ update sessionkey

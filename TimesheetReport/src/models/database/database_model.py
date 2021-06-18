@@ -703,7 +703,7 @@ class Configuration(Connection):
         self.db_execute(query)
     
     def get_user_version(self):
-        query   = """SELECT `%s`, `%s`, `%s`,  FROM `%s`;"""%( 
+        query   = """SELECT `%s`, `%s`, `%s` FROM `%s`;"""%( 
             DbHeader.VERSION, DbHeader.USER_VERSION_ID, DbHeader.USER_ID, DbTable.USER_VERSION)
         query_result    = self.db_query(query)
         result = {}
@@ -774,6 +774,90 @@ class Configuration(Connection):
         """%(DbTable.USER_ROLE, DbHeader.ROLE_ID, role_id, DbHeader.USER_ID, user_id)
         self.db_execute(query)
     
+    def add_productivity_config(self, list_record):
+        query   = '''INSERT INTO `%s` 
+                        (`%s`, `%s`, `%s`, `%s`, `%s`)
+                    '''%(DbTable.PRODUCTIVITY_CONFIG,\
+                    DbHeader.WEEK, DbHeader.SHEET_TYPE_ID, DbHeader.USER_ID, \
+                    DbHeader.WORK_HOUR, DbHeader.UPDATED_BY)
+        query   += '''
+                    VALUES
+                        (%s, %s, %s, %s, %s)
+                    ;'''
+        self.db_execute_many(query, list_record)
+    
+    def get_productivity_config(self, start_date=None, end_date=None):
+        condition = ''
+        if start_date and  end_date:
+            condition = "WHERE `%s`.'%s'>='%s' AND `%s`.'%s'<='%s'"%(
+                DbTable.PRODUCTIVITY_CONFIG, DbHeader.WEEK, start_date,
+                DbTable.PRODUCTIVITY_CONFIG, DbHeader.WEEK, end_date)
+        query = """
+                SELECT `%s`.`%s`, 
+                        `%s`.`%s`,
+                        `%s`.`%s`,
+                        `%s`.`%s`,
+                        `%s`.`%s`
+                FROM `%s` 
+                INNER JOIN `%s`
+                ON `%s`.`%s`=`%s`.`%s`
+                INNER JOIN `%s`
+                ON `%s`.`%s`=`%s`.`%s`
+                ORDER BY `%s`.`%s`, `%s`.`%s`, `%s`.`%s`
+                %s;
+        """%(
+            DbTable.SHEET_TYPE, DbHeader.SHEET_TYPE,
+            DbTable.USER, DbHeader.USER_NAME,
+            DbTable.PRODUCTIVITY_CONFIG, DbHeader.WEEK,
+            DbTable.PRODUCTIVITY_CONFIG, DbHeader.WORK_HOUR,
+            DbTable.PRODUCTIVITY_CONFIG, DbHeader.UPDATED_BY,
+            DbTable.PRODUCTIVITY_CONFIG,
+            DbTable.SHEET_TYPE,
+            DbTable.SHEET_TYPE, DbHeader.SHEET_TYPE_ID, DbTable.PRODUCTIVITY_CONFIG, DbHeader.SHEET_TYPE_ID,
+            DbTable.USER,
+            DbTable.USER, DbHeader.USER_ID, DbTable.PRODUCTIVITY_CONFIG, DbHeader.USER_ID,
+            DbTable.PRODUCTIVITY_CONFIG, DbHeader.WEEK,
+            DbTable.SHEET_TYPE, DbHeader.SHEET_TYPE,
+            DbTable.USER, DbHeader.USER_NAME, condition
+            )
+        query_result    = self.db_query(query)
+        result = {}
+        if query_result:
+            for row in query_result:
+                sheet_type = row[DbHeader.SHEET_TYPE]
+                resource = row[DbHeader.USER_NAME]
+                week = row[DbHeader.WEEK]
+                work_hour = row[DbHeader.WORK_HOUR]
+                work_hour   = round_num(work_hour)
+                if not result.get(week):
+                    result[week] = {}
+                if not result[week].get(resource):
+                    result[week][resource] = {}
+                result[week][resource][sheet_type] = work_hour
+        return result
+    
+    def check_exist_productivity_config(self):
+        query   = """SELECT `%s` FROM `%s` WHERE `%s`="%s" AND `%s`="%s" AND `%s`="%s";"""%( 
+            DbHeader.PRODUCTIVITY_CONFIG_ID, DbTable.PRODUCTIVITY_CONFIG, 
+            DbHeader.USER_ID, self.user_id, DbHeader.SHEET_TYPE_ID, self.sheet_type_id, \
+            DbHeader.WEEK, self.week)
+        query_result    = self.db_query(query)
+        if query_result:
+            return True
+        else:
+            return False
+    
+    def update_productivity_config(self):
+        query   = """UPDATE `%s` SET `%s`="%s", `%s`="%s"
+                    WHERE `%s`="%s" AND `%s`="%s" AND `%s`="%s";
+        """%( DbTable.PRODUCTIVITY_CONFIG, DbHeader.WORK_HOUR, self.work_hour, 
+              DbHeader.UPDATED_BY, self.updated_by,
+              DbHeader.USER_ID, self.user_id, 
+              DbHeader.SHEET_TYPE_ID, self.sheet_type_id, 
+              DbHeader.WEEK, self.week, 
+              )
+        self.db_execute(query)
+        
 class DbTask(Connection):
     def __init__(self):
         Connection.__init__(self)

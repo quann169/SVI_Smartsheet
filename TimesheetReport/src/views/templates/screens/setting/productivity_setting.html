@@ -1,0 +1,77 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Productivity Setting
+{% endblock title %}
+{% block breadcrumb %}
+	{% set br_items = [(route.PRODUCTIVITY_SETTING, 'Productivity Setting', True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+{% block sidebar %}
+	{% set active_sidebar = route.PRODUCTIVITY_SETTING %}
+	{% with active_sidebar=active_sidebar , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/screens/setting/productivity_setting.js')}}"></script>
+{% endblock scripts %}
+{% block main %}
+<form id='import_productivity' method="post" enctype="multipart/form-data">
+	<div class='dp-flex'>
+		{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+			<div class="custom-file col-4">
+			    <input type="file" name='config_file' id='config_file' accept='.xlsx' class="custom-file-input " >
+			    <label class="custom-file-label" for="config_file">Choose file</label>
+			</div>
+			<button type='submit' class='mg-l-5' id='btn_import' disabled  data-toggle="tooltip" title="Import"><i class="fas fa-file-import"></i></button>
+		{% endif %}
+	</div>
+</form>
+<div class='table-content'>
+	<table id="productivity_table" class="table table-striped table-bordered " cellspacing="0" width='100%'>
+	  {% set productivity_setting = ctrl_obj.get_productivity_setting() %}
+	  <thead>
+	    <tr>
+		  <th class="th-sm">Week
+	      </th>
+	      <th class="th-sm">Resource
+	      </th>
+		  <th class="th-sm">NRE
+	      </th>
+		  <th class="th-sm">RnD
+		</th>
+		<th class="th-sm">Support
+		</th>
+		<th class="th-sm">Pre-sale
+		</th>
+		<th class="th-sm">Post-sale
+		</th>
+		<th class="th-sm">Non-WH
+		</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+		{% for week in productivity_setting %}
+			{% for resource in productivity_setting[week] %}
+				<tr>
+				<td >{{week.strftime('%Y-%m-%d')}}</td>
+				<td >{{resource}}</td>
+				<td class='bold'>{{productivity_setting[week][resource]['NRE']}}</td>
+				<td class='bold'>{{productivity_setting[week][resource]['RnD']}}</td>
+				<td class='bold'>{{productivity_setting[week][resource]['Support']}}</td>
+				<td class='bold'>{{productivity_setting[week][resource]['Pre-sale']}}</td>
+				<td class='bold'>{{productivity_setting[week][resource]['Post-sale']}}</td>
+				<td class='bold'>{{productivity_setting[week][resource]['Non-WH']}}</td>
+				
+				</tr>
+			{% endfor %}
+		{% endfor %}
+	
+	  </tbody>
+	  
+	</table>
+</div>
+{% endblock main %}

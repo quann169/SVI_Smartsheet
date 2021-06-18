@@ -293,6 +293,66 @@ class Controllers:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
+    def import_productivity_setting(self, file_name):
+        try:
+            file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
+            df          = pd.read_excel (file_path, sheet_name='Productivity', engine='openpyxl')
+            user_name   = session[SessionKey.USERNAME]
+            week_list       = df[ExcelHeader.WEEK]
+            resource_list    = df[ExcelHeader.RESOURCE]
+            tmp_week = ''
+            config_obj  = Configuration()
+            config_obj.get_sheet_type_info(is_parse=True)
+            sheet_type_info = config_obj.sheet_type
+            config_obj.get_all_user_information()
+            users    = config_obj.users
+            list_record = []
+            list_sheet_type = [ExcelHeader.NRE, ExcelHeader.RND, ExcelHeader.TRN, 
+                               ExcelHeader.PRE_SALE, ExcelHeader.POST_SALE, ExcelHeader.SUPPORT, 
+                               ExcelHeader.NONE_WH]
+            for idx in range(0, len(week_list)):
+                week = str(week_list[idx])
+                resource = str(resource_list[idx]).strip()
+                if week not in SettingKeys.EMPTY_CELL:
+                    tmp_week = week
+                    tmp_week = get_start_week_of_date(tmp_week, output_str=True)
+                if not users.get(resource):
+                    return [0, 'No such user %s'%resource]
+                user_id = users[resource].user_id
+                for sheet_type in list_sheet_type:
+                    value = str((df[sheet_type][idx])).strip()
+                    if value in SettingKeys.EMPTY_CELL:
+                        value = 0
+                    if not sheet_type_info.get(sheet_type):
+                        return [0, 'No such sheet type %s'%sheet_type]
+                    sheet_type_id = sheet_type_info[sheet_type]
+                    list_record.append((tmp_week, sheet_type_id, user_id, value, user_name))
+            for index in range(len(list_record) - 1, -1, -1):
+                row      = list_record[index]
+                config_obj.set_attr(
+                    updated_by= user_name,
+                    week= row[0],
+                    work_hour= row[3],
+                    sheet_type_id= row[1],
+                    user_id= row[2]
+                )
+                if config_obj.check_exist_productivity_config():
+                    config_obj.update_productivity_config()
+                    del list_record[index]
+            if len(list_record):
+                config_obj.add_productivity_config(list_record)
+                # self.record_to_log(0, LogKeys.ACTION_ADD_HOLIDAY, '', '%s'%(date), user_name)
+            remove_path(file_path)
+            return 1, Msg.M001
+        except Exception as e:
+            println(e, OtherKeys.LOGING_EXCEPTION)
+            return 0, e.args[0]
+    
+    def get_productivity_setting(self):
+        config_obj  = Configuration()
+        result = config_obj.get_productivity_config()
+        return result   
+    
     def get_session(self, key=None):
         try:
             val   = session[key]

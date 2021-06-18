@@ -34,6 +34,7 @@ const DOWNLOAD_FILE = '/dowload';
 const EXPORT = '/export';
 const TIMEOFF = '/timeoff';
 const IMPORT_TIMEOFF = '/import-timeoff';
+const IMPORT_PRODUCTIVITY_SETTING    = '/import-productivity-setting'
 const LOG = '/log';
 const SHEET = '/sheet';
 const IMPORT_SHEET = '/import-sheet';
