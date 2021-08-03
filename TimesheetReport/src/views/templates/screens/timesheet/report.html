@@ -31,12 +31,20 @@
 {% block main %}
 <form id='timesheet_form' class=''>
 	{% set sheet_info = ctrl_obj.get_list_sheet_name() %}
+	{% set resource_info = ctrl_obj.get_resource_config() %}
 	<div class='row'>
 		<div class='col-md-10 d-flex align-items-center'>
 			<select id="list_sheet" class='mt-1' multiple="multiple">
 
 				{% for row in sheet_info %}
 		        	<option value="{{row[db_header.SHEET_ID]}}" {% if row[db_header.SHEET_ID] in request_dict[session_enum.SHEETS]%} selected {% endif %} >{{row[db_header.SHEET_NAME]}}</option>
+		    	{% endfor %}
+		    </select>
+		    <select id="list_user" class='mt-1 ' multiple="multiple" name="user">
+				{% for row2 in resource_info %}
+					{% if row2[db_header.IS_ACTIVE]%}
+		        		<option value="{{row2[db_header.USER_NAME]}}" {% if row2[db_header.USER_NAME] in request_dict[session_enum.USERS]%} selected {% endif %} >{{row2[db_header.USER_NAME]}}</option>
+		    		{% endif %}
 		    	{% endfor %}
 		    </select>
 			<input type='date' name='from_date' id='from_date' placeholder='From date' class='mx-1 px-2' value='{{request_dict[session_enum.FROM]}}'>
@@ -71,22 +79,22 @@
 	    </tr>
 	  </thead>
 	  <tbody>
-		{% for week in info %}
+		{% for week in info.keys()|sort %}
 			<tr class='week'>
 				<td colspan='9' class='bg-grey bold'>{{week}}</td>
 			</tr>
-			{% for email in info[week] %}
+			{% for email in info[week].keys()|sort %}
 				{% for row in info[week][email]%}
 					<tr class='report-content'>
 						<td ><a><i class="fas fa-minus-circle remove-row"></i></a></td>
 						<td contenteditable='true' class='email'>{{email}}</td>
-						<td  class='resource'>{{row.resource}}</td>
-						<td  class='resource-mail'>{{row.resource_mail}}</td>
-						<td  class='work-hours'>{{row.work_hours}}</td>
-						<td  class='timeoff'>{{row.timeoff}}</td>
-						<td  class='total'>{{row.total}}</td>
-						<td  class='detail'>{{row.detail}}</td>
-						<td  class='comment' contenteditable='true'></td>
+						<td contenteditable='true'  class='resource'>{{row.resource}}</td>
+						<td contenteditable='true'  class='resource-mail'>{{row.resource_mail}}</td>
+						<td contenteditable='true'  class='work-hours'>{{row.work_hours}}</td>
+						<td contenteditable='true'  class='timeoff'>{{row.timeoff}}</td>
+						<td contenteditable='true'  class='total'>{{row.total}}</td>
+						<td contenteditable='true'  class='detail'>{{row.detail}}</td>
+						<td contenteditable='true'  class='comment'></td>
 					</tr>
 				{% endfor %}
 			{% endfor %}

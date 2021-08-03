@@ -230,7 +230,10 @@ function update_session(session_key, session_value) {
    });
 }
 $(document).ready(function(){
-  $('[data-toggle="tooltip"]').tooltip();   
+  $('[data-toggle="tooltip"]').tooltip();  
+  $('[data-toggle="tooltip"]').click(function(){
+		$(this).tooltip('hide');
+	});
 });
 
 function parse_url() {

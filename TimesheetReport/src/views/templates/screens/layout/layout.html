@@ -28,14 +28,14 @@
 	<body>
 	    <div class="wrapper">
 	        <!-- Sidebar  -->
-	        <nav id="sidebar" class='{% if ctrl_obj.get_session('sidebar') == 1 %}active{% endif %}'>
+	        <nav id="sidebar" class="{% if ctrl_obj.get_session('sidebar') == 1 %}active{% endif %}">
 	            {% block sidebar %}
 		            {% include template.SIDEBAR %}
 	        	{%- endblock sidebar %}
 	        </nav>
 	
 	        <!-- Page Content  -->
-	        <div id="content" class="{% if ctrl_obj.get_session('sidebar') == 0 %}active{% endif %}">
+	        <div id="content" class="{% if ctrl_obj.get_session('sidebar') != 1 %}active{% endif %}">
 				<div class="loading" id ='overlay_loader'>&#8230;</div>
 				<a href="#" id="to_top_btn" class="" data-abc="true"><i class="fas fa-chevron-up" style="position: absolute; transform: translate(50%, 50%);"></i></a>
 				<div id='overlay'></div>

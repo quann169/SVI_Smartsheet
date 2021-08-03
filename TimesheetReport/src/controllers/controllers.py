@@ -155,9 +155,10 @@ class Controllers:
         end_time = time.time()
         diff = int(end_time - start_time)
         minutes, seconds = diff // 60, diff % 60
-        println ("Time: " + str(minutes) + ':' + str(seconds).zfill(2))
+        message = "Time: " + str(minutes) + ':' + str(seconds).zfill(2)
+        println(message, OtherKeys.LOGING_INFO)
         if log:
-            write_message_into_file(log, "Time: " + str(minutes) + ':' + str(seconds).zfill(2)  + '\n')
+            write_message_into_file(log, message  + '\n')
     
     def convert_request_dict_to_url(self, request_dict):
         result = convert_request_dict_to_url(request_dict)
@@ -678,7 +679,7 @@ class Controllers:
                                                  from_date      = from_date,
                                                  to_date        = to_date,
                                                  log            = log_file)
-            
+            println(Msg.M002, OtherKeys.LOGING_INFO)
             write_message_into_file(log_file, Msg.M002)
             time.sleep(2)
             return 1, Msg.M002
@@ -1829,6 +1830,7 @@ class Controllers:
                 sheet_type  = sheet_obj.sheet_type
                 if sheet_type == SettingKeys.NA_VALUE:
                     #skip sheet type NA
+                    print ('Skip sheet "%s" - Sheet type "NA"'%(sheet_name))
                     continue
                 for user_id in sheet_obj.resource:
                     for task_obj in sheet_obj.resource[user_id]:
