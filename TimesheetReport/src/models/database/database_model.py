@@ -786,10 +786,17 @@ class Configuration(Connection):
                     ;'''
         self.db_execute_many(query, list_record)
     
+    def remove_productivity_config_by_date(self, list_week):
+        if len(list_week):
+            query   = """DELETE FROM `%s` WHERE `%s` in %s;
+            """%(DbTable.PRODUCTIVITY_CONFIG, DbHeader.WEEK, str(list_week))
+            self.db_execute(query)
+            
+        
     def get_productivity_config(self, start_date=None, end_date=None):
         condition = ''
         if start_date and  end_date:
-            condition = "WHERE `%s`.'%s'>='%s' AND `%s`.'%s'<='%s'"%(
+            condition = "WHERE `%s`.`%s`>='%s' AND `%s`.`%s`<='%s'"%(
                 DbTable.PRODUCTIVITY_CONFIG, DbHeader.WEEK, start_date,
                 DbTable.PRODUCTIVITY_CONFIG, DbHeader.WEEK, end_date)
         query = """
@@ -803,8 +810,8 @@ class Configuration(Connection):
                 ON `%s`.`%s`=`%s`.`%s`
                 INNER JOIN `%s`
                 ON `%s`.`%s`=`%s`.`%s`
-                ORDER BY `%s`.`%s`, `%s`.`%s`, `%s`.`%s`
-                %s;
+                %s
+                ORDER BY `%s`.`%s`, `%s`.`%s`, `%s`.`%s`;
         """%(
             DbTable.SHEET_TYPE, DbHeader.SHEET_TYPE,
             DbTable.USER, DbHeader.USER_NAME,
@@ -816,9 +823,10 @@ class Configuration(Connection):
             DbTable.SHEET_TYPE, DbHeader.SHEET_TYPE_ID, DbTable.PRODUCTIVITY_CONFIG, DbHeader.SHEET_TYPE_ID,
             DbTable.USER,
             DbTable.USER, DbHeader.USER_ID, DbTable.PRODUCTIVITY_CONFIG, DbHeader.USER_ID,
+            condition,
             DbTable.PRODUCTIVITY_CONFIG, DbHeader.WEEK,
             DbTable.SHEET_TYPE, DbHeader.SHEET_TYPE,
-            DbTable.USER, DbHeader.USER_NAME, condition
+            DbTable.USER, DbHeader.USER_NAME
             )
         query_result    = self.db_query(query)
         result = {}

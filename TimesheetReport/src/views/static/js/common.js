@@ -474,5 +474,53 @@ function parse_serialize(serialize){
 	}
 	return out;
 }
+// show hide group row in table
+$(document).ready(function(){
+    $('tr').on('click', '.crollRow', function(){
+        var parentRow = $(this).closest("tr");
+        var parentTable = $(this).closest("table");
+        var parentCell = $(this).closest("td");
+        var listRow = parentTable.find('tr');
+        var listCol = parentRow.find('td');
+        var currentRow = listRow.index(parentRow);
+        var currentCol = listCol.index(parentCell);
+        $(this).toggleClass('showChild');
+        var isShow = false;
+        if ($(this).hasClass('showChild')){
+            isShow = true;
+        }
+        if (isShow) {
+            $(this).html('+');
+        } else {
+            $(this).html('-');
+        }
+        var listNextRow = listRow.slice(currentRow + 1, listRow.length);
+        listNextRow.each(function(){
+            var listColInRow = $(this).find('td');
+            var isCheck = true;
+            var listPrevCol = listColInRow.slice(0, currentCol + 1);
+            listPrevCol.each(function(){
+                var contentCell = $(this).html();
+                if (contentCell.trim() != '') {
+                    isCheck = false;
+                    return false;
+                }
+            })
+            if (isCheck) {
+                if (isShow) {
+                    $(this).addClass('hidden-row');
+                    $(this).removeClass('shown-row');
+                } else {
+                    $(this).addClass('shown-row');
+                    $(this).removeClass('hidden-row');
+                    $(this).find('.crollRow').html('-');
+                    $(this).find('.crollRow').removeClass('showChild');
+                }
+            } else {
+                return false;
+            }
+        })
+    });
+})
 
 INTERVAL_CHECK_SMARTSHEET = setInterval(function() {check_loading_smartsheet(); }, 10000);

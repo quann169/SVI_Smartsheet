@@ -310,9 +310,12 @@ class Controllers:
             list_sheet_type = [ExcelHeader.NRE, ExcelHeader.RND, ExcelHeader.TRN, 
                                ExcelHeader.PRE_SALE, ExcelHeader.POST_SALE, ExcelHeader.SUPPORT, 
                                ExcelHeader.NONE_WH]
+            list_week_remove = []
+            
             for idx in range(0, len(week_list)):
                 week = str(week_list[idx])
                 resource = str(resource_list[idx]).strip()
+                
                 if week not in SettingKeys.EMPTY_CELL:
                     tmp_week = week
                     tmp_week = get_start_week_of_date(tmp_week, output_str=True)
@@ -326,31 +329,23 @@ class Controllers:
                     if not sheet_type_info.get(sheet_type):
                         return [0, 'No such sheet type %s'%sheet_type]
                     sheet_type_id = sheet_type_info[sheet_type]
+                    list_week_remove.append(tmp_week)
                     list_record.append((tmp_week, sheet_type_id, user_id, value, user_name))
-            for index in range(len(list_record) - 1, -1, -1):
-                row      = list_record[index]
-                config_obj.set_attr(
-                    updated_by= user_name,
-                    week= row[0],
-                    work_hour= row[3],
-                    sheet_type_id= row[1],
-                    user_id= row[2]
-                )
-                if config_obj.check_exist_productivity_config():
-                    config_obj.update_productivity_config()
-                    del list_record[index]
+                        
             if len(list_record):
+                list_week_remove = tuple(set(list_week_remove))
+                pprint(list_week_remove)
+                config_obj.remove_productivity_config_by_date(list_week_remove)
                 config_obj.add_productivity_config(list_record)
-                # self.record_to_log(0, LogKeys.ACTION_ADD_HOLIDAY, '', '%s'%(date), user_name)
             remove_path(file_path)
             return 1, Msg.M001
         except Exception as e:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
-    def get_productivity_setting(self):
+    def get_productivity_setting(self, start_date=None, end_date=None):
         config_obj  = Configuration()
-        result = config_obj.get_productivity_config()
+        result = config_obj.get_productivity_config(start_date, end_date)
         return result   
     
     def get_session(self, key=None):
@@ -1730,7 +1725,44 @@ class Controllers:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, 'Fail to send report.'
         return 1, 'Send Successfully.'
-        
+    
+    def group_productivity_setting_by_user(self, from_date, to_date, list_sub_col, team_ids, 
+                                           eng_type_ids, users, others_name, user_ids):
+        result = {}
+        procuctivity_setting = self.get_productivity_setting(from_date, to_date)
+        for date_obj, data in procuctivity_setting.items():
+            start_week = convert_date_to_string(date_obj, '%Y-%m-%d')
+            for user_name, user_data in  data.items():
+                try:
+                    user_id = users[user_name].user_id
+                except KeyError:
+                    try:
+                        user_id = others_name[user_name]
+                    except KeyError:
+                        user_id = users[SettingKeys.NA_VALUE].user_id
+                eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
+                team_name   = team_ids[user_ids[user_id].team_id]
+                #
+                # #Skip user not in PROCDUCTIVITY_ENG
+                # if eng_type not in OtherKeys.PROCDUCTIVITY_ENG:
+                #     continue
+                #get leader name
+                leader_id = users[user_name].leader_id
+                if leader_id:
+                    leader_name = user_ids[leader_id].user_name
+                else:
+                    leader_name = SettingKeys.NA_VALUE
+                    
+                if not result.get(user_name):
+                    result[user_name] = {'eng_type': eng_type,
+                                        'team_name': team_name,
+                                        'leader_name': leader_name,
+                                        'timesheet': {}}
+                if not result[user_name]['timesheet'].get(start_week):
+                    result[user_name]['timesheet'][start_week] = {}
+                result[user_name]['timesheet'][start_week] = user_data
+        return result
+    
     def get_resource_productivity_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, 
                                     filter='weekly', task_filter='both'):
         try:
@@ -1758,6 +1790,7 @@ class Controllers:
             
             user_email, users, user_ids, others_name = self.get_all_resource_information()
             info            = {}
+            
             if filter == 'monthly':
                 list_month   = get_work_month(from_date=from_date, to_date=to_date, holidays=holidays)
                 cols_element = list_month
@@ -1772,7 +1805,10 @@ class Controllers:
                 list_sub_col       = []
                 for col in cols_element:
                     list_sub_col.append(col[0])
-             
+            productivity_config_info = self.group_productivity_setting_by_user(from_date, to_date, 
+                                                                               list_sub_col, team_ids, 
+                                                                               eng_type_ids, users, 
+                                                                               others_name, user_ids)
             # caculate timeoff by week/month
             timeoff_info_2 = {}
             for user_id in time_off_info:
@@ -1791,6 +1827,9 @@ class Controllers:
                 sheet_obj   = timesheet_obj.sheets[sheet_id]
                 sheet_name  = sheet_obj.sheet_name
                 sheet_type  = sheet_obj.sheet_type
+                if sheet_type == SettingKeys.NA_VALUE:
+                    #skip sheet type NA
+                    continue
                 for user_id in sheet_obj.resource:
                     for task_obj in sheet_obj.resource[user_id]:
                         user_name   = task_obj.user_name
@@ -1860,7 +1899,7 @@ class Controllers:
                         if info[leader_name][user_name]['timesheet'][col_element]['sheet_type']['Non-WH'] <= 0:
                             info[leader_name][user_name]['timesheet'][col_element]['sheet_type']['Non-WH'] = 0
             
-            return info, list_sub_col, cols_element
+            return info, list_sub_col, cols_element, productivity_config_info
         except Exception as e:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]

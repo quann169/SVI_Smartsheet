@@ -78,7 +78,7 @@
 		</div>
 	</div>
 </form>
-{% set info, list_sub_col, cols_element = ctrl_obj.get_resource_productivity_info(request_dict)%}
+{% set info, list_sub_col, cols_element, productivity_config_info = ctrl_obj.get_resource_productivity_info(request_dict)%}
 <div class='table-content' style='overflow-x: auto; resize: vertical;'>
 	<table id="productivity" class="" cellspacing="0" width='100%'>
 	  <thead>
@@ -127,8 +127,29 @@
 				{% endfor %}
 
 			{% endfor %}
-		
 			
+			<!-- Add productivity config  -->
+			{% for user_name, user_data in productivity_config_info.items() %}
+				<tr>
+					<td class="w-50-px"><a><i class="fas fa-plus-circle add-row"></i></a></td>
+					<td class="w-50-px"><a><i class="fas fa-minus-circle remove-row"></i></a></td>
+					<td contenteditable='true' class="">{{user_data['leader_name']}}</td>
+					<td contenteditable='true' class="">{{user_name}}</td>
+					<td contenteditable='true' class="">{{user_data['eng_type']}}</td>
+					<td contenteditable='true' class="">{{user_data['team_name']}}</td>
+					{% for col, max_hours in cols_element %}
+						{% if user_data['timesheet'][col] %}
+							{% for key in other_keys.PROCDUCTIVITY_SHEET_TYPE %}
+								<td contenteditable='true' class="w-50-px" data-target='{{max_hours}}'>{{user_data['timesheet'][col][key]}}</td>
+							{% endfor %}
+						{% else %}
+							{% for key in other_keys.PROCDUCTIVITY_SHEET_TYPE %}
+								<td contenteditable='true' class="w-50-px" data-target='{{max_hours}}'>{% if key == 'Non-WH' %}{{max_hours}}{% else %}0{%endif%}</td>
+							{% endfor %}
+						{% endif %}
+					{% endfor %}
+				</tr>
+			{% endfor %}
 	  </tbody>
 	  
 	</table>
