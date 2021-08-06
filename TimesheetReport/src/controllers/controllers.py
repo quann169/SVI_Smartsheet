@@ -857,6 +857,7 @@ class Controllers:
                                                                                                              [SessionKey.TASK_FILTER, task_filter],
                                                                                                              [SessionKey.FROM, start],
                                                                                                              [SessionKey.TO, end],
+                                                                                                             [SessionKey.EXPAND_COLLAPSE, 'expand'],
                                                                                                              ]))
                         info[eng_type][team_name][user_name][col_element]['href'] = href
 

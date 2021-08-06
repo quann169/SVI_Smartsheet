@@ -186,6 +186,7 @@ class SessionKey:
     ACTIONS          = 'actions'
     GRANTED_LIST    = 'granted_list'
     COST            = 'cost'
+    EXPAND_COLLAPSE         = 'expand_collapse'
     
 class LogKeys:
     ACTION_ADD_FINAL_TASK = 'Add Final Task'

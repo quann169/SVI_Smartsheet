@@ -100,15 +100,16 @@
 	  </thead>
 	  <tbody>
 		{% for sheet_type in type_and_sheet_info.keys()|sort %}
+			{% set vars = {'is_first': True} %}
 			{% for sheet_name in type_and_sheet_info[sheet_type].keys()|sort %}
-				{% set count = loop.index %}
 				{% if sheet_name in info and sheet_name != 'total' %}
 					{% if sheet_name in granted_info %}
 						{% set granted_number = granted_info[sheet_name][db_header.GRANTED_NUMBER] %}
 					{% else %}
 						{% set granted_number = 0 %}
 					{% endif %}
-					{% if count == 1 %}
+					{% if vars.is_first %}
+						{% if vars.update({'is_first': false}) %}{% endif %}
 						<tr style='background-color: #8ed5e1 !important;'>
 						<td><span class='crollRow show-hide-row-btn'>-</span>{{sheet_type}}</td>	
 					  	<td ></td>
@@ -123,7 +124,7 @@
 					{% endif %}
 					<tr style='background-color: #e9e9e9 !important;'>
 						<td style='background-color: #fff !important;'></td>	
-					  	<td ><span class='crollRow show-hide-row-btn showChild'>+</span>{{sheet_name}}</td>
+					  	<td ><span class='crollRow show-hide-row-btn {% if request_dict[session_enum.EXPAND_COLLAPSE] == "expand" %}{% else %}showChild{% endif %}'>{% if request_dict[session_enum.EXPAND_COLLAPSE] == "expand" %}-{% else %}+{% endif %}</span>{{sheet_name}}</td>
 						<td></td><td></td><td></td>
 						{% for column in list_sub_column %}
 							<td>
@@ -140,7 +141,7 @@
 						{% set eng_type = info[sheet_name]['resource'][user_name]['eng_type'] %}
 						{% set timesheet = info[sheet_name]['resource'][user_name]['timesheet'] %}
 						{% set total_resource = info[sheet_name]['resource'][user_name]['total'] %}
-						<tr class='hidden-row'>
+						<tr class='{% if request_dict[session_enum.EXPAND_COLLAPSE] == "expand" %}show-row{% else %}hidden-row{% endif %}''>
 					  		<td></td>
 					  		<td></td>
 							<td>{{user_name}}</td>
