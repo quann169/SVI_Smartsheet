@@ -22,6 +22,9 @@ $(document).ready(function () {
 	$('#filter').change(function(event) {
 		load_timesheet_report();
 	});
+	$('#cost').change(function(event) {
+		load_timesheet_report();
+	});
 });
 
 

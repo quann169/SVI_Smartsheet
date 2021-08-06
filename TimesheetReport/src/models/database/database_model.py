@@ -33,6 +33,8 @@ class Configuration(Connection):
         self.sheet_user         = {}
         self.sheet_user2        = {}
         self.sheet_user3        = {}
+        self.type_and_sheet_info = {}
+        self.granted            = {}
      
     def get_sheet_config(self, list_sheet_id=None, is_parse=False, is_active=True):
         condition = ''
@@ -103,6 +105,9 @@ class Configuration(Connection):
                         DbHeader.IS_ACTIVE                      : row[DbHeader.IS_ACTIVE],
                         DbHeader.IS_VALID                       : row[DbHeader.IS_VALID]
                         }
+                    if not self.type_and_sheet_info.get(row[DbHeader.SHEET_TYPE]):
+                        self.type_and_sheet_info[row[DbHeader.SHEET_TYPE]] =  {}
+                    self.type_and_sheet_info[row[DbHeader.SHEET_TYPE]][row[DbHeader.SHEET_NAME]] = {}
             return query_result
         else:
             return result
@@ -426,7 +431,73 @@ class Configuration(Connection):
             return query_result
         else:
             return result
-        
+    
+    def get_list_granted(self, is_parse=False):
+        query = """
+                SELECT `%s`.`%s`, `%s`.`%s`, `%s`.`%s`, 
+                    `%s`.`%s`, `%s`.`%s`, `%s`.`%s`, `%s`.`%s`
+                FROM `%s`
+                INNER JOIN `%s`
+                ON `%s`.`%s`=`%s`.`%s`
+                ORDER BY `%s`.`%s` DESC, `%s`.`%s` DESC;
+        """%(
+            DbTable.GRANTED_CONFIG, DbHeader.GRANTED_NAME,
+            DbTable.GRANTED_CONFIG, DbHeader.GRANTED_CONFIG_ID,
+            DbTable.GRANTED_CONFIG, DbHeader.GRANTED_NUMBER,
+            DbTable.GRANTED_CONFIG, DbHeader.UPDATED_BY,
+            DbTable.GRANTED_CONFIG, DbHeader.UPDATED_DATE,
+            DbTable.SHEET, DbHeader.SHEET_NAME,
+            DbTable.SHEET, DbHeader.SHEET_ID,
+            DbTable.GRANTED_CONFIG,
+            DbTable.SHEET,
+            DbTable.GRANTED_CONFIG, DbHeader.SHEET_ID,
+            DbTable.SHEET, DbHeader.SHEET_ID,
+            DbTable.GRANTED_CONFIG, DbHeader.GRANTED_NAME,
+            DbTable.SHEET, DbHeader.SHEET_NAME,
+            )
+        query_result    = self.db_query(query)
+        result          = ()
+        if query_result:
+            if is_parse:
+                for row in query_result:
+                    sheet_name = row[DbHeader.SHEET_NAME]
+                    config_id = row[DbHeader.GRANTED_CONFIG_ID]
+                    sheet_id = row[DbHeader.SHEET_ID]
+                    granted_name = row[DbHeader.GRANTED_NAME]
+                    granted_number = row[DbHeader.GRANTED_NUMBER]
+                    updated_date = row[DbHeader.UPDATED_DATE]
+                    updated_by = row[DbHeader.UPDATED_BY]
+                    if not self.granted.get(granted_name):
+                        self.granted[granted_name] = {}
+                    if not self.granted[granted_name].get(sheet_name):
+                        self.granted[granted_name][sheet_name] = {}
+                    self.granted[granted_name][sheet_name][DbHeader.GRANTED_NUMBER] = int(granted_number)
+                    self.granted[granted_name][sheet_name][DbHeader.SHEET_ID] = sheet_id
+                    self.granted[granted_name][sheet_name][DbHeader.UPDATED_BY] = updated_by
+                    self.granted[granted_name][sheet_name][DbHeader.UPDATED_DATE] = updated_date
+                    self.granted[granted_name][sheet_name][DbHeader.GRANTED_CONFIG_ID] = config_id
+            return query_result
+        else:
+            return result
+    
+    def add_granted_config(self, list_record):
+        query   = '''INSERT INTO `%s` 
+                        (`%s`, `%s`, `%s`, `%s`)
+                    '''%(DbTable.GRANTED_CONFIG,\
+                    DbHeader.GRANTED_NAME, DbHeader.SHEET_ID, DbHeader.GRANTED_NUMBER, \
+                    DbHeader.UPDATED_BY)
+        query   += '''
+                    VALUES
+                        (%s, %s, %s, %s)
+                    ;'''
+        self.db_execute_many(query, list_record)
+    
+    def remove_granted_config_by_name(self, list_name):
+        if len(list_name):
+            query   = """DELETE FROM `%s` WHERE `%s` in %s;
+            """%(DbTable.GRANTED_CONFIG, DbHeader.GRANTED_NAME, str(list_name))
+            self.db_execute(query)
+            
     def remove_all_timeoff_information(self):
         query   = '''DELETE FROM `%s`;'''%(\
                     DbTable.TIME_OFF

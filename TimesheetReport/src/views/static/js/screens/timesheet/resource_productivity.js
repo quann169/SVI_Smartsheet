@@ -60,15 +60,16 @@ function draw_stack_column_chart(id, data, label_angle) {
 		style: {
 			// fontSize: '10px',
 			textShadow: false,
-			fontWeight: 'bold'
-	
+			textOutline: false,
+			fontWeight: '500',
+			fontFamily: "Calibri (Body)",
 		},
 		formatter:function(){
 			if(this.y > 2)
 				return this.y;
 		}
 	}
-	var color_maping = ['#7cb5ec', '#abc98a', '#e4d354', '#f7cbd6 ', '#91e8e1', '#f45b5b'];
+	var color_maping = ['#007BA9', '#fdd86c', '#a8d18d', '#f45b5b', '#d0cecf', '#fd7e14'];
 	let sheet_type_order = ["NRE", "RnD", "TRN", "Non-WH", "Support", "Pre-sale"];
 	for (let idx = sheet_type_order.length - 1; idx >= 0; idx--) {
 		let type = sheet_type_order[idx];
@@ -105,13 +106,15 @@ function draw_stack_column_chart(id, data, label_angle) {
 			labels: {
 				groupedOptions: [{
 					style: {
-						fontWeight: 'bold',
-						padding: '5px'
+						padding: '5px',
+						fontWeight: '500',
+						fontFamily: "Calibri (Body)",
 					},
 					rotation: 0,
 				}],
 				style: {
-					fontWeight: 'bold',
+					fontWeight: '500',
+					fontFamily: "Calibri (Body)",
 				},
 				rotation: label_angle
 			},

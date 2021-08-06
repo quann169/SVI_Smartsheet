@@ -199,7 +199,8 @@ function get_data_from_form(form_id) {
 	var from_date 	= data['from_date'];
 	var to_date 	= data['to_date'];
 	var filter 		= data['task_filter'];
-	
+	var granted_list 		= data['granted_list'];
+	var cost 		= data['cost'];
 	if (to_date == '' || from_date == '') {
 		custom_alert('Missing date', 'error');
 		return null;
@@ -209,6 +210,8 @@ function get_data_from_form(form_id) {
 	data[SESSION_FILTER] = filter;
 	data[SESSION_SHEETS] = ids;
 	data[SESSION_USERS] = users2;
+	data[SESSION_GRANTED_LIST] = granted_list;
+	data[SESSION_COST] = cost;
 	return data;
 }
 
@@ -350,6 +353,8 @@ function colect_config_date() {
 	var to_date 	= data['to_date'];
 	var filter 		= data['filter'];
 	var task_filter = data['task_filter'];
+	var granted_list = data['granted_list'];
+	var cost = data['cost'];
 	if (to_date == '' || from_date == '') {
 		custom_alert('Missing date', 'error');
 		return null;
@@ -361,6 +366,8 @@ function colect_config_date() {
 	out[SESSION_TASK_FILTER] = task_filter;
 	out[SESSION_SHEETS] = ids;
 	out[SESSION_USERS] = users2;
+	out[SESSION_GRANTED_LIST] = granted_list;
+	out[SESSION_COST] = cost;
 	return out;
 }
 $(document).ready(function () {

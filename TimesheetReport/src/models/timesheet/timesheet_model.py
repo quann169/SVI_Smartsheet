@@ -29,6 +29,7 @@ class Timesheet():
         self.all_task    = {}
         self.all_final_task = {}
         self.list_user = list_user
+        self.type_and_sheet_info = {}
         
     def parse(self, sheet_user=None):
         config_obj  = Configuration()
@@ -38,6 +39,7 @@ class Timesheet():
         self.time_off    = config_obj.time_off
         config_obj.get_sheet_config(is_parse=True)
         sheet_ids       = config_obj.sheet_ids
+        self.type_and_sheet_info = config_obj.type_and_sheet_info
         config_obj.get_team_info(is_parse=True)
         self.team_ids       = config_obj.team_ids
         config_obj.get_eng_type_info(is_parse=True)

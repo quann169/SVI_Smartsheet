@@ -335,7 +335,6 @@ class Controllers:
                         
             if len(list_record):
                 list_week_remove = tuple(set(list_week_remove))
-                pprint(list_week_remove)
                 config_obj.remove_productivity_config_by_date(list_week_remove)
                 config_obj.add_productivity_config(list_record)
             remove_path(file_path)
@@ -344,6 +343,42 @@ class Controllers:
             println(e, OtherKeys.LOGING_EXCEPTION)
             return 0, e.args[0]
     
+    def import_granted_setting(self, file_name):
+        try:
+            file_path   = os.path.join(os.path.join(config.WORKING_PATH, 'upload'), file_name)
+            df          = pd.read_excel (file_path, sheet_name='Granted', engine='openpyxl')
+            user_name   = session[SessionKey.USERNAME]
+            granted_names       = df[ExcelHeader.GRANTED_NAME]
+            granted_numbers    = df[ExcelHeader.GRANTED_NUMBER]
+            sheet_names         = df[ExcelHeader.SHEET_NAME]
+            tmp_name = ''
+            config_obj  = Configuration()
+            config_obj.get_sheet_config(is_parse=True, is_active=None)
+            sheets          = config_obj.sheets
+            list_record = []
+            list_name_remove= []
+            for idx in range(0, len(granted_names)):
+                granted_name = str(granted_names[idx])
+                granted_number = str(granted_numbers[idx]).strip()
+                sheet_name      = str(sheet_names[idx]).strip()
+                if granted_name not in SettingKeys.EMPTY_CELL:
+                    tmp_name = granted_name
+                if not sheets.get(sheet_name):
+                    return [0, 'No such sheet  %s'%sheet_name]
+                sheet_id = sheets[sheet_name][DbHeader.SHEET_ID]
+                list_name_remove.append(tmp_name)
+                list_record.append((tmp_name, sheet_id, granted_number, user_name))
+            
+            if len(list_record):
+                list_name_remove = tuple(set(list_name_remove))
+                config_obj.remove_granted_config_by_name(list_name_remove)
+                config_obj.add_granted_config(list_record)
+            remove_path(file_path)
+            return 1, Msg.M001
+        except Exception as e:
+            println(e, OtherKeys.LOGING_EXCEPTION)
+            return 0, e.args[0]
+        
     def get_productivity_setting(self, start_date=None, end_date=None):
         config_obj  = Configuration()
         result = config_obj.get_productivity_config(start_date, end_date)
@@ -360,6 +395,12 @@ class Controllers:
         config_obj  = Configuration()
         result      = config_obj.get_list_holiday()
         return result   
+    
+    def get_granted_info(self):
+        config_obj  = Configuration()
+        config_obj.get_list_granted(is_parse=True)
+        result = config_obj.granted
+        return result  
     
     def get_sheet_config(self, is_active=None):
         config_obj  = Configuration()
@@ -975,7 +1016,7 @@ class Controllers:
                             col_num = start_col
                             row_num += 1
         #end resource
-    def export_project_timesheet(self, wb, from_date, to_date, sheet_ids, color_style, options):
+    def export_project_timesheet(self, wb, from_date, to_date, sheet_ids, color_style, options, granted_list, cost):
         style_header = color_style['gray25']
         start_col, start_row = (0, 0)
         # export resource timesheet
@@ -983,75 +1024,124 @@ class Controllers:
             for filter in options['project'][SessionKey.FILTER]:
                 # Project timesheet
                 project_wb = wb.add_sheet('%s project  %s'%(filter, task_filter))
-                w_project_info, list_week, u1, u2 = self.get_project_timesheet_info(from_date=from_date, to_date=to_date, 
+                w_project_info, list_week, u1, u2, type_and_sheet_info, granted_info = self.get_project_timesheet_info(from_date=from_date, \
+                                                                                               to_date=to_date, 
                                                                                                sheet_ids=sheet_ids, \
                                                                                                task_filter=task_filter,
-                                                                                               filter=filter)
+                                                                                               filter=filter,
+                                                                                               granted_list=granted_list,
+                                                                                               cost=cost)
                 start_col, start_row = (0, 0)
                 row_num, col_num = (0, 0)
                 # create  header
-                list_header = ['Sheet', 'Resource', 'Eng Type', 'Team'] + list_week + ['Total']
+                list_header = ['Sheet Type', 'Sheet', 'Resource', 'Eng Type', 'Team'] + list_week + ['Granted', 'Used', 'Remain']
                 for header in list_header:
                     project_wb.col(col_num).width = 256 * 14
                     project_wb.write(row_num, col_num, header, style_header)
                     col_num += 1
                 col_num = start_col
                 row_num += 1
-                for sheet_name in w_project_info:
-                    project_wb.write(row_num, col_num, sheet_name, color_style['light_turquoise'])
-                    col_num += 1
-                    project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
-                    col_num += 1
-                    project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
-                    col_num += 1
-                    project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
-                    col_num += 1
-                    for column in list_week:
-                        project_wb.write(row_num, col_num, w_project_info[sheet_name]['total'][column], color_style['light_turquoise'])
-                        col_num += 1
-                    project_wb.write(row_num, col_num, w_project_info[sheet_name]['total_row'], color_style['light_turquoise'])
-                    col_num = start_col
-                    row_num += 1
-                    for user_name in w_project_info[sheet_name]['resource']:
-                        eng_type = w_project_info[sheet_name]['resource'][user_name]['eng_type']
-                        team = w_project_info[sheet_name]['resource'][user_name]['team']
-                        eng_type = w_project_info[sheet_name]['resource'][user_name]['eng_type']
-                        timesheet = w_project_info[sheet_name]['resource'][user_name]['timesheet']
-                        r_total = w_project_info[sheet_name]['resource'][user_name]['total']
-                        project_wb.write(row_num, col_num, '')
-                        col_num += 1
-                        project_wb.write(row_num, col_num, user_name)
-                        col_num += 1
-                        project_wb.write(row_num, col_num, eng_type)
-                        col_num += 1
-                        project_wb.write(row_num, col_num, team)
-                        col_num += 1
-                        
-                        for column in list_week:
-                            work_hour = timesheet[column]['work_hour']
-                            max_hour = timesheet[column]['max_hour']
-                            if work_hour > max_hour:
-                                project_wb.write(row_num, col_num, max_hour, color_style['orange'])
-                                col_num += 1
-                            elif work_hour  == max_hour:
-                                project_wb.write(row_num, col_num, max_hour, color_style['lime'])
-                                col_num += 1
+                for sheet_type in sorted(type_and_sheet_info.keys()): 
+                    count = 0
+                    for sheet_name in sorted(type_and_sheet_info[sheet_type].keys()):
+                        count += 1
+                        if sheet_name in w_project_info and sheet_name != 'total':
+                            if sheet_name in granted_info:
+                                granted_number = granted_info[sheet_name][DbHeader.GRANTED_NUMBER]
                             else:
-                                project_wb.write(row_num, col_num, work_hour, color_style['tan'])
+                                granted_number = 0
+                            if count == 1:
+                                # row sheet type
+                                project_wb.write(row_num, col_num, sheet_type, color_style['light_turquoise'])
                                 col_num += 1
-                        project_wb.write(row_num, col_num, r_total, color_style['white'])
-                        col_num += 1
-                        col_num = start_col
-                        row_num += 1
+                                project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                                col_num += 1
+                                project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                                col_num += 1
+                                project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                                col_num += 1
+                                project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                                col_num += 1
+                                for column in list_week:
+                                    project_wb.write(row_num, col_num, type_and_sheet_info[sheet_type]['total'][column], color_style['light_turquoise'])
+                                    col_num += 1
+                                project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                                col_num += 1
+                                project_wb.write(row_num, col_num, type_and_sheet_info[sheet_type]['total']['total_row'], color_style['light_turquoise'])
+                                col_num += 1
+                                project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                                col_num = start_col
+                                row_num += 1
+                            
+                            # row sheet
+                            project_wb.write(row_num, col_num, '')
+                            col_num += 1
+                            project_wb.write(row_num, col_num, sheet_name, color_style['light_turquoise'])
+                            col_num += 1
+                            project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                            col_num += 1
+                            project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                            col_num += 1
+                            project_wb.write(row_num, col_num, '', color_style['light_turquoise'])
+                            col_num += 1
+                            for column in list_week:
+                                project_wb.write(row_num, col_num, w_project_info[sheet_name]['total'][column], color_style['light_turquoise'])
+                                col_num += 1
+                            project_wb.write(row_num, col_num, granted_number, color_style['light_turquoise'])
+                            col_num += 1
+                            project_wb.write(row_num, col_num, w_project_info[sheet_name]['total_row'], color_style['light_turquoise'])
+                            col_num += 1
+                            project_wb.write(row_num, col_num, granted_number - w_project_info[sheet_name]['total_row'], color_style['light_turquoise'])
+                            col_num = start_col
+                            row_num += 1
+                            # user
+                            for user_name in w_project_info[sheet_name]['resource']:
+                                eng_type = w_project_info[sheet_name]['resource'][user_name]['eng_type']
+                                team = w_project_info[sheet_name]['resource'][user_name]['team']
+                                eng_type = w_project_info[sheet_name]['resource'][user_name]['eng_type']
+                                timesheet = w_project_info[sheet_name]['resource'][user_name]['timesheet']
+                                r_total = w_project_info[sheet_name]['resource'][user_name]['total']
+                                project_wb.write(row_num, col_num, '')
+                                col_num += 1
+                                project_wb.write(row_num, col_num, '')
+                                col_num += 1
+                                project_wb.write(row_num, col_num, user_name)
+                                col_num += 1
+                                project_wb.write(row_num, col_num, eng_type)
+                                col_num += 1
+                                project_wb.write(row_num, col_num, team)
+                                col_num += 1
+                                
+                                for column in list_week:
+                                    work_hour = timesheet[column]['work_hour']
+                                    max_hour = timesheet[column]['max_hour']
+                                    if work_hour > max_hour:
+                                        project_wb.write(row_num, col_num, max_hour, color_style['orange'])
+                                        col_num += 1
+                                    elif work_hour  == max_hour:
+                                        project_wb.write(row_num, col_num, max_hour, color_style['lime'])
+                                        col_num += 1
+                                    else:
+                                        project_wb.write(row_num, col_num, work_hour, color_style['tan'])
+                                        col_num += 1
+                                project_wb.write(row_num, col_num, '', color_style['white'])
+                                col_num += 1
+                                project_wb.write(row_num, col_num, r_total, color_style['white'])
+                                col_num += 1
+                                project_wb.write(row_num, col_num, '', color_style['white'])
+                                col_num = start_col
+                                row_num += 1
                 #end project
                 
-    def export_excel(self, from_date, to_date, sheet_ids, options):
+    def export_excel(self, from_date, to_date, sheet_ids, options, granted_list, cost):
         try:
             if not (from_date and to_date and sheet_ids):
                 return 0, MsgError.E003
             wb = Workbook()
             file_name = 'Report.xls'
             output_path   = os.path.join(config.WORKING_PATH, file_name)
+            file_name2 = 'Report.xlsx'
+            output_path2   = os.path.join(config.WORKING_PATH, file_name2)
             if os.path.exists(output_path):
                 os.remove(output_path)           
             # style 
@@ -1064,12 +1154,15 @@ class Controllers:
             self.export_resource_timesheet(wb, from_date, to_date, sheet_ids, color_style, options)
             
             #Export Project timesheet
-            self.export_project_timesheet(wb, from_date, to_date, sheet_ids, color_style, options)
+            self.export_project_timesheet(wb, from_date, to_date, sheet_ids, color_style, options, granted_list, cost)
             try:
                 wb.save(output_path)
+                x2x = XLS2XLSX(output_path)
+                remove_path(output_path)
+                x2x.to_xlsx(output_path2)
             except IndexError:
                 return 0, 'Can not export file because there are no sheets in the output workbook.'
-            return 1, file_name
+            return 1, file_name2
         
         except Exception as e:
             println(e, OtherKeys.LOGING_EXCEPTION)
@@ -1261,7 +1354,7 @@ class Controllers:
         i5_method = convert_request_dict_to_url(request_dict, [[SessionKey.MODE, 'continuity'],
                                                                [SessionKey.TITLE, AnalyzeItem.A005]])
         
-        info, list_sub_column, i6_count_fail, i6_total = self.get_project_timesheet_info(request_dict, is_caculate=True)
+        info, list_sub_column, i6_count_fail, i6_total, type_and_sheet_info, granted_info = self.get_project_timesheet_info(request_dict, is_caculate=True)
         if i6_total - i6_count_fail == i6_total:
             i6_status = True
         else:
@@ -1318,9 +1411,54 @@ class Controllers:
         else:
             result = (False, [])
         return result 
-        
+    
+    def calculate_cost_project_timesheet(self, timesheet_info, timeoff_info):
+        # group timesheet by resource to calculate cost
+        timesheet_by_resource = {}
+        for sheet_name, sheet_data in timesheet_info.items():
+            if sheet_data.get('resource'):
+                for resource, resource_data in sheet_data['resource'].items():
+                    if resource_data.get('timesheet'):
+                        for col_name, col_data in resource_data['timesheet'].items():
+                            max_hour = col_data['max_hour']
+                            work_hour = col_data['work_hour']
+                            if not timesheet_by_resource.get(resource):
+                                timesheet_by_resource[resource] = {}
+                            resource_data_2 = timesheet_by_resource[resource]
+                            if not resource_data_2.get(col_name):
+                                timeoff = 0
+                                if timeoff_info.get(resource) and timeoff_info[resource].get(col_name):
+                                    timeoff = timeoff_info[resource].get(col_name)
+                                resource_data_2[col_name] = {'sheets': [],
+                                                             'max_hour': max_hour,
+                                                             'work_hour': [],
+                                                             'timeoff': timeoff}
+                            col_data_2 = resource_data_2[col_name]
+                            col_data_2['sheets'].append(sheet_name)
+                            col_data_2['work_hour'].append(work_hour)
+                            
+        #calculate cost and update the input data
+        for resource, resource_data_3 in timesheet_by_resource.items():
+            for col_name, col_data_3 in resource_data_3.items():
+                sheets = col_data_3['sheets']
+                timeoff = col_data_3['timeoff']
+                work_hours = col_data_3['work_hour']
+                max_hour = col_data_3['max_hour']
+                sum_real_hour = sum(work_hours)
+                total = timeoff + sum_real_hour
+                if total > max_hour:
+                    standar_hour = max_hour - timeoff
+                    percent_number = standar_hour / sum_real_hour
+                    for idx in range(0, len(sheets)):
+                        sheet_name = sheets[idx]
+                        work_hour = work_hours[idx]
+                        cost = percent_number * work_hour
+                        cost = round_num(cost)
+                        timesheet_info[sheet_name]['resource'][resource]['timesheet'][col_name]['work_hour'] = cost
+
+    
     def get_project_timesheet_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, filter='weekly', 
-                                   mode='all', task_filter='both', list_user=None, is_caculate=False):
+                                   mode='all', task_filter='both', list_user=None, is_caculate=False, granted_list=None, cost=None):
         try:
             missing_method = False
             if request_dict:
@@ -1336,11 +1474,19 @@ class Controllers:
                         list_user = request_dict[SessionKey.USERS]
                     if request_dict.get(SessionKey.TASK_FILTER):
                         task_filter = request_dict[SessionKey.TASK_FILTER]
+                    if request_dict.get(SessionKey.GRANTED_LIST):
+                        granted_list = request_dict[SessionKey.GRANTED_LIST]
+                    if request_dict.get(SessionKey.COST):
+                        cost = request_dict[SessionKey.COST]
                 except KeyError:
                     missing_method = True
             
             if not filter or not sheet_ids or not to_date or not from_date or missing_method:
-                return ({}, [], 0, 0)
+                return ({}, [], 0, 0, {}, {})
+            granted_info = {}
+            if granted_list:
+                granted_info = self.get_granted_info()
+                granted_info = granted_info[granted_list]
             sheet_user2 = None
             sheet_user3 = None
             config_obj      = Configuration()
@@ -1353,13 +1499,13 @@ class Controllers:
             timesheet_obj   = Timesheet(False, from_date, to_date, task_filter, sheet_ids, list_user)
             timesheet_obj.parse(sheet_user=sheet_user2)
             user_ids        = timesheet_obj.user_ids
+            type_and_sheet_info = timesheet_obj.type_and_sheet_info
             eng_type_ids    = timesheet_obj.eng_type_ids
             team_ids        = timesheet_obj.team_ids
             time_off_info   = timesheet_obj.time_off
             config_obj.get_list_holiday(is_parse=True)
             holidays  = config_obj.holidays
             info            = {}
-            
             # caculate timeoff by week/month
             timeoff_info_2 = {}
             for user_id in time_off_info:
@@ -1391,6 +1537,7 @@ class Controllers:
             
             for sheet_id in timesheet_obj.sheets:
                 sheet_obj   = timesheet_obj.sheets[sheet_id]
+                sheet_type = sheet_obj.sheet_type
                 sheet_name  = sheet_obj.sheet_name
                 for user_id in sheet_obj.resource:
                     for task_obj in sheet_obj.resource[user_id]:
@@ -1406,7 +1553,9 @@ class Controllers:
                         else:
                             col_element  = task_obj.start_week
                         if not info.get(sheet_name):
-                            info[sheet_name]  = {'resource': {}, 'total': {}, 'sheet_id': sheet_id, 'total_row': 0}
+                            info[sheet_name]  = {'resource': {}, 'total': {}, 
+                                                 'sheet_id': sheet_id, 'total_row': 0, 
+                                                 'sheet_type': sheet_type}
                              
                         if not info[sheet_name]['resource'].get(user_name):
                             info[sheet_name]['resource'][user_name]  = {'eng_type': eng_type, 
@@ -1427,8 +1576,8 @@ class Controllers:
                                                                                                    }
                             if not info[sheet_name]['total'].get(col_name):
                                 info[sheet_name]['total'][col_name]  = 0
-                        info[sheet_name]['resource'][user_name]['total']  += work_hour
-                        info[sheet_name]['resource'][user_name]['total']  = round_num(info[sheet_name]['resource'][user_name]['total'])
+                        # info[sheet_name]['resource'][user_name]['total']  += work_hour
+                        # info[sheet_name]['resource'][user_name]['total']  = round_num(info[sheet_name]['resource'][user_name]['total'])
                         info[sheet_name]['resource'][user_name]['timesheet'][col_element]['work_hour']  += work_hour
                         info[sheet_name]['resource'][user_name]['timesheet'][col_element]['work_hour']  = round_num(info[sheet_name]['resource'][user_name]['timesheet'][col_element]['work_hour'])
                         start, end = calculate_start_end_date_by_option(date, from_date, to_date, filter)
@@ -1440,21 +1589,40 @@ class Controllers:
                                                                                                             [SessionKey.MODE, 'view']
                                                                                                             ]))
                         info[sheet_name]['resource'][user_name]['timesheet'][col_element]['href']  = href
+            
+            if cost == 'cost':
+                self.calculate_cost_project_timesheet(timesheet_info=info, timeoff_info=timeoff_info_2)
             # caculate total of sheet
             for sheet_name in info:
+                sheet_type = info[sheet_name]['sheet_type']
                 for user_name in info[sheet_name]['resource']:
                     for col_name in info[sheet_name]['resource'][user_name]['timesheet']:
                         work_hour = info[sheet_name]['resource'][user_name]['timesheet'][col_name]['work_hour']
                         max_hour = info[sheet_name]['resource'][user_name]['timesheet'][col_name]['max_hour']
+                        if not type_and_sheet_info[sheet_type].get('total'):
+                            type_and_sheet_info[sheet_type]['total'] = {}
+                        if not type_and_sheet_info[sheet_type]['total'].get(col_name):
+                            type_and_sheet_info[sheet_type]['total'][col_name] = 0
+                        if not type_and_sheet_info[sheet_type]['total'].get('total_row'):
+                            type_and_sheet_info[sheet_type]['total']['total_row'] = 0
                         if work_hour > max_hour:
                             info[sheet_name]['total'][col_name]  += max_hour
                             info[sheet_name]['total_row'] += max_hour
+                            info[sheet_name]['resource'][user_name]['total'] += max_hour
+                            type_and_sheet_info[sheet_type]['total'][col_name] += max_hour
+                            type_and_sheet_info[sheet_type]['total']['total_row'] += max_hour
                         else:
                             info[sheet_name]['total'][col_name]  += work_hour
                             info[sheet_name]['total_row'] += work_hour
+                            info[sheet_name]['resource'][user_name]['total'] += work_hour
+                            type_and_sheet_info[sheet_type]['total'][col_name] += work_hour
+                            type_and_sheet_info[sheet_type]['total']['total_row'] += work_hour
                             
                         info[sheet_name]['total'][col_name]  = round_num(info[sheet_name]['total'][col_name])
                         info[sheet_name]['total_row']  = round_num(info[sheet_name]['total_row'])
+                        info[sheet_name]['resource'][user_name]['total']  = round_num(info[sheet_name]['resource'][user_name]['total'])
+                        type_and_sheet_info[sheet_type]['total']['total_row']  = round_num(type_and_sheet_info[sheet_type]['total']['total_row'])
+                        type_and_sheet_info[sheet_type]['total'][col_name]  = round_num(type_and_sheet_info[sheet_type]['total'][col_name])
             total    = 0
             no_enought   = 0
             
@@ -1515,7 +1683,7 @@ class Controllers:
                         remove_sheet.append(sheet_name)
                 for name in remove_sheet:
                     del info[name]
-            result = (info, list_sub_col, no_enought, total)
+            result = (info, list_sub_col, no_enought, total, type_and_sheet_info, granted_info)
             return result
         except Exception as e:
             println(e, OtherKeys.LOGING_EXCEPTION)
@@ -2036,11 +2204,13 @@ class Controllers:
         return version
     
     def is_in_require_role(self, list_role):
-        user_role = session[SessionKey.ROLE_NAME]
-        if user_role in list_role:
-            return True
-        else:
-            return False
+        user_role = session[SessionKey.LIST_ROLE_NAME]
+        result = False
+        for role_name in user_role:
+            if role_name in list_role:
+                result = True
+        # result = True 
+        return result
     
     def add_current_version_of_user(self):
         config_obj = Configuration()

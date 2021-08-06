@@ -86,9 +86,9 @@
 	  </thead>
 	  <tbody>
 		{% set count = {'value': 0} %}
-		{% for eng_type in info %}
-			{% for team in info[eng_type] %}
-				{% for user_name in info[eng_type][team] %}
+		{% for eng_type in info.keys()|sort %}
+			{% for team in info[eng_type].keys()|sort %}
+				{% for user_name in info[eng_type][team].keys()|sort %}
 					{% if count.update({'value': (count.value + 1)}) %} {% endif %}
 					<tr>
 					{% set timesheet = info[eng_type][team][user_name]%}

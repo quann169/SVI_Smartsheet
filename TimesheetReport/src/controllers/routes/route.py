@@ -38,7 +38,6 @@ def before_request():
     # check login
     password = get_saved_password()
     username = getpass.getuser()
-
     if session.get(SessionKey.IS_LOGIN) == None:
         if path not in [Route().LOGIN, Route().AUTH]:
             check_password = ctrl_obj.authenticate_account(username, password)
@@ -225,10 +224,18 @@ def export():
     println(Route.EXPORT, OtherKeys.LOGING_DEBUG)
     try:
         request_dict = get_request_form_ajax()
+        granted_list = None
+        if request_dict.get(SessionKey.GRANTED_LIST):
+            granted_list = request_dict[SessionKey.GRANTED_LIST]
+        cost = None
+        if request_dict.get(SessionKey.COST):
+            cost = request_dict[SessionKey.COST]
         result = ctrl().export_excel(from_date=request_dict[SessionKey.FROM], \
                                      to_date=request_dict[SessionKey.TO], \
                                      sheet_ids=request_dict[SessionKey.SHEETS],
-                                     options=request_dict['options'])
+                                     options=request_dict['options'],
+                                     granted_list=granted_list,
+                                     cost=cost)
         return jsonify({'result': result})
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
@@ -425,7 +432,38 @@ def import_productivity_setting():
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
+
+@timesheet_bp.route(Route.GRANTED_SETTING)
+def granted_setting():
+    """ granted setting page
+    :param : 
+    :return: granted setting page
+    """
+    println(Route.GRANTED_SETTING, OtherKeys.LOGING_DEBUG)
+    try:
+        ctrl_obj    = ctrl()
+        return render_template(Template.SETTING_GRANTED, ctrl_obj = ctrl_obj, role = Role(), \
+                               db_header = DbHeader(), route = Route() , template= Template())
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.IMPORT_GRANTED, methods=[OtherKeys.METHOD_POST])
+def import_granted_setting():
+    """ import granted setting by excel
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.IMPORT_GRANTED, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().import_granted_setting(file_name=request_dict['file_name'])
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
     
+       
     
 @timesheet_bp.route(Route.UPDATE_SESSION, methods=[OtherKeys.METHOD_POST])
 def update_session():
@@ -877,7 +915,7 @@ def update_admin_version():
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
     
-@timesheet_bp.route('/test')
+@timesheet_bp.route('/test', methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
 def test():
     println('/test', OtherKeys.LOGING_DEBUG)
     try:

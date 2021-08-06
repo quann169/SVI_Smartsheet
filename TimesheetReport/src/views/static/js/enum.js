@@ -16,6 +16,8 @@ const SESSION_RESOURCE_NAME   = 'resource_name';
 const SESSION_ROLE_NAME       = 'role_name';
 const SESSION_MODE 		= 'mode';
 const SESSION_ACTIONS          = 'actions';
+const SESSION_GRANTED_LIST          = 'granted_list';
+const SESSION_COST          = 'cost';
 
 // INTERVAL KEY
 var INTERVAL_GET_DATA  = null;
@@ -42,6 +44,7 @@ const RESOURCE = '/resource';
 const IMPORT_RESOURCE = '/import-resource';
 const HOLIDAY = '/holiday';
 const IMPORT_HOLIDAY = '/import-holiday';
+const IMPORT_GRANTED = '/import-granted';
 const UPDATE_SESSION = '/update-session';
 const DETAIL   = '/detail-timesheet';
 const RESOURCE_TIMESHEET = '/resource-timesheet';

@@ -66,6 +66,7 @@ class DbTable:
     OTHER_CONFIG            = 'other_config'
     ACTION                  = 'action'
     PRODUCTIVITY_CONFIG     = 'productivity_config'
+    GRANTED_CONFIG          = 'granted_config'
     
 class AnalyzeCFGKeys:
     TOKEN   = 'Token'
@@ -112,6 +113,8 @@ class ExcelHeader:
     STATUS      = 'Status'
     HOLIDAY     = 'Holiday'
     SHEET_NAME  = 'Sheet Name'
+    GRANTED_NUMBER  = 'Granted Number'
+    GRANTED_NAME   = 'Granted Name'
     SHEET_TYPE  = 'Sheet Type'
     RESOURCE    = 'Resource'
     ENG_TYPE    = 'Eng Type'
@@ -181,7 +184,9 @@ class SessionKey:
     IS_UPDATE_VERSION = 'is_update_version'
     USER_VERSION    = 'user_version'
     ACTIONS          = 'actions'
-
+    GRANTED_LIST    = 'granted_list'
+    COST            = 'cost'
+    
 class LogKeys:
     ACTION_ADD_FINAL_TASK = 'Add Final Task'
     ACTION_ADD_RESOURCE     = 'Add Resource'
@@ -266,6 +271,9 @@ class DbHeader:
     PRODUCTIVITY_CONFIG_ID  = 'productivity_config_id'
     WEEK                    = 'week'
     WORK_HOUR               = 'work_hour'
+    GRANTED_NUMBER          = 'granted_number'
+    GRANTED_NAME            = 'granted_name'
+    GRANTED_CONFIG_ID       = 'granted_config_id'
     
 class ExcelColor:
     
@@ -283,6 +291,7 @@ class Role:
 class Template:
     
     SETTING_HOLIDAY     = 'screens/setting/holiday.html'
+    SETTING_GRANTED     = 'screens/setting/granted.html'
     SETTING_RESOURCE    = 'screens/setting/resource.html'
     SETTING_SHEET       = 'screens/setting/sheet.html'
     SETTING_TIMEOFF     = 'screens/setting/timeoff.html'
@@ -336,6 +345,8 @@ class Route:
     IMPORT_RESOURCE    = '/import-resource'
     HOLIDAY    = '/holiday'
     IMPORT_HOLIDAY    = '/import-holiday'
+    GRANTED_SETTING    = '/granted-setting'
+    IMPORT_GRANTED    = '/import-granted'
     UPDATE_SESSION    = '/update-session'
     DETAIL              = '/detail-timesheet'
     RESOURCE_TIMESHEET = '/resource-timesheet'
@@ -371,7 +382,7 @@ class Route:
     GET_VERSION_INFO = '/get-version-info'
     UPDATE_ADMIN_VERSION   = '/update-admin-version'
     
-    LIST_SETTING_ROUTE      = [HOLIDAY, RESOURCE, SHEET, TIMEOFF, OTHER_SETTING, PRODUCTIVITY_SETTING]
+    LIST_SETTING_ROUTE      = [HOLIDAY, RESOURCE, SHEET, TIMEOFF, OTHER_SETTING, PRODUCTIVITY_SETTING, GRANTED_SETTING]
     LIST_TIMESHEET_ROUTE    = [RESOURCE_TIMESHEET, DETAIL, PROJECT_TIMESHEET, REPORT, RESOURCE_PRODUCTIVITY]
     LIST_ADMIN_ROUTE        = [ADMIN_USER_ROLE, ADMIN_DASHBOARD, ADMIN_VERSION, LOG]
     # DEFINE ROUTE REQUIRE ROLE 
@@ -391,6 +402,10 @@ class Route:
         REPORT: [role.PM],
         SEND_REPORT: [role.PM],
         LOCK_SYNC: [role.PM],
+        PROJECT_TIMESHEET: [role.PM, role.DM],
+        ADMIN_USER_ROLE: [role.ADMIN],
+        ADMIN_VERSION: [role.ADMIN],
+        LOG: [role.ADMIN]
         }
      
     
