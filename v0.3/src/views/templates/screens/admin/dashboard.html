@@ -1,0 +1,27 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Holiday Setting
+{% endblock title %}
+{% block breadcrumb %}
+	{% set br_items = [(route.ADMIN_DASHBOARD, 'Dashboard', True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+{% block sidebar %}
+	{% set active_sidebar = route.ADMIN_DASHBOARD %}
+	{% with active_sidebar=active_sidebar , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/screens/admin/dashboard.js')}}"></script>
+{% endblock scripts %}
+{% block styles %}
+	{{super()}}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/screens/admin/dashboard.css') }}" />
+{% endblock styles %}
+{% block main %}
+
+{% endblock main %}

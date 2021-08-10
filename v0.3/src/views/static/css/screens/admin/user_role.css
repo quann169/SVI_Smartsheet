@@ -1,0 +1,96 @@
+.main-div {
+    text-align: center;
+}
+input:focus, select:focus {
+    outline: none;
+}
+.main-div .ctcard {
+    width: 30%;
+    min-width: 400px;
+    max-width: 500px;
+    margin: auto;
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    background-color: white;
+}
+.main-div .ctcard .ctcard_body {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    text-align: left;
+}
+.main-div .ctcard .ctcard_body a  {
+    font-size: 20px;
+}
+
+.main-div .ctcard .ctcard_body .ctcard__title {
+    font-weight: bold;
+    font-size: 18px;
+    margin: 0px;
+}
+.main-div .ctcard .ctcard_body .ctcard__new {
+    flex-grow: 1;
+    margin-left: 5px;
+    font-size: 15px;
+    text-decoration: underline;
+    color: blue;
+    margin: auto 5px;
+    font-weight: bold;
+}
+.main-div .ctcard .ctcard_body .ctcard__new:hover {
+    cursor: pointer;
+}
+.main-div .ctcard .ctcard_body .ctcard__content {
+    flex-basis: 100%;
+}
+
+.main-div .ctcard .ctcard_body .ctcard__content .ctcard__content-item {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 5px;
+    text-align: left;
+}
+.main-div .ctcard .ctcard_body .ctcard__content .ctcard__content-item:hover .item__remove {
+    visibility: visible;
+    max-width: 100vw;
+    transition: 1s ease-in;
+}
+.main-div .ctcard .ctcard_body .ctcard__content .ctcard__content-item > input {
+    flex-grow: 1;
+    border-radius: 0px;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #aaa;
+}
+.main-div .ctcard .ctcard_body .ctcard__content .ctcard__content-item select {
+    flex-grow: 1;
+    padding: 5px;
+    margin-right: 5px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-indent: 1px;
+    text-overflow: '';
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #aaa;
+    border-radius: 0px;
+}
+
+.main-div .ctcard .ctcard_body .ctcard__content .ctcard__content-item .item__remove {
+    padding: 0px 0px 0px 5px;
+    visibility: hidden;
+    overflow: hidden;
+    max-width: 0px;
+}
+.main-div .ctcard .ctcard_body .ctcard__content .ctcard__content-item .item__remove:hover {
+    color: #ff0000;
+}
+.main-div .ctcard .ctcard__footer {
+    text-align: right;
+    padding-top: 5px;
+    border-top: 1px solid #aaa;
+}

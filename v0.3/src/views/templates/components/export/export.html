@@ -1,0 +1,91 @@
+<div class="exportoption">
+    <div class="exportoption__taskbar">
+        <label class="exportoption__taskbar-title">
+            Export
+        </label>
+        <a class="exportoption__taskbar-close" onclick="close_overlay();">
+            <i class="fas fa-times"></i>
+        </a>
+    </div>
+    <div class="exportoption__content">
+        <fieldset class="exportoption__content-block">
+            <legend class='block__label'>Detail Timesheet</legend>
+            <ul class="block__body">
+                <li class="block__body-item">
+                    <input type="checkbox" id='detail_current' >
+                    <label for='detail_current'>Current</label>
+                </li>
+                <li class="block__body-item">
+                    <input type="checkbox"  id='detail_final' checked>
+                    <label for='detail_final'>Final</label>
+                </li>
+                <li class="block__body-item">
+                    <input type="checkbox" id='detail_both'>
+                    <label for='detail_both'>Both</label>
+                </li>
+            </ul>
+        </fieldset>
+        <fieldset class="exportoption__content-block">
+            <legend class='block__label'>Resource Timesheet</legend>
+            <ul class="block__body">
+                <li class="block__body-item">
+                    <input type="checkbox" id='resource_current'>
+                    <label for='resource_current'>Current</label>
+                </li>
+                <li class="block__body-item">
+                    <input type="checkbox" id='resource_final' checked>
+                    <label for='resource_final'>Final</label>
+                </li>
+                <li class="block__body-item">
+                    <input type="checkbox" id='resource_both' >
+                    <label for='resource_both' >Both</label>
+                </li>
+            </ul>
+            <ul class="block__body">
+                <li class="block__body-item">
+                    <input type="checkbox" id='resource_weekly' checked>
+                    <label for='resource_weekly'>Weekly</label>
+                </li>
+                <li class="block__body-item">
+                    <input type="checkbox" id='resource_monthly' checked>
+                    <label for='resource_monthly'>Monthly</label>
+                </li>
+            </ul>
+        </fieldset>
+        <fieldset class="exportoption__content-block">
+            <legend class='block__label'>Project Timesheet</legend>
+            <ul class="block__body">
+                <li class="block__body-item">
+                    <input type="checkbox" id='project_current'>
+                    <label for='project_current'>Current</label>
+                </li>
+                <li class="block__body-item">
+                    <input type="checkbox" id='project_final' checked>
+                    <label for='project_final'>Final</label>
+                </li>
+                <li class="block__body-item">
+                    <input type="checkbox" id='project_both' >
+                    <label for='project_both'>Both</label>
+                </li>
+            </ul>
+            <ul class="block__body">
+                <li class="block__body-item">
+                    <input type="checkbox" id='project_weekly' checked>
+                    <label for='project_weekly'>Weekly</label>
+                </li>
+                <li class="block__body-item">
+                    <input type="checkbox" id='project_monthly' checked>
+                    <label for='project_monthly'>Monthly</label>
+                </li>
+            </ul>
+        </fieldset>
+    </div>
+    <div class="exportoption__footer">
+        <button class="exportoption__footer-cancel"  onclick="close_overlay();">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <button class="exportoption__footer-cancel" id='confirm_export'>
+            <i class="fas fa-file-export"></i>
+        </button>
+    </div>
+</div>

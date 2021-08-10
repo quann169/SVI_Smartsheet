@@ -1,0 +1,86 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Log
+{% endblock title %}
+{% block breadcrumb %}
+	{% set br_items = [(route.LOG, 'Log', True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+{% block sidebar %}
+	{% set active_sidebar = route.LOG %}
+	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/screens/admin/log.js')}}"></script>
+{% endblock scripts %}
+
+{% block main %}
+<form id='log_form' class=''>
+	{% set sheet_info = ctrl_obj.get_list_sheet_name() %}
+	{% set action_info = ctrl_obj.get_log_action() %}
+	<div class='row'>
+		<div class='col-md-10 d-flex align-items-center'>
+		    <select id="list_action" class='mt-1 ' multiple="multiple" name="action">
+				{% for row2 in action_info %}
+					{% if request_dict[session_enum.ACTIONS] %}
+		        		<option value="{{row2[db_header.ACTION_ID]}}" {% if row2[db_header.ACTION_ID] in request_dict[session_enum.ACTIONS]%} selected {% endif %} >{{row2[db_header.ACTION_NAME]}}</option>
+					{% else %}
+					<option value="{{row2[db_header.ACTION_ID]}}" selected >{{row2[db_header.ACTION_NAME]}}</option>
+					{%endif%}
+				{% endfor %}
+		    </select>
+			<input type='date' name='from_date' id='from_date' placeholder='From date' class='mx-1 px-2' value='{{request_dict[session_enum.FROM]}}'>
+			<input type='date' name='to_date' id='to_date' placeholder='To date' class='mx-1 px-2' value='{{request_dict[session_enum.TO]}}'>
+			<button type='button' id='load' class='mx-1 px-3' data-toggle="tooltip" title="Load"><i class="fas fa-sync-alt"></i></button>
+			
+		</div>
+	</div>
+</form>
+<div class='table-content'>
+	<table id="log_table" class="table table-striped table-bordered " cellspacing="0" width='100%'>
+	  {% set log_info = ctrl_obj.get_log_info(request_dict) %}
+	  <thead>
+	    <tr>
+		  <th class="th-sm">#
+	      </th>
+	      <th class="th-sm">Sheet Name
+	      </th>
+		  <th class="th-sm">Action
+	      </th>
+	      <th class="th-sm">Old Values
+	      </th>
+	      <th class="th-sm">New Values
+	      </th>
+	      <th class="th-sm">Updated By
+	      </th>
+	      <th class="th-sm">Updated Date
+	      </th>
+	    </tr>
+	  </thead>
+	  <tbody>
+		{% for row in log_info %}
+			<tr>
+			  <td>{{loop.index}}</td>
+			  {% if row[db_header.SHEET_NAME] %}
+		      	<td>{{row[db_header.SHEET_NAME]}}</td>
+			  {% else %}
+			  	<td></td>
+			  {% endif %}
+		      <td>{{row[db_header.ACTION_NAME]}}</td>
+		      <td>{{row[db_header.OLD_VALUE]}}</td>
+		      <td>{{row[db_header.NEW_VALUE]}}</td>
+		      <td>{{row[db_header.UPDATED_BY]}}</td>
+		      <td>{{row[db_header.UPDATED_DATE]}}</td>
+		    </tr>
+		{% endfor %}
+	
+	  </tbody>
+	  
+	</table>
+</div>
+{% endblock main %}

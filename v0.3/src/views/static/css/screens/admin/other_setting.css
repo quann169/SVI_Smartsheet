@@ -1,0 +1,75 @@
+.main-div {
+    text-align: center;
+}
+input:focus, select:focus {
+    outline: none;
+}
+.main-div .ctcard {
+    width: 50%;
+    min-width: 400px;
+    max-width: 600px;
+    margin: auto;
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    background-color: white;
+}
+.main-div .ctcard .ctcard_body {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    text-align: left;
+}
+.main-div .ctcard .ctcard_body a  {
+    font-size: 20px;
+}
+
+.main-div .ctcard .ctcard_body .ctcard__title {
+    font-weight: bold;
+    font-size: 18px;
+    margin: 0px;
+}
+.main-div .ctcard .ctcard_body .ctcard__new {
+    flex-grow: 1;
+    margin-left: 5px;
+    font-size: 15px;
+    text-decoration: underline;
+    color: blue;
+    margin: auto 5px;
+    font-weight: bold;
+}
+.main-div .ctcard .ctcard_body .ctcard__new:hover {
+    cursor: pointer;
+}
+.main-div .ctcard .ctcard_body .ctcard__content {
+    flex-basis: 100%;
+}
+
+.main-div .ctcard .ctcard_body .ctcard__content .ctcard__content-item {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 5px;
+    
+}
+
+.main-div .ctcard .ctcard_body .ctcard__content .ctcard__content-item  input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #aaa;
+    border-radius: 0px;
+    margin-left: 5px;
+}
+.main-div .ctcard .ctcard_body .ctcard__content .ctcard__content-item  label {
+    display: block;
+    margin: 0px;
+    flex-basis: 30%;
+}
+.main-div .ctcard .ctcard__footer {
+    text-align: right;
+    padding-top: 5px;
+    border-top: 1px solid #aaa;
+}

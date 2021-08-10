@@ -1,0 +1,176 @@
+{% extends template.LAYOUT %}
+{% block title %}
+	Project Timesheet
+{% endblock title %}
+{% block sidebar %}
+	{% set active_sidebar = route.PROJECT_TIMESHEET %}
+	{% with active_sidebar=active_sidebar  , ctrl_obj = ctrl_obj%}
+		{% include template.SIDEBAR %}
+	{% endwith %}
+{% endblock sidebar %}
+{% block breadcrumb %}
+	{% set br_items = [(route.PROJECT_TIMESHEET, 'Project Timesheet', True)] %}
+	{% with br_items=br_items %}
+		{% include template.BREADCRUMB %}
+	{% endwith %}
+{% endblock breadcrumb %}
+
+{% block styles %}
+	{{super()}}
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendors/bootstrap-select-1.13.1/css/bootstrap-select.css') }}" /> 
+
+{% endblock styles %}
+
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='vendors/bootstrap-4.5.3/js/bootstrap.bundle.min.js')}}"></script>
+	<script src="{{url_for('static', filename='vendors/bootstrap-select-1.13.1/js/bootstrap-select.min.js')}}"></script>
+	<script src="{{url_for('static', filename='js/screens/timesheet/project_timesheet.js')}}"></script>
+{% endblock scripts %}
+
+{% block main %}
+<form id='timesheet_form' class='{% if session_enum.MODE in request_dict and request_dict[session_enum.MODE] in ['view', 'sheet_user']%}d-none{% endif %}'>
+	{% set sheet_info = ctrl_obj.get_list_sheet_name() %}
+	{% set resource_info = ctrl_obj.get_resource_config() %}
+	{% set granted_info = ctrl_obj.get_granted_info() %}
+	<div class='row'>
+		<div class='col-md-10 d-flex align-items-center'>
+			<select id="list_sheet" class='mt-1' multiple="multiple">
+				{% for row in sheet_info %}
+		        	<option value="{{row[db_header.SHEET_ID]}}" {% if row[db_header.SHEET_ID] in request_dict[session_enum.SHEETS]%} selected {% endif %} >{{row[db_header.SHEET_NAME]}}</option>
+		    	{% endfor %}
+		    </select>
+		    <select id="list_user" class='mt-1 ' multiple="multiple" name="user">
+				{% for row2 in resource_info %}
+					{% if row2[db_header.IS_ACTIVE]%}
+		        		<option value="{{row2[db_header.USER_NAME]}}" {% if row2[db_header.USER_NAME] in request_dict[session_enum.USERS]%} selected {% endif %} >{{row2[db_header.USER_NAME]}}</option>
+		    		{% endif %}
+		    	{% endfor %}
+		    </select>
+		    <select id="granted_list" name="granted_list" class='mxw-100 mr-1'>
+		    	<option value="" >No Granted</option>
+				{% for granted_name in granted_info.keys()|sort %}
+		        	<option value="{{granted_name}}" {% if granted_name in request_dict[session_enum.GRANTED_LIST]%} selected {% endif %} >{{granted_name}}</option>
+		    	{% endfor %}
+		    </select>
+			<input type='date' name='from_date' id='from_date' placeholder='From date' class='mr-1 px-2' value='{{request_dict[session_enum.FROM]}}'>
+			<input type='date' name='to_date' id='to_date' placeholder='To date' class='mr-1 px-2' value='{{request_dict[session_enum.TO]}}'>
+			<button type='button' id='load' class='mr-1 px-3' data-toggle="tooltip" title="Load"><i class="fas fa-sync-alt"></i></button>
+			<button type='button' id='get_newest_data' class='mr-1' data-toggle="tooltip" title="Get Newest Data"><i class="fas fa-cloud-download-alt"></i></button>
+			{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+				<button type='button' id='lock' class='mr-1' data-toggle="tooltip" title="Lock/Unlock 'Get Newest Data' feature"><i class="fas fa-lock"></i></button>
+			{% endif%}
+			<button type='button' id='export' class='mr-1 px-3' data-toggle="tooltip" title="Export"><i class="fas fa-file-export" ></i></button>
+		</div>
+		<div class='col-md-2 d-flex justify-content-end'>
+			<select id="task_filter" name="task_filter">
+		        <option value="current" {% if request_dict[session_enum.TASK_FILTER] == 'current' %}selected{% endif %}>Current</option>
+		        <option value="final" {% if request_dict[session_enum.TASK_FILTER] == 'final' %}selected{% endif %}>Final</option>
+		        <option value="both"  {% if request_dict[session_enum.TASK_FILTER] == 'both' %}selected{% endif %}>Both</option>
+		    </select>
+			<select id="filter" name="filter" class='ml-1'>
+		        <option value="weekly" {% if request_dict[session_enum.FILTER] == 'weekly' %}selected{% endif %}>Weekly</option>
+		        <option value="monthly" {% if request_dict[session_enum.FILTER] == 'monthly' %}selected{% endif %}>Monthly</option>
+		    </select>
+		    <select id="cost" name="cost" class='ml-1'>
+		        <option value="normal" {% if request_dict[session_enum.COST] == 'normal' %}selected{% endif %}>Normal</option>
+		        <option value="cost" {% if request_dict[session_enum.COST] == 'cost' %}selected{% endif %}>Cost</option>
+		    </select>
+		</div>
+	</div>
+</form>
+<div class='table-content'>
+	<table id="project_timesheet" class="table table-striped table-bordered " cellspacing="0" width='100%'>
+		{% set info, list_sub_column, no_enought, total, type_and_sheet_info, granted_info = ctrl_obj.get_project_timesheet_info(request_dict) %}
+		
+	  <thead>
+	    <tr>
+	    	<th class="th-sm">Sheet Type</th>
+	    	<th class="th-sm">Sheet</th>
+			<th class="th-sm">Resource</th>
+			<th class="th-sm">Eng Type</th>
+			<th class="th-sm">Team</th>
+			{% for column in list_sub_column %}
+				<th class="th-sm">{{column}}</th>
+			{% endfor %}
+			<th class="th-sm">Granted</th>
+			<th class="th-sm">Used</th>
+			<th class="th-sm">Remain</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+		{% for sheet_type in type_and_sheet_info.keys()|sort %}
+			{% set vars = {'is_first': True} %}
+			{% for sheet_name in type_and_sheet_info[sheet_type].keys()|sort %}
+				{% if sheet_name in info and sheet_name != 'total' %}
+					{% if sheet_name in granted_info %}
+						{% set granted_number = granted_info[sheet_name][db_header.GRANTED_NUMBER] %}
+					{% else %}
+						{% set granted_number = 0 %}
+					{% endif %}
+					{% if vars.is_first %}
+						{% if vars.update({'is_first': false}) %}{% endif %}
+						<tr style='background-color: #8ed5e1 !important;'>
+						<td><span class='crollRow show-hide-row-btn'>-</span>{{sheet_type}}</td>	
+					  	<td ></td>
+						<td></td><td></td><td></td>
+						{% for column in list_sub_column %}
+							<td><b>{{type_and_sheet_info[sheet_type]['total'][column]}}</b></td>
+						{% endfor %}
+						<td><b></b></td>
+						<td><b>{{type_and_sheet_info[sheet_type]['total']['total_row']}}</b></td>
+						<td><b></b></td>
+					</tr>
+					{% endif %}
+					<tr style='background-color: #e9e9e9 !important;'>
+						<td style='background-color: #fff !important;'></td>	
+					  	<td ><span class='crollRow show-hide-row-btn {% if request_dict[session_enum.EXPAND_COLLAPSE] == "expand" %}{% else %}showChild{% endif %}'>{% if request_dict[session_enum.EXPAND_COLLAPSE] == "expand" %}-{% else %}+{% endif %}</span>{{sheet_name}}</td>
+						<td></td><td></td><td></td>
+						{% for column in list_sub_column %}
+							<td>
+								<b class='' >{{info[sheet_name]['total'][column]}}</b>
+							</td>
+						{% endfor %}
+						<td><b>{{granted_number}}</b></td>
+						<td><b>{{info[sheet_name]['total_row']}}</b></td>
+						<td><b>{{granted_number - info[sheet_name]['total_row']}}</b></td>
+					</tr>
+					{% for user_name in info[sheet_name]['resource'] %}
+						{% set eng_type = info[sheet_name]['resource'][user_name]['eng_type'] %}
+						{% set team = info[sheet_name]['resource'][user_name]['team'] %}
+						{% set eng_type = info[sheet_name]['resource'][user_name]['eng_type'] %}
+						{% set timesheet = info[sheet_name]['resource'][user_name]['timesheet'] %}
+						{% set total_resource = info[sheet_name]['resource'][user_name]['total'] %}
+						<tr class='{% if request_dict[session_enum.EXPAND_COLLAPSE] == "expand" %}show-row{% else %}hidden-row{% endif %}''>
+					  		<td></td>
+					  		<td></td>
+							<td>{{user_name}}</td>
+							<td>{{eng_type}}</td>
+							<td>{{team}}</td>
+							{% for column in list_sub_column %}
+								{% set work_hour = timesheet[column]['work_hour']%}
+								{% set max_hour = timesheet[column]['max_hour']%}
+								{% set href = timesheet[column]['href']%}
+								<td>
+									{% if work_hour > max_hour %}
+										<a class='cl-red bold' {% if href %} href="{{href}}" {% endif %}>{{max_hour}}</a>
+									{% elif work_hour  == max_hour %}
+										<a class='cl-green bold' {% if href %} href="{{href}}" {% endif %}>{{max_hour}}</a>
+									{% else %}
+										<a class='cl-orange bold' {% if href %} href="{{href}}" {% endif %}>{{work_hour}}</a>
+									{% endif %}
+								</td>
+							{% endfor %}
+							<td><a class='bold'></a></td>
+							<td><a class='bold'>{{total_resource}}</a></td>
+							<td><a class='bold'></a></td>
+						</tr>
+					{% endfor %}
+				{% endif %}
+			{% endfor %}
+		{% endfor %}
+	  </tbody>
+	  
+	</table>
+</div>
+{% endblock main%}

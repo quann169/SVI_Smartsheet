@@ -1,0 +1,75 @@
+.exportoption {
+    width: 30%;
+    background-color: white;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 5px;
+}
+.exportoption .exportoption__taskbar {
+    padding: 5px 0px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #aaa;
+}
+.exportoption .exportoption__taskbar .exportoption__taskbar-title {
+    display: block;
+    flex-grow: 1;
+    margin: 0px;
+    text-align: center;
+    font-weight: bold;
+}
+.exportoption .exportoption__taskbar .exportoption__taskbar-close {
+    display: block;
+    padding: 5px;
+}
+.exportoption .exportoption__taskbar .exportoption__taskbar-close:hover {
+    color: red;
+    cursor: pointer;
+}
+.exportoption .exportoption__content {
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+}
+.exportoption .exportoption__content .exportoption__content-block {
+    border-top: 1px solid #ccc;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 20px;
+}
+.exportoption .exportoption__content .exportoption__content-block .block__label {
+    font-size: 15px;
+    width: auto;
+    font-weight: 600;
+    color: #777;
+    margin: 0px;
+}
+.exportoption .exportoption__content .exportoption__content-block .block__body {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 5px 10px;
+    margin-bottom: 0px;
+}
+.exportoption .exportoption__content .exportoption__content-block .block__body .block__body-item {
+    flex-basis: calc(100%/3);
+}
+
+.exportoption .exportoption__content .exportoption__content-block .block__body .block__body-item input {
+
+}
+
+.exportoption .exportoption__content .exportoption__content-block .block__body .block__body-item label {
+    margin-bottom: 0px;
+}
+.exportoption .exportoption__footer {
+    text-align: right;
+    padding: 5px;
+    border-top: 1px solid #aaa;
+}

@@ -1,0 +1,9 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light navbar_head" >
+    <div class="container-fluid">
+        <button type="button" id="sidebarCollapse" class="btn btn-info">
+            <i class="fas fa-bars"></i>
+        </button>
+		{% set user_id, resource_name, role_name, list_role = ctrl_obj.get_resource_and_role_name() %}
+        <a >{{resource_name}}</a><a >{{user_id}}</a><a >{{role_name}}</a>
+    </div>
+</nav>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		{%- block head %}
+		    {%- block metas %}
+		        <meta charset="utf-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		    {%- endblock metas %}
+			<title>
+		        {% block title %}
+		        {{title|default}}
+		        {% endblock title %}
+		    </title>
+			{%- block styles %}
+				<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+				<link rel="stylesheet" href="{{ url_for('static', filename='vendors/bootstrap-4.5.3/css/bootstrap.min.css') }}" />  
+				<link rel="stylesheet" href="{{ url_for('static', filename='vendors/DataTables/datatables.min.css') }}" /> 
+				<link rel="stylesheet" href="{{ url_for('static', filename='vendors/multiple-select/example-styles.css') }}" /> 
+				<!-- Our Custom CSS -->
+			    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/fontawesome/css/all.css') }}" />
+				<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
+				<link rel="stylesheet" href="{{ url_for('static', filename='css/components/export.css') }}" />
+			{%- endblock styles %}
+		{%- endblock head %}
+	</head>
+	
+	<body>
+	    <div class="wrapper">
+	        <!-- Sidebar  -->
+	        <nav id="sidebar" class="{% if ctrl_obj.get_session('sidebar') == 1 %}active{% endif %}">
+	            {% block sidebar %}
+		            {% include template.SIDEBAR %}
+	        	{%- endblock sidebar %}
+	        </nav>
+	
+	        <!-- Page Content  -->
+	        <div id="content" class="{% if ctrl_obj.get_session('sidebar') != 1 %}active{% endif %}">
+				<div class="loading" id ='overlay_loader'>&#8230;</div>
+				<a href="#" id="to_top_btn" class="" data-abc="true"><i class="fas fa-chevron-up" style="position: absolute; transform: translate(50%, 50%);"></i></a>
+				<div id='overlay'></div>
+				<!--{% block navbar %}
+		            {% include template.NAVBAR %}
+	        	{%- endblock navbar %}
+	            -->
+				<nav class="navbar navbar-expand-lg navbar-light navbar_head" style='display: flex; justify-content: space-between; padding-left: 10px; padding-right: 10px;'>
+					<button type="button" id="sidebarCollapse" class="btn btn-info mnw-auto">
+						<i class="fas fa-bars"></i>
+					</button>
+					{% block breadcrumb %}
+						{% include template.BREADCRUMB %}
+					{% endblock %}
+					{% set user_id, resource_name, role_name, list_role = ctrl_obj.get_resource_and_role_name() %}
+					<div style="display: flex; align-items: center;">
+						<i class="fas fa-server cl-blue mg-l-5" aria-hidden="true"></i><div class='nowrap mg-l-5 mg-r-5'>{{role_name}}</div>|
+						<i class="fas fa-user cl-blue mg-l-5" aria-hidden="true"></i><div class='nowrap mg-l-5  mg-r-5'>{{resource_name}}</div>|
+						<a href='{{route.LOGIN}}' data-toggle="tooltip" title="Logout"><i class="fas fa-sign-out-alt cl-red mg-l-5" aria-hidden="true"></i></a>
+					</div>
+				</nav>
+				<div class='notify' id='notify'>
+					<div class='d-flex'>
+						<div id='notify_content' class='notify-content col-11 d-flex justify-content-center'></div>
+						<div class='notify-close notify-content col-1 d-flex justify-content-end'>
+							<a id='notify_close'><i class="fas fa-times" ></i></a>
+						</div>
+					</div>
+				</div>
+				<div class='main-div' id='main_div'>
+					
+					{% block main %} 
+			        {% endblock %}
+				</div>
+
+	      </div>
+	    </div>
+		{% block scripts %}
+			<!-- Font Awesome JS -->
+			<script src="{{url_for('static', filename='js/enum.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/fontawesome/js/solid.js')}}" ></script>
+			<script src="{{url_for('static', filename='vendors/fontawesome/js/fontawesome.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.slim.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/poper/popper-1.14.0.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/bootstrap-4.5.3/js/bootstrap.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/DataTables/datatables.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/multiple-select/jquery.multi-select.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/canvas/canvasjs.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/hightchart/hightchart.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/hightchart/group_category.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/hightchart/exporting.js')}}"></script>
+			<script src="{{url_for('static', filename='js/common.js')}}"></script>
+			<script src="{{url_for('static', filename='js/components/export.js')}}"></script>
+	    {%- endblock scripts %}
+		{% set is_notify, link = ctrl_obj.check_version() %}
+		{% if is_notify %}
+			<script>
+				if ( confirm("A new version of Timesheet Report is available, download now?")) {
+					window.open('{{link}}', '_blank');
+				}
+			</script>
+		{% endif %}
+	    
+	</body>
+
+</html>

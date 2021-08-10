@@ -1,0 +1,256 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="http://blacklabel.github.io/grouped_categories/grouped-categories.js"></script>
+
+
+<style>
+	
+</style>
+<div id="container" class="chart-container" style="width: 500px; resize: both;"></div>
+
+
+<script>
+
+var chart = Highcharts.chart('container', {
+
+    chart: {
+        type: 'column'
+    },
+
+    title: {
+        text: 'Total fruit consumption, grouped by gender'
+    },
+
+    xAxis: {
+    	tickWidth: 0,
+    	labels: {
+            groupedOptions: [{
+            	style: {
+                    fontWeight: 'bold',
+                    padding: '5px'
+                },
+                rotation: 0,
+            }],
+            style: {
+                fontWeight: 'bold',
+            },
+            rotation: 90
+        },
+	      categories: [{
+	        name: "iSCI",
+	        categories: ["12-14hkjhkj", "12-15", "12-14", "12-15", "12-14"]
+	      }, {
+	        name: "",
+	        categories: [""]
+	      }, {
+	        name: "Data Center",
+	        categories: ["12-14", "12-15", "12-14", "12-15", "12-14"]
+	      }],
+    },
+
+    yAxis: {
+        allowDecimals: false,
+        min: 0,
+        title: {
+            text: 'Number of fruits'
+        }
+    },
+
+
+    plotOptions: {
+        column: {
+            stacking: 'normal'
+        },
+	    series: {
+	        grouping: false,
+	        groupPadding: 0,
+	        pointPadding: 0,
+	      }
+    },
+
+    series: [{
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    },
+    {
+        name: 'John',
+        data: [5, 3, 4, 7, 5, 0, 4, 7, 5, 3, 4],
+        stack: '1'
+    }]
+});
+$(document).ready(function(){
+	$(document).on('click', '#container', function(){
+		chart.reflow();
+	});
+});
+	</script>
+
+
+
+
+
+
+{title: "Team Productivity", info: {…}, column: Array(45), type: Array(6)}
+column: Array(45)
+0: "Quan Nguyen 06-07"
+1: "Quan Nguyen 06-14"
+2: "Quan Nguyen 06-21"
+3: "Quan Nguyen 06-28"
+4: "Quan Nguyen 07-05"
+5: "NA 06-07"
+6: "NA 06-14"
+7: "NA 06-21"
+8: "NA 06-28"
+9: "NA 07-05"
+10: "Loc Ho 06-07"
+11: "Loc Ho 06-14"
+12: "Loc Ho 06-21"
+13: "Loc Ho 06-28"
+14: "Loc Ho 07-05"
+15: "Hieu Nguyen 06-07"
+16: "Hieu Nguyen 06-14"
+17: "Hieu Nguyen 06-21"
+18: "Hieu Nguyen 06-28"
+19: "Hieu Nguyen 07-05"
+20: "Nhat Thai 06-07"
+21: "Nhat Thai 06-14"
+22: "Nhat Thai 06-21"
+23: "Nhat Thai 06-28"
+24: "Nhat Thai 07-05"
+25: "Thanh Hoang 06-07"
+26: "Thanh Hoang 06-14"
+27: "Thanh Hoang 06-21"
+28: "Thanh Hoang 06-28"
+29: "Thanh Hoang 07-05"
+30: "Ha Tran 06-07"
+31: "Ha Tran 06-14"
+32: "Ha Tran 06-21"
+33: "Ha Tran 06-28"
+34: "Ha Tran 07-05"
+35: "Hung Huynh 06-07"
+36: "Hung Huynh 06-14"
+37: "Hung Huynh 06-21"
+38: "Hung Huynh 06-28"
+39: "Hung Huynh 07-05"
+40: "Phi Le 06-07"
+41: "Phi Le 06-14"
+42: "Phi Le 06-21"
+43: "Phi Le 06-28"
+44: "Phi Le 07-05"
+length: 45
+__proto__: Array(0)
+info:
+NRE:
+Ha Tran 06-07:
+label: "100"
+value: 100
+x: 37
+__proto__: Object
+Ha Tran 06-14: {value: 100, x: 38, label: "100"}
+Ha Tran 06-21: {value: 48, x: 39, label: "48"}
+Ha Tran 06-28: {value: 4, x: 40, label: "4"}
+Ha Tran 07-05: {value: 0, x: 41, label: ""}
+Hieu Nguyen 06-07: {value: 100, x: 19, label: "100"}
+Hieu Nguyen 06-14: {value: 83.3, x: 20, label: "83.3"}
+Hieu Nguyen 06-21: {value: 66.7, x: 21, label: "66.7"}
+Hieu Nguyen 06-28: {value: 66.7, x: 22, label: "66.7"}
+Hieu Nguyen 07-05: {value: 50, x: 23, label: "50"}
+Hung Huynh 06-07: {value: 100, x: 43, label: "100"}
+Hung Huynh 06-14: {value: 100, x: 44, label: "100"}
+Hung Huynh 06-21: {value: 100, x: 45, label: "100"}
+Hung Huynh 06-28: {value: 100, x: 46, label: "100"}
+Hung Huynh 07-05: {value: 100, x: 47, label: "100"}
+Loc Ho 06-07: {value: 92, x: 13, label: "92"}
+Loc Ho 06-14: {value: 75, x: 14, label: "75"}
+Loc Ho 06-21: {value: 69, x: 15, label: "69"}
+Loc Ho 06-28: {value: 53, x: 16, label: "53"}
+Loc Ho 07-05: {value: 42, x: 17, label: "42"}
+NA 06-07: {value: 100, x: 7, label: "100"}
+NA 06-14: {value: 100, x: 8, label: "100"}
+NA 06-21: {value: 62.5, x: 9, label: "62.5"}
+NA 06-28: {value: 27.5, x: 10, label: "27.5"}
+NA 07-05: {value: 2.5, x: 11, label: "2.5"}
+Nhat Thai 06-07: {value: 78.6, x: 25, label: "78.6"}
+Nhat Thai 06-14: {value: 78.6, x: 26, label: "78.6"}
+Nhat Thai 06-21: {value: 35.7, x: 27, label: "35.7"}
+Nhat Thai 06-28: {value: 14.3, x: 28, label: "14.3"}
+Nhat Thai 07-05: {value: 0, x: 29, label: ""}
+Phi Le 06-07: {value: 100, x: 49, label: "100"}
+Phi Le 06-14: {value: 100, x: 50, label: "100"}
+Phi Le 06-21: {value: 100, x: 51, label: "100"}
+Phi Le 06-28: {value: 100, x: 52, label: "100"}
+Phi Le 07-05: {value: 100, x: 53, label: "100"}
+Quan Nguyen 06-07: {value: 71.4, x: 1, label: "71.4"}
+Quan Nguyen 06-14: {value: 71.4, x: 2, label: "71.4"}
+Quan Nguyen 06-21: {value: 71.4, x: 3, label: "71.4"}
+Quan Nguyen 06-28: {value: 37.1, x: 4, label: "37.1"}
+Quan Nguyen 07-05: {value: 17.1, x: 5, label: "17.1"}
+Thanh Hoang 06-07: {value: 100, x: 31, label: "100"}
+Thanh Hoang 06-14: {value: 100, x: 32, label: "100"}
+Thanh Hoang 06-21: {value: 72.5, x: 33, label: "72.5"}
+Thanh Hoang 06-28: {value: 7.5, x: 34, label: "7.5"}
+Thanh Hoang 07-05: {value: 0, x: 35, label: ""}
+__proto__: Object
+Non-WH: {Quan Nguyen 06-07: {…}, Quan Nguyen 06-14: {…}, Quan Nguyen 06-21: {…}, Quan Nguyen 06-28: {…}, Quan Nguyen 07-05: {…}, …}
+Pre-sale: {Quan Nguyen 06-07: {…}, Quan Nguyen 06-14: {…}, Quan Nguyen 06-21: {…}, Quan Nguyen 06-28: {…}, Quan Nguyen 07-05: {…}, …}
+RnD: {Quan Nguyen 06-07: {…}, Quan Nguyen 06-14: {…}, Quan Nguyen 06-21: {…}, Quan Nguyen 06-28: {…}, Quan Nguyen 07-05: {…}, …}
+Support: {Quan Nguyen 06-07: {…}, Quan Nguyen 06-14: {…}, Quan Nguyen 06-21: {…}, Quan Nguyen 06-28: {…}, Quan Nguyen 07-05: {…}, …}
+TRN: {Quan Nguyen 06-07: {…}, Quan Nguyen 06-14: {…}, Quan Nguyen 06-21: {…}, Quan Nguyen 06-28: {…}, Quan Nguyen 07-05: {…}, …}
+__proto__: Object
+title: "Team Productivity"
+type: Array(6)
+0: "NRE"
+1: "RnD"
+2: "TRN"
+3: "Pre-sale"
+4: "Support"
+5: "Non-WH"
+length: 6
+}
