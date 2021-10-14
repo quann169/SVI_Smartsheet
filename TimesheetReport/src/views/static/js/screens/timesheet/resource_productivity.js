@@ -1,57 +1,25 @@
-// function draw_stack_column_chart(id, data, label_angle) {
-// 	if (label_angle == undefined) {
-// 		var label_angle = 0;
-// 	}
-// 	var title_text = data.title;
-// 	var info = data.info;
-// 	var column = data.column;
-// 	var row_type = data.type;
-// 	var chart_data = []
-// 	var chart_type = 'stackedColumn';
-// 	var color_maping = ['#7cb5ec', '#abc98a', '#e4d354', '#f7cbd6 ', '#91e8e1', '#f45b5b'];
-// 	for (var i = 0; i < row_type.length; i++) {
-// 		var temp = {
-// 				type: chart_type,
-// 				legendText: row_type[i],
-// 				showInLegend: "true",
-// 				color: color_maping[i], 
-// 				//indexLabel: "{y}",
-// 				//percentFormatString: "#",
-// 				//toolTipContent: "#percent%",
-// 				dataPoints: []
-// 			};
-			
-// 		for (var j = 0; j < column.length; j++) {
-			
-// 			temp['dataPoints'].push({ y: info[row_type[i]][column[j]]['value'] , label: column[j], x: info[row_type[i]][column[j]]['x'], indexLabel: info[row_type[i]][column[j]]['label']});
-			
-// 		}
-// 		chart_data.push(temp);
-// 	}
-//     var chart = new CanvasJS.Chart(id,
-// 	{
-// 		title:{
-// 			text: title_text
-// 		},
-// 		axisY:{
-// 			minimum: 0,
-// 			//maximum: 100,
-//            interval: 20,
-// 		   //valueFormatString: ("#'%'") 
-// 		 },
-// 		axisX:{
-// 	        labelAngle: label_angle,
-// 			interval: 1,
-// 	    	labelFormatter: function(e) {
-// 		      	return e.label ? e.label : "";
-// 		      }
-// 	      },
-// 		data: chart_data
-// 	});
-// 	chart.render();
-// }
-function draw_stack_column_chart(id, data, label_angle) {
-	let series_list = []
+const roundNum = 1000;
+function draw_stack_column_chart(id, data, label_angle, type) {
+	let tooltip = $('#tooltip').prop('checked');
+	let lenCategoryLv1 = parseInt(data.category.length / 2) + 1;
+	let lenCategoryLv2 = data.category[0].categories.length;
+	let series_list = [];
+	let enableStackLabel = false;
+	var listIdxShowStackLabel = [];
+	if (type == 'chart2'){
+		enableStackLabel = true;
+		// find list index to show stacklabel
+		let center_num = parseInt(lenCategoryLv2 / 2) + 1;
+		if (lenCategoryLv2 % 2 == 0) {
+			center_num = parseInt(lenCategoryLv2 / 2);
+		}
+		var count  = -1;
+		for (let idx1 = 0; idx1 < lenCategoryLv1; idx1++) {
+			listIdxShowStackLabel.push(count + center_num);
+			count  += lenCategoryLv2 + 1;
+		}
+	}
+	
 	let dataLabel =  {
 		enabled: true,
 		color: '#000',
@@ -65,15 +33,27 @@ function draw_stack_column_chart(id, data, label_angle) {
 			fontFamily: "Calibri (Body)",
 		},
 		formatter:function(){
-			if(this.y > 2)
-				return this.y;
+			let min = 1;
+			if (type == 'chart2') {
+				min = 0.1;
+			}
+			if(this.y > min) {
+				if (type == 'chart2') {
+					let num = (this.y / this.total) * (100);
+					let label = Math.round(num ) + '%';
+					return label;
+				} else {
+					let label = Math.round(this.y) + '%';
+					return label;
+				}
+			} 	
 		}
 	}
-	var color_maping = ['#007BA9', '#fdd86c', '#a8d18d', '#f45b5b', '#d0cecf', '#fd7e14'];
-	let sheet_type_order = ["NRE", "RnD", "TRN", "Non-WH", "Support", "Pre-sale"];
+	var color_maping = ['#007BA9', '#fdd86c', '#a8d18d', '#f45b5b', '#d0cecf', '#abdbe3', '#fd7e14'];
+	let sheet_type_order = ["NRE", "RnD", "TRN", "Non-WH", "Operating", "Support", "Pre-sale"];
 	for (let idx = sheet_type_order.length - 1; idx >= 0; idx--) {
 		let type = sheet_type_order[idx];
-		let tmp_series = {stacked: '1', name: type, data: [], color: color_maping[idx], dataLabels: dataLabel};
+		let tmp_series = {stacked: '1', name: type, data: [], color: color_maping[idx], label: 'sss',  dataLabels: dataLabel};
 		for (let idx1 = 0; idx1 < data.category.length; idx1++) {
 			let name = data.category[idx1].name;
 			let list_category = data.category[idx1].categories;
@@ -83,7 +63,6 @@ function draw_stack_column_chart(id, data, label_angle) {
 				if (! data.info[type][text]) {
 					tmp_series.data.push(0);
 				} else {
-					
 					let value = data.info[type][text].value;
 					tmp_series.data.push(value);
 				}
@@ -121,25 +100,50 @@ function draw_stack_column_chart(id, data, label_angle) {
 			  categories: data.category
 		},
 		tooltip: {
-            enabled: true
+            enabled: tooltip
         },
+		
 		yAxis: {
 			allowDecimals: false,
 			min: 0,
 			title: {
 				text: ''
-			}
+			},
+			labels: {
+				formatter:function(){
+					if (type == 'chart1') {
+						let label = this.value + '%';
+						return label;
+					} else {
+						return this.value;
+					}
+				}
+			},
+			stackLabels: {
+                    enabled: enableStackLabel,
+					formatter: function() {
+						if (this.total > 0 ){
+							let x = this.x;
+							if (listIdxShowStackLabel.indexOf(x) != -1) {
+								return this.total;
+							}
+							
+						}
+					}
+                }
 		},
 		legend: {
 			itemHiddenStyle: {
 				color: '#ffffff'
 			}
 		},
+		
 		plotOptions: {
 			column: {
 				stacking: 'normal'
 			},
 			series: {
+				enableMouseTracking: tooltip,
 				grouping: false,
 				groupPadding: 0,
 				pointPadding: 0,
@@ -148,11 +152,8 @@ function draw_stack_column_chart(id, data, label_angle) {
 	
 		series: series_list
 	});
-	$(document).on('click', '#' + id, function(){
-		chart.reflow();
-	});
 }
-function get_list_herder(id) {
+function get_list_header(id) {
 	var tr = $(id).find('tr');
 	var head_num = 0;
 	var headers = {};
@@ -189,7 +190,7 @@ function get_list_herder(id) {
 	return headers;
 }
 
-function creat_productivity_data(row_data, headers, group_id, title, max_hours) {
+function creat_productivity_data(row_data, headers, group_id, title, max_hours, type) {
 	var out = {}
 	var data = {};
 	out['title'] = title;
@@ -225,7 +226,7 @@ function creat_productivity_data(row_data, headers, group_id, title, max_hours) 
 		}
 		if (! data.hasOwnProperty(name) ) {
 			data[name] = {};
-		}
+		} 
 		for (var idx4 = 6; idx4 < headers['2'].length; idx4++) {
 			var header_1 = headers['1'][idx4];
 			var header_2 = headers['2'][idx4];
@@ -243,7 +244,6 @@ function creat_productivity_data(row_data, headers, group_id, title, max_hours) 
 				val_num = std_hour;
 			}
 			data[name][header_1][header_2] += val_num;
-			
 			if (! data[name][header_1]['total'].hasOwnProperty(header_2)) {
 				data[name][header_1]['total'][header_2] = 0;
 			}
@@ -251,21 +251,38 @@ function creat_productivity_data(row_data, headers, group_id, title, max_hours) 
 			
 		}
 	}
-	
+	// 
+	if (type == 'chart2') {
+		for (var [group, value] of Object.entries(data)) {
+			for (var [week, value2] of Object.entries(value)) {
+				let remainHours = value2['total']['NRE'];
+				for (var [type_name, value3] of Object.entries(value2)) {
+					if (type_name != 'total') {
+						if (type_name == 'Non-WH') {
+							data[group][week][type_name] = remainHours;
+						} else {
+							remainHours = remainHours - value3;
+							if (remainHours < 0) {
+								remainHours = 0;
+							}
+						}
+					} 
+				}
+			}
+		}
+	}
 	// caculate percent
 	for (var [group, value] of Object.entries(data)) {
 		for (var [week, value2] of Object.entries(value)) {
-			
 			for (var [type_name, value3] of Object.entries(value2)) {
 				if (type_name != 'total') {
 					var total = value2['total'][type_name];
 					var percent = value3 * 100 / total;
-					data[group][week][type_name] = Math.round(percent * 10) / 10;
+					data[group][week][type_name] = Math.round(percent * roundNum) / roundNum;
 				} 
 			}
 		}
 	}
-	
 	out['info'] = {};
 	var list_group = Object.keys(data);
 	var list_col2 = []
@@ -285,12 +302,22 @@ function creat_productivity_data(row_data, headers, group_id, title, max_hours) 
 			for (var idx6=0; idx6 < list_col.length; idx6++ ) {
 				var week = list_col[idx6];
 				var day = week.split('-')[1] + '-' + week.split('-')[2];
+				var stdHour = max_hours[idx6*7 + 6];
 				var percent = data[group][week][type_name];
+				var total = data[group][week]['total'][type_name];
 				var label = '';
 				if (percent) {
 					label = percent.toString();
-				} 
-				out['info'][type_name][group + ' ' + day] = {'value': percent, 'x': count, 'label': label};
+				}
+				// chart1/chart2 format
+				if (type == 'chart1'){
+					var value = percent;
+				} else if (type == 'chart2') {
+					var resourceNum = total / stdHour;
+					var value = (percent / 100) * (resourceNum) ;
+					value = Math.round(value * roundNum) / roundNum;
+				}
+				out['info'][type_name][group + ' ' + day] = {'value': value, 'x': count, 'label': label};
 				count += 1;
 				if (! list_col2.includes(group  + ' ' + day)) {
 					list_col2.push(group + ' ' + day);
@@ -316,7 +343,7 @@ function creat_productivity_data(row_data, headers, group_id, title, max_hours) 
 }
 function get_data_productivity() {
 	var table_id = '#productivity';
-	var headers = get_list_herder('#productivity');
+	var headers = get_list_header('#productivity');
 	var tr = $(table_id).find('tr');
 	var row_data = [];
 	var max_hours = []
@@ -330,9 +357,6 @@ function get_data_productivity() {
 			td.each(function() {
 				var value = $(this).html();
 				if (value.trim() == '') {
-					//custom_alert('Cell is empty.');
-					//is_go = false;
-					//return null
 					value = 0;
 				}
 				tmp_data.push(value);
@@ -348,44 +372,65 @@ function get_data_productivity() {
 	var result = [headers, row_data, max_hours];
 	return result;
 }
+function drawChart(type){
+	var table_info = get_data_productivity();
+	var headers = table_info[0];
+	var row_data = table_info[1];
+	var  max_hours = table_info[2];
+	var team_productivity = creat_productivity_data(row_data, headers, 2, 'Team Productivity', max_hours, type);
+	draw_stack_column_chart('team_productivity', team_productivity, 90, type);
+	
+	var field_productivity = creat_productivity_data(row_data, headers, 5, 'Field Productivity', max_hours, type);
+	draw_stack_column_chart('field_productivity', field_productivity, 90, type);
+	
+	var seniority_productivity = creat_productivity_data(row_data, headers, 4, 'Seniority Productivity', max_hours, type);
+	draw_stack_column_chart('seniority_productivity', seniority_productivity, 90, type);
+	
+	var headcount_productivity = creat_productivity_data(row_data, headers, -1, 'Headcount', max_hours, type);
+	draw_stack_column_chart('headcount', headcount_productivity, 0, type);
+}
+
 $(document).ready(function() {
 	$('#view_chart').click(function(){
-		var table_info = get_data_productivity();
-		var headers = table_info[0];
-		var row_data = table_info[1];
-		var  max_hours = table_info[2];
 		var content = `
 		<div class='productivity-block' align='center'>
 			<div class='productivity-taskbar' align='center' class='b-bottom '><b>Chart</b><a class='close-p' style='transform: translate(-165%, 0%) !important;' onclick='close_overlay();'><i class='fas fa-times '></i></a></div>
 			<div class='productivity-ctn'>
-				<div id="team_productivity" style="height: 400px; width: 95%; resize: both; border: 1px solid #aaa;">
+			    <div class='chart-option'>
+					<input type='checkbox' id='tooltip' checked class='mr-2'><label class='mr-2 my-0' for='tooltip'>Tooltip</label>
+					<button id='reload_chart' class='mr-2'>Reload</button>
+					<select id='chart_option'>
+						<option value='chart1'>Percent</option>
+						<option value='chart2'>Headcount</option>
+					</select>
+				</div>
+				<div id="team_productivity" style="height: 700px; width: 95%; resize: both; border: 1px solid #aaa;">
 				</div><br>
-				<div id="field_productivity" style="height: 400px; width: 95%; resize: both; border: 1px solid #aaa;">
+				<div id="field_productivity" style="height: 700px; width: 95%; resize: both; border: 1px solid #aaa;">
 				</div><br>
-				<div id="seniority_productivity" style="height: 400px; width: 50%; resize: both; border: 1px solid #aaa;">
+				<div id="seniority_productivity" style="height: 700px; width: 50%; resize: both; border: 1px solid #aaa;">
 				</div><br>
-				<div id="headcount" style="height: 400px; width: 30%; resize: both; border: 1px solid #aaa;">
+				<div id="headcount" style="height: 600px; width: 30%; resize: both; border: 1px solid #aaa;">
 				</div><br><br><br><br>
 			</div>
 		</div>
 		`
 		$('#overlay').html(content);
 		$('#overlay').show();
-		
-		
-		var team_productivity = creat_productivity_data(row_data, headers, 2, 'Team Productivity', max_hours);
-		draw_stack_column_chart('team_productivity', team_productivity, 90);
-		
-		var field_productivity = creat_productivity_data(row_data, headers, 5, 'Field Productivity', max_hours);
-		draw_stack_column_chart('field_productivity', field_productivity, 90);
-		
-		var seniority_productivity = creat_productivity_data(row_data, headers, 4, 'Seniority Productivity', max_hours);
-		draw_stack_column_chart('seniority_productivity', seniority_productivity, 90);
-		
-		var headcount_productivity = creat_productivity_data(row_data, headers, -1, 'Headcount', max_hours);
-		draw_stack_column_chart('headcount', headcount_productivity, 0);
+		drawChart('chart1');
 	})
 })
+
+$(document).on('change', '#chart_option', function () {
+	let type = $(this).val();
+	drawChart(type);
+})
+
+$(document).on('click', '#reload_chart', function () {
+	let type = $('#chart_option').val();
+	drawChart(type);
+})
+
 function load_timesheet_report() {
 	var data = colect_config_date();
 	if (data) {
@@ -410,7 +455,7 @@ $(document).ready(function () {
 	});
 	$(document).on('click', '.add-row', function(event) {
 		var table_id = '#productivity';
-		var headers = get_list_herder('#productivity');
+		var headers = get_list_header('#productivity');
 		var tr = $(table_id).find('tr');
 		var max_hours = []
 		tr.each(function() {

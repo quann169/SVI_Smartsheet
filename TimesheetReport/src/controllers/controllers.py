@@ -310,7 +310,7 @@ class Controllers:
             list_record = []
             list_sheet_type = [ExcelHeader.NRE, ExcelHeader.RND, ExcelHeader.TRN, 
                                ExcelHeader.PRE_SALE, ExcelHeader.POST_SALE, ExcelHeader.SUPPORT, 
-                               ExcelHeader.NONE_WH]
+                               ExcelHeader.NONE_WH, ExcelHeader.OPERATING]
             list_week_remove = []
             
             for idx in range(0, len(week_list)):
@@ -799,7 +799,7 @@ class Controllers:
                     if not timeoff_info_2[user_id].get(name):
                         timeoff_info_2[user_id][name] = 0
                     timeoff_info_2[user_id][name] += timeoff_per_day
-            
+            user_email, users, user_ids, others_name = self.get_all_resource_information()
             for sheet_id in timesheet_obj.sheets:
                 sheet_obj   = timesheet_obj.sheets[sheet_id]
                 sheet_name  = sheet_obj.sheet_name
@@ -808,6 +808,11 @@ class Controllers:
                         user_name   = task_obj.user_name
                         eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
                         team_name   = team_ids[user_ids[user_id].team_id]
+                        leader_id = users[user_name].leader_id
+                        if leader_id:
+                            leader_name = user_ids[leader_id].user_name
+                        else:
+                            leader_name = SettingKeys.NA_VALUE
                         task_date   = task_obj.date
                         allocation  = task_obj.allocation
                         work_hour   = 8*(allocation)/100
@@ -829,6 +834,7 @@ class Controllers:
                                       
                         if not info[eng_type][team_name].get(user_name):
                             info[eng_type][team_name][user_name]  = {}
+                            info[eng_type][team_name][user_name]['leader_name'] = leader_name
                             for element in cols_element:
                                 if filter == 'monthly':
                                     month, year, max_hour = element
@@ -860,7 +866,7 @@ class Controllers:
                                                                                                              [SessionKey.EXPAND_COLLAPSE, 'expand'],
                                                                                                              ]))
                         info[eng_type][team_name][user_name][col_element]['href'] = href
-
+            
             total    = 0
             no_missing   = 0
             no_redundant = 0
@@ -982,7 +988,7 @@ class Controllers:
                 start_col, start_row = (0, 0)
                 row_num, col_num = (0, 0)
                 # create  header
-                list_header = ['Eng Type', 'Team', 'Resource'] + list_week
+                list_header = ['Eng Type', 'DM','Team', 'Resource'] + list_week
                 for header in list_header:
                     resource_wb.col(col_num).width = 256 * 14
                     resource_wb.write(row_num, col_num, header, style_header)
@@ -993,7 +999,10 @@ class Controllers:
                     for team in w_resource_info[eng_type]:
                         for user_name in w_resource_info[eng_type][team]:
                             timesheet = w_resource_info[eng_type][team][user_name]
+                            leader_name = timesheet['leader_name']
                             resource_wb.write(row_num, col_num, eng_type)
+                            col_num += 1
+                            resource_wb.write(row_num, col_num, leader_name)
                             col_num += 1
                             resource_wb.write(row_num, col_num, team)
                             col_num += 1
@@ -1042,15 +1051,18 @@ class Controllers:
                     col_num += 1
                 col_num = start_col
                 row_num += 1
+                
                 for sheet_type in sorted(type_and_sheet_info.keys()): 
                     count = 0
                     for sheet_name in sorted(type_and_sheet_info[sheet_type].keys()):
-                        count += 1
+                        
                         if sheet_name in w_project_info and sheet_name != 'total':
+                            count += 1
                             if sheet_name in granted_info:
                                 granted_number = granted_info[sheet_name][DbHeader.GRANTED_NUMBER]
                             else:
                                 granted_number = 0
+                            
                             if count == 1:
                                 # row sheet type
                                 project_wb.write(row_num, col_num, sheet_type, color_style['light_turquoise'])
@@ -1297,6 +1309,8 @@ class Controllers:
                         list_1.append((date, is_exist_date))
                     elif sheet_id not in final_date_info:
                         list_1.append((date, is_exist_date))
+                    elif date in holidays:
+                        list_1.append((date, is_exist_date))
                     else:
                         is_conflict = True
                         enable_add  = False
@@ -1420,6 +1434,7 @@ class Controllers:
             if sheet_data.get('resource'):
                 for resource, resource_data in sheet_data['resource'].items():
                     if resource_data.get('timesheet'):
+                        user_id = resource_data['user_id']
                         for col_name, col_data in resource_data['timesheet'].items():
                             max_hour = col_data['max_hour']
                             work_hour = col_data['work_hour']
@@ -1428,8 +1443,8 @@ class Controllers:
                             resource_data_2 = timesheet_by_resource[resource]
                             if not resource_data_2.get(col_name):
                                 timeoff = 0
-                                if timeoff_info.get(resource) and timeoff_info[resource].get(col_name):
-                                    timeoff = timeoff_info[resource].get(col_name)
+                                if timeoff_info.get(user_id) and timeoff_info[user_id].get(col_name):
+                                    timeoff = timeoff_info[user_id].get(col_name)
                                 resource_data_2[col_name] = {'sheets': [],
                                                              'max_hour': max_hour,
                                                              'work_hour': [],
@@ -1437,7 +1452,7 @@ class Controllers:
                             col_data_2 = resource_data_2[col_name]
                             col_data_2['sheets'].append(sheet_name)
                             col_data_2['work_hour'].append(work_hour)
-                            
+                  
         #calculate cost and update the input data
         for resource, resource_data_3 in timesheet_by_resource.items():
             for col_name, col_data_3 in resource_data_3.items():
@@ -1805,10 +1820,14 @@ class Controllers:
                                                                                                    filter='weekly')
         info = {}
         user_email, users, user_ids, others_name = self.get_all_resource_information()
+        list_exist_user = []
         for eng_type in rt_info:
             for team in rt_info[eng_type]:
                 for resource in rt_info[eng_type][team]:
+                    list_exist_user.append(resource)
                     for week in rt_info[eng_type][team][resource]:
+                        if week == 'leader_name':
+                            continue
                         max_hours = rt_info[eng_type][team][resource][week]['max_hour']
                         sheets = rt_info[eng_type][team][resource][week]['sheets']
                         work_hours = rt_info[eng_type][team][resource][week]['summary'][0]
@@ -1834,7 +1853,50 @@ class Controllers:
                                 'timeoff': timeoff,
                                 'total': work_hours + timeoff,
                                 'detail': detail})
-
+        #add user don't have task in smartsheet
+        config_obj      = Configuration()
+        config_obj.get_list_holiday(is_parse=True)
+        holidays  = config_obj.holidays
+        list_week   = get_work_week(from_date=from_date, to_date=to_date, holidays=holidays)
+        config_obj.get_list_timeoff(is_parse=True, start_date=from_date, end_date=to_date)
+        time_off_info    = config_obj.time_off
+        timeoff_info_2 = {}
+        for user_id in time_off_info:
+            for date, week, timeoff_per_day, obj in time_off_info[user_id]:
+                name     = get_start_week_of_date(date)
+                if not  timeoff_info_2.get(user_id):
+                    timeoff_info_2[user_id] = {}
+                if not timeoff_info_2[user_id].get(name):
+                    timeoff_info_2[user_id][name] = 0
+                timeoff_info_2[user_id][name] += timeoff_per_day
+        for resource, resource_obj in users.items():
+            user_id = resource_obj.user_id
+            if resource_obj.is_active:
+                if resource not in list_exist_user:
+                    for week, max_hours in list_week:
+                        work_hours = 0
+                        timeoff = 0
+                        if timeoff_info_2.get(user_id):
+                            if timeoff_info_2[user_id].get(week):
+                                timeoff = timeoff_info_2[user_id][week]
+                        if not info.get(week):
+                            info[week] = {}
+                        leader_id = users[resource].leader_id
+                        resource_mail = users[resource].email
+                        if leader_id:
+                            leader_email = user_ids[leader_id].email
+                        else:
+                            leader_email = SettingKeys.NA_VALUE
+                        if not info[week].get(leader_email):
+                            info[week][leader_email] = []
+                        detail = ''
+                        info[week][leader_email].append({
+                            'resource': resource,
+                            'resource_mail': resource_mail,
+                            'work_hours': 0,
+                            'timeoff': timeoff,
+                            'total': work_hours + timeoff,
+                            'detail': detail})
         return info
         
     def update_sync_sheet(self, request_dict):
@@ -2077,7 +2139,6 @@ class Controllers:
     
     def export_productiviity(self, request_dict):
         try:
-            
             data = request_dict['data']
             headers = request_dict['headers']
             wb = Workbook()
@@ -2101,13 +2162,14 @@ class Controllers:
             for idx in range(2, len(headers['1'])):
                 prd_wb.col(col_num).width = 256 * 14
                 header = headers['1'][idx]
+                print (header)
                 if count_2 > 0:
                     count_2 -= 1
                     col_num += 1
                     continue
                 if idx > 5:
-                    prd_wb.write_merge(row_num, row_num, col_num, col_num + 5, header, style_header)
-                    count_2 = 5
+                    prd_wb.write_merge(row_num, row_num, col_num, col_num + 6, header, style_header)
+                    count_2 = 6
                 else:
                     prd_wb.write_merge(row_num, row_num + 1, col_num, col_num, header, style_header)
                 col_num += 1
@@ -2194,7 +2256,6 @@ class Controllers:
                 string = ', '.join(week_std_hour.keys())
                 return 0, 'Missing data for %s'%string
             remove_path(file_path)
-            
             return 1, output
         except Exception as e:
             println(e, OtherKeys.LOGING_EXCEPTION)

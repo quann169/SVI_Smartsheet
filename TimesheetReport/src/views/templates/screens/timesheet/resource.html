@@ -74,8 +74,9 @@
 		
 	  <thead>
 	    <tr>
-			<th class="th-sm">#</th>
+	    	<th class="th-sm">#</th>
 	    	<th class="th-sm">Eng Type</th>
+	    	<th class="th-sm">DM</th>
 			<th class="th-sm">Team</th>
 			<th class="th-sm">Resource</th>
 			
@@ -92,8 +93,10 @@
 					{% if count.update({'value': (count.value + 1)}) %} {% endif %}
 					<tr>
 					{% set timesheet = info[eng_type][team][user_name]%}
+					{% set leader_name = info[eng_type][team][user_name]['leader_name'] %}
 					<td>{{count.value}}</td>
 			  		<td>{{eng_type}}</td>
+			  		<td>{{leader_name}}</td>
 					<td>{{team}}</td>
 					<td>{{user_name}}</td>
 					{% for column in list_sub_column %}

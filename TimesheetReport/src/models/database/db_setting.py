@@ -15,3 +15,4 @@ class DbSetting():
         self.db_user        = 'timesheet'
         self.db_port        = 3306
         self.db_password    = 'svi4ams!'
+        

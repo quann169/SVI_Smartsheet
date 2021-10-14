@@ -133,6 +133,7 @@ class ExcelHeader:
     RND         = 'RnD'
     TRN         = 'TRN'
     NONE_WH     = 'Non-WH'
+    OPERATING   = 'Operating'
     
 class DefaulteValue:
     
@@ -159,7 +160,7 @@ class OtherKeys:
     LOGING_EXCEPTION    = 'exception'
     LOGING_CRITICAL     = 'critical'
     PROCDUCTIVITY_ENG   = ['Jr. Engineer', 'Sr. Engineer']
-    PROCDUCTIVITY_SHEET_TYPE   = ['NRE', 'RnD', 'TRN', 'Pre-sale', 'Support', 'Non-WH']
+    PROCDUCTIVITY_SHEET_TYPE   = ['NRE', 'RnD', 'TRN', 'Pre-sale', 'Operating', 'Support', 'Non-WH']
     
 class SessionKey:
     
@@ -403,7 +404,7 @@ class Route:
         REPORT: [role.PM],
         SEND_REPORT: [role.PM],
         LOCK_SYNC: [role.PM],
-        PROJECT_TIMESHEET: [role.PM, role.DM],
+        # PROJECT_TIMESHEET: [role.PM, role.DM],
         ADMIN_USER_ROLE: [role.ADMIN],
         ADMIN_VERSION: [role.ADMIN],
         LOG: [role.ADMIN]

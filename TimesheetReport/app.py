@@ -10,8 +10,8 @@ import webbrowser, threading
 from threading import Timer
 from src.models.database.connection_model import Connection
 from src.controllers.controllers import Controllers as ctrl
-        
-version  = 'v0.3'
+from src.commons.enums import SessionKey
+version  = 'v0.3.2'
 if config.IS_PRODUCT:
     port = get_free_tcp_port()
     template_path =  '.data/views/templates'
@@ -45,6 +45,7 @@ def create_connection():
     g.tool_path = tool_path
     g.template_path = template_path
     g.version       = version
+    
 
 if __name__ == "__main__":
     if config.IS_PRODUCT:

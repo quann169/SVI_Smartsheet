@@ -38,12 +38,12 @@
  			<li class="{% if active_sidebar == route.RESOURCE_TIMESHEET %} active{% endif %}">
                 <a href="{{route.RESOURCE_TIMESHEET}}"><i class="fas fa-user-clock"></i>&nbsp;&nbsp;Resource</a>
             </li>
-            {% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM, role.DM]) %}
+            
 			<li class="{% if active_sidebar == route.PROJECT_TIMESHEET %} active{% endif %}">
                 <a href="{{route.PROJECT_TIMESHEET}}"><i class="fas fa-book"></i>&nbsp;&nbsp;Project</a>
             </li>
-            {% endif %}
-			{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+            
+			{% if ctrl_obj.is_in_require_role([role.PM]) %}
 				<li class="{% if active_sidebar == route.REPORT %} active{% endif %}">
                 	<a href="{{route.REPORT}}"><i class="fas fa-envelope"></i>&nbsp;&nbsp;Report</a>
             	</li>
@@ -72,7 +72,7 @@
             <li class="{% if active_sidebar == route.GRANTED_SETTING %} active{% endif %}">
                 <a href="{{route.GRANTED_SETTING}}"><i class="fas fa-clock"></i>&nbsp;&nbsp;Granted Setting</a>
             </li>
-			{% if ctrl_obj.is_in_require_role([role.ADMIN, role.PM]) %}
+			{% if ctrl_obj.is_in_require_role([role.PM]) %}
 				<li class="{% if active_sidebar == route.OTHER_SETTING %} active{% endif %}">
 	                <a href="{{route.OTHER_SETTING}}"><i class="fas fa-cogs"></i>&nbsp;&nbsp;Other Setting</a>
 	            </li>
