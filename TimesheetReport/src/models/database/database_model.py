@@ -1266,6 +1266,7 @@ class Log(Connection):
                     DbTable.LOG, DbHeader.SHEET_ID, DbHeader.ACTION_ID, \
                     DbHeader.OLD_VALUE, DbHeader.NEW_VALUE, DbHeader.UPDATED_BY, 
                     self.sheet_id, self.action_id, self.old_value, self.new_value, self.updated_by)
+        
         self.db_execute(query)
         
     def get_log(self, from_date, to_date, action_ids):

@@ -132,7 +132,7 @@ def println(message, logging_level=None, is_print=True):
             print (message)
     elif logging_level == OtherKeys.LOGING_DEBUG:
         if config.LOGGING_LEVEL.lower() ==  OtherKeys.LOGING_DEBUG:
-            logging.debug(message)
+            #logging.debug(message)
             if is_print:
                 print (message)
 

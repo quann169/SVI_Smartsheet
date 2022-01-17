@@ -26,7 +26,7 @@ function draw_stack_column_chart(id, data, label_angle, type) {
 		align: 'center',
 		// y: 10, // 10 pixels down from the top
 		style: {
-			// fontSize: '10px',
+			fontSize: '11px',
 			textShadow: false,
 			textOutline: false,
 			fontWeight: '500',
@@ -35,7 +35,7 @@ function draw_stack_column_chart(id, data, label_angle, type) {
 		formatter:function(){
 			let min = 1;
 			if (type == 'chart2') {
-				min = 0.1;
+				min = 0;
 			}
 			if(this.y > min) {
 				if (type == 'chart2') {
@@ -49,7 +49,7 @@ function draw_stack_column_chart(id, data, label_angle, type) {
 			} 	
 		}
 	}
-	var color_maping = ['#007BA9', '#fdd86c', '#a8d18d', '#f45b5b', '#d0cecf', '#abdbe3', '#fd7e14'];
+	var color_maping = ['#76b5c5', '#fdd86c', '#a8d18d', '#f45b5b', '#d0cecf', '#abdbe3', '#fd7e14'];
 	let sheet_type_order = ["NRE", "RnD", "TRN", "Non-WH", "Operating", "Support", "Pre-sale"];
 	for (let idx = sheet_type_order.length - 1; idx >= 0; idx--) {
 		let type = sheet_type_order[idx];
@@ -110,6 +110,10 @@ function draw_stack_column_chart(id, data, label_angle, type) {
 				text: ''
 			},
 			labels: {
+				style: {
+					fontWeight: '500',
+					fontFamily: "Calibri (Body)",
+				},
 				formatter:function(){
 					if (type == 'chart1') {
 						let label = this.value + '%';
@@ -120,6 +124,12 @@ function draw_stack_column_chart(id, data, label_angle, type) {
 				}
 			},
 			stackLabels: {
+				style: {
+					fontWeight: '700',
+					fontSize: '20px',
+					paddingBottom: '50px',
+					fontFamily: "Calibri (Body)",
+				},
                     enabled: enableStackLabel,
 					formatter: function() {
 						if (this.total > 0 ){

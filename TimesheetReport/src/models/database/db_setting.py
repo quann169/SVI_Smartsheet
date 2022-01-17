@@ -11,7 +11,7 @@ class DbSetting():
             self.db_name        = 'timesheet'
         else:
             self.db_name        = 'timesheet_dev'
-        self.db_host        = '192.168.2.59'
+        self.db_host        = '192.168.200.59'
         self.db_user        = 'timesheet'
         self.db_port        = 3306
         self.db_password    = 'svi4ams!'

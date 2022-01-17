@@ -866,7 +866,43 @@ class Controllers:
                                                                                                              [SessionKey.EXPAND_COLLAPSE, 'expand'],
                                                                                                              ]))
                         info[eng_type][team_name][user_name][col_element]['href'] = href
-            
+            #add missing date for user missing task but enought timeoff
+            for user_id in timeoff_info_2:
+                eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
+                user_name = user_ids[user_id].user_name
+                if list_user and not (user_name in list_user):
+                    continue
+                team_name   = team_ids[user_ids[user_id].team_id]
+                leader_id = users[user_name].leader_id
+                if leader_id:
+                    leader_name = user_ids[leader_id].user_name
+                else:
+                    leader_name = SettingKeys.NA_VALUE
+                for date_name in timeoff_info_2[user_id]:
+                    timeoff = timeoff_info_2[user_id][date_name]
+                    if not info.get(eng_type):
+                        info[eng_type]  = {}
+                        
+                    if not info[eng_type].get(team_name):
+                        info[eng_type][team_name]  = {} 
+                                  
+                    if not info[eng_type][team_name].get(user_name):
+                        info[eng_type][team_name][user_name]  = {}
+                        info[eng_type][team_name][user_name]['leader_name'] = leader_name
+                    
+                    for element in cols_element:
+                        if filter == 'monthly':
+                            month, year, max_hour = element
+                            col_name    = DateTime.LIST_MONTH[month]
+                        else:
+                            col_name, max_hour = element
+                        if not info[eng_type][team_name][user_name].get(col_name):
+                            info[eng_type][team_name][user_name][col_name]  = {'max_hour' : max_hour, 
+                                                                               'summary': [0, 0], 
+                                                                               'sheets': {},
+                                                                               'href': ''}
+                        if date_name == col_name:
+                            info[eng_type][team_name][user_name][col_name]['summary'][1]  = timeoff
             total    = 0
             no_missing   = 0
             no_redundant = 0
@@ -2082,8 +2118,8 @@ class Controllers:
 #                                 timeoff = timeoff_info_2[user_id][col_element]
                         
                         #Skip user not in PROCDUCTIVITY_ENG
-                        if eng_type not in OtherKeys.PROCDUCTIVITY_ENG:
-                            continue
+                        # if eng_type not in OtherKeys.PROCDUCTIVITY_ENG:
+                        #     continue
                         #get leader name
                         leader_id = users[user_name].leader_id
                         if leader_id:
