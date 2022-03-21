@@ -94,7 +94,7 @@
 		{% set is_notify, link = ctrl_obj.check_version() %}
 		{% if is_notify %}
 			<script>
-				var ctn = 'A new version of Timesheet Report is available. Click here to download:' + '<a class="cl-blue" target="_blank" href="{{link}}"><u>  Dowload</u></a>'
+				var ctn = 'A new version of Timesheet Report is available. Click here to download:' + '<a class="cl-blue" target="_blank" href="{{link}}"><u>  Download</u></a>'
 				$('#notify_content').html(ctn);
 				$('#notify').show();
 			</script>

@@ -478,7 +478,7 @@ def get_saved_password():
     password = ''
     if os.path.exists(user_file):
         file_name = user_file
-        with open(file_name, 'r') as f:
+        with open(file_name, 'r', encoding="utf-8") as f:
             encrypt_ctn = f.read()
             password = decrypt(encrypt_ctn)
         return password
@@ -486,7 +486,7 @@ def get_saved_password():
         working_path = config.WORKING_PATH
         file_name = os.path.join(working_path, '.pswd.txt')
         if os.path.exists(file_name):
-            with open(file_name, 'r') as f:
+            with open(file_name, 'r', encoding="utf-8") as f:
                 encrypt_ctn = f.read()
                 password = decrypt(encrypt_ctn)
         return password
@@ -495,13 +495,13 @@ def save_password(password):
     try:
         username = getpass.getuser()
         file_name = os.path.join(os.path.join('C:\\Users', username), '.pswd.txt')
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', encoding="utf-8") as f:
             encrypt_ctn = encrypt(password)
             f.write(encrypt_ctn)
     except:
         working_path = config.WORKING_PATH
         file_name = os.path.join(working_path, '.pswd.txt')
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', encoding="utf-8") as f:
             encrypt_ctn = encrypt(password)
             f.write(encrypt_ctn)
             

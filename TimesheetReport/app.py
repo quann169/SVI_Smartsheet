@@ -11,7 +11,7 @@ from threading import Timer
 from src.models.database.connection_model import Connection
 from src.controllers.controllers import Controllers as ctrl
 from src.commons.enums import SessionKey
-version  = 'v0.3.2'
+version  = 'v0.4'
 if config.IS_PRODUCT:
     port = get_free_tcp_port()
     template_path =  '.data/views/templates'

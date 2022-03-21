@@ -769,7 +769,7 @@ class Controllers:
             config_obj      = Configuration()
             config_obj.get_list_holiday(is_parse=True)
             holidays  = config_obj.holidays
-            
+            list_exist_user = []
             info            = {}
             if filter == 'monthly':
                 list_month   = get_work_month(from_date=from_date, to_date=to_date, holidays=holidays)
@@ -835,6 +835,7 @@ class Controllers:
                         if not info[eng_type][team_name].get(user_name):
                             info[eng_type][team_name][user_name]  = {}
                             info[eng_type][team_name][user_name]['leader_name'] = leader_name
+                            list_exist_user.append(user_name)
                             for element in cols_element:
                                 if filter == 'monthly':
                                     month, year, max_hour = element
@@ -887,6 +888,7 @@ class Controllers:
                         info[eng_type][team_name]  = {} 
                                   
                     if not info[eng_type][team_name].get(user_name):
+                        list_exist_user.append(user_name)
                         info[eng_type][team_name][user_name]  = {}
                         info[eng_type][team_name][user_name]['leader_name'] = leader_name
                     
@@ -903,6 +905,43 @@ class Controllers:
                                                                                'href': ''}
                         if date_name == col_name:
                             info[eng_type][team_name][user_name][col_name]['summary'][1]  = timeoff
+            # Add user missing task
+            
+            for resource, resource_obj in users.items():
+                user_id = resource_obj.user_id
+                if resource_obj.is_active:
+                    if resource not in list_exist_user:
+                        eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
+                        user_name = resource
+                        team_name   = team_ids[user_ids[user_id].team_id]
+                        leader_id = users[user_name].leader_id
+                        if leader_id:
+                            leader_name = user_ids[leader_id].user_name
+                        else:
+                            leader_name = SettingKeys.NA_VALUE
+                        for week, max_hours in list_week:
+                            work_hours = 0
+                            if not info.get(eng_type):
+                                info[eng_type]  = {}
+                            if not info[eng_type].get(team_name):
+                                info[eng_type][team_name]  = {} 
+                                          
+                            if not info[eng_type][team_name].get(user_name):
+                                info[eng_type][team_name][user_name]  = {}
+                                info[eng_type][team_name][user_name]['leader_name'] = leader_name
+                            
+                            for element in cols_element:
+                                if filter == 'monthly':
+                                    month, year, max_hour = element
+                                    col_name    = DateTime.LIST_MONTH[month]
+                                else:
+                                    col_name, max_hour = element
+                                if not info[eng_type][team_name][user_name].get(col_name):
+                                    info[eng_type][team_name][user_name][col_name]  = {'max_hour' : max_hour, 
+                                                                                       'summary': [0, 0], 
+                                                                                       'sheets': {},
+                                                                                       'href': ''}
+            
             total    = 0
             no_missing   = 0
             no_redundant = 0
