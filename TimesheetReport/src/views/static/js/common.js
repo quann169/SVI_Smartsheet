@@ -136,12 +136,13 @@ function get_form_submit(form_id) {
     return data
 };
 
-function get_value_from_multiple_select(prefix) {
+function get_value_from_multiple_select(prefix, check_select_all) {
 	if (prefix == undefined) {
 		prefix = 'undefined';
 	}
 	var list_checkbox = $('.multi-select-menuitems').find('input');
 	var result = [];
+	var all = true;
 	list_checkbox.each(function(){
 		if ($(this).prop('checked') == true ) {
 			let id = $(this).attr('id');
@@ -149,10 +150,16 @@ function get_value_from_multiple_select(prefix) {
 				result.push($(this).val());
 			}
 			
+		} else {
+			all = false;
 		}
 	});
-	return result;
+	if (check_select_all) {
+		return [result, all];
+	} else {
+		return result;
 	}
+}
 
 function upload_file (form_id) {
 	var form_data = new FormData($(form_id)[0]);
@@ -183,12 +190,13 @@ function get_data_from_form(form_id) {
 	for (var idx = 0; idx < sheet_ids.length; idx++) {
 		ids.push(sheet_ids[idx]);
 	}
-	var users1 = get_value_from_multiple_select('user');
-	
-	if (users1.length == 0) {
-		custom_alert('No user name selected', 'error');
-		return null;
-	} 
+	var out_user = get_value_from_multiple_select('user', true);
+	var users1 = out_user[0];
+	var is_all = out_user[1];
+	//if (users1.length == 0) {
+	//	custom_alert('No user name selected', 'error');
+	//	return null;
+	//} 
 	var users2 = [];
 	for (var idx = 0; idx < users1.length; idx++) {
 		if (users1[idx] == 'all') {
@@ -196,6 +204,10 @@ function get_data_from_form(form_id) {
 		}
 		users2.push(users1[idx]);
 	}
+	if (is_all) {
+		users2 = [];
+	}
+	
 	var from_date 	= data['from_date'];
 	var to_date 	= data['to_date'];
 	var filter 		= data['task_filter'];
@@ -335,12 +347,13 @@ function colect_config_date() {
 		}
 		ids.push(sheet_ids[idx]);
 	}
-	var users1 = get_value_from_multiple_select('user');
-	
-	if (users1.length == 0) {
-		custom_alert('No user name selected', 'error');
-		return null;
-	} 
+	var out_user = get_value_from_multiple_select('user', true);
+	var users1 = out_user[0];
+	var is_all = out_user[1];
+	//if (users1.length == 0) {
+	//	custom_alert('No user name selected', 'error');
+	//	return null;
+	//} 
 	var users2 = [];
 	for (var idx = 0; idx < users1.length; idx++) {
 		if (users1[idx] == 'all') {
@@ -348,7 +361,9 @@ function colect_config_date() {
 		}
 		users2.push(users1[idx]);
 	}
-
+	if (is_all) {
+		users2 = [];
+	}
 	var from_date 	= data['from_date'];
 	var to_date 	= data['to_date'];
 	var filter 		= data['filter'];

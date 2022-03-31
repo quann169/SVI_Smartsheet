@@ -809,6 +809,9 @@ class Controllers:
                         eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
                         team_name   = team_ids[user_ids[user_id].team_id]
                         leader_id = users[user_name].leader_id
+                        #skip user inactive
+                        if not users[user_name].is_active:
+                            continue
                         if leader_id:
                             leader_name = user_ids[leader_id].user_name
                         else:
@@ -871,6 +874,9 @@ class Controllers:
             for user_id in timeoff_info_2:
                 eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
                 user_name = user_ids[user_id].user_name
+                #skip user inactive
+                if not user_ids[user_id].is_active:
+                    continue
                 if list_user and not (user_name in list_user):
                     continue
                 team_name   = team_ids[user_ids[user_id].team_id]
@@ -905,43 +911,44 @@ class Controllers:
                                                                                'href': ''}
                         if date_name == col_name:
                             info[eng_type][team_name][user_name][col_name]['summary'][1]  = timeoff
+            
             # Add user missing task
-            
-            for resource, resource_obj in users.items():
-                user_id = resource_obj.user_id
-                if resource_obj.is_active:
-                    if resource not in list_exist_user:
-                        eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
-                        user_name = resource
-                        team_name   = team_ids[user_ids[user_id].team_id]
-                        leader_id = users[user_name].leader_id
-                        if leader_id:
-                            leader_name = user_ids[leader_id].user_name
-                        else:
-                            leader_name = SettingKeys.NA_VALUE
-                        for week, max_hours in list_week:
-                            work_hours = 0
-                            if not info.get(eng_type):
-                                info[eng_type]  = {}
-                            if not info[eng_type].get(team_name):
-                                info[eng_type][team_name]  = {} 
-                                          
-                            if not info[eng_type][team_name].get(user_name):
-                                info[eng_type][team_name][user_name]  = {}
-                                info[eng_type][team_name][user_name]['leader_name'] = leader_name
-                            
-                            for element in cols_element:
-                                if filter == 'monthly':
-                                    month, year, max_hour = element
-                                    col_name    = DateTime.LIST_MONTH[month]
-                                else:
-                                    col_name, max_hour = element
-                                if not info[eng_type][team_name][user_name].get(col_name):
-                                    info[eng_type][team_name][user_name][col_name]  = {'max_hour' : max_hour, 
-                                                                                       'summary': [0, 0], 
-                                                                                       'sheets': {},
-                                                                                       'href': ''}
-            
+            if not list_user:
+                for resource, resource_obj in users.items():
+                    user_id = resource_obj.user_id
+                    if resource_obj.is_active:
+                        if resource not in list_exist_user:
+                            eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
+                            user_name = resource
+                            team_name   = team_ids[user_ids[user_id].team_id]
+                            leader_id = users[user_name].leader_id
+                            if leader_id:
+                                leader_name = user_ids[leader_id].user_name
+                            else:
+                                leader_name = SettingKeys.NA_VALUE
+                            for week, max_hours in list_week:
+                                work_hours = 0
+                                if not info.get(eng_type):
+                                    info[eng_type]  = {}
+                                if not info[eng_type].get(team_name):
+                                    info[eng_type][team_name]  = {} 
+                                              
+                                if not info[eng_type][team_name].get(user_name):
+                                    info[eng_type][team_name][user_name]  = {}
+                                    info[eng_type][team_name][user_name]['leader_name'] = leader_name
+                                
+                                for element in cols_element:
+                                    if filter == 'monthly':
+                                        month, year, max_hour = element
+                                        col_name    = DateTime.LIST_MONTH[month]
+                                    else:
+                                        col_name, max_hour = element
+                                    if not info[eng_type][team_name][user_name].get(col_name):
+                                        info[eng_type][team_name][user_name][col_name]  = {'max_hour' : max_hour, 
+                                                                                           'summary': [0, 0], 
+                                                                                           'sheets': {},
+                                                                                           'href': ''}
+                
             total    = 0
             no_missing   = 0
             no_redundant = 0
@@ -1248,6 +1255,7 @@ class Controllers:
                 x2x = XLS2XLSX(output_path)
                 remove_path(output_path)
                 x2x.to_xlsx(output_path2)
+                os.system('start %s'%(output_path2))
             except IndexError:
                 return 0, 'Can not export file because there are no sheets in the output workbook.'
             return 1, file_name2
@@ -2237,7 +2245,6 @@ class Controllers:
             for idx in range(2, len(headers['1'])):
                 prd_wb.col(col_num).width = 256 * 14
                 header = headers['1'][idx]
-                print (header)
                 if count_2 > 0:
                     count_2 -= 1
                     col_num += 1
@@ -2276,6 +2283,7 @@ class Controllers:
             x2x = XLS2XLSX(output_path)
             remove_path(output_path)
             x2x.to_xlsx(output_path2)
+            os.system('start %s'%(output_path2))
             return 1, file_name2
         
         except Exception as e:
