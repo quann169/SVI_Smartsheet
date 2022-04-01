@@ -4,7 +4,7 @@ Created on Feb 5, 2021
 @author: toannguyen
 '''
 import os, sys, re, copy
-import datetime, calendar
+import datetime, calendar, time
 import ast, getpass
 from src.commons.message import Msg, MsgError, MsgWarning
 from src.commons.enums import DateTime, SessionKey, ExcelColor, SettingKeys, OtherKeys
@@ -598,13 +598,23 @@ def send_mail(user_name, password, recipient, cc_recipient, subject, message, bc
         msg.attach(part)
         
         # Send the message via local SMTP server.
-        mail = smtplib.SMTP("smtp.outlook.office365.com", 587, timeout=20)
-        
-        # if tls = True                
-        mail.starttls()               
-        mail.login(sender, password)        
-        mail.sendmail(sender, recipient + bcc_recipient + cc_recipient, msg.as_string())
-        mail.quit()
+        starttls = True
+        count  = 0
+        while starttls:
+            count += 1
+            try:
+                mail = smtplib.SMTP("smtp.outlook.office365.com", 587, timeout=20)            
+                mail.starttls()               
+                mail.login(sender, password)
+                mail.sendmail(sender, recipient + bcc_recipient + cc_recipient, msg.as_string())
+                starttls = False
+                mail.quit()
+            except Exception as e:
+                time.sleep(1)
+                if count == 30:
+                    starttls = False
+                    println('Fail to send mail', OtherKeys.LOGING_ERROR)
+                    return 0, 'Fail to send mail.'
         return 1, ''
     except Exception as e:
         println(str(e.args), OtherKeys.LOGING_EXCEPTION)
