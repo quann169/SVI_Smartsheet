@@ -360,7 +360,15 @@ class Configuration(Connection):
         
         condition   = ""
         if start_date != None and end_date != None:
-            condition = 'WHERE `%s`>="%s" AND `%s`<="%s" '%(DbHeader.START_DATE, start_date, DbHeader.START_DATE, end_date)
+            condition = '''WHERE `%s`>="%s" AND `%s`<="%s" 
+                                OR `%s`>="%s" AND `%s`<="%s"
+                                OR "%s">=`%s` AND "%s"<=`%s`
+                                OR "%s">=`%s` AND "%s"<=`%s`'''%(
+                                    DbHeader.START_DATE, start_date, DbHeader.START_DATE, end_date,
+                                    DbHeader.END_DATE, start_date, DbHeader.END_DATE, end_date,
+                                    start_date, DbHeader.START_DATE, end_date, DbHeader.START_DATE,
+                                    start_date, DbHeader.END_DATE, end_date,  DbHeader.END_DATE
+                                    )
         
         query = """
                 SELECT `%s`.`%s`,

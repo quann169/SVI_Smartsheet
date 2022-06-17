@@ -189,7 +189,7 @@ class Controllers:
                 for key in sheet_ids_dict.keys():
                     sheet_ids.append(key)
                 request_dict[SessionKey.SHEETS] = sheet_ids
-            if not request_dict.get(SessionKey.USERS):
+            if request_dict.get(SessionKey.USERS) == None:
                 users_info = config_obj.get_list_resource()
                 users = []
                 for row in users_info:
@@ -2079,7 +2079,7 @@ class Controllers:
         return result
     
     def get_resource_productivity_info(self, request_dict=None, from_date=None, to_date=None, sheet_ids=None, 
-                                    filter='weekly', task_filter='both'):
+                                    filter='weekly', task_filter='both', list_user=None):
         try:
             missing_method = False
             if request_dict:
@@ -2089,11 +2089,13 @@ class Controllers:
                     sheet_ids   = request_dict[SessionKey.SHEETS]
                     if request_dict.get(SessionKey.TASK_FILTER):
                         task_filter = request_dict[SessionKey.TASK_FILTER]
+                    if request_dict.get(SessionKey.USERS):
+                        list_user = request_dict[SessionKey.USERS]
                 except KeyError:
                     missing_method = True
             if not filter or not sheet_ids or not to_date or not from_date or missing_method:
                 return ({}, [], 0, 0, 0, 0, 0)
-            timesheet_obj   = Timesheet(False, from_date, to_date, task_filter, sheet_ids)
+            timesheet_obj   = Timesheet(False, from_date, to_date, task_filter, sheet_ids, list_user)
             timesheet_obj.parse()
             user_ids        = timesheet_obj.user_ids
             eng_type_ids    = timesheet_obj.eng_type_ids
@@ -2137,7 +2139,7 @@ class Controllers:
                     if not timeoff_info_2[user_id].get(name):
                         timeoff_info_2[user_id][name] = 0
                     timeoff_info_2[user_id][name] += timeoff_per_day
-            
+            list_exist_user = []
             for sheet_id in timesheet_obj.sheets:
                 sheet_obj   = timesheet_obj.sheets[sheet_id]
                 sheet_name  = sheet_obj.sheet_name
@@ -2178,6 +2180,7 @@ class Controllers:
                             info[leader_name] = {}
                         
                         if not info[leader_name].get(user_name):
+                            list_exist_user.append(user_name)
                             info[leader_name][user_name] = {
                                 'eng_type': eng_type,
                                 'team_name': team_name,
@@ -2214,6 +2217,59 @@ class Controllers:
                         
                         if info[leader_name][user_name]['timesheet'][col_element]['sheet_type']['Non-WH'] <= 0:
                             info[leader_name][user_name]['timesheet'][col_element]['sheet_type']['Non-WH'] = 0
+            
+            # Add user missing task
+            if not list_user:
+                for resource, resource_obj in users.items():
+                    user_id = resource_obj.user_id
+                    if resource_obj.is_active:
+                        if resource not in list_exist_user:
+                            user_name   = resource_obj.user_name
+                            eng_type    = eng_type_ids[user_ids[user_id].eng_type_id]
+                            team_name   = team_ids[user_ids[user_id].team_id]
+                            leader_id = users[user_name].leader_id
+                            if leader_id:
+                                leader_name = user_ids[leader_id].user_name
+                            else:
+                                leader_name = SettingKeys.NA_VALUE
+                            
+                            if not info.get(leader_name):
+                                info[leader_name] = {}
+                            if not info[leader_name].get(user_name):
+                                info[leader_name][user_name] = {
+                                    'eng_type': eng_type,
+                                    'team_name': team_name,
+                                    'timesheet': {}
+                                    }
+                                for element in cols_element:
+                                    timeoff     = 0
+                                    if filter == 'monthly':
+                                        month, year, max_hour = element
+                                        col_name    = DateTime.LIST_MONTH[month]
+                                    else:
+                                        col_name, max_hour = element
+                                                    
+                                    info[leader_name][user_name]['timesheet'][col_name] = {
+                                        'timeoff' : timeoff,
+                                        'sheet_type': {},
+                                        'max_hours': max_hour
+                                        }
+                                    for element in OtherKeys.PROCDUCTIVITY_SHEET_TYPE:
+                                        if element in ['Non-WH']:
+                                            info[leader_name][user_name]['timesheet'][col_name]['sheet_type'][element] = max_hour - timeoff
+                                        else:
+                                            info[leader_name][user_name]['timesheet'][col_name]['sheet_type'][element] = 0
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             return info, list_sub_col, cols_element, productivity_config_info
         except Exception as e:
