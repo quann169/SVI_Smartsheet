@@ -1,0 +1,41 @@
+{% macro button(data) %}
+    {% set type = data.type %}
+    {% set text = data.text %}
+    {% set href = data.href %}
+    {% set class = data.class %}
+    {% set value = data.value %}
+    {% set is_disable = data.is_disable %}
+    {% set data_attr = data.data_attr %}
+    {#
+    <!-- 
+    data = {
+        'button_type': 'button' or 'link',
+        'text': "Submit",
+        'href': '#',
+        'class': 'button'
+        'value': ''
+        'data_attr': [(name1, value1), (name1, value2), ]
+
+    }
+    -->
+    #}
+    {% if type == 'link' %}
+        <a class='{% if class %}{{class}}{% else %}custom-link{% endif %}' href='{{href}}'
+        {% if data_attr %}
+            {% for attr in data_attr %}
+                {% set attr_name, attr_value = attr %}
+                data-{{attr_name}} = '{{attr_value}}'
+            {% endfor %}
+        {% endif %}
+        >{{text}}</a>
+    {% else %}
+        <button class='{% if class %}{{class}}{% else %}custom-button{% endif %}' value='{{value}}'
+        {% if data_attr %}
+            {% for attr in data_attr %}
+                {% set attr_name, attr_value = attr %}
+                data-{{attr_name}} = '{{attr_value}}'
+            {% endfor %}
+        {% endif %}
+        >{{text}}</button>
+    {% endif %}
+{% endmacro %}

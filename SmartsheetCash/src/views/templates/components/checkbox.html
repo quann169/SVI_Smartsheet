@@ -1,0 +1,34 @@
+{% macro checkbox(data) %}
+    {% set text = data['text'] %}
+    {% set class = data['class'] %}
+    {% set id = data['id'] %}
+    {% set value = data['value'] %}
+    {% set is_disable = data['is_disable'] %}
+    {% set is_readonly = data['is_readonly'] %}
+    {% set data_attr = data['data_attr'] %}
+    {#
+    <!-- 
+    data = {
+        'text': '', 
+        'class': 'custom-checkbox',
+        'id': '',
+        'value': '',
+        'data_attr': [(name1, value1), (name1, value2), ],
+        'is_readonly': True,
+        'is_disable': False
+
+    }
+    -->
+    #}
+    <input class='{% if class %}{{class}}{% else %}custom-checkbox{% endif %}' value='{{value}}' type='checkbox'
+    {% if is_disable %}disabled{% endif %} {% if is_readonly %}readonly{% endif %} {% if id %}id="{{id}}"}{% endif %}
+    {% if data_attr %}
+        {% for attr in data_attr %}
+            {% set attr_name, attr_value = attr %}
+            data-{{attr_name}} = '{{attr_value}}'
+        {% endfor %}
+    {% endif %}
+    >
+    {% if text %}<label class="" {% if id %}for="{{id}}"}{% endif %} >{{text}}</label>{% endif %}
+    
+{% endmacro %}

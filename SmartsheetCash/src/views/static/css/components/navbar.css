@@ -1,0 +1,10 @@
+.logo {
+    width: 200px;
+}
+
+.custom-navbar {
+    background-color: var(--navbar-bg);
+    color: var(--navbar-text);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}

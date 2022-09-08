@@ -1,0 +1,33 @@
+{% macro navbar(data) %}
+    {% set user_name = data['user_name'] %}
+    {% set home_link = data['home_link'] %}
+    {% set logo_link = data['logo_link'] %}
+    {% set signout_link = data['signout_link'] %}
+    {#
+    <!-- 
+        data = {
+            'user_name': name,
+            'home_link': '#',
+            'logo_link': '#',
+            'logout_link': '#'
+        }
+     -->
+    #}
+    <div class="custom-navbar" >
+        <div class="custom-container d-flex justify-content-between align-items-center">
+            <a href = "{{home_link}}" class="d-inline-block"><img src="{{logo_link}}" class='logo'></a> 
+            <div class="d-inline-block">
+                <span >{{user_name}}</span>
+                {{button({
+                    'type': 'link',
+                    'text': "Sign out",
+                    'class': 'custom-link-button bg-danger text-white',
+                    'href': signout_link
+                    })
+                }}
+            </div>
+            
+        </div>
+    </div>
+{%- endmacro -%}
+

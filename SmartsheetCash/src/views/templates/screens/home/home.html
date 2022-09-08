@@ -1,0 +1,101 @@
+{% extends enums.Template.LAYOUT %}
+{% block title %}
+	Home
+{% endblock title %}
+
+{% block breadcrumb_block %}
+	{% set data = {
+		'items': [
+			(enums.Route.HOME, 'Home', True)
+		],
+		'home_link':  enums.Route.INDEX
+	}
+	%}
+	{{ breadcrumb(data) }}
+{% endblock breadcrumb_block %}
+
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/screens/home/home.js')}}"></script>
+{% endblock scripts %}
+
+{% block option %}
+	{{select({
+		'value': "",
+		'class': 'custom-select',
+		'options': [
+			('Last Week', 'last_week', True),
+			('Last Month', 'last_month', False),
+			('Specific', 'specific', False)
+		]
+		})
+	}}
+	{{input({
+		'type': 'date',
+		'value': "",
+		'class': 'custom-input',
+		})
+	}}
+	{{input({
+		'type': 'date',
+		'value': "",
+		'class': 'custom-input'
+		})
+	}}
+	{{button({
+		'type': 'button',
+		'text': "Analyze",
+		'class': 'custom-button',
+		})
+	}}
+	
+{% endblock option %}
+
+{% block content %}
+	<table class="table table-striped table-bordered " cellspacing="0" width='100%'>
+	  <thead>
+	    <tr>
+		  <th class="">#
+	      </th>
+		  <th class="">{{checkbox({
+			'value': "",
+			'class': 'custom-checkbox',
+			'text': 'a',
+			'id': '1',
+			})
+		}}
+			</th>
+	      <th class="">From sheet
+	      </th>
+		  <th class="">To sheet
+	      </th>
+		  <th class="">Parse Time
+	      </th>
+		  <th class="">Result
+		  </th>
+	    </tr>
+	  </thead>
+	  <tbody>
+		<tr>
+			<td class="">#
+	      </td>
+		  <td class="">{{checkbox({
+				'value': "",
+				'class': 'custom-checkbox',
+				'text': 'a',
+				'id': '2',
+				})
+			}}
+			</td>
+	      <td class="">From sheet
+	      </td>
+		  <td class="">To sheet
+	      </td>
+		  <td class="">Parse Time
+	      </td>
+		  <td class="">Result
+		  </td>
+	  </tbody>
+	  
+	</table>
+{% endblock content%}

@@ -1,0 +1,6 @@
+2022-09-07 16:03:37,140 INFO _log(113)  * Restarting with stat
+2022-09-07 16:03:40,260 WARNING _log(113)  * Debugger is active!
+2022-09-07 16:03:40,268 INFO _log(113)  * Debugger PIN: 576-161-114
+2022-09-07 16:03:40,289 INFO _log(113)  * Running on http://localhost:6602/ (Press CTRL+C to quit)
+2022-09-07 16:03:50,425 INFO _log(113)  * Detected change in 'C:\\CAD\\Test\\app.py', reloading
+2022-09-07 16:03:50,684 INFO _log(113)  * Restarting with stat
