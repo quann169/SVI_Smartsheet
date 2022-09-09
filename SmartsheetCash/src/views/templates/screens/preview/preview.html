@@ -1,0 +1,57 @@
+{% extends enums.Template.LAYOUT %}
+{% block title %}
+	Home
+{% endblock title %}
+
+{% block breadcrumb_block %}
+	{% set data = {
+		'items_data': [
+			(enums.Route.ANALYZE, 'Analyze', False),
+            (enums.Route.PREVIEW, 'Preview', True)
+		],
+		'home_link':  enums.Route.INDEX
+	}
+	%}
+	{{ breadcrumb(data) }}
+{% endblock breadcrumb_block %}
+
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/screens/preview.js')}}"></script>
+{% endblock scripts %}
+
+{% set unuse = ctrl_obj.get_setting() %}
+{% set all_settings = ctrl_obj.all_settings %}
+{% block option %}
+	{{button({
+		'type': 'button',
+		'text': "Commit",
+		'class': 'custom-button',
+		})
+	}}
+	
+{% endblock option %}
+
+{% block content %}
+	<table class="table table-striped table-bordered position-relative" cellspacing="0" width='100%'>
+	  <thead class="position-sticky top-0">
+        <tr>
+            {% for header in all_settings['des_headers'] %}
+                <th class="">{{header}}</th>
+            {% endfor %}
+        </tr>
+	  </thead>
+	  <tbody>
+        {% for src_sheet in all_settings['src_sheets'] %}
+            <tr>
+                {% for header in all_settings['des_headers'] %}
+                    <td class="custom-w-5">{{header}}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+		
+
+	  </tbody>
+	  
+	</table>
+{% endblock content%}

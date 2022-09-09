@@ -32,7 +32,6 @@
 				<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
 				<!-- end common -->
 				<!-- Component -->
-				
 				<link rel="stylesheet" href="{{ url_for('static', filename='css/components/input.css') }}" />
 				<link rel="stylesheet" href="{{ url_for('static', filename='css/components/checkbox.css') }}" />
 				<link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}" />
@@ -41,8 +40,9 @@
 				<link rel="stylesheet" href="{{ url_for('static', filename='css/components/navbar.css') }}" />
 				<link rel="stylesheet" href="{{ url_for('static', filename='css/components/breadcrumb.css') }}" />
 				<!-- End component -->
-				
+				<!-- Custom  -->
 				<link rel="stylesheet" href="{{ url_for('static', filename='css/screens/layout.css') }}" />
+				<!-- End Custom -->
 
 			{%- endblock styles %}
 		{%- endblock head %}
@@ -58,32 +58,32 @@
 				'logo_link': url_for('static', filename='images/svi_logo.png'),
 				'signout_link': enums.Route.LOGOUT } %}
 			{{ navbar(data) }}
-			
 		{%- endblock navbar_block %}
 		{% block breadcrumb_block %}
 		{%- endblock breadcrumb_block %}
-		<div class='custom-container flex-grow-1'>
+		<div class='custom-container flex-grow-1 d-flex flex-column'>
 			<div class='option-block'>
 				{% block option %} 
 				{% endblock option %}
 			</div>
-			<div class='content'>
+			<div class='content flex-grow-1 overflow-auto h-0 mb-2'>
 				{% block content %} 
 				{% endblock content %}
 			</div>
 		</div>
-		
 		{% block scripts %}
-			<!-- Font Awesome JS -->
-			<script src="{{url_for('static', filename='js/enum.js')}}"></script>
+			<!-- library -->
 			<script src="{{url_for('static', filename='vendors/fontawesome/js/solid.js')}}" ></script>
 			<script src="{{url_for('static', filename='vendors/fontawesome/js/fontawesome.js')}}"></script>
 			<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.js')}}"></script>
-			<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.slim.min.js')}}"></script>
 			<script src="{{url_for('static', filename='vendors/poper/popper-1.14.0.min.js')}}"></script>
 			<script src="{{url_for('static', filename='vendors/bootstrap-4.5.3/js/bootstrap.min.js')}}"></script>
+			<!-- End library -->
 
+			<!-- Custom -->
+			<script src="{{url_for('static', filename='js/enum.js')}}"></script>
 			<script src="{{url_for('static', filename='js/common.js')}}"></script>
+			<!-- End custom -->
 	    {%- endblock scripts %}
 	</body>
 

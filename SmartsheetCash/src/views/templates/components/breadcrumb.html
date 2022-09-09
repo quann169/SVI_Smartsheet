@@ -1,11 +1,11 @@
 
 {% macro breadcrumb(data) %}
-  {% set items = data['items'] %}
-  {% set home_link = data['home_link'] %}
+  {% set items_data = data.items_data %}
+  {% set home_link = data.home_link %}
   {#
   <!-- 
     data = {
-        'items': [
+        'items_data': [
           (href, display_name, is_active),
           (href, display_name, is_active)
         ],
@@ -17,7 +17,7 @@
   <div class='custom-breadcrumb'>
     <ol class="custom-container d-flex justify-content-start align-items-center">
       <li class="custom-breadcrumb-item"><a href="{{home_link}}"><i class="fa fa-home" aria-hidden="true"></i></a></li>
-      {% for item in items %}
+      {% for item in items_data %}
         {% set href, display_name, is_active = item %}
         {% if is_active %}
           <li class="custom-breadcrumb-item active">

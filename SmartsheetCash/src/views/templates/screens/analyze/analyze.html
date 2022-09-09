@@ -6,7 +6,7 @@
 {% block breadcrumb_block %}
 	{% set data = {
 		'items_data': [
-			(enums.Route.HOME, 'Home', True)
+			(enums.Route.ANALYZE, 'Analyze', True)
 		],
 		'home_link':  enums.Route.INDEX
 	}
@@ -16,41 +16,25 @@
 
 {% block scripts %}
 	{{super()}}
-	<script src="{{url_for('static', filename='js/screens/home.js')}}"></script>
+	<script src="{{url_for('static', filename='js/screens/analyze.js')}}"></script>
 {% endblock scripts %}
 
 {% set unuse = ctrl_obj.get_setting() %}
 {% set all_settings = ctrl_obj.all_settings %}
 {% block option %}
-	{{select({
-		'value': "",
-		'class': 'custom-select date-type',
-		'options': [
-			('Last Week', 'last_week', False),
-			('Last Month', 'last_month', True),
-			('Specific', 'specific', False)
-		],
-		})
-	}}
-	{{input({
-		'type': 'date',
-		'value': "",
-		'class': 'custom-input from-date',
-		})
-	}}
-	{{input({
-		'type': 'date',
-		'value': "",
-		'class': 'custom-input to-date'
+	{{button({
+		'type': 'button',
+		'text': "Add To Smartsheet",
+		'class': 'custom-button',
 		})
 	}}
 	{{button({
-		'type': 'button',
-		'text': "Analyze",
-		'class': 'custom-button analyze',
+		'type': 'link',
+		'text': "Add To Smartsheet Link",
+		'class': 'custom-button',
+        'href': enums.Route.PREVIEW
 		})
 	}}
-	
 {% endblock option %}
 
 {% block content %}
@@ -68,14 +52,16 @@
 			})
 		}}
 			</th>
-	      <th class="">From Sheet
+	      <th class="custom-w-5">Row
 	      </th>
-		  <th class="">To Sheet
+		  <th class="custom-w-10">Invoice No
 	      </th>
-		  <th class="custom-w-15">Parse Time
+		  <th class="custom-w-10">Pay Date
 	      </th>
-		  <th class="custom-w-5">Result
+		  <th class="">Description
 		  </th>
+          <th class="custom-w-5">Status
+        </th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -91,13 +77,15 @@
 					})
 				}}
 				</td>
-				<td class="">{{src_sheet}}
+				<td class="">{{loop.index}}
 				</td>
-				<td class="">{{all_settings['des_sheets'][0]}}
+				<td class="">{{loop.index}}
 				</td>
-				<td class="">30-02-2022 11:11:11
+				<td class="">---
 				</td>
-				<td class=""><a href='{{enums.Route.ANALYZE}}'>Result</a>
+				<td class="">---
+				</td>
+                <td class="">---
 				</td>
 			</tr>
 		  {% endfor %}

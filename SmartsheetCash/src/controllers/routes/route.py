@@ -116,4 +116,49 @@ def home():
         utils.println(e, enums.OtherKeys.LOGGING_EXCEPTION)
         return abort(500, e)
 
-    
+@smartsheet_bp.route(enums.Route.START_ANALYZE, methods=[enums.OtherKeys.METHOD_GET])
+def start_analyze():
+    """ Start Analyze
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(enums.Route.START_ANALYZE, enums.OtherKeys.LOGGING_DEBUG)
+    try:
+        methods = get_request_form_ajax()
+        result = ctrl().start_analyze(methods)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        return abort(500, e)
+
+
+@smartsheet_bp.route(enums.Route.ANALYZE, methods=[enums.OtherKeys.METHOD_POST, enums.OtherKeys.METHOD_GET])
+@login_required
+def analyze():
+    """ Analyze page
+    :param : 
+    :return: Analyze page
+    """
+    utils.println(enums.Route.ANALYZE, enums.OtherKeys.LOGGING_DEBUG)
+    try:
+        ctrl_obj   = ctrl()
+        return render_template(enums.Template.ANALYZE, ctrl_obj = ctrl_obj, enums = enums)
+    except Exception as e:
+        utils.println(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        return abort(500, e)
+
+@smartsheet_bp.route(enums.Route.PREVIEW, methods=[enums.OtherKeys.METHOD_POST, enums.OtherKeys.METHOD_GET])
+@login_required
+def preview():
+    """ Preview page
+    :param : 
+    :return: Preview page
+    """
+    utils.println(enums.Route.PREVIEW, enums.OtherKeys.LOGGING_DEBUG)
+    try:
+        ctrl_obj   = ctrl()
+        return render_template(enums.Template.PREVIEW, ctrl_obj = ctrl_obj, enums = enums)
+    except Exception as e:
+        utils.println(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        return abort(500, e)
+

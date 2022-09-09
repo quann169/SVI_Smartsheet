@@ -12,29 +12,35 @@ function confirm_loggin() {
 	data[SESSION_USERNAME] =  user_name;
 	data['remember'] =  remember;
 	var out = null;
-	$('#error_div').hide();
+	$('.error').removeClass('d-flex');
+	$('.error').addClass('d-none');
 	$.ajax({
 	     url: AUTH,
 	     type: "POST",
 	     data: encodeURIComponent(JSON.stringify(data)),
 		 async: false,
 	     success: function(resp){
-	                 var result = resp.result;
-	                 if (result[0]) {
-	                	 out = true;
-	                 } else {
-	                	 out = false;
-	                	 $('#error_content').html = result[1];
-	                	 $('#error_div').show();
-	                 } 
+					var result = resp.result;
+					if (result[0]) {
+						out = true;
+					} else {
+						out = false;
+						$('.error .content').html(result[1]) ;
+						$('.error').addClass('d-flex');
+						$('.error').removeClass('d-none');
+					} 
 	         }
 	 });
 	return out;
 }
 
 $(document).ready(function() {
-	$('#login_form').submit(function() {
+	$('form').submit(function() {
 		var result = confirm_loggin();
 	    return result; 
+	})
+	$(document).on('click', '.close-err', function(){
+		$('.error').removeClass('d-flex');
+	$('.error').addClass('d-none');
 	})
 })

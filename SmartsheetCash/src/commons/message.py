@@ -9,7 +9,7 @@ class MsgError:
     E002    = "No sheet name '{}' on smartsheet"
     E003    = "Missing parameter"
     E004    = "Incorrect username or password"
-    E005    = "Access denied: You don't have permission to access"
+    E005    = "You don't have permission to access"
     
 
 class MsgWarning:

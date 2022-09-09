@@ -1,6 +1,6 @@
 import os, sys
 # sys.path.insert(0, './')
-# sys.path.insert(0, './3rd-src')
+sys.path.insert(0, './3rd-src')
 from src.commons import utils, message, enums
 import requests, time
 import config

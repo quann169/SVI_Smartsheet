@@ -9,7 +9,7 @@ import ast, getpass
 from src.commons import message, enums
 import logging
 import config
-from flask import request
+from flask import request, session
 import shutil
 import traceback
 from decimal import Decimal
@@ -22,7 +22,6 @@ from jinja2.loaders import FileSystemLoader
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
 
 def get_request_form():
     # for post method
@@ -68,7 +67,7 @@ def parse_dict(init, lkey=''):
 def read_template(file_name, add_info):
     config_params = {}
     sys.argv = [file_name, add_info]
-    execfile(file_name, config_params)
+    exec(open(file_name, encoding="utf-8").read(), config_params)
     if '__doc__' in config_params:
         del config_params['__doc__']
     if '__builtins__' in config_params:
@@ -549,9 +548,9 @@ def check_domain_password(username, password, domain_name='SVI'):
         if result:
             return True, ''
         else:
-            return False, message.MsgError().E004
+            return False, message.MsgError.E004
     except Exception as e:
-        println(str(e.args), enums.OtherKeys.LOGGING_EXCEPTION)
+        #println(str(e.strerror), enums.OtherKeys.LOGGING_EXCEPTION)
         return False, message.MsgError.E004
     
 def render_jinja2_template(template_path, file_name,  dict_variable):

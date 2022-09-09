@@ -1,17 +1,19 @@
 {% macro input(data) %}
-    {% set type = data['type'] %}
-    {% set class = data['class'] %}
-    {% set value = data['value'] %}
-    {% set is_disable = data['is_disable'] %}
-    {% set is_readonly = data['is_readonly'] %}
-    {% set data_attr = data['data_attr'] %}
+    {% set type = data.type %}
+    {% set class = data.class %}
+    {% set value = data.value %}
+    {% set is_disable = data.is_disable %}
+    {% set is_readonly = data.is_readonly %}
+    {% set attrs = data.attrs %}
+    {% set id = data.id %}
     {#
     <!-- 
     data = {
         'type': 'text', 'textarea', 
         'class': 'custom-textarea'
         'value': ''
-        'data_attr': [(name1, value1), (name1, value2), ]
+        'id': '',
+        'attrs': [(name1, value1), (name1, value2), ]
         'is_readonly': True
         'is_disable': False
 
@@ -20,21 +22,23 @@
     #}
     {% if type == 'textarea' %}
         <textarea class='{% if class %}{{class}}{% else %}custom-textarea{% endif %}' value='{{value}}'
+        {% if id %}id="{{id}}"{% endif %}
         {% if is_disable %}disabled{% endif %} {% if is_readonly %}readonly{% endif %}
-        {% if data_attr %}
-            {% for attr in data_attr %}
+        {% if attrs %}
+            {% for attr in attrs %}
                 {% set attr_name, attr_value = attr %}
-                data-{{attr_name}} = '{{attr_value}}'
+                {{attr_name}} = '{{attr_value}}'
             {% endfor %}
         {% endif %}
         >{{value}}</textarea>
     {% else %}
         <input class='{% if class %}{{class}}{% else %}custom-input{% endif %}' value='{{value}}' type='{{type}}'
+        {% if id %}id="{{id}}"{% endif %}
         {% if is_disable %}disabled{% endif %} {% if is_readonly %}readonly{% endif %}
-        {% if data_attr %}
-            {% for attr in data_attr %}
+        {% if attrs %}
+            {% for attr in attrs %}
                 {% set attr_name, attr_value = attr %}
-                data-{{attr_name}} = '{{attr_value}}'
+                {{attr_name}} = '{{attr_value}}'
             {% endfor %}
         {% endif %}
         >

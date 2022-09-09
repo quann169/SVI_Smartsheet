@@ -11,7 +11,7 @@
     text-align: center;
 }
 .custom-link {
-    color: transparent;
+    color: var(--default-link-text);
 }
 .custom-link-button {
     display: inline-block;

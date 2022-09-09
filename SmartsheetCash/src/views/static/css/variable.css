@@ -13,7 +13,7 @@
   --custom-gray: #6c757d;
   --custom-gray-dark: #343a40;
   --custom-primary: #007bff;
-  --custom-econdary: #6c757d;
+  --custom-secondary: #6c757d;
   --custom-success: #28a745;
   --custom-info: #17a2b8;
   --custom-warning: #ffc107;
@@ -38,15 +38,16 @@
   /* button */
   --default-button-bg: var(--custom-primary);
   --default-button-text: var(--custom-white);
-  --default-button-border: var(--custom-gray-dark);
+  --default-button-border: transparent;
+  --default-link-text: var(--custom-primary);
   /* end button */
 
   /* input */
-  --default-input-border: var(--custom-gray-dark);
+  --default-input-border: var(--custom-secondary);
   /* end input */
 
   /* select */
-  --default-select-border: var(--custom-gray-dark);
+  --default-select-border: var(--custom-secondary);
   /* end select */
 
   /* checkbox */
@@ -57,9 +58,10 @@
 
   /* END COMPONENT  */
   --custom-body-bg: var(--custom-white);
-  --table-th-bg: var(--custom-gray);
+  --table-th-bg: var(--custom-light);
   --table-td-bg: var(--custom-white);
-  --table-th-text: var(--custom-white);
+  --table-th-text: var(--custom-gray-dark);
   --table-td-text: var(--custom-gray-dark);
+  --table-border: #dddddd;
 
 }

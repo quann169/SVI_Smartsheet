@@ -1,4 +1,4 @@
-#login_form * {
+form * {
 	box-sizing: border-box;
 }
 .login-container {
@@ -9,14 +9,14 @@
 	height: auto;
 } 
 .close-err {
-	float: right;
+	color: red;
 }
 
 .close-err:hover {
 	cursor: pointer;
 }
 
-#login_form .login-contain-div {
+.login-contain-div {
 	padding: 0 20px;
 	width: 20%;
 	border: 1px solid #AAA;
@@ -29,7 +29,7 @@
     left: 50%;
     top: 50%;
 }
-#login_form .error-div {
+.error {
 	background-image: linear-gradient(#E9E9E9, #FFF);
 	padding: 10px;
 	color: #C00;
@@ -37,7 +37,7 @@
 	display: none;
 }
 /* style the submit button */
-#login_form button {
+button {
   	background-color: #4F96D3; /*#4CAF50*/
   	color: white;
   	cursor: pointer;
@@ -50,7 +50,7 @@
 	height: 50px !important;
 	border-radius: 5px !important;
 }
-#login_form input[type=text], #login_form input[type=password] {
+input[type=text], input[type=password] {
 	padding-left: 15px !important;
 	outline: medium none !important;
 	font-size: 14px !important;
@@ -59,7 +59,7 @@
 	border-radius: 5px !important;
 	
 }
-#login_form button:hover {
+button:hover {
   	background-color: #71B8F5;/*#45a049*/
 }
 
