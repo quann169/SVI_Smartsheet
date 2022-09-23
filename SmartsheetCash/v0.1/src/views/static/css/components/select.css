@@ -1,0 +1,7 @@
+.custom-select {
+    width: unset;
+    height: calc(2em + 2px);
+    vertical-align: middle;
+    text-align: center;
+    border: 1px solid var(--default-select-border);
+}

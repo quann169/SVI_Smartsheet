@@ -1,0 +1,8 @@
+body {
+    background-color: var(--body-bg);
+    height: 100vh;
+    overflow-y: hidden;
+}
+.option-block {
+    padding: 0.5rem 0;
+}

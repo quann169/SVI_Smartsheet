@@ -1,0 +1,83 @@
+:root {
+  --custom-blue: #007bff;
+  --custom-indigo: #6610f2;
+  --custom-purple: #6f42c1;
+  --custom-pink: #e83e8c;
+  --custom-red: #dc3545;
+  --custom-orange: #fd7e14;
+  --custom-yellow: #ffc107;
+  --custom-green: #28a745;
+  --custom-teal: #20c997;
+  --custom-cyan: #17a2b8;
+  --custom-white: #fff;
+  --custom-gray: #6c757d;
+  --custom-gray-dark: #343a40;
+  --custom-primary: #007bff;
+  --custom-secondary: #6c757d;
+  --custom-success: #28a745;
+  --custom-info: #17a2b8;
+  --custom-warning: #ffc107;
+  --custom-danger: #dc3545;
+  --custom-light: #f8f9fa;
+  --custom-dark: #343a40;
+  --custom-font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --custom-font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* COMPONENT */
+
+  /* navbar */
+  --navbar-bg: var(--custom-gray-dark);
+  --navbar-text: var(--custom-light);
+  /* end navbar */
+
+  /* breadcrumb */
+  --breadcrumb-bg: var(--custom-light);
+  --breadcrumb-item-active: var(--custom-gray-dark);
+  /* end breadcrumb */
+
+  /* button */
+  --default-button-bg: var(--custom-primary);
+  --default-button-text: var(--custom-white);
+  --default-button-border: transparent;
+  --default-link-text: var(--custom-primary);
+  /* end button */
+
+  /* input */
+  --default-input-border: var(--custom-secondary);
+  /* end input */
+
+  /* select */
+  --default-select-border: var(--custom-secondary);
+  /* end select */
+
+  /* checkbox */
+  /* end checkbox */
+
+  /* modal */
+  /* end modal */
+
+  /* END COMPONENT  */
+  --custom-body-bg: var(--custom-white);
+  --table-th-bg: var(--custom-light);
+  --table-td-bg: var(--custom-white);
+  --table-th-text: var(--custom-gray-dark);
+  --table-td-text: var(--custom-gray-dark);
+  --table-border: var(--custom-secondary);
+  --disable-bg: var(--custom-gray);
+  --disable-text: var(--custom-white);
+  
+
+
+
+  /* Home page */
+
+  /* End home page */
+
+  /* Analyze page */
+  --status-added: var(--custom-green);
+  --status-deleted: var(--custom-red);
+  --status-modified: var(--custom-blue);
+  --status-unchanged: var(--custom-dark);
+  /* End Analyze page */
+
+}
