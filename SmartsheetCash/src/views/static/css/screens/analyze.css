@@ -1,0 +1,23 @@
+.new {
+    font-weight: bold;
+    text-transform: capitalize;
+    color: var(--status-added);
+}
+
+.missing {
+    font-weight: bold;
+    text-transform: capitalize;
+    color: var(--status-deleted);
+}
+
+.unchanged {
+    font-weight: bold;
+    text-transform: capitalize;
+    color: var(--status-unchanged);
+}
+
+.modified {
+    font-weight: bold;
+    text-transform: capitalize;
+    color: var(--status-modified);
+}

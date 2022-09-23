@@ -1,0 +1,50 @@
+Hi all,<br>
+<br>
+This committed cash has been added by {{user_name}}.<br>
+Below is the summary information:<br>
+Date: {{date}}<br>
+<br>
+
+<table class="">
+  <thead class="">
+       <tr>
+		<th class="custom-w-5">Action</th>
+		<th class="custom-w-3">Row</th>
+		<th class="">Attachments</th>
+           {% for element in all_settings[enums.ConfigKeys.MAPPING_HEADERS] %}
+			{% set src_header, des_header = element %}
+               <th class="">{{des_header}}</th>
+           {% endfor %}
+		{% for mapping_header in all_settings[enums.ConfigKeys.DES_MAPPING_SRC_SHEET] %}
+               <th class="">{{mapping_header}}</th>
+           {% endfor %}
+       </tr>
+  </thead>
+  <tbody>
+	{% for row in dummy_data %}
+		{% set attachments = row[enums.DataKeys.ATTACHMENTS] %}
+		{% set attachments_name = row[enums.DataKeys.ATTACHMENTS_NAME] %}
+		{% set row_id = row[enums.DataKeys.ROW_ID] %}
+		{% set compare_id = row[enums.DataKeys.COMPARE_ID] %}
+		{% set row_number = row[enums.DataKeys.ROW_NUMBER] %}
+		{% set action = row[enums.DataKeys.ACTION] %}
+		<tr>
+			<td class="">{{action}}</td>
+			<td class="">{{row_number}}</td>
+			<td class="">{{ attachments_name | join('<br>') | safe}}</td>
+			{% for element in all_settings[enums.ConfigKeys.MAPPING_HEADERS] %}
+				{% set src_header, des_header = element %}
+				<td class="">{{ row[des_header][enums.DataKeys.VALUE] }}</td>
+			{% endfor %}
+			{% for mapping_header in all_settings[enums.ConfigKeys.DES_MAPPING_SRC_SHEET] %}
+				<td class="">{{ row[mapping_header][enums.DataKeys.VALUE] }}</td>
+			{% endfor %}
+		</tr>
+	{% endfor %}
+
+  </tbody>
+  
+</table>
+
+Best regards,<br>
+{{user_name}}

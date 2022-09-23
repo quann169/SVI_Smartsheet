@@ -1,18 +1,18 @@
 import os, sys
-# sys.path.insert(0, './')
+sys.path.insert(0, './')
 sys.path.insert(0, './3rd-src')
 from src.commons import utils, message, enums
 import requests, time
-import config
+import master_config
 from flask import Flask, g, session
 from src.controllers.routes.route import smartsheet_bp
 import webbrowser, threading
 from threading import Timer
 from src.controllers.controllers import Controllers as ctrl
         
-version  = config.VERSION
-if config.IS_PRODUCT:
-    port = get_free_tcp_port()
+version  = master_config.VERSION
+if master_config.IS_PRODUCT:
+    port = utils.get_free_tcp_port()
     template_path =  '.data/views/templates'
     static_path =  '.data/views/static'
 else:
@@ -30,7 +30,7 @@ app.config['SECRET_KEY']                    = 'SECRET_KEY'
 app.register_blueprint(smartsheet_bp)
 
 argv = sys.argv[1:]
-all_configs     = {}
+all_master_configs     = {}
 url = 'http://%s:%d/'%(host, port)
 def open_browser():
     webbrowser.open_new(url)
@@ -44,7 +44,7 @@ def create_connection():
 
 if __name__ == "__main__":
     print('URL: %s'%url)
-    if config.IS_PRODUCT:
+    if master_config.IS_PRODUCT:
         thread  = threading.Thread(name='open GUI', target = app.run,  args=(host, port), kwargs={'threaded': True})
         thread.start()
         while True:

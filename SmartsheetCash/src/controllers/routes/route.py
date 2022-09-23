@@ -10,7 +10,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, abort,
 from pprint import pprint
 import logging
 from src.controllers.controllers import Controllers as ctrl
-import config
+import master_config
 from src.commons import message, enums, utils
 from functools import wraps
 
@@ -27,18 +27,18 @@ def error_handle(e):
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if session.get(enums.SessionKey.IS_LOGIN):
+        if session.get(enums.SessionKeys.IS_LOGIN):
             return f(*args, **kwargs)
         return (redirect(url_for("smartsheet_bp.login")))
     return wrap
 
-@smartsheet_bp.route(enums.Route.INDEX, methods=[enums.OtherKeys.METHOD_POST, enums.OtherKeys.METHOD_GET])
+@smartsheet_bp.route(enums.Route.INDEX, methods=[enums.MethodKeys.METHOD_POST, enums.MethodKeys.METHOD_GET])
 def index():
     """ Starting page
     :param : 
     :return: home or login page
     """
-    utils.println(enums.Route.INDEX, enums.OtherKeys.LOGGING_DEBUG)
+    utils.println(enums.Route.INDEX, enums.LoggingKeys.LOGGING_DEBUG)
     try:  
         ctrl_obj   = ctrl()
         password = utils.get_saved_password()
@@ -52,113 +52,170 @@ def index():
             else:
                 return (redirect(url_for("smartsheet_bp.login")))
     except Exception as e:
-        utils.println(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
         return abort(500, e)
 
-@smartsheet_bp.route(enums.Route.LOGIN, methods=[enums.OtherKeys.METHOD_POST, enums.OtherKeys.METHOD_GET])
+@smartsheet_bp.route(enums.Route.LOGIN, methods=[enums.MethodKeys.METHOD_POST, enums.MethodKeys.METHOD_GET])
 def login():
     """ Login page
     :param : 
     :return: login page
     """
-    utils.println(enums.Route.LOGIN, enums.OtherKeys.LOGGING_DEBUG)
+    utils.println(enums.Route.LOGIN, enums.LoggingKeys.LOGGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
-        request_dict = utils.get_request_args()
-        return render_template(enums.Template.LOGIN, ctrl_obj = ctrl_obj, enums = enums, \
-                               request_dict = request_dict)
+        methods = utils.get_request_args()
+        return render_template(enums.Template.LOGIN, ctrl_obj = ctrl_obj, enums = enums, utils = utils, \
+                               methods = methods)
     except Exception as e:
-        utils.println(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
         return abort(500, e)
 
-@smartsheet_bp.route(enums.Route.LOGOUT, methods=[enums.OtherKeys.METHOD_POST, enums.OtherKeys.METHOD_GET])
+@smartsheet_bp.route(enums.Route.LOGOUT, methods=[enums.MethodKeys.METHOD_POST, enums.MethodKeys.METHOD_GET])
 def logout():
     """ logout page
     :param : 
     :return: logout page
     """
-    utils.println(enums.Route.LOGOUT, enums.OtherKeys.LOGGING_DEBUG)
+    utils.println(enums.Route.LOGOUT, enums.LoggingKeys.LOGGING_DEBUG)
     try:
         session.clear()
         utils.clear_saved_password()
         return (redirect(url_for("smartsheet_bp.login")))
     except Exception as e:
-        utils.println(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
         return abort(500, e)
 
-@smartsheet_bp.route(enums.Route.AUTH, methods=[enums.OtherKeys.METHOD_POST])
+@smartsheet_bp.route(enums.Route.AUTH, methods=[enums.MethodKeys.METHOD_POST])
 def auth():
     """ Authenticate user and domain password
     :param : 
     :return: (1 or 0, error message)
     """
-    utils.println(enums.Route.AUTH, enums.OtherKeys.LOGGING_DEBUG)
-    request_dict = utils.get_request_form_ajax()
-    password = request_dict[enums.SessionKey.PASSWORD]
-    username = request_dict[enums.SessionKey.USERNAME].strip()
-    remember = request_dict['remember']
+    utils.println(enums.Route.AUTH, enums.LoggingKeys.LOGGING_DEBUG)
+    methods = utils.get_request_form()
+    password = methods[enums.SessionKeys.PASSWORD]
+    username = methods[enums.SessionKeys.USERNAME].strip()
+    remember = methods['remember']
     ctrl_obj = ctrl()
     result = ctrl_obj.authenticate_account(username, password, remember)
     return jsonify({'result': result})
 
-@smartsheet_bp.route(enums.Route.HOME, methods=[enums.OtherKeys.METHOD_POST, enums.OtherKeys.METHOD_GET])
+@smartsheet_bp.route(enums.Route.HOME, methods=[enums.MethodKeys.METHOD_POST, enums.MethodKeys.METHOD_GET])
 @login_required
 def home():
     """ Home page
     :param : 
     :return: home page
     """
-    utils.println(enums.Route.HOME, enums.OtherKeys.LOGGING_DEBUG)
+    utils.println(enums.Route.HOME, enums.LoggingKeys.LOGGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
-        return render_template(enums.Template.HOME, ctrl_obj = ctrl_obj, enums = enums)
+        return render_template(enums.Template.HOME, ctrl_obj = ctrl_obj, enums = enums, utils = utils)
     except Exception as e:
-        utils.println(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
         return abort(500, e)
 
-@smartsheet_bp.route(enums.Route.START_ANALYZE, methods=[enums.OtherKeys.METHOD_GET])
+@smartsheet_bp.route(enums.Route.START_ANALYZE, methods=[enums.MethodKeys.METHOD_GET])
 def start_analyze():
     """ Start Analyze
     :param : 
     :return: (1 or 0, message)
     """
-    println(enums.Route.START_ANALYZE, enums.OtherKeys.LOGGING_DEBUG)
+    utils.println(enums.Route.START_ANALYZE, enums.LoggingKeys.LOGGING_DEBUG)
     try:
-        methods = get_request_form_ajax()
-        result = ctrl().start_analyze(methods)
+        result = ctrl().start_analyze()
+        print (result)
         return jsonify({'result': result})
     except Exception as e:
-        println(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
         return abort(500, e)
 
 
-@smartsheet_bp.route(enums.Route.ANALYZE, methods=[enums.OtherKeys.METHOD_POST, enums.OtherKeys.METHOD_GET])
+@smartsheet_bp.route(enums.Route.ANALYZE, methods=[enums.MethodKeys.METHOD_POST, enums.MethodKeys.METHOD_GET])
 @login_required
 def analyze():
     """ Analyze page
     :param : 
     :return: Analyze page
     """
-    utils.println(enums.Route.ANALYZE, enums.OtherKeys.LOGGING_DEBUG)
+    utils.println(enums.Route.ANALYZE, enums.LoggingKeys.LOGGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
-        return render_template(enums.Template.ANALYZE, ctrl_obj = ctrl_obj, enums = enums)
+        return render_template(enums.Template.ANALYZE, ctrl_obj = ctrl_obj, enums = enums, utils = utils)
     except Exception as e:
-        utils.println(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
         return abort(500, e)
 
-@smartsheet_bp.route(enums.Route.PREVIEW, methods=[enums.OtherKeys.METHOD_POST, enums.OtherKeys.METHOD_GET])
+@smartsheet_bp.route(enums.Route.PREVIEW, methods=[enums.MethodKeys.METHOD_POST, enums.MethodKeys.METHOD_GET])
 @login_required
 def preview():
     """ Preview page
     :param : 
     :return: Preview page
     """
-    utils.println(enums.Route.PREVIEW, enums.OtherKeys.LOGGING_DEBUG)
+    utils.println(enums.Route.PREVIEW, enums.LoggingKeys.LOGGING_DEBUG)
     try:
         ctrl_obj   = ctrl()
-        return render_template(enums.Template.PREVIEW, ctrl_obj = ctrl_obj, enums = enums)
+        return render_template(enums.Template.PREVIEW, ctrl_obj = ctrl_obj, enums = enums, utils = utils)
     except Exception as e:
-        utils.println(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
         return abort(500, e)
 
+
+@smartsheet_bp.route(enums.Route.COMMIT, methods=[enums.MethodKeys.METHOD_GET])
+def commit():
+    """ commit
+    :param : 
+    :return: (1 or 0, message)
+    """
+    utils.println(enums.Route.COMMIT, enums.LoggingKeys.LOGGING_DEBUG)
+    try:
+        result = ctrl().commit_to_smartsheet()
+        return jsonify({'result': result})
+    except Exception as e:
+        utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
+        return abort(500, e)
+
+@smartsheet_bp.route(enums.Route.LOAD_FILE, methods=[enums.MethodKeys.METHOD_GET])
+def load_file():
+    """  LOAD_FILE CONTENT
+    :param : 
+    :return:  
+    """
+    utils.println(enums.Route.LOAD_FILE, enums.LoggingKeys.LOGGING_DEBUG)
+    try:
+        ctrl_obj   = ctrl()
+        file_path = ctrl_obj.methods.get(enums.MethodKeys.PATH)
+        file_path = file_path.rstrip('/')
+        unsupport_extension = ['.gds', '.oa', '.tar.gz', '.gz', '.tar', '.db', '.zip', '.xlsx', '.xls']
+        if os.path.exists(file_path):
+            if os.path.isfile(file_path):
+                filename, extension = os.path.splitext(file_path)
+                if extension in unsupport_extension:
+                    content = 'Unable to open files with the extension %s'%(str(unsupport_extension))
+                else:
+                    content = '<div style="white-space: pre;">'
+                    content += utils.read_file(file_path)
+                    content += '</div>'
+            else:
+                content = ''
+                list_dir = os.listdir(file_path)
+                list_dir = ['..'] + list_dir
+                for dir_name in list_dir:
+                    if dir_name == '..':
+                        path = os.path.dirname(file_path)
+                    else:
+                        path = os.path.join(file_path, dir_name)
+                    if os.path.isfile(path):
+                        value = "<a href='%s?%s=%s' style='color: green;' >%s</a><br>"%(enums.Route.LOAD_FILE, enums.MethodKeys.PATH, path, dir_name)
+                    else:
+                        value = "<a href='%s?%s=%s' >%s</a><br>"%(enums.Route.LOAD_FILE, enums.MethodKeys.PATH, path, dir_name)
+                    content += value
+        else:
+            content = 'No such file or directory: %s'%file_path
+        return content
+    except Exception as e:
+        utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
+        return abort(404, e)
+    

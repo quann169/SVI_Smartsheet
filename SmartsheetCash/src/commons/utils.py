@@ -7,8 +7,8 @@ import os, sys, re, copy
 import datetime, calendar, time
 import ast, getpass
 from src.commons import message, enums
-import logging
-import config
+import logging, base64
+import master_config
 from flask import request, session
 import shutil
 import traceback
@@ -22,37 +22,72 @@ from jinja2.loaders import FileSystemLoader
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from pprint import pprint
+import binascii
 
+def hash(text):
+    str_text = str(text)
+    result = int(binascii.hexlify(str_text.encode('utf8')), 16)
+    result = str(result)
+    return result
+
+def unhash(text):
+    result = binascii.unhexlify('%x' % int(text))
+    result = result.decode('ascii')
+    return result
+    
 def get_request_form():
     # for post method
-    request_dict = {}
+    methods = {}
     forms = request.form
     for form in forms:
-        request_dict[form] = forms.get(form)
-    return request_dict
+        try:
+            methods = ast.literal_eval(form.strip())
+        except ValueError as e:
+            methods[form] = forms.get(form)
+    return methods
 
 def get_request_args():
     # for get method
-    request_dict = {}
+    methods = {}
     forms = request.args
     for form in forms:
-        request_dict = ast.literal_eval(form.strip())
-    
-    # if enums.SessionKey.SHEETS in request_dict:
-    #     for idx in range(0, len(request_dict[enums.SessionKey.SHEETS])):
-    #         request_dict[enums.SessionKey.SHEETS][idx] = int(request_dict[enums.SessionKey.SHEETS][idx])
-    # if enums.SessionKey.ACTIONS in request_dict:
-    #     for idx in range(0, len(request_dict[enums.SessionKey.ACTIONS])):
-    #         request_dict[enums.SessionKey.ACTIONS][idx] = int(request_dict[enums.SessionKey.ACTIONS][idx])
-    return request_dict
+        try:
+            methods = ast.literal_eval(form.strip())
+        except ValueError as e:
+            methods[form] = forms.get(form)
+    return methods
 
-def get_request_form_ajax():
-    # for past method
-    forms = request.form
-    request_dict = {}
-    for form in forms.keys():
-        request_dict = ast.literal_eval(form.strip())
-    return request_dict
+def get_delta_time(start_date, end_date):
+    if not isinstance(start_date, datetime.datetime):
+        start_date = str_to_date(start_date)[0]
+    if not isinstance(end_date, datetime.datetime):
+        end_date = str_to_date(end_date)[0]
+    # returns a timedelta object
+    delta_date = end_date - start_date
+    
+    # returns the difference of the time of the day
+    minutes = int(delta_date.seconds / 60)
+    return minutes
+
+def toDate(date_str):
+    try:
+        obj = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+    except:
+        try:
+            obj = datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S')
+        except:
+            try:
+                obj = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+            except:
+                try:
+                    obj = datetime.datetime.strptime(date_str, '%m/%d/%Y')
+                except:
+                    println("Datetime format error: %s"%date_str)
+    year = obj.year
+    month = obj.month
+    day = obj.day
+    return obj, year, month, day
 
 def parse_dict(init, lkey=''):
     ret = {}
@@ -63,6 +98,22 @@ def parse_dict(init, lkey=''):
         else:
             ret[key] = val
     return ret
+
+def convert_text(text):
+    if isinstance(text, float) or isinstance(text, int):
+        result = text
+    else:
+        result = text.encode('utf8')
+        result = str(result, 'utf8')
+    return result
+
+def revert_text(text):
+    result = text.encode('utf8').decode('utf8')
+    return result
+
+def add_keys_to_dict(data, key, value):
+    if not data.get(key):
+        data[key] = value
 
 def read_template(file_name, add_info):
     config_params = {}
@@ -93,6 +144,27 @@ def remove_path(path):
         else:
             os.remove(path)
 
+def encode_base64(text):
+    result = base64.b64encode(text)
+    return result
+    
+def encode_base64(text):
+    result = base64.b64encode(text.encode('utf8'))
+    return result
+    
+def make_file(path, content, is_print=True):
+    if is_print:
+        println('Create file "%s"'%path)
+    f = open(path, 'w', encoding='utf-8')
+    f.write(content)
+    f.close
+
+def read_file(path):
+    f = open(path, 'r', encoding='utf-8')
+    content = f.read()
+    f.close
+    return content
+    
 def round_num(number, ndigits=2):
     number  = Decimal(number)
     result = round(number, ndigits)
@@ -104,12 +176,12 @@ def save_file_from_request():
     try:
         for file_name in request.files:
             userfile = request.files[file_name]
-            upload_folder   = os.path.join(config.WORKING_PATH, 'upload')
+            upload_folder   = os.path.join(master_config.WORKING_PATH, 'upload')
             make_folder(upload_folder)
             userfile.save(os.path.join(upload_folder, userfile.filename))
         return 1, ''
     except Exception as e:
-        println(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
         return 0, e.args[0]
 
 def stuck(message='', logging_level=None):
@@ -128,56 +200,38 @@ def convert_request_dict_to_url(request_dict, more_option=[]):
     result = urllib.parse.quote(str(request_dict_cp))
     return result   
     
-def println(message, logging_level=None, is_print=True):
-    if logging_level == enums.OtherKeys.LOGGING_CRITICAL:
-        logging.critical(message)
+def println(message, logging_level=enums.LoggingKeys.LOGGING_INFO, is_print=True):
+    try:
+        message = str(message)
+    except:
+        pass
+    if logging_level == enums.LoggingKeys.LOGGING_CRITICAL:
+        # logging.critical(message)
         if is_print:
-            print (message)
-    elif logging_level == enums.OtherKeys.LOGGING_EXCEPTION:
-        logging.exception(message)
-        traceback.print_exc('')
+            print ('>> ERROR: ' + message)
+    elif logging_level == enums.LoggingKeys.LOGGING_EXCEPTION:
+        # logging.exception(message)
+        # traceback.print_exc('')
         if is_print:
-            print (message)
-    elif logging_level == enums.OtherKeys.LOGGING_ERROR:
-        logging.error(message)
-        traceback.print_exc('')
+            print ('>> ERROR: ' + message)
+    elif logging_level == enums.LoggingKeys.LOGGING_ERROR:
+        # logging.error(message)
+        # traceback.print_exc()
         if is_print:
-            print (message)
-    elif logging_level == enums.OtherKeys.LOGGING_WARNING:
-        logging.warn(message)
+            print ('>> ERROR: ' + message)
+    elif logging_level == enums.LoggingKeys.LOGGING_WARNING:
+        # logging.warn(message)
         if is_print:
-            print (message)
-    elif logging_level == enums.OtherKeys.LOGGING_INFO:
-        logging.info(message)
+            print ('>> WARN: ' + message)
+    elif logging_level == enums.LoggingKeys.LOGGING_INFO:
+        # logging.info(message)
         if is_print:
-            print (message)
-    elif logging_level == enums.OtherKeys.LOGGING_DEBUG:
-        if config.LOGGING_LEVEL.lower() ==  enums.OtherKeys.LOGGING_DEBUG:
+            print ('>> INFO: ' + message)
+    elif logging_level == enums.LoggingKeys.LOGGING_DEBUG:
+        if master_config.LOGGING_LEVEL.lower() ==  enums.LoggingKeys.LOGGING_DEBUG:
             #logging.debug(message)
             if is_print:
-                print (message)
-
-def is_caculate_sheet(sheet_name):
-    result = True
-    if '_ais' in sheet_name.lower():
-        result = False
-    elif ' ais' in sheet_name.lower():
-        result = False
-    elif sheet_name.lower().startswith('bug_'):
-        result = False
-    elif sheet_name.lower().startswith('copy of'):
-        result = False
-    elif sheet_name.lower().startswith('ai_'):
-        result = False
-    elif sheet_name.lower().startswith('ais_'):
-        result = False
-    elif sheet_name.lower().startswith('ai '):
-        result = False
-    elif sheet_name.lower().startswith('ar-'):
-        result = False
-    elif sheet_name in SettingKeys.SKIP_SHEET:
-        result = False
-    return result
+                print ('>> DEBUG: ' + message)
     
 def split_patern(string, pattern=''):
     result = filter(None, re.split(pattern, string))
@@ -204,7 +258,7 @@ def message_generate(message, *argv):
         result  = message.format(*var_tuple)
         return result
     except Exception as e:
-        stuck(e, enums.OtherKeys.LOGGING_EXCEPTION)
+        stuck(e, enums.LoggingKeys.LOGGING_EXCEPTION)
 
 def search_pattern(string, pattern):
     obj_search = re.search(pattern, string)
@@ -218,15 +272,15 @@ def select_logging_level(logging_level):
     level = ''
     if logging_level == 0:
         level = logging.WARNING
-    elif logging_level.lower() == enums.OtherKeys.LOGGING_DEBUG:
+    elif logging_level.lower() == enums.LoggingKeys.LOGGING_DEBUG:
         level = logging.DEBUG
-    elif logging_level.lower() == enums.OtherKeys.LOGGING_INFO:
+    elif logging_level.lower() == enums.LoggingKeys.LOGGING_INFO:
         level = logging.INFO
-    elif logging_level.lower() == enums.OtherKeys.LOGGING_WARNING:
+    elif logging_level.lower() == enums.LoggingKeys.LOGGING_WARNING:
         level = logging.WARNING
-    elif logging_level.lower() == enums.OtherKeys.LOGGING_ERROR:
+    elif logging_level.lower() == enums.LoggingKeys.LOGGING_ERROR:
         level = logging.ERROR
-    elif logging_level.lower() == enums.OtherKeys.LOGGING_CRITICAL:
+    elif logging_level.lower() == enums.LoggingKeys.LOGGING_CRITICAL:
         level = logging.CRITICAL
     else:
         level = logging.WARNING
@@ -234,17 +288,23 @@ def select_logging_level(logging_level):
 
 def logging_setting(file_name):
     try:
-        logging_lv      = config.LOGGING_LEVEL
+        logging_lv      = master_config.LOGGING_LEVEL
     except  AttributeError:
-        logging_lv      = enums.OtherKeys.LOGGING_ERROR
+        logging_lv      = enums.LoggingKeys.LOGGING_ERROR
     logging_level       = select_logging_level(logging_lv)
-    log_formatter       = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
-    log_name            = os.path.join(config.WORKING_PATH, file_name)
-    log                 = logging.getLogger()
-    log.setLevel(logging_level)
-    handler             = logging.handlers.RotatingFileHandler(log_name,maxBytes= 1000*1024,backupCount=20)
-    handler.setFormatter(log_formatter)
-    log.addHandler(handler)
+    log_name            = os.path.join(master_config.WORKING_PATH, file_name)
+    logging.basicConfig(filename=log_name, level=logging_level, 
+                    format='>> %(levelname)s: %(message)s',
+                    filemode='a')
+
+def date_to_str(date_obj=None, format_str='%Y-%m-%d %H:%M:%S'):
+    if not date_obj:
+        date_obj = datetime.datetime.now()
+    if isinstance(date_obj, datetime.datetime):
+        result = date_obj.strftime(format_str)
+    else:
+        result = date_obj
+    return result
 
 def str_to_date(string):
     if isinstance(string, datetime.datetime):
@@ -263,7 +323,7 @@ def str_to_date(string):
                         obj_date = datetime.datetime.strptime(string, '%m/%d/%Y')
                     except:
                         message      = message_generate(enums.MsgError.E001, string)
-                        stuck(message, enums.OtherKeys.LOGGING_EXCEPTION)
+                        stuck(message, enums.LoggingKeys.LOGGING_EXCEPTION)
     year    = obj_date.year
     month   = obj_date.month
     day     = obj_date.day
@@ -276,10 +336,6 @@ def get_week_number(date):
         date = str_to_date(date)[0]
         result  = date.isocalendar()[1]
     return result
-
-def write_message_into_file(log, message='', mode='a'):
-    with open(log, mode) as file:
-        file.write(message)
     
 def convert_date_to_string(date_obj, format_str='%Y-%m-%d %H:%M:%S'):
     if isinstance(date_obj, datetime.datetime):
@@ -504,7 +560,7 @@ def get_saved_password():
             password = decrypt(encrypt_ctn)
         return password
     else:
-        working_path = config.WORKING_PATH
+        working_path = master_config.WORKING_PATH
         file_name = os.path.join(working_path, '.pswd.txt')
         if os.path.exists(file_name):
             with open(file_name, 'r', encoding="utf-8") as f:
@@ -527,7 +583,7 @@ def save_password(password):
             encrypt_ctn = encrypt(password)
             f.write(encrypt_ctn)
     except:
-        working_path = config.WORKING_PATH
+        working_path = master_config.WORKING_PATH
         file_name = os.path.join(working_path, '.pswd.txt')
         with open(file_name, 'w', encoding="utf-8") as f:
             encrypt_ctn = encrypt(password)
@@ -550,7 +606,6 @@ def check_domain_password(username, password, domain_name='SVI'):
         else:
             return False, message.MsgError.E004
     except Exception as e:
-        #println(str(e.strerror), enums.OtherKeys.LOGGING_EXCEPTION)
         return False, message.MsgError.E004
     
 def render_jinja2_template(template_path, file_name,  dict_variable):
@@ -560,7 +615,7 @@ def render_jinja2_template(template_path, file_name,  dict_variable):
     result = run_template.render(dict_variable)
     return result
     
-def send_mail(user_name, password, recipient, cc_recipient, subject, message, bcc=None, break_line=True):
+def send_mail(user_name, password, recipient, cc_recipient, subject, message, bcc_recipient=[], break_line=True):
     try:
         mail_style_css = """
 <style>
@@ -601,20 +656,7 @@ def send_mail(user_name, password, recipient, cc_recipient, subject, message, bc
             message = message.replace('\n', '<br>\n')
         message = mail_style_css + message
         sender = "%s@savarti.com"%user_name
-        if not config.IS_PRODUCT:
-            print ('Recipient: %s'%(str(recipient)))
-            print ('CC Recipient: %s'%(str(cc_recipient)))
-            print ('Subject: %s'%(subject))
-            print ('Body: %s'%(message))
-            print (bcc)
-            recipient = ['toannguyen@savarti.com']
-            cc_recipient = ['toannguyen@savarti.com']
-            bcc = 'toannguyen@savarti.com'
-            
-        if bcc:
-            bcc_recipient = list(filter(None, re.split(' |;|,', bcc)))
-        else:
-            bcc_recipient = []
+        bcc_recipient = []
         # Create message container - the correct MIME type is multipart/alternative.
         msg = MIMEMultipart('alternative')
         msg['From'] = sender
@@ -641,10 +683,10 @@ def send_mail(user_name, password, recipient, cc_recipient, subject, message, bc
                 time.sleep(1)
                 if count == 30:
                     starttls = False
-                    println('Fail to send mail', enums.OtherKeys.LOGGING_ERROR)
+                    println('Fail to send mail', enums.LoggingKeys.LOGGING_ERROR)
                     return 0, 'Fail to send mail.'
         return 1, ''
     except Exception as e:
-        println(str(e.args), enums.OtherKeys.LOGGING_EXCEPTION)
+        println(str(e.args), enums.LoggingKeys.LOGGING_EXCEPTION)
         return 0, 'Fail to send mail.'
         

@@ -62,6 +62,22 @@
   --table-td-bg: var(--custom-white);
   --table-th-text: var(--custom-gray-dark);
   --table-td-text: var(--custom-gray-dark);
-  --table-border: #dddddd;
+  --table-border: var(--custom-secondary);
+  --disable-bg: var(--custom-gray);
+  --disable-text: var(--custom-white);
+  
+
+
+
+  /* Home page */
+
+  /* End home page */
+
+  /* Analyze page */
+  --status-added: var(--custom-green);
+  --status-deleted: var(--custom-red);
+  --status-modified: var(--custom-blue);
+  --status-unchanged: var(--custom-dark);
+  /* End Analyze page */
 
 }

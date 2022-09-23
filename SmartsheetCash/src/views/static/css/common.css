@@ -4,7 +4,7 @@
   padding-left: 15px;
   margin-right: auto;
   margin-left: auto;
-  max-width: 95vw;
+  max-width: 97vw;
 }
 table tr {
   border: 1px solid var(--table-border) !important;
@@ -25,14 +25,25 @@ table td {
   border: 1px solid var(--table-border) !important;
 }
 
+button[disabled=''], button[disabled='disabled'], input[disabled=''], input[disabled='disabled'], a[disabled=''], a[disabled='disabled']{
+	color: var(--disable-text) !important;
+	background-color: var(--disable-bg) !important;
+	cursor: unset !important;
+}
+
+
 .h-0 {
   height: 0;
 }
-.top-0 {
-  top: 0;  
+.custom-position-sticky {
+  top: -1px;  
+  position: sticky!important;
 }
 .custom-w-0 {
   width: 0%;
+}
+.custom-w-3 {
+  width: 3%;
 }
 .custom-w-5 {
   width: 5%;
@@ -95,40 +106,10 @@ table td {
   width: 100%;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+.center-text {
+  text-align: center;
+  vertical-align: middle !important;
+}
 /* loading popup style */
 .loading {
 	display: none;
@@ -202,7 +183,7 @@ table td {
 /* end loading popup */
 
 /* overlay */
-#overlay {
+.overlay {
   position: fixed; /* Sit on top of the page content */
   display: none; /* Hidden by default */
   width: 100%; /* Full width (cover the whole page) */

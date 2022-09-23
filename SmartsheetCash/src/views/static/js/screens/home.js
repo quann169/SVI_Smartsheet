@@ -9,8 +9,9 @@ function getFirstLastDayOfWeek(d) {
     let diff1 = date.getDate() - day + (day === 0 ? -6 : 1);
     let startDateObj = new Date(date.setDate(diff1));
     let startDate = startDateObj.getFullYear() + '-' + String(startDateObj.getMonth() + 1).padStart(2, '0') + '-' + String(startDateObj.getDate()).padStart(2, '0');
-    let diff2 = date.getDate() + day + (day === 0 ? -6 : 1);
-    let endDateObj = new Date(date.setDate(diff2));
+    // let diff2 = date.getDate() + day + (day === 0 ? -6 : 1);
+    let endDateObj = new Date(startDateObj);
+    endDateObj.setDate(endDateObj.getDate() + 6);
     let endDate = endDateObj.getFullYear() + '-' + String(endDateObj.getMonth() + 1).padStart(2, '0') + '-' + String(endDateObj.getDate()).padStart(2, '0');
     return [startDate, endDate];
 }
@@ -52,12 +53,96 @@ function loadConfigDate() {
         fromDateObj.prop('disabled', false);
         toDateObj.prop('disabled', false);
     }
-    console.log(startDate, endDate);
 }
+
+function controlSubmitButton(){
+    var checkBoxs = $('tbody input[type="checkbox"]');
+    var isSelect = false;
+    checkBoxs.each(function(){
+        if ($(this).prop('checked')) {
+            var check = $(this).prop('checked');
+            if (check) {
+                isSelect = true;
+                return null;
+            }
+        }
+    })
+    if (isSelect) {
+        $('.analyze').prop('disabled', false);
+    } else {
+        $('.analyze').prop('disabled', true);
+    }
+}
+
+$(document).on('change', 'input[type="checkbox"]', function(){
+    controlSubmitButton();
+})
 
 $(document).ready(function () {
     loadConfigDate();
+    controlSubmitButton();
 })
 $(document).on('click', '.date-type', function(){
     loadConfigDate();
+})
+
+$(document).on('click', '.analyze', function(){
+    // validate input before submit 
+    var fromDateObj = $('.from-date');
+    var toDateObj = $('.to-date');
+    var startDate = fromDateObj.val();
+    var endDate = toDateObj.val();
+    // validate date
+    if (! (startDate && endDate)) {
+        customAlert({message: MESSAGE.EMPTY_DATE});
+        return 0;
+    } else {
+        // validate sheet
+        var checkBoxs = $('tbody input[type="checkbox"]');
+        var isSelect = false;
+        var sheets = [];
+        checkBoxs.each(function(){
+            if ($(this).prop('checked')) {
+                var check = $(this).prop('checked');
+                if (check) {
+                    var sheetName = $(this).val();
+                    isSelect = true;
+                    sheets.push(sheetName);
+                }
+            }
+        })
+        if (!isSelect) {
+            customAlert({message: MESSAGE.NO_SHEET_SELECTED});
+            return 0;
+        } else {
+            var data = {};
+            data[FROM_DATE] = startDate;
+            data[TO_DATE] = endDate;
+            data[SHEETS] = sheets;
+            showLoader();
+            $.ajax({
+                url: START_ANALYZE,
+                type: "GET",
+                data: encodeURIComponent(JSON.stringify(data)),
+                async: true,
+                success: function(resp){
+                    hideLoader();
+                    var result = resp.result;
+                    var status = result[0];
+                    var message = result[1];
+                    if (status) {
+                        customAlert({message: message});
+                        reloadElement('.content', 'table');
+                    } else {
+                        customAlert({message: message});
+                    }
+                    
+                },
+                error: function(resp) {
+                        hideLoader();
+                        customAlert({message: 'Internal Server Error'});
+                } 
+            });
+        }
+    }
 })

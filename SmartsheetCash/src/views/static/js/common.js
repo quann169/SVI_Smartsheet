@@ -5,33 +5,33 @@ function controlProperty(is_active, propName, target){
 }
 
 function showLoader(){
-	$('#overlay_loader').show();
+	$('.loading').show();
 }
 function hideLoader(){
-	$('#overlay_loader').hide();
+	$('.loading').hide();
 }
 function showOverlay(level){
 	if (level) {
-		$('#overlay' + level).show();
+		$('.overlay' + level).show();
 	} else {
-		$('#overlay').show();
+		$('.overlay').show();
 	}
 }
 
 
 function hideOverlay(level){
 	if (level) {
-		$('#overlay' + level).hide();
+		$('.overlay' + level).hide();
 	} else {
-		$('#overlay').hide();
+		$('.overlay').hide();
 	}
 }
 
 function cleanOverlay(level){
 	if (level) {
-		$('#overlay' + level).html('');
+		$('.overlay' + level).html('');
 	} else {
-		$('#overlay').html('');
+		$('.overlay').html('');
 	}
 	
 }
@@ -41,9 +41,9 @@ function hideAndCleanOverlay(level){
 }
 function addOverlayContent(content, level){
 	if (level) {
-		$('#overlay' + level).html(content);
+		$('.overlay' + level).html(content);
 	} else {
-		$('#overlay').html(content);
+		$('.overlay').html(content);
 	}
 	
 }
