@@ -4,7 +4,7 @@
     color: var(--status-added) !important;
 }
 
-.delete {
+.delete, .review {
     font-weight: bold;
     text-transform: capitalize;
     color: var(--status-deleted)  !important;

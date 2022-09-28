@@ -125,11 +125,21 @@ def start_analyze():
     utils.println(enums.Route.START_ANALYZE, enums.LoggingKeys.LOGGING_DEBUG)
     try:
         result = ctrl().start_analyze()
-        print (result)
         return jsonify({'result': result})
     except Exception as e:
         utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
         return abort(500, e)
+
+@smartsheet_bp.route(enums.Route.GET_CONSOLE, methods=[enums.MethodKeys.METHOD_GET])
+def get_console():
+    """ Render  running log
+    :param : 
+    :return: 
+    """
+    utils.println(enums.Route.GET_CONSOLE, enums.LoggingKeys.LOGGING_DEBUG)
+    ctrl_obj   = ctrl()
+    result = ctrl_obj.render_console_content()
+    return jsonify({'result': result})
 
 
 @smartsheet_bp.route(enums.Route.ANALYZE, methods=[enums.MethodKeys.METHOD_POST, enums.MethodKeys.METHOD_GET])
@@ -218,4 +228,15 @@ def load_file():
     except Exception as e:
         utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
         return abort(404, e)
+
+@smartsheet_bp.route(enums.Route.GET_COMPARE_DETAIL_MODAL, methods=[enums.MethodKeys.METHOD_GET])
+def get_compare_detail_modal():
+    """ Render  detail modal content
+    :param : 
+    :return: 
+    """
+    utils.println(enums.Route.GET_COMPARE_DETAIL_MODAL, enums.LoggingKeys.LOGGING_DEBUG)
+    ctrl_obj   = ctrl()
+    result = ctrl_obj.render_compare_detail_modal_content()
+    return jsonify({'result': result})
     

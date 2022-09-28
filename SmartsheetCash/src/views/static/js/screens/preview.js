@@ -1,9 +1,11 @@
 $(document).on('click', '.commit', function(){
     var checkBoxs = $('tbody input[type="checkbox"]');
-    var sheet_id = $(this).data('sheet-id');
-    var des_id = $(this).data('des-id');
+    var srcId = $(this).data('src-id');
+    var desId = $(this).data('des-id');
+    var groupId = $(this).data('group-id');
     var isSelect = false;
     var ids = [];
+    var path = $(this).data('path');
     checkBoxs.each(function(){
         if ($(this).prop('checked')) {
             var check = $(this).prop('checked');
@@ -24,29 +26,35 @@ $(document).on('click', '.commit', function(){
 		} else {
             var data = {};
             data[IDS] = ids;
-            data[SHEET_ID] = sheet_id;
-            data[DES_ID] = des_id;
-            showLoader();
+            data[SRC_ID] = srcId;
+            data[DES_ID] = desId;
+            data[GROUP_INDEX] = groupId;
+            openConsoleModal(path);
+            $('.close-overlay-clean').prop('disabled', true)
             $.ajax({
                 url: COMMIT,
                 type: "GET",
                 data: encodeURIComponent(JSON.stringify(data)),
                 async: true,
                 success: function(resp){
-                    hideLoader();
+                    // hideLoader();
                     var result = resp.result;
                     var status = result[0];
                     var message = result[1];
+                    $('.close-overlay-clean').prop('disabled', false)
                     if (status) {
                         customAlert({message: message})
-                        reloadPage();
+                        reloadElement('.main-content', '.option-block');
+                        reloadElement('.main-content', '.content');
+                        // reloadPage();
                     } else {
                         customAlert({message: message})
                     }
                     
                 },
                 error: function(resp) {
-                        hideLoader();
+                        // hideLoader();
+                        $('.close-overlay-clean').prop('disabled', false)
                         customAlert({message: 'Internal Server Error'});
                 } 
             });

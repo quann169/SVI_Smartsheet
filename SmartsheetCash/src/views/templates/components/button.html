@@ -30,7 +30,7 @@
                 {{attr_name}} = '{{attr_value}}'
             {% endfor %}
         {% endif %}
-        >{{text}}</a>
+        >{{text | safe }}</a>
     {% else %}
         <button class='{% if class %}{{class}}{% else %}custom-button{% endif %}' value='{{value}}'
         {% if id %}id="{{id}}"{% endif %}
@@ -40,6 +40,6 @@
                 {{attr_name}} = '{{attr_value}}'
             {% endfor %}
         {% endif %}
-        >{{text}}</button>
+        >{{text | safe }}</button>
     {% endif %}
 {% endmacro %}

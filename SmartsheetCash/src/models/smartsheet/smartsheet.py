@@ -14,16 +14,18 @@ import master_config
 import copy
 
 class SmartSheets:
-    def __init__(self, sheets=[], all_settings={}, input_type='', from_date = '', to_date = '', is_compare = False):
+    def __init__(self, all_settings={}, input_type=enums.ConfigKeys.SOURCE, from_date = '', to_date = '', is_compare = False, group_index=None):
         self.from_date = from_date
         self.to_date = to_date
-        self.sheets = sheets
+        self.sheets = ''
         self.available_name = {}
         self.all_settings = all_settings
         self.token   = self.all_settings[enums.ConfigKeys.TOKEN]
         self.data = {}
         self.column_index = {}
         self.input_type = input_type
+        self.group_index = group_index
+        self.type_cfg = {}
         self.update_attr_by_input_type()
         self.parsed_date = utils.date_to_str()
         self.is_compare = is_compare
@@ -32,31 +34,41 @@ class SmartSheets:
         self.html_split_key = '##'
         self.exist_rows = {}
         
+                    
+            
+        
     def set_attr(self, **kwargs):
         for key, value in kwargs.items():                  
             setattr(self, key, value)
     
+        
     def update_attr_by_input_type(self):
         '''
         :description: set dynamic attribute by input type 
         :parameters:
         :return:
         '''
-        if self.input_type == 'src':
-            self.input_headers = self.all_settings[enums.ConfigKeys.SRC_HEADERS]
-            self.date_header = utils.convert_text(self.all_settings[enums.ConfigKeys.SRC_DATE_HEADER])
-            self.compare_headers = self.all_settings[enums.ConfigKeys.SRC_COMPARE_HEADERS]
-            self.empty_headers = self.all_settings[enums.ConfigKeys.SRC_EMPTY_HEADERS]
-            self.none_empty_headers = self.all_settings[enums.ConfigKeys.SRC_NONE_EMPTY_HEADERS]
-            self.is_seperate_sheet = False
-        elif self.input_type == 'des':
-            self.input_headers = self.all_settings[enums.ConfigKeys.DES_HEADERS]
-            self.date_header = utils.convert_text(self.all_settings[enums.ConfigKeys.DES_DATE_HEADER])
-            self.compare_headers = self.all_settings[enums.ConfigKeys.DES_COMPARE_HEADERS]
-            self.empty_headers = self.all_settings[enums.ConfigKeys.DES_EMPTY_HEADERS]
-            self.none_empty_headers = self.all_settings[enums.ConfigKeys.DES_NONE_EMPTY_HEADERS]
-            self.is_seperate_sheet = True
-            
+        group_config = self.all_settings[enums.ConfigKeys.GROUPS][self.group_index]
+        self.sheets = group_config[self.input_type]['sheets']
+        self.input_headers = group_config[self.input_type]['input_headers']
+        #reset attr
+        self.date_headers = group_config[self.input_type]['date_headers']
+        self.compare_headers = group_config[self.input_type]['compare_headers']
+        self.empty_headers = group_config[self.input_type]['empty_headers']
+        self.none_empty_headers = group_config[self.input_type]['none_empty_headers']
+        self.modified_headers = group_config[self.input_type]['modified_headers']
+        self.mapping_values = group_config[self.input_type]['mapping_values']
+           
+        
+        self.type_cfg[self.input_type] = {
+            enums.ConfigKeys.DATE_HEADER : self.date_headers,
+            enums.ConfigKeys.COMPARE_HEADERS : self.compare_headers,
+            enums.ConfigKeys.EMPTY_HEADERS : self.empty_headers,
+            enums.ConfigKeys.NONE_EMPTY_HEADERS : self.none_empty_headers,
+            enums.ConfigKeys.MODIFIED_HEADERS : self.modified_headers,
+            enums.ConfigKeys.MAPPING_VALUES : self.mapping_values 
+            }
+           
     def connect_smartsheet(self):
         '''
         :description:
@@ -86,7 +98,7 @@ class SmartSheets:
                     self.available_name[sheet_name] = sheet_id
         #pprint (self.available_name)
         
-    def get_row_data(self, row, sheet_name, sheet_id, parse_rows, skip_rows):
+    def get_row_data(self, row, sheet_name, sheet_id, parse_rows, skip_rows, duplicate_rows):
         '''
         ::description::
         ::params:
@@ -120,84 +132,104 @@ class SmartSheets:
         tmp_row_data[header] = {'display_value': display_value, 'value': value}
         tmp_row_data[enums.DataKeys.ROW_ID] = row_id
         tmp_row_data[enums.DataKeys.ROW_NUMBER] = row_number
-        row_date = tmp_row_data[self.date_header]['value']
         
         #Rule to detect row contains data to parse
-        is_data_row = True
-        skip_reason = ''
-        #require empty cell
-        for header in self.empty_headers:
-            header = utils.convert_text(header)
-            if tmp_row_data.get(header) and tmp_row_data[header].get('value'):
-                is_data_row = False
-                skip_reason = 'Column %s is not empty.'%(header)
-        
-        #require none empty cell
-        for header in self.none_empty_headers:
-            header = utils.convert_text(header)
-            if not tmp_row_data.get(header) and (not tmp_row_data[header].get('value')):
-                is_data_row = False
-                skip_reason = 'Column %s is empty.'%(header)
-                
-        is_add = True
-        tmp_row_data['mapping_sheet_name'] = ''
-        if self.is_seperate_sheet:
-            is_add = False
-            for header in self.all_settings[enums.ConfigKeys.DES_MAPPING_SRC_SHEET]:
-                for cfg_value in self.all_settings[enums.ConfigKeys.DES_MAPPING_SRC_SHEET][header]:
-                    sheet_cfg = self.all_settings[enums.ConfigKeys.DES_MAPPING_SRC_SHEET][header][cfg_value]
-                    value = tmp_row_data[header].get('value')
-                    if value == cfg_value:
-                        tmp_sheet_name = sheet_cfg
-                        is_add = True
-                        tmp_row_data['mapping_sheet_name'] = sheet_cfg
-                        break
-        
-        if is_data_row:
-            if is_add:
-                if row_date:
-                    #only get row inside from/to date
-                    if utils.compare_date(row_date, self.from_date) and utils.compare_date(self.to_date, row_date):
-                        att_data = []
-                        list_att_name = []
-                        attachments = self.smartsheet_obj.Attachments.list_row_attachments(sheet_id=sheet_id, row_id=row_id, include_all=True)
-                        total_count = attachments.total_count
-                        if total_count:
-                            for element in attachments.data:
-                                att_data.append({
-                                    'id' : element.id,
-                                    # 'attachment_type' : element.attachment_type,
-                                    # 'created_at' : element.created_at,
-                                    # 'created_by' : element.created_by,
-                                    'mime_type' : element.mime_type,
-                                    'size_in_kb' : element.size_in_kb,
-                                    'name' : element.name,
-                                    'parent_id' : element.parent_id,
-                                    # 'parent_type' : element.parent_type
-                                    })
-                                list_att_name.append(element.name)
-                        
-                        tmp_row_data[enums.DataKeys.ATTACHMENTS] = att_data
-                        self.data[sheet_id]['rows'][row_number] = tmp_row_data
-                        list_att_name.sort()
-                        tmp_row_data['attachments_name'] = list_att_name
-                        #data to compare
-                        value_compare = []
-                        # value_compare += list_att_name
-                        for header in self.compare_headers:
-                            value_compare.append(str(tmp_row_data[header].get('value', '')))
-                        key_compare = ' - '.join(value_compare)
-                        self.compare_data[sheet_id]['rows'][row_number] = key_compare
-                        parse_rows.append(tmp_row_data)
-                    else:
-                        skip_rows.append(['Column %s exceed of start/end date'%self.date_header, tmp_row_data])#[skip_reason, data]
+        #check date header
+        pass_check_date = True
+        for date_header in self.date_headers:
+            row_date = tmp_row_data[date_header]['value']
+            if row_date:
+                #only get row inside from/to date
+                if utils.compare_date(row_date, self.from_date) and utils.compare_date(self.to_date, row_date):
+                    pass
                 else:
-                    skip_rows.append(['Column %s is empty'%self.date_header, tmp_row_data])#[skip_reason, data]
+                    pass_check_date = False
+                    break
             else:
-                skip_rows.append(['Can not find src sheet name', tmp_row_data])#[skip_reason, data]
+                pass_check_date = False
+            
+        if pass_check_date:
+            is_data_row = True
+            skip_reason = ''
+            #require empty cell
+            for header in self.empty_headers:
+                header = utils.convert_text(header)
+                if tmp_row_data.get(header) and tmp_row_data[header].get('value'):
+                    is_data_row = False
+                    skip_reason = 'Column %s is not empty.'%(header)
+            
+            #require none empty cell
+            for header in self.none_empty_headers:
+                header = utils.convert_text(header)
+                if not tmp_row_data.get(header) and (not tmp_row_data[header].get('value')):
+                    is_data_row = False
+                    skip_reason = 'Column %s is empty.'%(header)
+                    
+            is_add = True
+            tmp_row_data['mapping_sheet_name'] = ''
+            if self.mapping_values:
+                is_add = True
+                for header in self.mapping_values:
+                    value = tmp_row_data[header].get('value')
+                    if len(self.mapping_values) and value not in self.mapping_values[header]:
+                        is_add = False
+                        break
+            
+            if is_data_row:
+                if is_add:               
+                    att_data = []
+                    list_att_name = []
+                    attachments = self.smartsheet_obj.Attachments.list_row_attachments(sheet_id=sheet_id, row_id=row_id, include_all=True)
+                    total_count = attachments.total_count
+                    if total_count:
+                        for element in attachments.data:
+                            att_data.append({
+                                'id' : element.id,
+                                # 'attachment_type' : element.attachment_type,
+                                # 'created_at' : element.created_at,
+                                # 'created_by' : element.created_by,
+                                'mime_type' : element.mime_type,
+                                'size_in_kb' : element.size_in_kb,
+                                'name' : element.name,
+                                'parent_id' : element.parent_id,
+                                # 'parent_type' : element.parent_type
+                                })
+                            list_att_name.append(element.name)
+                    
+                    tmp_row_data[enums.DataKeys.ATTACHMENTS] = att_data
+                    self.data[sheet_id]['rows'][row_number] = tmp_row_data
+                    
+                    list_att_name.sort()
+                    tmp_row_data['attachments_name'] = list_att_name
+                    #data to compare
+                    value_compare = []
+                    # value_compare += list_att_name
+                    for header in self.compare_headers:
+                        value_compare.append(str(tmp_row_data[header].get('value', '')))
+                    key_compare = ' - '.join(value_compare)
+                    
+                    self.compare_data[sheet_id]['rows'][row_number] = key_compare
+                    parse_rows.append(tmp_row_data)
+                    self.data[sheet_id]['parse_count'] += 1
+                    self.compare_data[sheet_id]['parse_count'] += 1
+                    #check duplicate
+                    if self.exist_rows.get(key_compare):
+                        #utils.println('Duplicate keys: %s'%key_compare)
+                        duplicate_rows.append(tmp_row_data)
+                        self.data[sheet_id]['duplicate_count'] += 1
+                        self.compare_data[sheet_id]['duplicate_count'] += 1
+                    else:
+                        self.exist_rows[key_compare] = 1
+                else:
+                    skip_rows.append(['Mapping value fail', tmp_row_data])#[skip_reason, data]
+                    self.data[sheet_id]['skip_count'] += 1
+                    self.compare_data[sheet_id]['skip_count'] += 1
+            else:
+                skip_rows.append([skip_reason, tmp_row_data])#[skip_reason, data]
+                self.data[sheet_id]['skip_count'] += 1
+                self.compare_data[sheet_id]['skip_count'] += 1
         else:
-            skip_rows.append([skip_reason, tmp_row_data])#[skip_reason, data]
-        
+            pass
         
         
     def get_column_index(self, column=None, sheet_name=None, sheet_id=None):
@@ -259,6 +291,12 @@ class SmartSheets:
         src_id = src_data['sheet_id']
         des_name = des_data['sheet_name']
         src_name = src_data['sheet_name']
+        des_duplicate_count = des_data['duplicate_count']
+        des_skip_count = des_data['skip_count']
+        des_parse_count = des_data['parse_count']
+        src_duplicate_count = src_data['duplicate_count']
+        src_skip_count = src_data['skip_count']
+        src_parse_count = src_data['parse_count']
         utils.add_keys_to_dict(compare_data, 
                                'data', 
                                { 
@@ -272,6 +310,12 @@ class SmartSheets:
                                     'src_id' : src_id, 
                                     'parse_at': self.parsed_date,
                                     'ids': {},
+                                    'des_duplicate_count': des_duplicate_count,
+                                    'des_skip_count': des_skip_count,
+                                    'des_parse_count': des_parse_count,
+                                    'src_duplicate_count': src_duplicate_count,
+                                    'src_skip_count': src_skip_count,
+                                    'src_parse_count': src_parse_count,
                                 }
                             )
         compare_index = 1
@@ -285,11 +329,9 @@ class SmartSheets:
             for row_number_2 in des_compare_data['rows']:
                 des_key = des_compare_data['rows'].get(row_number_2)
                 if src_key == des_key:
-                    mapping_sheet_name = des_data['rows'][row_number_2]['mapping_sheet_name']
-                    if mapping_sheet_name == src_sheet:
-                        is_exist = True
-                        des_row_info = des_data['rows'][row_number_2]
-                        break
+                    is_exist = True
+                    des_row_info = des_data['rows'][row_number_2]
+                    break
             if is_exist:
                 #unchanges
                 #[src_key, src_row_info, des_row_info]
@@ -301,9 +343,9 @@ class SmartSheets:
                 if src_attact_name != des_attact_name:
                     is_modified = True
                 #check columns val
-                for idx in range(0, len(self.all_settings[enums.ConfigKeys.SRC_CHECK_MODIFIED_HEADERS])):
-                    src_header = self.all_settings[enums.ConfigKeys.SRC_CHECK_MODIFIED_HEADERS][idx]
-                    des_header = self.all_settings[enums.ConfigKeys.DES_CHECK_MODIFIED_HEADERS][idx]
+                for idx in range(0, len(self.type_cfg[enums.ConfigKeys.SOURCE][enums.ConfigKeys.MODIFIED_HEADERS])):
+                    src_header = self.type_cfg[enums.ConfigKeys.SOURCE][enums.ConfigKeys.MODIFIED_HEADERS][idx]
+                    des_header = self.type_cfg[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.MODIFIED_HEADERS][idx]
                     if src_row_info[src_header]['value'] != des_row_info[des_header]['value']:
                         is_modified = True
                 if is_modified:
@@ -343,7 +385,7 @@ class SmartSheets:
       
         compare_folder = os.path.join(master_config.WORKING_PATH, enums.StructureKeys.COMPARE_FOLDER)
         utils.make_folder(compare_folder)
-        result_file = os.path.join(compare_folder, '%s.py'%src_id)
+        result_file = os.path.join(compare_folder, '%s_%s.py'%(src_id, des_id))
         content = 'result = '
         content += pformat(compare_data, width=400)
         utils.make_file(result_file, content)
@@ -355,12 +397,12 @@ class SmartSheets:
         :return:
         '''
         self.connect_smartsheet()
-        for sheet_name in self.sheets:
+        sheet_name = self.sheets
+        if sheet_name:
             utils.println('Sheet name "%s"'%sheet_name)
             if not self.available_name.get(sheet_name):
                 text = utils.message_generate(message.MsgError.E006, sheet_name)
-                utils.println(text, enums.LoggingKeys.LOGGING_ERROR)
-                break
+                raise Exception(text)
             sheet_id = self.available_name[sheet_name]
             #sheet_obj = self.master_sheet_obj.get_sheet_by_name(name = sheet_name, include='all')
             sheet_obj = self.master_sheet_obj.get_sheet(sheet_id = sheet_id, include='all')
@@ -377,6 +419,8 @@ class SmartSheets:
             utils.remove_path(result_file)
             rows = sheet_obj.rows
             columns = sheet_obj.columns
+            #reset key compare exist
+            self.exist_rows = {}
             utils.println('Calculate headers')
             for header in self.input_headers:
                 header = utils.convert_text(header)
@@ -391,18 +435,30 @@ class SmartSheets:
                     text = utils.message_generate(message.MsgError.E007, header)
                     utils.println(text, enums.LoggingKeys.LOGGING_ERROR)
                     break
-            utils.add_keys_to_dict(self.data, sheet_id, {'rows': {}, 'sheet_id': sheet_id, 'sheet_name': sheet_name, 'parse_at': self.parsed_date})
-            utils.add_keys_to_dict(self.compare_data, sheet_id, {'rows': {}, 'sheet_id': sheet_id, 'sheet_name': sheet_name, 'parse_at': self.parsed_date})
+            utils.add_keys_to_dict(self.data, sheet_id, {'rows': {}, 'sheet_id': sheet_id, 
+                                                         'sheet_name': sheet_name, 
+                                                         'parse_at': self.parsed_date,
+                                                         'parse_count': 0,
+                                                         'skip_count': 0,
+                                                         'duplicate_count': 0,
+                                                         })
+            utils.add_keys_to_dict(self.compare_data, sheet_id, {'rows': {}, 'sheet_id': sheet_id, 
+                                                                 'sheet_name': sheet_name, 
+                                                                 'parse_at': self.parsed_date,                                                                 
+                                                                 'parse_count': 0,
+                                                                 'skip_count': 0,
+                                                                 'duplicate_count': 0})
             count = 0
             total_row = len(rows)
             utils.println('Calculate rows')
             parse_rows = []
             skip_rows = []
+            duplicate_rows = []
             for row in rows:
                 count += 1
                 if ((count % 100) == 0) or (count == total_row):
                     utils.println('Processing  [%s/%s] rows.'%(count, total_row))
-                self.get_row_data(row, sheet_name, sheet_id, parse_rows, skip_rows)
+                self.get_row_data(row, sheet_name, sheet_id, parse_rows, skip_rows, duplicate_rows)
                 
             parse_folder = os.path.join(master_config.WORKING_PATH, enums.StructureKeys.PARSE_FOLDER)
             utils.make_folder(parse_folder)
@@ -425,11 +481,13 @@ table td {
                 #Parse rows
                 result_file = os.path.join(parse_folder, '%s_parse_rows.html'%sheet_id)
                 content = '%s<table><thead><tr>'%style_text
+                content += '<th>Row</th>'
                 for header in self.column_index[sheet_name]:
                     content += '<th>%s</th>'%(header)
                 content += '</tr></thead><tbody>'
                 for row_data in parse_rows:
                     content += '<tr>'
+                    content += '<td>%s</td>'%(row_data['row_number'])
                     for header in self.column_index[sheet_name]:
                         header = utils.convert_text(header)
                         content += '<td>%s</td>'%(row_data[header]['value'])
@@ -441,6 +499,7 @@ table td {
                 #Skip rows
                 result_file = os.path.join(parse_folder, '%s_skip_rows.html'%sheet_id)
                 content = '%s<table><thead><tr>'%style_text
+                content += '<th>Row</th>'
                 for header in self.column_index[sheet_name]:
                     content += '<th>%s</th>'%(header)
                 content += '<th>Reason</th>'
@@ -448,6 +507,7 @@ table td {
                 for element in skip_rows:
                     reason, row_data = element
                     content += '<tr>'
+                    content += '<td>%s</td>'%(row_data['row_number'])
                     for header in self.column_index[sheet_name]:
                         header = utils.convert_text(header)
                         content += '<td>%s</td>'%(row_data[header]['value'])
@@ -456,13 +516,32 @@ table td {
                 content += '</tbody></table>'
                 content = utils.revert_text(content)
                 utils.make_file(result_file, content)
+                
+                #Duplicate rows
+                result_file = os.path.join(parse_folder, '%s_duplicate_rows.html'%sheet_id)
+                content = '%s<table><thead><tr>'%style_text
+                content += '<th>Row</th>'
+                for header in self.column_index[sheet_name]:
+                    content += '<th>%s</th>'%(header)
+                content += '</tr></thead><tbody>'
+                for row_data in duplicate_rows:
+                    content += '<tr>'
+                    content += '<td>%s</td>'%(row_data['row_number'])
+                    for header in self.column_index[sheet_name]:
+                        header = utils.convert_text(header)
+                        content += '<td>%s</td>'%(row_data[header]['value'])
+                    content += '</tr>'
+                content += '</tbody></table>'
+                content = utils.revert_text(content)
+                utils.make_file(result_file, content)
+                
             except:
                 pass
             utils.println('Total rows have data %s'%(len(self.data[sheet_id]['rows'])))
             self.record_sheet_data(sheet_id)
             sheet_data = self.data[sheet_id]
             compare_sheet_data = self.compare_data[sheet_id]
-            if self.input_type == 'des':
+            if self.input_type == enums.ConfigKeys.DESTINATION:
                 self.des_data = sheet_data
                 self.des_compare_data = compare_sheet_data
             else:
@@ -470,7 +549,7 @@ table td {
                     self.compare_two_sheet(src_data = sheet_data, des_data = self.des_data, 
                                            src_compare_data = compare_sheet_data, des_compare_data = self.des_compare_data)
             utils.println('Sheet name "%s" Done'%sheet_name)
-            
+        
     def dowload_attachments(self, att_list, des_id, src_id):
         '''
         ::description:: dowload_attachments
@@ -510,20 +589,20 @@ table td {
                 att_type)
             )
     
-    def remove_attachments(self, att_list, des_id, src_id, row_id):
-        '''
-        ::description:: upload_attachments
-        ::params:
-        :return:
-        '''
-        attachments_folder = os.path.join(master_config.WORKING_PATH, enums.StructureKeys.ATTACHMENTS_FOLDER)
-        des_dir = os.path.join(attachments_folder, str(src_id))
-        for attach in att_list:
-            att_id = attach['id']  #get the id of the attachment
-            att_name = attach['name']  # get the name of the attachment
-            att_type = attach['mime_type']  # get the name of the attachment
-            dest_file = os.path.join(des_dir, str(att_name))
-            updated_attachment = self.smartsheet_obj.Attachments.delete_attachment(des_id, att_id)
+    # def remove_attachments(self, att_list, des_id, src_id, row_id):
+    #     '''
+    #     ::description:: upload_attachments
+    #     ::params:
+    #     :return:
+    #     '''
+    #     attachments_folder = os.path.join(master_config.WORKING_PATH, enums.StructureKeys.ATTACHMENTS_FOLDER)
+    #     des_dir = os.path.join(attachments_folder, str(src_id))
+    #     for attach in att_list:
+    #         att_id = attach['id']  #get the id of the attachment
+    #         att_name = attach['name']  # get the name of the attachment
+    #         att_type = attach['mime_type']  # get the name of the attachment
+    #         dest_file = os.path.join(des_dir, str(att_name))
+    #         updated_attachment = self.smartsheet_obj.Attachments.delete_attachment(des_id, att_id)
             
         
     def add_new_row(self, row_data, des_headers, sheet_id, src_id):
@@ -551,14 +630,14 @@ table td {
         self.dowload_attachments(att_list, sheet_id, src_id)
         self.upload_attachments(att_list, sheet_id, src_id, row_id)
         
-    def delete_row(self, row_data, des_headers, sheet_id, src_id):
-        '''
-        ::description:: delete row of smartsheet
-        ::params:
-        :return:
-        '''
-        row_id = row_data[enums.DataKeys.ROW_ID]
-        response = self.master_sheet_obj.delete_rows(sheet_id, [row_id])
+    # def delete_row(self, row_data, des_headers, sheet_id, src_id):
+    #     '''
+    #     ::description:: delete row of smartsheet
+    #     ::params:
+    #     :return:
+    #     '''
+    #     row_id = row_data[enums.DataKeys.ROW_ID]
+    #     response = self.master_sheet_obj.delete_rows(sheet_id, [row_id])
         
         
     def update_row(self, row_data, des_headers, sheet_id, src_id):
@@ -585,7 +664,5 @@ table td {
         response = self.master_sheet_obj.update_rows(sheet_id, [row_obj])
         self.dowload_attachments(att_list, sheet_id, src_id)
         self.upload_attachments(att_list, sheet_id, src_id, row_id)
-        if not self.all_settings.get(enums.ConfigKeys.SKIP_REMOVE_ATTACHMENTS):
-            self.remove_attachments(des_attachments, sheet_id, src_id, row_id)
         
             

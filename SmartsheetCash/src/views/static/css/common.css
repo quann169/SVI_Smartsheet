@@ -30,7 +30,11 @@ button[disabled=''], button[disabled='disabled'], input[disabled=''], input[disa
 	background-color: var(--disable-bg) !important;
 	cursor: unset !important;
 }
-
+button[disabled='']:hover, button[disabled='disabled']:hover, input[disabled='']:hover, input[disabled='disabled']:hover, a[disabled='']:hover, a[disabled='disabled']:hover{
+	color: var(--disable-text) !important;
+	background-color: var(--disable-bg) !important;
+	cursor: unset !important;
+}
 
 .h-0 {
   height: 0;
@@ -196,3 +200,49 @@ button[disabled=''], button[disabled='disabled'], input[disabled=''], input[disa
   z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
 }
 /* end overlay */
+
+/* start  modal */
+.close-overlay, .close-overlay-clean {
+	font-size: 20px;
+    font-weight: bold;
+    padding: 5px 10px !important;
+    border-radius: 3px;
+    align-items: center;
+    vertical-align: middle;
+    height: unset !important;
+}
+/* .close-overlay:hover, .close-overlay-clean:hover {
+	color: var(--close-popup-text);
+	cursor: pointer;
+	background-color: var(--close-popup-bg);
+} */
+.modal-body-custom {
+	overflow-y: auto;
+	max-height: 80vh;
+}
+.modal-dialog-custom {
+	max-width: unset;
+}
+#console_content {
+	white-space: pre-line;
+	overflow: auto;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	position: absolute;
+	padding: 1rem;
+}
+/* end modal */
+.console-info {
+    color: var(--log-info-text);
+}
+.console-error {
+    color: var(--log-error-text);
+}
+.console-warning {
+    color: var(--log-warning-text);
+}
+.console-debug {
+    color: var(--log-debug-text);
+}

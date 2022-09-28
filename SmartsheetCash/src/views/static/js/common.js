@@ -199,21 +199,6 @@ $(document).on("click", ".read-more,.read-less", function() {
     $(this).closest(".add-read-more").toggleClass("show-less-content show-more-content");
 });
 
-function updateMethod(data){
-	var projElm = $('.project');
-	var milElm = $('.milestone');
-	var project = '';
-	var milestone = '';
-	if (projElm) {
-		project = projElm.data('name');
-	}
-	if (milElm) {
-		milestone = milElm.data('name');
-	}
-	data[MILESTONE_NAME] = milestone;
-	data[PROJECT_NAME] = project;
-	return data;
-}
 
 $(document).on("mouseenter", ".modal-header", function(){
 	if (MODAL_DRAG){
@@ -226,4 +211,76 @@ $(document).on("mouseenter", ".modal-header", function(){
 function escapeHtml(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
+function revertHtmlFormat(str) {
+    return str.replace(/&amp;/g, "&;").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+}
 
+
+
+
+
+
+
+
+function loadConsole(data){
+	if (COMPLETE_PREVIOUS_PROCESS){
+		COMPLETE_PREVIOUS_PROCESS = false;
+	    $.ajax({
+	    	url: GET_CONSOLE,
+	 	   type: "GET",
+	 	   async: false,
+	 	   data: encodeURIComponent(JSON.stringify(data)),
+	 	   success: function(resp){
+	 		  var content = resp.result;
+	 		content = escapeHtml(content); 
+			var oldContent = $('#console_content').html();
+	 		var isChange = false;
+			content = revertHtmlFormat(content);
+			oldContent = revertHtmlFormat(oldContent);
+	 		if (content != oldContent) {
+	 			$('#console_content').html(content);
+	 			isChange = true;
+	 		 }
+	 		COMPLETE_PREVIOUS_PROCESS = true;
+	 		var isScroll = $('#scroll').prop('checked');
+ 			if (isChange & isScroll){
+ 				var height = $('#console_content')[0].scrollHeight;
+				const element = document.getElementById("console_content");
+				element.scrollTop = height;
+ 			}
+	 		 }
+	 	 });
+	}
+}
+$(document).on('click', '.close-overlay-clean', function(){
+	clearInterval(INTERVAL);
+	INTERVAL = null;
+})
+
+ function openConsoleModal(path){
+	showOverlay();
+	var content = '';
+	content +='<div class="modal-dialog" role="document" style="max-width: 1000px;">';
+	content += '<div class="modal-content">';
+	content += '<div class="modal-header p-2 align-items-center">';
+	content += '<h5 class="modal-title font-weight-bold">Console</h4>';
+	content += '<button class="close-overlay-clean custom-button bg-danger" aria-hidden="true">&times;</button>';
+	content += '</div>';
+	content += '<div class="modal-body modal-body-custom" style="height: 75vh;">';
+	content += '<div id="console_content"></div>';
+	content += '</div>';
+	content += '<div class="modal-footer p-2 justify-content-start">';
+	content += '<input type="checkbox" checked="" id="scroll"><label for="scroll">Scroll</label>';
+	content += '</div>';
+	content += '</div>';
+	content += '</div>';
+	addOverlayContent(content);
+	var data = {};
+    data[PATH] = path;
+	COMPLETE_PREVIOUS_PROCESS = true;
+    INTERVAL = setInterval(function() {loadConsole(data); }, 1000);
+}
+
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();   
+});

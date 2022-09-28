@@ -1,14 +1,23 @@
 {% extends enums.Template.LAYOUT %}
 {% block title %}
-	Review Before Commit
+	Commit
 {% endblock title %}
+
+{% set unuse = ctrl_obj.get_setting() %}
+{% set all_settings = ctrl_obj.all_settings %}
+{% set group_id = ctrl_obj.methods[enums.MethodKeys.GROUP_INDEX] %}
+{% set src_id = ctrl_obj.methods[enums.MethodKeys.SRC_ID] %}
+{% set des_id = ctrl_obj.methods[enums.MethodKeys.DES_ID] %}
+{% set group_config = all_settings[enums.ConfigKeys.GROUPS][group_id | int] %}
+{% set dummy_data = ctrl_obj.create_dummy_data_to_commit() %}
 
 {% block breadcrumb_block %}
 	{% set data = {
 		'items_data': [
-			(enums.Route.ANALYZE + '?' + enums.MethodKeys.SHEET_ID + '=' + ctrl_obj.methods[enums.MethodKeys.SHEET_ID] | string 
-			+ '&' + enums.MethodKeys.DES_ID + '=' + ctrl_obj.methods[enums.MethodKeys.DES_ID] | string , 'Analyze', False),
-            (enums.Route.PREVIEW, 'Commit ', True)
+			(enums.Route.ANALYZE + '?' + enums.MethodKeys.SRC_ID + '=' + src_id | string 
+			+ '&' + enums.MethodKeys.DES_ID + '=' + des_id | string 
+			+ '&' + enums.MethodKeys.GROUP_INDEX + '=' + group_id | string , 'Analyze', False),
+            (enums.Route.PREVIEW, 'Commit To "' + group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.SHEET_NAME] +  '"' , True)
 		],
 		'home_link':  enums.Route.INDEX
 	}
@@ -26,16 +35,16 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/screens/preview.css') }}" />
 {% endblock styles %}
 
-{% set unuse = ctrl_obj.get_setting() %}
-{% set all_settings = ctrl_obj.all_settings %}
-{% set dummy_data = ctrl_obj.create_dummy_data_to_commit() %}
+
 {% block option %}
 	{{button({
 		'type': 'button',
 		'text': "Commit",
 		'class': 'custom-button commit',
-		'attrs': [('data-sheet-id', ctrl_obj.methods[enums.MethodKeys.SHEET_ID]),
-		('data-des-id', ctrl_obj.methods[enums.MethodKeys.DES_ID])]
+		'attrs': [('data-src-id', src_id),
+			('data-des-id', des_id),
+			('data-group-id', group_id),
+			('data-path', ctrl_obj.working_path + '/' + enums.StructureKeys.CONSOLE_FOLDER + '/' + 'commit.log')]
 		})
 	}}
 	
@@ -57,12 +66,9 @@
 			<th class="custom-w-5">Action</th>
 			<th class="custom-w-3">Row</th>
 			<th class="">Attachments</th>
-            {% for element in all_settings[enums.ConfigKeys.MAPPING_HEADERS] %}
+            {% for element in group_config[enums.ConfigKeys.MAPPING_HEADERS] %}
 				{% set src_header, des_header = element %}
                 <th class="">{{des_header}}</th>
-            {% endfor %}
-			{% for mapping_header in all_settings[enums.ConfigKeys.DES_MAPPING_SRC_SHEET] %}
-                <th class="">{{mapping_header}}</th>
             {% endfor %}
         </tr>
 	  </thead>
@@ -75,23 +81,25 @@
 			{% set row_number = row[enums.DataKeys.ROW_NUMBER] %}
 			{% set action = row[enums.DataKeys.ACTION] %}
 			<tr>
-				<td class="center-text">
-					{{checkbox({
-						'value': compare_id,
-						'class': 'custom-checkbox',
-						'text': '',
-						})
-					}}
-				</td>
+				{% if action == enums.DataKeys.DELETE %}
+					<td></td>
+				{% else %}
+					<td class="center-text">
+						{{checkbox({
+							'value': compare_id,
+							'class': 'custom-checkbox',
+							'text': '',
+							})
+						}}
+					</td>
+				{% endif %}
 				<td class="{{action}}">{{action}}</td>
 				<td class="">{{row_number}}</td>
 				<td class="">{{ attachments_name | join('<br>') | safe}}</td>
-				{% for element in all_settings[enums.ConfigKeys.MAPPING_HEADERS] %}
+				{% for element in group_config[enums.ConfigKeys.MAPPING_HEADERS] %}
 					{% set src_header, des_header = element %}
-					<td class="">{{ row[des_header][enums.DataKeys.VALUE] }}</td>
-				{% endfor %}
-				{% for mapping_header in all_settings[enums.ConfigKeys.DES_MAPPING_SRC_SHEET] %}
-					<td class="">{{ row[mapping_header][enums.DataKeys.VALUE] }}</td>
+					{% set value = utils.convert_data_type(row[des_header][enums.DataKeys.VALUE], group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.DATA_TYPE][des_header]) %}
+					<td class="">{{ value }}</td>
 				{% endfor %}
 			</tr>
 		{% endfor %}

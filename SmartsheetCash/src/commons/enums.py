@@ -15,36 +15,45 @@ class LoggingKeys:
 class ConfigKeys:
     TOKEN = 'token'
     ALLOW_USERS = 'allow_users'
-    SRC_SHEET = 'src_sheets'
-    SRC_HEADERS = 'src_headers'
-    DES_SHEETS = 'des_sheets'
-    DES_HEADERS = 'des_headers'
-    SRC_DATE_HEADER = 'src_date_header'
-    DES_DATE_HEADER = 'des_date_header'
+    SHEETS = 'sheets'
+    HEADERS = 'headers'
+    DATE_HEADER = 'date_header'
     EXPIRED_TIME = 'expired_time'
-    SRC_COMPARE_HEADERS = 'src_compare_headers'
-    DES_COMPARE_HEADERS = 'des_compare_headers'
-    SRC_EMPTY_HEADERS = 'src_empty_headers'
-    SRC_NONE_EMPTY_HEADERS = 'src_none_empty_headers'
-    DES_EMPTY_HEADERS = 'des_empty_headers'
-    DES_NONE_EMPTY_HEADERS = 'des_none_empty_headers'
-    DES_MAPPING_SRC_SHEET = 'des_mapping_src_sheet'
-    SRC_CHECK_MODIFIED_HEADERS = 'src_check_modified_headers'
-    DES_CHECK_MODIFIED_HEADERS = 'des_check_modified_headers'
+    COMPARE_HEADERS = 'compare_headers'
+    EMPTY_HEADERS = 'empty_headers'
+    NONE_EMPTY_HEADERS = 'none_empty_headers'
+    MODIFIED_HEADERS = 'modified_headers'
+    
+    
+    #New keys
+    GROUPS = 'groups'
     MAPPING_HEADERS = 'mapping_headers'
-    SKIP_REMOVE_ATTACHMENTS = 'skip_remove_attachments'
+    SOURCE = 'source'
+    SHEET_NAME = 'sheet_name'
+    HEADERS = 'headers'
+    DESTINATION = 'destination'
+    IS_DATE = 'is_date'
+    COMPARE_INDEX = 'compare_index'
+    IS_EMPTY = 'is_empty'
+    IS_NONE_EMPTY = 'is_none_empty'
+    MODIFIED_INDEX = 'modified_index'
+    DATA_TYPE = 'data_type'
+    MAPPING_VALUES = 'mapping_values'
+    
     RECIPIENT_MAIL = 'recipient_mail'
     CC_MAIL = 'cc_mail'
     SUBJECT = 'subject'
     BCC_MAIL = 'bcc_mail'
-
+    DEFAULT_VALUE = 'default_value'
+    
 class DataKeys:
+    
     NEW = 'new'
     MISSING = 'missing'
     MODIFIED = 'modified'
     UNCHANGED = 'unchanged'
     ADD = 'add'
-    DELETE = 'delete'
+    DELETE = 'review'#delete -> review
     MODIFIED = 'modified'
     ATTACHMENTS = 'attachments'
     ATTACHMENTS_NAME = 'attachments_name'
@@ -71,7 +80,12 @@ class MethodKeys:
     SHEET_ID = 'sheet_id'
     IDS = 'ids'
     DES_ID          = 'des_id'
+    DES_NAME          = 'des_name'
+    SRC_ID          = 'src_id'
+    SRC_NAME          = 'src_name'
     PATH          = 'path'
+    GROUP_INDEX       = 'group_index'
+    COMPARE_ID             = 'compare_id'
 
 class StructureKeys:
     PARSE_FOLDER = 'informations'
@@ -80,7 +94,6 @@ class StructureKeys:
     COMPARE_FOLDER = 'compare'
     
 class Template:
-    
     BREADCRUMB          = 'components/breadcrumb.html'
     NAVBAR              = 'components/navbar.html'
     SIDEBAR             = 'components/sidebar.html'
@@ -102,19 +115,19 @@ class Template:
     
     
 class Route:
-    
     INDEX   = '/'
     HOME   = '/home'
     ANALYZE   = '/analyze'
     PREVIEW   = '/preview'
     START_ANALYZE = '/start-analyze'
     COMMIT   = '/commit'
-    
+    GET_CONSOLE = '/get-console'
     
     LOGIN   = '/login'
     LOGOUT   = '/logout'
     AUTH   = '/auth'
     
     LOAD_FILE = '/load-file'
+    GET_COMPARE_DETAIL_MODAL = '/get-compare-detail-modal'
     
     

@@ -35,7 +35,31 @@ def unhash(text):
     result = binascii.unhexlify('%x' % int(text))
     result = result.decode('ascii')
     return result
+
+def convert_number_to_currency(input_number):
+    if isinstance(input_number, float) or isinstance(input_number, int):
+        result = "${:,.0f}".format(input_number)# ${:,.0f}
+    else:
+        if not input_number:
+            result = ''
+        else:
+            try:
+                result = result = "${:,.0f}".format(float(input_number))
+            except:
+                result = ''
+    return result
+
+
+
+def convert_data_type(value, data_type):
+    result = value
+    #data type is currency
+    if data_type == 'currency':
+        result = convert_number_to_currency(value)
+     
+    return result
     
+
 def get_request_form():
     # for post method
     methods = {}
@@ -208,31 +232,37 @@ def println(message, logging_level=enums.LoggingKeys.LOGGING_INFO, is_print=True
     if logging_level == enums.LoggingKeys.LOGGING_CRITICAL:
         # logging.critical(message)
         if is_print:
-            print ('>> ERROR: ' + message)
+            print ('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message)
+            sys.stdout.flush()
     elif logging_level == enums.LoggingKeys.LOGGING_EXCEPTION:
         # logging.exception(message)
-        # traceback.print_exc('')
+        traceback.print_exc('')
         if is_print:
-            print ('>> ERROR: ' + message)
+            print ('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message)
+            sys.stdout.flush()
     elif logging_level == enums.LoggingKeys.LOGGING_ERROR:
         # logging.error(message)
-        # traceback.print_exc()
+        traceback.print_exc()
         if is_print:
-            print ('>> ERROR: ' + message)
+            print ('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message)
+            sys.stdout.flush()
     elif logging_level == enums.LoggingKeys.LOGGING_WARNING:
         # logging.warn(message)
         if is_print:
-            print ('>> WARN: ' + message)
+            print ('<span class="font-weight-bold console-warning"> >> WARN: </span>' + message)
+            sys.stdout.flush()
     elif logging_level == enums.LoggingKeys.LOGGING_INFO:
         # logging.info(message)
         if is_print:
-            print ('>> INFO: ' + message)
+            print ('<span class="font-weight-bold console-info"> >> INFO: </span>' + message)
+            sys.stdout.flush()
     elif logging_level == enums.LoggingKeys.LOGGING_DEBUG:
         if master_config.LOGGING_LEVEL.lower() ==  enums.LoggingKeys.LOGGING_DEBUG:
             #logging.debug(message)
             if is_print:
-                print ('>> DEBUG: ' + message)
-    
+                print ('<span class="font-weight-bold console-debug"> >> DEBUG: </span>'  + message)
+                sys.stdout.flush()
+                
 def split_patern(string, pattern=''):
     result = filter(None, re.split(pattern, string))
     return result
@@ -306,6 +336,20 @@ def date_to_str(date_obj=None, format_str='%Y-%m-%d %H:%M:%S'):
         result = date_obj
     return result
 
+def create_list(list_input, index, value):
+    for idx in range(0, index + 1):
+        if len(list_input) < (idx + 1):
+            list_input.append('')
+            try:
+                list_input[index] = value
+            except:
+                pass
+        else:
+            try:
+                list_input[index] = value
+            except:
+                pass
+        
 def str_to_date(string):
     if isinstance(string, datetime.datetime):
         obj_date    = string
@@ -617,46 +661,11 @@ def render_jinja2_template(template_path, file_name,  dict_variable):
     
 def send_mail(user_name, password, recipient, cc_recipient, subject, message, bcc_recipient=[], break_line=True):
     try:
-        mail_style_css = """
-<style>
-    * {
-		font-family: 'Poppins', sans-serif !important;
-	}
-	tr {
-		background-color: white !important;
-	    border: 1px solid #aaa !important;
-	    white-space: nowrap;
-	}
-	th {
-		background-color: #007BA9 !important;
-		border: 1px solid #aaa !important;
-		color: white;
-		font-weight: bold;
-		box-sizing: content-box;
-		padding: 5px;
-	}
-	td {
-		border: 1px solid #aaa !important;
-		padding: 5px;
-	}
-	
-	table {
-		border-collapse: collapse !important;
-    }
-	.cl-red {
-		color: red;
-	}
-	.cl-blue {
-		color: blue;
-	}
-</style>
-        
-        """
         if break_line:
             message = message.replace('\n', '<br>\n')
-        message = mail_style_css + message
         sender = "%s@savarti.com"%user_name
-        bcc_recipient = []
+        if not master_config.IS_PRODUCT:
+            bcc_recipient = []
         # Create message container - the correct MIME type is multipart/alternative.
         msg = MIMEMultipart('alternative')
         msg['From'] = sender

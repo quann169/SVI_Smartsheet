@@ -54,6 +54,7 @@
 		'type': 'button',
 		'text': "Analyze",
 		'class': 'custom-button analyze',
+		'attrs': [('data-path', ctrl_obj.working_path + '/' + enums.StructureKeys.CONSOLE_FOLDER + '/' + 'analyze.log')]
 		})
 	}}
 	
@@ -70,7 +71,6 @@
 			'class': 'custom-checkbox all-checkbox',
 			'attrs': [('data-target', 'tbody')],
 			'text': '',
-			'id': '1',
 			})
 		}}
 			</th>
@@ -85,7 +85,10 @@
 	    </tr>
 	  </thead>
 	  <tbody>
-		  {% for src_sheet in all_settings['src_sheets'] %}
+		  {% for group_cfg in all_settings[enums.ConfigKeys.GROUPS] %}
+		  	{% set group_index = loop.index - 1 %}
+		  	{% set src_sheet = group_cfg[enums.ConfigKeys.SOURCE][enums.ConfigKeys.SHEET_NAME] %}
+			{% set des_sheet = group_cfg[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.SHEET_NAME] %}
 			<tr>
 				<td class="">{{loop.index}}
 				</td>
@@ -93,18 +96,21 @@
 					'value': src_sheet,
 					'class': 'custom-checkbox',
 					'text': '',
-					'id': loop.index,
+					'id': group_index,
+					'attrs': [('data-src-name', src_sheet),
+						('data-des-name', des_sheet),
+						('data-group-index', group_index)]
 					})
 				}}
 				</td>
 				<td class="">{{src_sheet}}
 				</td>
-				<td class="">{{all_settings['des_sheets']}}
+				<td class="">{{des_sheet}}
 				</td>
 				{% if src_sheet in compare_data %}
 				<td class="">{{compare_data[src_sheet][0]}}
 				</td>
-				<td class=""><a href='{{enums.Route.ANALYZE}}?{{enums.MethodKeys.SHEET_ID}}={{compare_data[src_sheet][4]}}'>Result</a>
+				<td class=""><a href='{{enums.Route.ANALYZE}}?{{enums.MethodKeys.SRC_ID}}={{compare_data[src_sheet][3]}}&{{enums.MethodKeys.DES_ID}}={{compare_data[src_sheet][5]}}&{{enums.MethodKeys.GROUP_INDEX}}={{group_index}}'>Result</a>
 				</td>
 				{% else %}
 				<td class="">

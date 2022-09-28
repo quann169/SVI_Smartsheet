@@ -21,3 +21,7 @@
     text-transform: capitalize;
     color: var(--status-modified);
 }
+.hightlight {
+    color: var(--hightlight-text)  !important;
+    background-color: var(--hightlight-bg)  !important;
+}

@@ -92,6 +92,7 @@ $(document).on('click', '.analyze', function(){
     var toDateObj = $('.to-date');
     var startDate = fromDateObj.val();
     var endDate = toDateObj.val();
+    var path = $(this).data('path');
     // validate date
     if (! (startDate && endDate)) {
         customAlert({message: MESSAGE.EMPTY_DATE});
@@ -105,9 +106,11 @@ $(document).on('click', '.analyze', function(){
             if ($(this).prop('checked')) {
                 var check = $(this).prop('checked');
                 if (check) {
-                    var sheetName = $(this).val();
+                    var groupIndex = $(this).data('group-index');
+                    var srcName = $(this).data('src-name');
+                    var desName = $(this).data('des-name');
                     isSelect = true;
-                    sheets.push(sheetName);
+                    sheets.push([groupIndex, srcName, desName]);
                 }
             }
         })
@@ -119,17 +122,19 @@ $(document).on('click', '.analyze', function(){
             data[FROM_DATE] = startDate;
             data[TO_DATE] = endDate;
             data[SHEETS] = sheets;
-            showLoader();
+            openConsoleModal(path);
+            $('.close-overlay-clean').prop('disabled', true)
             $.ajax({
                 url: START_ANALYZE,
                 type: "GET",
                 data: encodeURIComponent(JSON.stringify(data)),
                 async: true,
                 success: function(resp){
-                    hideLoader();
+                    // hideLoader();
                     var result = resp.result;
                     var status = result[0];
                     var message = result[1];
+                    $('.close-overlay-clean').prop('disabled', false)
                     if (status) {
                         customAlert({message: message});
                         reloadElement('.content', 'table');
@@ -139,7 +144,8 @@ $(document).on('click', '.analyze', function(){
                     
                 },
                 error: function(resp) {
-                        hideLoader();
+                        // hideLoader();
+                        $('.close-overlay-clean').prop('disabled', false)
                         customAlert({message: 'Internal Server Error'});
                 } 
             });

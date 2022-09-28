@@ -61,7 +61,7 @@
 		{%- endblock navbar_block %}
 		{% block breadcrumb_block %}
 		{%- endblock breadcrumb_block %}
-		<div class='custom-container flex-grow-1 d-flex flex-column'>
+		<div class='custom-container flex-grow-1 d-flex flex-column main-content'>
 			<div class='option-block'>
 				{% block option %} 
 				{% endblock option %}
@@ -78,6 +78,7 @@
 			<script src="{{url_for('static', filename='vendors/jquery/jquery-3.1.1.js')}}"></script>
 			<script src="{{url_for('static', filename='vendors/poper/popper-1.14.0.min.js')}}"></script>
 			<script src="{{url_for('static', filename='vendors/bootstrap-4.5.3/js/bootstrap.min.js')}}"></script>
+			<script src="{{url_for('static', filename='vendors/bootstrap-4.5.3/js/bootstrap.bundle.js')}}"></script>
 			<!-- End library -->
 
 			<!-- Custom -->

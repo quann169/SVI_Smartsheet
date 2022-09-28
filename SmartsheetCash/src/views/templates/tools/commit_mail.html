@@ -1,8 +1,53 @@
+<style>
+	* {
+		font-family: 'Poppins', sans-serif !important;
+	}
+	tr {
+		background-color: white !important;
+	    border: 1px solid #aaa !important;
+	    white-space: nowrap;
+	}
+	th {
+		background-color: #007BA9 !important;
+		border: 1px solid #aaa !important;
+		color: white;
+		font-weight: bold;
+		box-sizing: content-box;
+		padding: 5px;
+	}
+	td {
+		border: 1px solid #aaa !important;
+		padding: 5px;
+	}
+	
+	table {
+		border-collapse: collapse !important;
+    }
+	.add {
+		font-weight: bold;
+		text-transform: capitalize;
+		color: #28a745;
+	}
+
+	.delete, .review {
+		font-weight: bold;
+		text-transform: capitalize;
+		color: #dc3545;
+	}
+
+	.modified {
+		font-weight: bold;
+		text-transform: capitalize;
+		color: #007bff;
+	}
+</style>
+{% set group_config = all_settings[enums.ConfigKeys.GROUPS][group_id] %}
 Hi all,<br>
 <br>
 This committed cash has been added by {{user_name}}.<br>
 Below is the summary information:<br>
 Date: {{date}}<br>
+Sheet: {{group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.SHEET_NAME]}}  -> {{group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.SHEET_NAME]}}<br>
 <br>
 
 <table class="">
@@ -11,40 +56,37 @@ Date: {{date}}<br>
 		<th class="custom-w-5">Action</th>
 		<th class="custom-w-3">Row</th>
 		<th class="">Attachments</th>
-           {% for element in all_settings[enums.ConfigKeys.MAPPING_HEADERS] %}
+		{% for element in group_config[enums.ConfigKeys.MAPPING_HEADERS] %}
 			{% set src_header, des_header = element %}
-               <th class="">{{des_header}}</th>
-           {% endfor %}
-		{% for mapping_header in all_settings[enums.ConfigKeys.DES_MAPPING_SRC_SHEET] %}
-               <th class="">{{mapping_header}}</th>
-           {% endfor %}
+			<th class="">{{des_header}}</th>
+		{% endfor %}
        </tr>
   </thead>
   <tbody>
+	
 	{% for row in dummy_data %}
-		{% set attachments = row[enums.DataKeys.ATTACHMENTS] %}
-		{% set attachments_name = row[enums.DataKeys.ATTACHMENTS_NAME] %}
-		{% set row_id = row[enums.DataKeys.ROW_ID] %}
-		{% set compare_id = row[enums.DataKeys.COMPARE_ID] %}
-		{% set row_number = row[enums.DataKeys.ROW_NUMBER] %}
-		{% set action = row[enums.DataKeys.ACTION] %}
-		<tr>
-			<td class="">{{action}}</td>
-			<td class="">{{row_number}}</td>
-			<td class="">{{ attachments_name | join('<br>') | safe}}</td>
-			{% for element in all_settings[enums.ConfigKeys.MAPPING_HEADERS] %}
-				{% set src_header, des_header = element %}
-				<td class="">{{ row[des_header][enums.DataKeys.VALUE] }}</td>
-			{% endfor %}
-			{% for mapping_header in all_settings[enums.ConfigKeys.DES_MAPPING_SRC_SHEET] %}
-				<td class="">{{ row[mapping_header][enums.DataKeys.VALUE] }}</td>
-			{% endfor %}
-		</tr>
-	{% endfor %}
+			{% set attachments = row[enums.DataKeys.ATTACHMENTS] %}
+			{% set attachments_name = row[enums.DataKeys.ATTACHMENTS_NAME] %}
+			{% set row_id = row[enums.DataKeys.ROW_ID] %}
+			{% set compare_id = row[enums.DataKeys.COMPARE_ID] %}
+			{% set row_number = row[enums.DataKeys.ROW_NUMBER] %}
+			{% set action = row[enums.DataKeys.ACTION] %}
+			<tr>
+				<td class="{{action}}">{{action}}</td>
+				<td class="">{{row_number}}</td>
+				<td class="">{{ attachments_name | join('<br>') | safe}}</td>
+				{% for element in group_config[enums.ConfigKeys.MAPPING_HEADERS] %}
+					{% set src_header, des_header = element %}
+					{% set value = utils.convert_data_type(row[des_header][enums.DataKeys.VALUE], group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.DATA_TYPE][des_header]) %}
+					<td class="">{{ value }}</td>
+				{% endfor %}
+			</tr>
+		{% endfor %}
 
   </tbody>
   
 </table>
-
+<br>
+<br>
 Best regards,<br>
 {{user_name}}

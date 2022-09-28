@@ -14,13 +14,25 @@ const COMMIT   = '/commit';
 const LOGIN   = '/login';
 const LOGOUT   = '/logout';
 const AUTH   = '/auth';
+const GET_CONSOLE = '/get-console';
+const GET_COMPARE_DETAIL_MODAL = '/get-compare-detail-modal';
 
 // METHOD KEYS
 const SHEETS          = 'sheets';
 const SHEET_ID        = 'sheet_id';
 const DES_ID          = 'des_id';
+const SRC_ID          = 'src_id';
+const SRC_NAME          = 'src_name';
+const DES_NAME          = 'des_name';
+const GROUP_INDEX       = 'group_index';
 const FROM_DATE       = 'from_date';
 const TO_DATE         = 'to_date';
 const IDS             = 'ids';
+const PATH             = 'path';
+const COMPARE_ID             = 'compare_id';
 
 
+const MODAL_DRAG = false;
+
+var INTERVAL  = null;
+var COMPLETE_PREVIOUS_PROCESS = true;

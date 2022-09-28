@@ -54,18 +54,23 @@
   /* end checkbox */
 
   /* modal */
+  --close-popup-bg: var(--custom-red);
+  --close-popup-text: var(--custom-white);
   /* end modal */
 
   /* END COMPONENT  */
   --custom-body-bg: var(--custom-white);
-  --table-th-bg: var(--custom-light);
+  --table-th-bg: var(--custom-gray-dark);
   --table-td-bg: var(--custom-white);
-  --table-th-text: var(--custom-gray-dark);
+  --table-th-text: var(--custom-white);
   --table-td-text: var(--custom-gray-dark);
-  --table-border: var(--custom-secondary);
+  --table-border: var(--custom-gray);
   --disable-bg: var(--custom-gray);
   --disable-text: var(--custom-white);
-  
+  --log-info-text: var(--custom-blue);
+  --log-error-text: var(--custom-red);
+  --log-warning-text: var(--custom-yellow);
+  --log-debug-text: var(--custom-dark);
 
 
 
@@ -78,6 +83,8 @@
   --status-deleted: var(--custom-red);
   --status-modified: var(--custom-blue);
   --status-unchanged: var(--custom-dark);
+  --hightlight-text: var(--custom-gray-dark);
+  --hightlight-bg: var(--custom-yellow);
   /* End Analyze page */
 
 }

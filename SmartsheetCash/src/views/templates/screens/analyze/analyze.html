@@ -6,47 +6,31 @@
 {% set unuse = ctrl_obj.get_setting() %}
 {% set all_settings = ctrl_obj.all_settings %}
 {% set analyze_info = ctrl_obj.get_analyze_result() %}
+{% set href_prefix = enums.Route.LOAD_FILE + '?' + enums.MethodKeys.PATH + '=' + ctrl_obj.working_path + '/' + enums.StructureKeys.PARSE_FOLDER + '/' %}
+{% set des_name = analyze_info['result']['data']['des_name'] %}
+
+{% set des_duplicate_count = analyze_info['result']['data']['des_duplicate_count'] %}
+{% set des_skip_count = analyze_info['result']['data']['des_skip_count'] %}
+{% set des_parse_count = analyze_info['result']['data']['des_parse_count'] %}
+{% set src_duplicate_count = analyze_info['result']['data']['src_duplicate_count'] %}
+{% set src_skip_count = analyze_info['result']['data']['src_skip_count'] %}
+{% set src_parse_count = analyze_info['result']['data']['src_parse_count'] %}
+
+
+{% set src_name = analyze_info['result']['data']['src_name'] %}
+{% set des_id = analyze_info['result']['data']['des_id'] %}
+{% set src_id = analyze_info['result']['data']['src_id'] %}
+{% set group_id = ctrl_obj.methods[enums.MethodKeys.GROUP_INDEX] %}
+{% set group_config = all_settings[enums.ConfigKeys.GROUPS][group_id | int] %}
 {% block option %}
- 	{% set href_prefix = enums.Route.LOAD_FILE + '?' + enums.MethodKeys.PATH + '=' + ctrl_obj.working_path + '/' + enums.StructureKeys.PARSE_FOLDER + '/' %}
-	{{button({
+ 	{{button({
 		'type': 'button',
-		'text': "Add To Smartsheet",
+		'text': 'Add To "' + des_name + '"',
 		'class': 'custom-button add-to-smartsheet d-inline-block',
 		'href': '#',
-		'attrs': [('data-sheet-id', analyze_info['result']['data']['src_id']), 
-				('data-des-id', analyze_info['result']['data']['des_id'])]
-		})
-	}}
-	{{button({
-		'type': 'link',
-		'text': "SRC Raw Data",
-		'class': 'custom-button  d-inline-block',
-		'href': href_prefix + analyze_info['result']['data']['src_id'] | string + '_parse_rows.html',
-		'attrs': [('target', '_blank')]
-		})
-	}}
-	{{button({
-		'type': 'link',
-		'text': "SRC Skip Row",
-		'class': 'custom-button  d-inline-block',
-		'href': href_prefix + analyze_info['result']['data']['src_id'] | string + '_skip_rows.html',
-		'attrs': [('target', '_blank')]
-		})
-	}}
-	{{button({
-		'type': 'link',
-		'text': "DES Raw Data",
-		'class': 'custom-button  d-inline-block',
-		'href': href_prefix + analyze_info['result']['data']['des_id'] | string + '_parse_rows.html',
-		'attrs': [('target', '_blank')]
-		})
-	}}
-	{{button({
-		'type': 'link',
-		'text': "DES Skip Row",
-		'class': 'custom-button  d-inline-block',
-		'href': href_prefix + analyze_info['result']['data']['des_id'] | string + '_skip_rows.html',
-		'attrs': [('target', '_blank')]
+		'attrs': [('data-src-id', src_id), 
+				('data-des-id', des_id),
+				('data-group-id', group_id)]
 		})
 	}}
 	
@@ -55,7 +39,7 @@
 {% block breadcrumb_block %}
 	{% set data = {
 		'items_data': [
-			(enums.Route.ANALYZE, analyze_info['result']['data']['src_name'] + ' vs ' + analyze_info['result']['data']['des_name'], True)
+			(enums.Route.ANALYZE, src_name + ' vs ' + des_name, True)
 		],
 		'home_link':  enums.Route.INDEX
 	}
@@ -89,60 +73,134 @@
 			}}
 			</th>
 				
-			{% for header in all_settings[enums.ConfigKeys.SRC_COMPARE_HEADERS] %}
+			{% for header in group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.COMPARE_HEADERS] %}
 				<th rowspan='2' class='center-text'>{{header}}</th>
 			{% endfor %}
 
-			<th colspan='{{ 1 + all_settings[enums.ConfigKeys.SRC_CHECK_MODIFIED_HEADERS] | length }}' class='center-text'>{{analyze_info['result']['data']['src_name']}}</th>
-			<th colspan='{{ 1 + all_settings[enums.ConfigKeys.DES_CHECK_MODIFIED_HEADERS] | length }}' class='center-text'>{{analyze_info['result']['data']['des_name']}}</th>	
-			<th rowspan='2' class='center-text'>Status</th>
+			<th colspan='{{ 1 + group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.MODIFIED_HEADERS] | length }}' class='center-text'>{{src_name}}
+				{% if src_parse_count %}
+					{{button({
+						'type': 'link',
+						'text': "parse(" + src_parse_count | string + ')',
+						'class': 'custom-link  d-inline-block text-success',
+						'href': href_prefix + src_id | string + '_parse_rows.html',
+						'attrs': [('target', '_blank')]
+						})
+					}}
+				{% endif %}
+				{% if src_skip_count %}
+					{{button({
+						'type': 'link',
+						'text': "skip(" + src_skip_count | string + ')',
+						'class': 'custom-link  d-inline-block text-blue',
+						'href': href_prefix + src_id | string + '_skip_rows.html',
+						'attrs': [('target', '_blank')]
+						})
+					}}
+				{% endif %}
+				{% if src_duplicate_count %}
+					{{button({
+						'type': 'link',
+						'text': "duplicate(" + src_duplicate_count | string + ')',
+						'class': 'custom-link  d-inline-block text-danger',
+						'href': href_prefix + src_id | string + '_duplicate_rows.html',
+						'attrs': [('target', '_blank')]
+						})
+					}}
+				{% endif %}
+			</th>
+			<th colspan='{{ 1 + group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.MODIFIED_HEADERS] | length }}' class='center-text'>{{des_name}}
+				{% if des_parse_count %}
+					{{button({
+						'type': 'link',
+						'text': "parse(" + des_parse_count | string + ')',
+						'class': 'custom-link  d-inline-block text-success',
+						'href': href_prefix + des_id | string + '_parse_rows.html',
+						'attrs': [('target', '_blank')]
+						})
+					}}
+				{% endif %}
+				{% if des_skip_count %}
+					{{button({
+						'type': 'link',
+						'text': "skip(" + des_skip_count | string + ')',
+						'class': 'custom-link  d-inline-block text-blue',
+						'href': href_prefix + des_id | string + '_skip_rows.html',
+						'attrs': [('target', '_blank')]
+						})
+					}}
+				{% endif %}
+				{% if des_duplicate_count %}
+					{{button({
+						'type': 'link',
+						'text': "duplicate(" + des_duplicate_count | string + ')',
+						'class': 'custom-link  d-inline-block text-danger',
+						'href': href_prefix + des_id | string + '_duplicate_rows.html',
+						'attrs': [('target', '_blank')]
+						})
+					}}
+				{% endif %}
+			</th>	
+			<th rowspan='2' class='center-text'>Status<i class="fa fa-info-circle text-danger" aria-hidden="true" data-placement="left"
+				data-toggle="tooltip" data-html="true" title="New: Only exist in {{src_name}}.<br>Misisng: Only exist in {{des_name}}.<br>Modified: Some columns are different between 2 sheet.<br>"
+				></i></th>
+			<th rowspan='2' class='center-text'>Detail</th>
 	    </tr>
 		<tr>
 			<th  class='center-text'>Attachments</th>
-			{% for header in all_settings[enums.ConfigKeys.SRC_CHECK_MODIFIED_HEADERS] %}
+			{% for header in group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.MODIFIED_HEADERS] %}
 				<th  class='center-text'>{{header}}</th>
 			{% endfor %}
 			<th  class='center-text'>Attachments</th>
-			{% for header in all_settings[enums.ConfigKeys.DES_CHECK_MODIFIED_HEADERS] %}
+			{% for header in group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.MODIFIED_HEADERS] %}
 				<th  class='center-text'>{{header}}</th>
 			{% endfor %}
 			
 	    </tr>
 	  </thead>
 	  <tbody>
-		  {% for status in analyze_info['result']['data'] %}
-		  	{% if status in [enums.DataKeys.NEW, enums.DataKeys.MISSING, enums.DataKeys.MODIFIED, enums.DataKeys.UNCHANGED] %}
+			{% for status in [enums.DataKeys.NEW, enums.DataKeys.MODIFIED, enums.DataKeys.MISSING] %}
+		  		{% if status in analyze_info['result']['data'] %}
+		  	
 				{% for index_compare in analyze_info['result']['data'][status] %}
 					{% set row = analyze_info['result']['data'][status][index_compare] %}
 					{% set compare_key = row[0] %}
 					{% set src_data = row[1] %}
 					{% set des_data = row[2] %}
 					{% set data = src_data %}
-					{% set headers = all_settings[enums.ConfigKeys.SRC_COMPARE_HEADERS] %}
+					{% set headers = group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.COMPARE_HEADERS] %}
+					{% set data_type_cfg = group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.DATA_TYPE] %}
 					{% if status == enums.DataKeys.MISSING %}
 						{% set data = des_data %}
-						{% set headers = all_settings[enums.ConfigKeys.DES_COMPARE_HEADERS] %}
+						{% set headers = group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.COMPARE_HEADERS] %}
+						{% set data_type_cfg = group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.DATA_TYPE] %}
 					{% endif %}
 					<tr>
-						<td class="center-text">
-							{{checkbox({
-								'value': index_compare,
-								'class': 'custom-checkbox',
-								'text': '',
-								'attrs': [('data-status', status), ('data-index', index_compare)]
-								})
-							}}
-						</td>
+						{% if status == enums.DataKeys.MISSING %}
+							<td></td>
+						{% else %}
+							<td class="center-text">
+								{{checkbox({
+									'value': index_compare,
+									'class': 'custom-checkbox',
+									'text': '',
+									'attrs': [('data-status', status), ('data-index', index_compare)]
+									})
+								}}
+							</td>
+						{% endif %}
 						{% for header in headers %}
 							{% set header = utils.convert_text(header) %}
-							<td>{{data[header]['value']}}</td>
+							{% set value = utils.convert_data_type(data[header]['value'], data_type_cfg[header] )%}
+							<td>{{value}}</td>
 						{% endfor %}
 						<!-- src -->
 						<td><span class=''>{{src_data['attachments_name'] | join('<br>')  | safe }}</span></td>
-						{% for header in all_settings[enums.ConfigKeys.SRC_CHECK_MODIFIED_HEADERS] %}
+						{% for header in group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.MODIFIED_HEADERS] %}
 							{% set header = utils.convert_text(header) %}
 							{% if src_data %}
-								<td  class=''>{{src_data[header]['value']}}</td>
+								{% set value = utils.convert_data_type(src_data[header]['value'], group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.DATA_TYPE][header] )%}
+								<td  class=''>{{value}}</td>
 							{% else %}
 								<td  class=''></td>
 							{% endif %}
@@ -150,16 +208,30 @@
 
 						<!-- des -->
 						<td><span class=''>{{des_data['attachments_name'] | join('<br>') | safe }}</span></td>
-						{% for header in all_settings[enums.ConfigKeys.DES_CHECK_MODIFIED_HEADERS] %}
+						{% for header in group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.MODIFIED_HEADERS] %}
 							{% set header = utils.convert_text(header) %}
 							{% if des_data %}
-								<td  class=''>{{des_data[header]['value']}}</td>
+								{% set value = utils.convert_data_type(des_data[header]['value'], group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.DATA_TYPE][header] )%}
+								<td  class=''>{{value}}</td>
 							{% else %}
 								<td  class=''></td>
 							{% endif %}
 						{% endfor %}
 
 						<td><span class='{{status}}'>{{status}}</span></td>
+						<td class='center-text'>
+							{{button({
+								'type': 'link',
+								'text': '<i class="fa fa-info-circle" aria-hidden="true"></i>',
+								'class': 'custom-link  d-inline-block text-blue view-detail ',
+								'href': '#',
+								'attrs': [('data-src-id', src_id),
+								('data-des-id', des_id),
+								('data-group-id', group_id),
+								('data-compare-id', index_compare)]
+								})
+							}}
+							
 					</tr>
 				{% endfor %}
 			{% endif %}
