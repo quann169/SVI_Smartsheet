@@ -1,0 +1,28 @@
+.custom-button {
+    
+    text-decoration: none;
+    border: 1px solid var(--default-button-border);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--default-button-bg);
+    color: var(--default-button-text);
+    height: calc(2em + 2px);
+    vertical-align: middle;
+    text-align: center;
+}
+.custom-link {
+    color: var(--default-link-text);
+}
+.custom-link-button {
+    display: inline-block;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid var(--default-button-border);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--default-button-bg);
+    color: var(--default-button-text);
+    height: calc(2em + 2px);
+    vertical-align: middle;
+    text-align: center;
+}

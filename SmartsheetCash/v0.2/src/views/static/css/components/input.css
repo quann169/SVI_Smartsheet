@@ -1,0 +1,12 @@
+.custom-textarea {
+    
+}
+.custom-input {
+    height: calc(2em + 2px);
+    vertical-align: middle;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid var(--default-input-border);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+}

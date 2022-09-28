@@ -1,0 +1,17 @@
+.add {
+    font-weight: bold;
+    text-transform: capitalize;
+    color: var(--status-added) !important;
+}
+
+.delete, .review {
+    font-weight: bold;
+    text-transform: capitalize;
+    color: var(--status-deleted)  !important;
+}
+
+.modified {
+    font-weight: bold;
+    text-transform: capitalize;
+    color: var(--status-modified)  !important;
+}

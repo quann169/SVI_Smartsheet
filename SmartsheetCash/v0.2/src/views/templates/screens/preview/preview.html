@@ -1,0 +1,110 @@
+{% extends enums.Template.LAYOUT %}
+{% block title %}
+	Commit
+{% endblock title %}
+
+{% set unuse = ctrl_obj.get_setting() %}
+{% set all_settings = ctrl_obj.all_settings %}
+{% set group_id = ctrl_obj.methods[enums.MethodKeys.GROUP_INDEX] %}
+{% set src_id = ctrl_obj.methods[enums.MethodKeys.SRC_ID] %}
+{% set des_id = ctrl_obj.methods[enums.MethodKeys.DES_ID] %}
+{% set group_config = all_settings[enums.ConfigKeys.GROUPS][group_id | int] %}
+{% set dummy_data = ctrl_obj.create_dummy_data_to_commit() %}
+
+{% block breadcrumb_block %}
+	{% set data = {
+		'items_data': [
+			(enums.Route.ANALYZE + '?' + enums.MethodKeys.SRC_ID + '=' + src_id | string 
+			+ '&' + enums.MethodKeys.DES_ID + '=' + des_id | string 
+			+ '&' + enums.MethodKeys.GROUP_INDEX + '=' + group_id | string , 'Analyze', False),
+            (enums.Route.PREVIEW, 'Commit To "' + group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.SHEET_NAME] +  '"' , True)
+		],
+		'home_link':  enums.Route.INDEX
+	}
+	%}
+	{{ breadcrumb(data) }}
+{% endblock breadcrumb_block %}
+
+{% block scripts %}
+	{{super()}}
+	<script src="{{url_for('static', filename='js/screens/preview.js')}}"></script>
+{% endblock scripts %}
+
+{% block styles %}
+	{{super()}}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/screens/preview.css') }}" />
+{% endblock styles %}
+
+
+{% block option %}
+	{{button({
+		'type': 'button',
+		'text': "Commit",
+		'class': 'custom-button commit',
+		'attrs': [('data-src-id', src_id),
+			('data-des-id', des_id),
+			('data-group-id', group_id),
+			('data-path', ctrl_obj.working_path + '/' + enums.StructureKeys.CONSOLE_FOLDER + '/' + 'commit.log')]
+		})
+	}}
+	
+{% endblock option %}
+
+{% block content %}
+	<table class="table table-striped table-bordered position-relative" cellspacing="0" width='100%'>
+	  <thead class="custom-position-sticky">
+        <tr>
+			<th class="custom-w-3 center-text" rowspan='2'>{{checkbox({
+				'value': "",
+				'class': 'custom-checkbox all-checkbox',
+				'attrs': [('data-target', 'tbody')],
+				'text': '',
+				'id': '',
+				})
+			}}
+			</th>
+			<th class="custom-w-5">Action</th>
+			<th class="custom-w-3">Row</th>
+			<th class="">Attachments</th>
+            {% for element in group_config[enums.ConfigKeys.MAPPING_HEADERS] %}
+				{% set src_header, des_header = element %}
+                <th class="">{{des_header}}</th>
+            {% endfor %}
+        </tr>
+	  </thead>
+	  <tbody>
+		{% for row in dummy_data %}
+			{% set attachments = row[enums.DataKeys.ATTACHMENTS] %}
+			{% set attachments_name = row[enums.DataKeys.ATTACHMENTS_NAME] %}
+			{% set row_id = row[enums.DataKeys.ROW_ID] %}
+			{% set compare_id = row[enums.DataKeys.COMPARE_ID] %}
+			{% set row_number = row[enums.DataKeys.ROW_NUMBER] %}
+			{% set action = row[enums.DataKeys.ACTION] %}
+			<tr>
+				{% if action == enums.DataKeys.DELETE %}
+					<td></td>
+				{% else %}
+					<td class="center-text">
+						{{checkbox({
+							'value': compare_id,
+							'class': 'custom-checkbox',
+							'text': '',
+							})
+						}}
+					</td>
+				{% endif %}
+				<td class="{{action}}">{{action}}</td>
+				<td class="integer">{{row_number}}</td>
+				<td class="">{{ attachments_name | join('<br>') | safe}}</td>
+				{% for element in group_config[enums.ConfigKeys.MAPPING_HEADERS] %}
+					{% set src_header, des_header = element %}
+					{% set value = utils.convert_data_type(row[des_header][enums.DataKeys.VALUE], group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.DATA_TYPE][des_header]) %}
+					<td class="{{group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.DATA_TYPE][des_header]}}">{{ value }}</td>
+				{% endfor %}
+			</tr>
+		{% endfor %}
+
+	  </tbody>
+	  
+	</table>
+{% endblock content%}

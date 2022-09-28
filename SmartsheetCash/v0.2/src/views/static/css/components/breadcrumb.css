@@ -1,0 +1,22 @@
+.custom-breadcrumb {
+	display: flex;
+    flex-wrap: wrap;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    list-style: none;
+    border-radius: 0.25rem;
+	background-color: var(--breadcrumb-bg);
+}
+.custom-breadcrumb .custom-breadcrumb-item.active {
+    color: var(--breadcrumb-item-active);
+}
+.custom-breadcrumb .custom-breadcrumb-item {
+    padding-right: 0.5rem;
+}
+.custom-breadcrumb-item+.custom-breadcrumb-item::before {
+    display: inline-block;
+    padding-right: 0.5rem;
+    content: "/";
+}
+
+

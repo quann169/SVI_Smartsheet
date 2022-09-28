@@ -1,0 +1,36 @@
+{% macro select(data) %}
+    {% set options = data.options %}
+    {% set is_disable = data.is_disable %}
+    {% set class = data.class %}
+    {% set attrs = data.attrs %}
+    {% set id = data.id %}
+    {#
+    <!-- 
+    data = {
+        'options': [
+        (option_text, option_value, is_checked), (option_text, option_value, is_checked),
+        ],
+        'is_disable': True,
+        'class': '',
+        'id': '',
+        'attrs': [(name1, value1), (name1, value2), ]
+
+    }
+    -->
+    #}
+    
+    <select class='{% if class %}{{class}}{% else %}custom-select{% endif %}' {% if id %}id="{{id}}"{% endif %}
+        {% if is_disable %}disabled{% endif %}
+        {% if attrs %}
+            {% for attr in attrs %}
+                {% set attr_name, attr_value = attr %}
+                {{attr_name}} = '{{attr_value}}'
+            {% endfor %}
+        {% endif %}
+    >
+    {% for option in options %}
+        {% set option_text, option_value, is_checked = option %}
+        <option value="{{option_value}}" {% if is_checked %}selected{% endif %}>{{option_text}}</option>
+    {% endfor %}
+    </select>
+{% endmacro %}
