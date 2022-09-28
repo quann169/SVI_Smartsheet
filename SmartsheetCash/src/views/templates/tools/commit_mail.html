@@ -40,14 +40,25 @@
 		text-transform: capitalize;
 		color: #007bff;
 	}
+	.text-red {
+		color: #dc3545 !important;
+		font-weight: bold;
+	}
+	.text-blue {
+		color:  #007BA9 !important;
+		font-weight: bold;
+	}
+	td.currency, td.integer, td.float {
+		text-align: right;
+	}
 </style>
 {% set group_config = all_settings[enums.ConfigKeys.GROUPS][group_id] %}
 Hi all,<br>
 <br>
-This committed cash has been added by {{user_name}}.<br>
+This committed cash has been added by <span class="text-blue">{{user_name}} </span>.<br>
 Below is the summary information:<br>
-Date: {{date}}<br>
-Sheet: {{group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.SHEET_NAME]}}  -> {{group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.SHEET_NAME]}}<br>
+Date: <span class="text-red">{{date}}</span><br>
+Sheet: <span class="text-blue">{{group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.SHEET_NAME]}}</span> -> <span class="text-blue">{{group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.SHEET_NAME]}}</span><br>
 <br>
 
 <table class="">
@@ -73,12 +84,12 @@ Sheet: {{group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.SHEET_NAME]}}  -
 			{% set action = row[enums.DataKeys.ACTION] %}
 			<tr>
 				<td class="{{action}}">{{action}}</td>
-				<td class="">{{row_number}}</td>
+				<td class="integer">{{row_number}}</td>
 				<td class="">{{ attachments_name | join('<br>') | safe}}</td>
 				{% for element in group_config[enums.ConfigKeys.MAPPING_HEADERS] %}
 					{% set src_header, des_header = element %}
 					{% set value = utils.convert_data_type(row[des_header][enums.DataKeys.VALUE], group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.DATA_TYPE][des_header]) %}
-					<td class="">{{ value }}</td>
+					<td class="{{group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.DATA_TYPE][des_header]}}">{{ value }}</td>
 				{% endfor %}
 			</tr>
 		{% endfor %}

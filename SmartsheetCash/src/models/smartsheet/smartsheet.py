@@ -3,9 +3,10 @@ Created on Feb 5, 2021
 
 @author: toannguyen
 '''
-from src.commons import enums, message, utils
+from src.commons import enums, utils
 import sys, re, os
 from pprint import pprint, pformat
+from flask import g, session
 import urllib
 from smartsheet import smartsheet, sheets, models
 import datetime
@@ -14,7 +15,7 @@ import master_config
 import copy
 
 class SmartSheets:
-    def __init__(self, all_settings={}, input_type=enums.ConfigKeys.SOURCE, from_date = '', to_date = '', is_compare = False, group_index=None):
+    def __init__(self, all_settings={}, input_type=enums.ConfigKeys.SOURCE, from_date = '', to_date = '', is_compare = False, group_index=None, parsed_date=None):
         self.from_date = from_date
         self.to_date = to_date
         self.sheets = ''
@@ -27,15 +28,14 @@ class SmartSheets:
         self.group_index = group_index
         self.type_cfg = {}
         self.update_attr_by_input_type()
-        self.parsed_date = utils.date_to_str()
+        if not parsed_date:
+            self.parsed_date = utils.date_to_str()
+        else:
+            self.parsed_date = parsed_date
         self.is_compare = is_compare
         self.des_data = {}
         self.compare_data = {}
-        self.html_split_key = '##'
         self.exist_rows = {}
-        
-                    
-            
         
     def set_attr(self, **kwargs):
         for key, value in kwargs.items():                  
@@ -93,7 +93,7 @@ class SmartSheets:
                 sheet_name = sheet.name
                 sheet_id = sheet.id
                 if self.available_name.get(sheet_name):
-                    utils.println('Sheet name %s exists.'%sheet_name, enums.LoggingKeys.LOGGING_WARNING)
+                    utils.println('The sheet "%s" has a duplicate name.'%sheet_name, enums.LoggingKeys.LOGGING_WARNING)
                 else:
                     self.available_name[sheet_name] = sheet_id
         #pprint (self.available_name)
@@ -154,14 +154,14 @@ class SmartSheets:
             #require empty cell
             for header in self.empty_headers:
                 header = utils.convert_text(header)
-                if tmp_row_data.get(header) and tmp_row_data[header].get('value'):
+                if tmp_row_data.get(header) and (tmp_row_data[header].get('value') not in [None, ''] and tmp_row_data[header].get('display_value') not in [None, '']):
                     is_data_row = False
                     skip_reason = 'Column %s is not empty.'%(header)
             
             #require none empty cell
             for header in self.none_empty_headers:
                 header = utils.convert_text(header)
-                if not tmp_row_data.get(header) and (not tmp_row_data[header].get('value')):
+                if tmp_row_data.get(header) and ( tmp_row_data[header].get('value') in [None, ''] and tmp_row_data[header].get('display_value') in [None, '']):
                     is_data_row = False
                     skip_reason = 'Column %s is empty.'%(header)
                     
@@ -369,11 +369,11 @@ class SmartSheets:
             for row_number_2 in src_compare_data['rows']:
                 src_key = src_compare_data['rows'].get(row_number_2)
                 if src_key == des_key:
-                    mapping_sheet_name = des_data['rows'][row_number_1]['mapping_sheet_name']
-                    if mapping_sheet_name == src_sheet:
-                        is_exist = True
-                        src_row_info = src_data['rows'][row_number_2]
-                        break
+                    #mapping_sheet_name = des_data['rows'][row_number_1]['mapping_sheet_name']
+                    #if mapping_sheet_name == src_sheet:
+                    is_exist = True
+                    src_row_info = src_data['rows'][row_number_2]
+                    break
             if is_exist:
                 pass
             else:
@@ -400,8 +400,9 @@ class SmartSheets:
         sheet_name = self.sheets
         if sheet_name:
             utils.println('Sheet name "%s"'%sheet_name)
+            #print(self.available_name)
             if not self.available_name.get(sheet_name):
-                text = utils.message_generate(message.MsgError.E006, sheet_name)
+                text = "Sheet name '%s' not exist"%sheet_name
                 raise Exception(text)
             sheet_id = self.available_name[sheet_name]
             #sheet_obj = self.master_sheet_obj.get_sheet_by_name(name = sheet_name, include='all')
@@ -432,9 +433,9 @@ class SmartSheets:
                         self.get_column_index(column, sheet_name)
                         break
                 if not is_exist:
-                    text = utils.message_generate(message.MsgError.E007, header)
-                    utils.println(text, enums.LoggingKeys.LOGGING_ERROR)
-                    break
+                    text = "Column name '%s' not exist"%header
+                    #utils.println(text, enums.LoggingKeys.LOGGING_ERROR)
+                    raise Exception(text)
             utils.add_keys_to_dict(self.data, sheet_id, {'rows': {}, 'sheet_id': sheet_id, 
                                                          'sheet_name': sheet_name, 
                                                          'parse_at': self.parsed_date,
@@ -462,81 +463,58 @@ class SmartSheets:
                 
             parse_folder = os.path.join(master_config.WORKING_PATH, enums.StructureKeys.PARSE_FOLDER)
             utils.make_folder(parse_folder)
-            try:
-                style_text = '''<style>
-                table tr {
-  border: 1px solid #aaa ;
-}
+            # try:
+            #
 
-table th {
-  padding: 0.5rem !important;
-  font-weight: bold;
-  border: 1px solid #aaa !important;
-}
-
-table td {
-  padding: 0.5rem  !important;
-  border: 1px solid #aaa !important;
-}</style>'''
-                #Parse rows
-                result_file = os.path.join(parse_folder, '%s_parse_rows.html'%sheet_id)
-                content = '%s<table><thead><tr>'%style_text
-                content += '<th>Row</th>'
-                for header in self.column_index[sheet_name]:
-                    content += '<th>%s</th>'%(header)
-                content += '</tr></thead><tbody>'
-                for row_data in parse_rows:
-                    content += '<tr>'
-                    content += '<td>%s</td>'%(row_data['row_number'])
-                    for header in self.column_index[sheet_name]:
-                        header = utils.convert_text(header)
-                        content += '<td>%s</td>'%(row_data[header]['value'])
-                    content += '</tr>'
-                content += '</tbody></table>'
-                content = utils.revert_text(content)
-                utils.make_file(result_file, content)
+            template_path = g.template_path
+            tool_path    = g.tool_path
+            template_path = os.path.join(os.path.join(tool_path, template_path), 'tools')
+            
+            #Parse rows 
+            vars = {}
+            vars['all_settings'] = self.all_settings        
+            vars['enums'] = enums
+            vars['utils'] = utils
+            vars['parse_rows'] = parse_rows
+            vars['sheet_name'] = sheet_name
+            vars['column_index'] = self.column_index
+            content = utils.render_jinja2_template(template_path, 'parse_rows.html', vars)
+            content = utils.revert_text(content)
+            result_file = os.path.join(parse_folder, '%s_parse_rows.html'%sheet_id)
+            utils.make_file(result_file, content)
+            
+            
+            #Skip rows
+            vars = {}
+            vars['all_settings'] = self.all_settings        
+            vars['enums'] = enums
+            vars['utils'] = utils
+            vars['skip_rows'] = skip_rows
+            vars['sheet_name'] = sheet_name
+            vars['column_index'] = self.column_index
+            content = utils.render_jinja2_template(template_path, 'skip_rows.html', vars)
+            content = utils.revert_text(content)
+            result_file = os.path.join(parse_folder, '%s_skip_rows.html'%sheet_id)
+            content = utils.revert_text(content)
+            utils.make_file(result_file, content)
+            
+            #Duplicate rows                
+            vars = {}
+            vars['all_settings'] = self.all_settings        
+            vars['enums'] = enums
+            vars['utils'] = utils
+            vars['duplicate_rows'] = duplicate_rows
+            vars['sheet_name'] = sheet_name
+            vars['column_index'] = self.column_index
+            content = utils.render_jinja2_template(template_path, 'duplicate_rows.html', vars)
+            content = utils.revert_text(content)
+            result_file = os.path.join(parse_folder, '%s_duplicate_rows.html'%sheet_id)
+            
+            content = utils.revert_text(content)
+            utils.make_file(result_file, content)
                 
-                #Skip rows
-                result_file = os.path.join(parse_folder, '%s_skip_rows.html'%sheet_id)
-                content = '%s<table><thead><tr>'%style_text
-                content += '<th>Row</th>'
-                for header in self.column_index[sheet_name]:
-                    content += '<th>%s</th>'%(header)
-                content += '<th>Reason</th>'
-                content += '</tr></thead><tbody>'
-                for element in skip_rows:
-                    reason, row_data = element
-                    content += '<tr>'
-                    content += '<td>%s</td>'%(row_data['row_number'])
-                    for header in self.column_index[sheet_name]:
-                        header = utils.convert_text(header)
-                        content += '<td>%s</td>'%(row_data[header]['value'])
-                    content += '<td>%s</td>'%reason
-                    content += '</tr>'
-                content += '</tbody></table>'
-                content = utils.revert_text(content)
-                utils.make_file(result_file, content)
-                
-                #Duplicate rows
-                result_file = os.path.join(parse_folder, '%s_duplicate_rows.html'%sheet_id)
-                content = '%s<table><thead><tr>'%style_text
-                content += '<th>Row</th>'
-                for header in self.column_index[sheet_name]:
-                    content += '<th>%s</th>'%(header)
-                content += '</tr></thead><tbody>'
-                for row_data in duplicate_rows:
-                    content += '<tr>'
-                    content += '<td>%s</td>'%(row_data['row_number'])
-                    for header in self.column_index[sheet_name]:
-                        header = utils.convert_text(header)
-                        content += '<td>%s</td>'%(row_data[header]['value'])
-                    content += '</tr>'
-                content += '</tbody></table>'
-                content = utils.revert_text(content)
-                utils.make_file(result_file, content)
-                
-            except:
-                pass
+            # except:
+            #     pass
             utils.println('Total rows have data %s'%(len(self.data[sheet_id]['rows'])))
             self.record_sheet_data(sheet_id)
             sheet_data = self.data[sheet_id]

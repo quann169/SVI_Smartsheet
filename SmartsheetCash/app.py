@@ -1,7 +1,7 @@
 import os, sys
 sys.path.insert(0, './')
 sys.path.insert(0, './3rd-src')
-from src.commons import utils, message, enums
+from src.commons import utils, enums
 import requests, time
 import master_config
 from flask import Flask, g, session

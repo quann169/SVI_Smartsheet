@@ -192,7 +192,7 @@
 						{% for header in headers %}
 							{% set header = utils.convert_text(header) %}
 							{% set value = utils.convert_data_type(data[header]['value'], data_type_cfg[header] )%}
-							<td>{{value}}</td>
+							<td class='{{data_type_cfg[header]}}'>{{value}}</td>
 						{% endfor %}
 						<!-- src -->
 						<td><span class=''>{{src_data['attachments_name'] | join('<br>')  | safe }}</span></td>
@@ -200,7 +200,7 @@
 							{% set header = utils.convert_text(header) %}
 							{% if src_data %}
 								{% set value = utils.convert_data_type(src_data[header]['value'], group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.DATA_TYPE][header] )%}
-								<td  class=''>{{value}}</td>
+								<td  class='{{group_config[enums.ConfigKeys.SOURCE][enums.ConfigKeys.DATA_TYPE][header]}}'>{{value}}</td>
 							{% else %}
 								<td  class=''></td>
 							{% endif %}
@@ -212,7 +212,7 @@
 							{% set header = utils.convert_text(header) %}
 							{% if des_data %}
 								{% set value = utils.convert_data_type(des_data[header]['value'], group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.DATA_TYPE][header] )%}
-								<td  class=''>{{value}}</td>
+								<td  class='{{group_config[enums.ConfigKeys.DESTINATION][enums.ConfigKeys.DATA_TYPE][header]}}'>{{value}}</td>
 							{% else %}
 								<td  class=''></td>
 							{% endif %}

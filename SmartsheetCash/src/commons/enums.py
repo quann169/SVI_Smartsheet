@@ -46,6 +46,8 @@ class ConfigKeys:
     BCC_MAIL = 'bcc_mail'
     DEFAULT_VALUE = 'default_value'
     
+    CURRENCY_FORMAT = 'currency_format'
+    
 class DataKeys:
     
     NEW = 'new'

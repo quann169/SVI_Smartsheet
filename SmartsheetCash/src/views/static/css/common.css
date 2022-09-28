@@ -25,6 +25,10 @@ table td {
   border: 1px solid var(--table-border) !important;
 }
 
+td.currency, td.integer, td.float {
+  text-align: right;
+}
+
 button[disabled=''], button[disabled='disabled'], input[disabled=''], input[disabled='disabled'], a[disabled=''], a[disabled='disabled']{
 	color: var(--disable-text) !important;
 	background-color: var(--disable-bg) !important;

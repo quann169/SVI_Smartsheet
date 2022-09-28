@@ -6,7 +6,7 @@ Created on Feb 5, 2021
 import os, sys, re, copy
 import datetime, calendar, time
 import ast, getpass
-from src.commons import message, enums
+from src.commons import enums
 import logging, base64
 import master_config
 from flask import request, session
@@ -37,18 +37,39 @@ def unhash(text):
     return result
 
 def convert_number_to_currency(input_number):
+    currency_format = "{:,.0f} VND"
     if isinstance(input_number, float) or isinstance(input_number, int):
-        result = "${:,.0f}".format(input_number)# ${:,.0f}
+        result = currency_format.format(input_number)# ${:,.0f}
     else:
         if not input_number:
             result = ''
         else:
             try:
-                result = result = "${:,.0f}".format(float(input_number))
+                result = result = currency_format.format(float(input_number))
             except:
                 result = ''
     return result
 
+def convert_to_int(text):
+    try:
+        result = int(text)
+    except:
+        result = text
+    return result
+
+def convert_to_float(text):
+    try:
+        result = float(text)
+    except:
+        result = text
+    return result
+
+def convert_to_string(text):
+    try:
+        result = str(text)
+    except:
+        result = text
+    return result
 
 
 def convert_data_type(value, data_type):
@@ -56,7 +77,12 @@ def convert_data_type(value, data_type):
     #data type is currency
     if data_type == 'currency':
         result = convert_number_to_currency(value)
-     
+    elif data_type == 'integer':
+        result = convert_to_int(value)
+    elif data_type == 'float':
+        result = convert_to_float(value)
+    elif data_type == 'string':
+        result = convert_to_string(value) 
     return result
     
 
@@ -232,19 +258,19 @@ def println(message, logging_level=enums.LoggingKeys.LOGGING_INFO, is_print=True
     if logging_level == enums.LoggingKeys.LOGGING_CRITICAL:
         # logging.critical(message)
         if is_print:
-            print ('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message)
+            print (('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message).encode("utf-8"))
             sys.stdout.flush()
     elif logging_level == enums.LoggingKeys.LOGGING_EXCEPTION:
         # logging.exception(message)
-        traceback.print_exc('')
+        # traceback.print_exc('')
         if is_print:
-            print ('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message)
+            print (('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message).encode("utf-8"))
             sys.stdout.flush()
     elif logging_level == enums.LoggingKeys.LOGGING_ERROR:
         # logging.error(message)
-        traceback.print_exc()
+        # traceback.print_exc()
         if is_print:
-            print ('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message)
+            print (('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message).encode("utf-8"))
             sys.stdout.flush()
     elif logging_level == enums.LoggingKeys.LOGGING_WARNING:
         # logging.warn(message)
@@ -648,9 +674,9 @@ def check_domain_password(username, password, domain_name='SVI'):
         if result:
             return True, ''
         else:
-            return False, message.MsgError.E004
+            return False, 'Incorrect username or password'
     except Exception as e:
-        return False, message.MsgError.E004
+        return False, 'Incorrect username or password'
     
 def render_jinja2_template(template_path, file_name,  dict_variable):
     systemFile1 = FileSystemLoader(template_path)
@@ -666,6 +692,11 @@ def send_mail(user_name, password, recipient, cc_recipient, subject, message, bc
         sender = "%s@savarti.com"%user_name
         if not master_config.IS_PRODUCT:
             bcc_recipient = []
+        
+        println('Subject: ' + str(subject))
+        println('Recipient: ' + str(recipient))
+        println('CC: ' + str(cc_recipient))
+        
         # Create message container - the correct MIME type is multipart/alternative.
         msg = MIMEMultipart('alternative')
         msg['From'] = sender

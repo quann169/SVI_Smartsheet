@@ -4,7 +4,7 @@ Created on Feb 22, 2021
 @author: toannguyen
 '''
 from src.models.smartsheet.smartsheet import SmartSheets
-from src.commons import enums, message, utils
+from src.commons import enums, utils
 from flask import g, session
 from pprint import pprint, pformat
 import pandas as pd
@@ -136,6 +136,7 @@ class Controllers:
             sheets = self.methods[enums.MethodKeys.SHEETS]
             from_date = self.methods[enums.MethodKeys.FROM_DATE]
             to_date = self.methods[enums.MethodKeys.TO_DATE]
+            parsed_date = utils.date_to_str()
             for element in sheets:
                 group_index, src_name, des_name = element
                 group_index = int(group_index)
@@ -144,7 +145,8 @@ class Controllers:
                                              from_date = from_date, 
                                              to_date = to_date,
                                              is_compare=False,
-                                             group_index = group_index)
+                                             group_index = group_index,
+                                             parsed_date = parsed_date)
                 utils.println('Start parse destination sheet')
                 smartsheet_obj.parse_smartsheet()
                 utils.println('Parse destination sheet - Done')
@@ -337,17 +339,15 @@ class Controllers:
                 des_header = utils.convert_text(des_header)
                 des_headers.append(des_header)
                 
-            # for mapping_header in group_config[][enums.ConfigKeys.DES_MAPPING_SRC_SHEET]:
-            #     mapping_header = utils.convert_text(mapping_header)
-            #     des_headers.append(mapping_header)
-                
+            attachments_folder = os.path.join(master_config.WORKING_PATH, enums.StructureKeys.ATTACHMENTS_FOLDER)
+            utils.remove_path(attachments_folder)
             len_row = len(data)
             count = 0
             utils.println('Start commit..')
             mail_data_ids = []
             for row in data:
                 count += 1
-                if (count % 5 == 0) or (count == len_row):
+                if (count % 2 == 0) or (count == len_row):
                     utils.println('Processing [%s/%s]'%(count, len_row))
                 action = row[enums.DataKeys.ACTION]
                 update_file = False

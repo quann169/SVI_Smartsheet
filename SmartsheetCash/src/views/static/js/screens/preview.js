@@ -44,8 +44,7 @@ $(document).on('click', '.commit', function(){
                     $('.close-overlay-clean').prop('disabled', false)
                     if (status) {
                         customAlert({message: message})
-                        reloadElement('.main-content', '.option-block');
-                        reloadElement('.main-content', '.content');
+                        reloadElement('.content', 'table');
                         // reloadPage();
                     } else {
                         customAlert({message: message})

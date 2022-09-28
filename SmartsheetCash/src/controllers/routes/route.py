@@ -11,7 +11,7 @@ from pprint import pprint
 import logging
 from src.controllers.controllers import Controllers as ctrl
 import master_config
-from src.commons import message, enums, utils
+from src.commons import enums, utils
 from functools import wraps
 
 
@@ -27,8 +27,17 @@ def error_handle(e):
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if session.get(enums.SessionKeys.IS_LOGIN):
-            return f(*args, **kwargs)
+        ctrl_obj   = ctrl()
+        password = utils.get_saved_password()
+        username = ctrl_obj.user_name
+        if password == None:
+            return (redirect(url_for("smartsheet_bp.login")))
+        else:
+            check_password = ctrl_obj.authenticate_account(username, password)
+            if check_password[0]:
+                return f(*args, **kwargs)
+            else:
+                return (redirect(url_for("smartsheet_bp.login")))
         return (redirect(url_for("smartsheet_bp.login")))
     return wrap
 
@@ -174,6 +183,7 @@ def preview():
 
 
 @smartsheet_bp.route(enums.Route.COMMIT, methods=[enums.MethodKeys.METHOD_GET])
+@login_required
 def commit():
     """ commit
     :param : 
