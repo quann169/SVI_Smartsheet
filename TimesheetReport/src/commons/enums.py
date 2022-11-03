@@ -16,7 +16,12 @@ class SmartsheetCfgKeys:
     PREDECESSOR = 'Predecessors'
     COMMENT     = 'Comments'
     ACTUAL_END_DATE = 'Actual End Date'
+    ACTUAL_START_DATE = 'Actual Start Date'
     STATUS      = 'Status'
+    ACTUAL_DURATION = 'Actual Duration'
+    ORIGINAL_DURATION = 'Original Duration'
+    PREFIX_NAME = 'Prefix'
+    
     
     LIST_HEADER = [
                     TASK_NAME,
@@ -30,6 +35,15 @@ class SmartsheetCfgKeys:
 #                     COMMENT,
 #                     ACTUAL_END_DATE,
 #                     STATUS
+        ]
+    LIST_HEADER_EFFECTIVE = [
+                    TASK_NAME,
+                    START_DATE,
+                    END_DATE,
+                    ACTUAL_END_DATE,
+                    ASSIGN_TO,
+                    ACTUAL_DURATION,
+                    DURATION
         ]
 
 class Connect:
@@ -67,6 +81,7 @@ class DbTable:
     ACTION                  = 'action'
     PRODUCTIVITY_CONFIG     = 'productivity_config'
     GRANTED_CONFIG          = 'granted_config'
+    EFFECTIVE_RATE          = 'effective_rate'
     
 class AnalyzeCFGKeys:
     TOKEN   = 'Token'
@@ -236,6 +251,7 @@ class DbHeader:
     PREDECESSORS            = 'predecessors'
     COMMENT                 = 'comment'
     ACTUAL_END_DATE         = 'actual_end_date'
+    ACTUAL_START_DATE       = 'actual_start_date'
     STATUS                  = 'status'
     IS_CHILDREN             = 'is_children'
     FINAL_DATE_ID           = 'final_date_id'
@@ -276,6 +292,9 @@ class DbHeader:
     GRANTED_NUMBER          = 'granted_number'
     GRANTED_NAME            = 'granted_name'
     GRANTED_CONFIG_ID       = 'granted_config_id'
+    ACTUAL_DURATION         = 'actual_duration'
+    PREFIX_NAME             = 'prefix_name'
+    EFFECTIVE_RATE          = 'effective_rate'
     
 class ExcelColor:
     
@@ -313,6 +332,7 @@ class Template:
     TIMESHEET_PROJECT   = 'screens/timesheet/project.html'
     REPORT              = 'screens/timesheet/report.html'
     RESOURCE_PRODUCTIVITY = 'screens/timesheet/resource_productivity.html'
+    EFFECTIVE_RATE  = 'screens/timesheet/effective_rate.html'
     
     BREADCRUMB          = 'components/breadcrumb/breadcrumb.html'
     NAVBAR              = 'components/navbar/navbar.html'
@@ -329,6 +349,7 @@ class Route:
     INDEX   = '/'
     HOME   = '/home'
     GET_NEWEST_DATA = '/get-newest-data'
+    SYNC_EFFECTIVE_DATA = '/sync-effective-data'
     GET_NEWEST_DATA_LOG = '/get-newest-data_log'
     ADD_TO_FINAL    = '/add-to-final'
     UPLOAD_FILE    = '/upload'
@@ -353,6 +374,8 @@ class Route:
     DETAIL              = '/detail-timesheet'
     RESOURCE_TIMESHEET = '/resource-timesheet'
     PROJECT_TIMESHEET = '/project-timesheet'
+    EFFECTIVE_RATE = '/effective-rate'
+    EXPORT_EFFECTIVE = '/export-effective'
     ANALYZE = '/analyze'
     CONFLICT_DATE   = '/conflict-date'
     CHECK_LOADING_SMARTSHEET    = '/check-loading-smartsheet'
@@ -385,7 +408,7 @@ class Route:
     UPDATE_ADMIN_VERSION   = '/update-admin-version'
     
     LIST_SETTING_ROUTE      = [HOLIDAY, RESOURCE, SHEET, TIMEOFF, OTHER_SETTING, PRODUCTIVITY_SETTING, GRANTED_SETTING]
-    LIST_TIMESHEET_ROUTE    = [RESOURCE_TIMESHEET, DETAIL, PROJECT_TIMESHEET, REPORT, RESOURCE_PRODUCTIVITY]
+    LIST_TIMESHEET_ROUTE    = [RESOURCE_TIMESHEET, DETAIL, PROJECT_TIMESHEET, REPORT, RESOURCE_PRODUCTIVITY, EFFECTIVE_RATE]
     LIST_ADMIN_ROUTE        = [ADMIN_USER_ROLE, ADMIN_DASHBOARD, ADMIN_VERSION, LOG]
     # DEFINE ROUTE REQUIRE ROLE 
     role = Role()

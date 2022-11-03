@@ -443,8 +443,11 @@ $(document).ready(function () {
 	});
 });
 
-function show_log_get_newest_data() {
+function show_log_get_newest_data(name) {
 		var data = {};
+		if (name != undefined) {
+			data[SESSION_FILE_NAME] = name
+		}
 	    $.ajax({
 	        url: GET_NEWEST_DATA_LOG,
 	        type: "POST",

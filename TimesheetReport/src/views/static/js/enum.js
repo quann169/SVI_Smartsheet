@@ -29,6 +29,7 @@ var INTERVAL_CHECK_VERSION  = null;
 const INDEX   = '/';
 const HOME   = '/home';
 const GET_NEWEST_DATA = '/get-newest-data';
+const SYNC_EFFECTIVE_DATA = '/sync-effective-data';
 const GET_NEWEST_DATA_LOG = '/get-newest-data_log';
 const ADD_TO_FINAL = '/add-to-final';
 const UPLOAD_FILE = '/upload';
@@ -74,6 +75,8 @@ const UPDATE_ADMIN_USER_ROLE   = '/update-admin-user-role';
 const ADMIN_VERSION   = '/version';
 const GET_VERSION_INFO = '/get-version-info';
 const UPDATE_ADMIN_VERSION   = '/update-admin-version';
+const EFFECTIVE_RATE = '/effective-rate';
+const EXPORT_EFFECTIVE = '/export-effective';
 
 var FOCUS_MULTISELECT = null;
 

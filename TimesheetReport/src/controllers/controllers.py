@@ -4,7 +4,8 @@ Created on Feb 22, 2021
 @author: toannguyen
 '''
 from src.models.smartsheet.smartsheet_model import SmartSheets
-from src.models.database.database_model import Configuration, DbTask, Log
+from src.models.smartsheet.effective_rate_model import SmartSheetsEffective
+from src.models.database.database_model import Configuration, DbTask, Log, DbEffectiveRate
 from src.commons.enums import DbHeader, ExcelHeader, SettingKeys, DefaulteValue, SessionKey, \
                             DateTime, AnalyzeCFGKeys, Route, Role, OtherKeys, DbTable,\
     OtherCFGKeys, LogKeys
@@ -15,19 +16,20 @@ from src.commons.utils import search_pattern, message_generate, println, remove_
                             get_work_days, write_message_into_file, convert_request_dict_to_url,\
                             str_to_date, get_end_week_of_date, get_start_week_of_date, get_month_name_of_date, \
                             calculate_start_end_date_by_option, check_domain_password, save_password, get_saved_password,\
-                            render_jinja2_template, send_mail
+                            render_jinja2_template, send_mail, compare_date
 from flask import g   
 from src.models.timesheet.timesheet_model import Timesheet
 from flask import session
 from pprint import pprint
 import pandas as pd
-import os, sys
+import os, sys, datetime
 import config
 import xlwt
 import xlrd
 import time
 from xlwt import Workbook
 from xls2xlsx import XLS2XLSX
+
 
 class Controllers:
     def __init__(self):
@@ -729,8 +731,9 @@ class Controllers:
             write_message_into_file(log_file, '[ERROR] %s'%(e.args[0]))
             return 1, '[ERROR] %s'%(e.args[0])
     
-    def get_newest_data_log(self):
-        log_file = os.path.join(config.WORKING_PATH, "GetNewestData.log")
+    def get_newest_data_log(self, request_dict={}):
+        file_name = request_dict.get(SessionKey.FILE_NAME, 'GetNewestData.log')
+        log_file = os.path.join(config.WORKING_PATH, file_name)
         result = ''
         if os.path.exists(log_file):
             with open(log_file, 'r') as log:
@@ -2260,17 +2263,6 @@ class Controllers:
                                         else:
                                             info[leader_name][user_name]['timesheet'][col_name]['sheet_type'][element] = 0
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             return info, list_sub_col, cols_element, productivity_config_info
         except Exception as e:
             println(e, OtherKeys.LOGING_EXCEPTION)
@@ -2531,3 +2523,368 @@ class Controllers:
         result = obj.get_log(from_date, to_date, action_id)
         return result
     
+    def parse_smarsheet_and_update_task_effective_rate(self, list_sheet_id=None, log=None):
+        if log:
+            write_message_into_file(log, 'Starting parse smartsheet\n')
+        println('Starting parse smartsheet', OtherKeys.LOGING_INFO)
+        start_time = time.time()
+        config_obj = Configuration()
+        sheet_info  = config_obj.get_sheet_config(list_sheet_id)
+        
+        list_sheet  = []
+        analyze_config_info = config_obj.get_analyze_config()
+        token   = analyze_config_info[AnalyzeCFGKeys.TOKEN]
+        for row in sheet_info:
+            list_sheet.append((row[DbHeader.SHEET_NAME], int(row[DbHeader.SHEET_ID]), ))
+        sms_obj = SmartSheetsEffective(list_sheet=list_sheet, log=log, token=token)
+        sms_obj.connect_smartsheet()
+        sms_obj.parse()
+        config_obj.get_all_user_information()
+        user_info = config_obj.users
+        other_name_info = config_obj.others_name
+        effective_obj    = DbEffectiveRate()
+        total = len(sms_obj.info)
+        count = 0
+        missing_user = {}
+        write_message_into_file(log, '%s\n'%('-'*75))
+        println('%s'%('-'*75), OtherKeys.LOGING_INFO)
+        for sheet_name in sms_obj.info:
+            count += 1
+            # save children_task only
+            child_tasks         = sms_obj.info[sheet_name].children_task
+            sheet_id            = sms_obj.info[sheet_name].sheet_id
+            if log:
+                write_message_into_file(log, '[%d/%d] Updating sheet: <span class="bold cl-blue">%s</span>\n'%(count, total, sheet_name))
+            println('[%d/%d] Updating sheet: %s'%(count, total, sheet_name), OtherKeys.LOGING_INFO)
+            
+            effective_obj.set_attr(sheet_id    = sheet_id)
+            effective_obj.remove_all_task_information_by_project_id()
+            list_records_task   = []
+            for child_task_obj in child_tasks:
+                task_name       = child_task_obj.task_name
+                start_date      = child_task_obj.start_date
+                end_date        = child_task_obj.end_date
+                duration        = child_task_obj.duration
+                actual_duration        = child_task_obj.actual_duration
+                actual_start_date = child_task_obj.actual_start_date
+                actual_end_date = child_task_obj.actual_end_date
+                assign_to       = child_task_obj.assign_to
+                prefix_name     = child_task_obj.prefix_name
+                try:
+                    user_id = user_info[assign_to].user_id
+                except KeyError:
+                    try:
+                        user_id = other_name_info[assign_to]
+                    except KeyError:
+                        missing_user[assign_to] = ''
+                        user_id = user_info[SettingKeys.NA_VALUE].user_id
+                record  = (
+                    str(sheet_id),
+                    str(user_id),
+                    task_name,
+                    str(start_date),
+                    str(end_date),
+                    str(actual_start_date),
+                    str(actual_end_date),
+                    actual_duration,
+                    duration,
+                    prefix_name,
+                    '')
+                list_records_task.append(record)
+            effective_obj.add_task(list_records_task)
+        
+            println('[%d/%d] Update database for %s - Done'%(count, total, sheet_name), OtherKeys.LOGING_INFO)
+            if log:
+                write_message_into_file(log, '[%d/%d] Update database for <span class="bold cl-blue">%s</span> - Done\n'%(count, total, sheet_name))
+        
+        write_message_into_file(log, '%s\n'%('-'*75))
+        println('%s'%('-'*75), OtherKeys.LOGING_INFO)
+        
+        for user in missing_user:
+            message = message_generate(MsgWarning.W002, user)
+            println('Warning: %s'%(message), OtherKeys.LOGING_INFO)
+            if log:
+                write_message_into_file(log, 'Warning: %s\n'%(message))
+        end_time = time.time()
+        diff = int(end_time - start_time)
+        minutes, seconds = diff // 60, diff % 60
+        message = "Time: " + str(minutes) + ':' + str(seconds).zfill(2)
+        println(message, OtherKeys.LOGING_INFO)
+        if log:
+            write_message_into_file(log, message  + '\n')
+            
+    def sync_effective_data(self, sheet_ids):
+        '''
+        
+        ::param::
+        ::result::
+        '''
+        try:
+            log_file = os.path.join(config.WORKING_PATH, "EffectiveRate.log")
+            if os.path.exists(log_file):
+                os.remove(log_file)
+            self.parse_smarsheet_and_update_task_effective_rate(list_sheet_id  = sheet_ids,
+                                                 log            = log_file)
+            println(Msg.M002, OtherKeys.LOGING_INFO)
+            write_message_into_file(log_file, Msg.M002)
+            time.sleep(2)
+            return 1, Msg.M002
+        except Exception as e:
+            println(e, OtherKeys.LOGING_EXCEPTION)
+            write_message_into_file(log_file, '[ERROR] %s'%(e.args[0]))
+            return 1, '[ERROR] %s'%(e.args[0])
+        
+    def get_effective_rate(self, request_dict):
+        '''
+        
+        ::param::
+        ::result::
+        '''
+        
+        effective_obj    = DbEffectiveRate()
+        sheets = request_dict.get(SessionKey.SHEETS, [])
+        config_obj = Configuration()
+        config_obj.get_list_holiday(is_parse=True)
+        holidays  = config_obj.holidays
+        data = {}
+        config_obj.get_all_user_information()
+        user_ids = config_obj.user_ids
+        config_obj.get_eng_level_info(is_parse=True)
+        eng_level_info = config_obj.eng_level_ids
+        config_obj.get_sheet_config(is_parse=True, is_active=True)
+        sheet_ids = config_obj.sheet_ids
+        projects = []
+        for sheet_id in sheets:
+            sheet_id = int(sheet_id)
+            task_data = effective_obj.get_tasks(sheet_id)
+            for row in task_data:
+                task_name = row['task_name']
+                user_id = row['user_id']
+                start_date = row['start_date']
+                end_date = row['end_date']
+                actual_start_date = row['actual_start_date']
+                actual_end_date = row['actual_end_date']
+                actual_duration = row['actual_duration']
+                duration        = row['duration']
+                prefix_name     = row['prefix_name']
+                user_name = user_ids[user_id].user_name
+                level_id = user_ids[user_id].eng_level_id
+                level = eng_level_info[level_id]
+                sheet_name = sheet_ids[sheet_id]['sheet_name']
+                #logic to calculate effective
+                #calculate actual_duration
+                if not actual_duration:
+                    if actual_end_date and actual_end_date != '0000-00-00 00:00:00':
+                        if start_date and start_date != '0000-00-00 00:00:00':
+                            workday = get_work_days(start_date, actual_end_date, holidays)
+                            if not len(workday):
+                                continue
+                            actual_duration = len(workday)
+                        else:
+                            #missing duration information
+                            continue
+                    else:
+                        if end_date and end_date != '0000-00-00 00:00:00':
+                            if start_date and start_date != '0000-00-00 00:00:00':
+                                workday = get_work_days(start_date, end_date, holidays)
+                                if not len(workday):
+                                    continue
+                                actual_duration = len(workday)
+                            else:
+                                #missing actual_duration information
+                                continue
+                        else:
+                            continue
+                
+                #calculate duration
+                if not duration:
+                    if end_date and end_date != '0000-00-00 00:00:00':
+                        if start_date and start_date != '0000-00-00 00:00:00':
+                            workday = get_work_days(start_date, end_date, holidays)
+                            duration = len(workday)
+                        else:
+                            #missing actual_duration information
+                            continue
+                    else:
+                        continue
+                
+                effective_rate = int(float(duration) / float(actual_duration) * 100)
+                #calculate from_date
+                from_date = start_date
+                
+                #calculate to_date
+                if actual_end_date != '0000-00-00 00:00:00':
+                    to_date = actual_end_date
+                else:
+                    to_date = end_date
+                if not data.get(user_name):
+                    data[user_name] = {'level': level, 'effective_rate': None, 'projects': {}}
+                if not data[user_name]['projects'].get(sheet_name):
+                    projects.append(sheet_name)
+                    data[user_name]['projects'][sheet_name] = {'from': None, 'to': None, 'effective_rate': None}
+                
+                #update from date
+                if data[user_name]['projects'][sheet_name]['from'] == None:
+                        data[user_name]['projects'][sheet_name]['from'] = from_date
+                else:
+                    if data[user_name]['projects'][sheet_name]['from'] == '0000-00-00 00:00:00':
+                        data[user_name]['projects'][sheet_name]['from'] = from_date
+                    elif from_date == '0000-00-00 00:00:00':
+                        pass
+                    else:
+                        if compare_date(data[user_name]['projects'][sheet_name]['from'], from_date):
+                            data[user_name]['projects'][sheet_name]['from'] = from_date
+                #update to date
+                if data[user_name]['projects'][sheet_name]['to'] == None:
+                        data[user_name]['projects'][sheet_name]['to'] = to_date
+                else:
+                    if data[user_name]['projects'][sheet_name]['to'] == '0000-00-00 00:00:00':
+                        data[user_name]['projects'][sheet_name]['to'] = to_date
+                    elif to_date == '0000-00-00 00:00:00':
+                        pass
+                    else:
+                        if compare_date(to_date, data[user_name]['projects'][sheet_name]['to']):
+                            data[user_name]['projects'][sheet_name]['to'] = to_date
+                if isinstance( data[user_name]['projects'][sheet_name]['to'], datetime.datetime):
+                    data[user_name]['projects'][sheet_name]['to'] = convert_date_to_string(data[user_name]['projects'][sheet_name]['to'], '%Y-%m-%d')
+                if isinstance( data[user_name]['projects'][sheet_name]['from'], datetime.datetime):
+                    data[user_name]['projects'][sheet_name]['from'] = convert_date_to_string(data[user_name]['projects'][sheet_name]['from'], '%Y-%m-%d')
+                
+                #calculate percent
+                if data[user_name]['projects'][sheet_name]['effective_rate'] == None:
+                    data[user_name]['projects'][sheet_name]['effective_rate'] = effective_rate
+                else:
+                    data[user_name]['projects'][sheet_name]['effective_rate'] = (data[user_name]['projects'][sheet_name]['effective_rate'] + effective_rate ) / 2
+                data[user_name]['projects'][sheet_name]['effective_rate'] = int(data[user_name]['projects'][sheet_name]['effective_rate'])
+        for user_name in data:
+            sheet_info = data[user_name]['projects']
+            ls_eff = []
+            for sheet_name in sheet_info:
+                effective_rate = sheet_info[sheet_name]['effective_rate']
+                if effective_rate not in [None, '']:
+                    ls_eff.append(effective_rate)
+            if ls_eff:
+                avarage = int(sum(ls_eff) / len(ls_eff))
+                data[user_name]['effective_rate'] = avarage
+        projects = list(set(projects))
+        result = [data, projects]
+        return result
+    
+    def export_effective_rate(self, request_dict):
+        data, sheets = self.get_effective_rate(request_dict)
+        try:
+            workbook = Workbook()
+            file_name = 'Effective_Rate.xls'
+            output_path   = os.path.join(config.WORKING_PATH, file_name)
+            file_name2 = 'Effective_Rate.xlsx'
+            output_path2   = os.path.join(config.WORKING_PATH, file_name2)
+            if os.path.exists(output_path):
+                os.remove(output_path)
+            start_col, start_row = (0, 0)
+            
+            # style 
+            color_style = defined_color()
+            gray_ega_col = color_style['gray_ega']
+            light_col = color_style['light_turquoise']
+            orange_col = color_style['orange']
+            tan_col = color_style['tan']
+            gray25_col = color_style['gray25']
+            # export daily timesheet
+            
+            wb = workbook.add_sheet('Effective Rate')
+            row_num, col_num = (0, 0)
+            #headers 
+            wb.write(row_num, col_num, 'Resource', orange_col)
+            wb.col(col_num).width = 256 * 14
+            col_num += 1
+            wb.write(row_num, col_num, 'Level', orange_col)
+            wb.col(col_num).width = 256 * 14
+            col_num += 1
+            wb.write(row_num, col_num, 'Effective Rate', orange_col)
+            wb.col(col_num).width = 256 * 14
+            col_num += 1
+            for sheet_name in sheets:
+                wb.write(row_num, col_num, sheet_name, orange_col)
+                wb.col(col_num).width = 256 * 14
+                col_num += 1
+            col_num = 0
+            row_num += 1
+            
+            #tbody
+            count = 0
+            for resource in data:
+                count += 1
+                style = light_col
+                if count % 2 == 0:
+                    style = tan_col
+                    
+                level = data[resource]['level']
+                sum_effective_rate = data[resource]['effective_rate']
+                if sum_effective_rate:
+                    sum_effective_rate = '%s%%'%sum_effective_rate
+                eff_projects = data[resource]['projects']
+                #row1
+                wb.write_merge(row_num, row_num + 2, col_num, col_num, resource, style)
+                col_num += 1
+                wb.write(row_num, col_num, level, style)
+                col_num += 1
+                wb.write(row_num, col_num, sum_effective_rate)
+                col_num += 1
+                for sheet_name in sheets:
+                    effective_rate = ''
+                    from_date = ''
+                    to_date = ''
+                    if sheet_name in eff_projects:
+                        effective_rate = eff_projects[sheet_name]['effective_rate']
+                        from_date = eff_projects[sheet_name]['from']
+                        to_date = eff_projects[sheet_name]['to']
+                        if effective_rate:
+                            effective_rate = '%s%%'%effective_rate
+                        wb.write(row_num, col_num, effective_rate)
+                    col_num += 1
+                row_num += 1
+                col_num = 1
+                #row 2
+                wb.write_merge(row_num, row_num + 1, col_num, col_num, 'Duration')
+                col_num += 1
+                wb.write(row_num, col_num, 'From')
+                col_num += 1
+                for sheet_name in sheets:
+                    effective_rate = ''
+                    from_date = ''
+                    to_date = ''
+                    if sheet_name in eff_projects:
+                        effective_rate = eff_projects[sheet_name]['effective_rate']
+                        from_date = eff_projects[sheet_name]['from']
+                        to_date = eff_projects[sheet_name]['to']
+                        wb.write(row_num, col_num, from_date, gray25_col)
+                    col_num += 1
+                row_num += 1
+                col_num = 2
+                #row 3
+                wb.write(row_num, col_num, 'To')
+                col_num += 1
+                for sheet_name in sheets:
+                    effective_rate = ''
+                    from_date = ''
+                    to_date = ''
+                    if sheet_name in eff_projects:
+                        effective_rate = eff_projects[sheet_name]['effective_rate']
+                        from_date = eff_projects[sheet_name]['from']
+                        to_date = eff_projects[sheet_name]['to']
+                        wb.write(row_num, col_num, to_date, gray25_col)
+                    col_num += 1
+                row_num += 1
+                col_num = 0
+
+            workbook.save(output_path)
+            x2x = XLS2XLSX(output_path)
+            remove_path(output_path)
+            x2x.to_xlsx(output_path2)
+            os.system('start %s'%(output_path2))
+            return 1, file_name2
+        
+        except Exception as e:
+            println(e, OtherKeys.LOGING_EXCEPTION)
+            return 0, e.args[0]
+        

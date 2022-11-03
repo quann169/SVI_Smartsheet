@@ -111,7 +111,7 @@ class SmartSheets:
                 info = Sheet(self, sheet_name, latest_modified, sheet_id, parsed_date, count, total)
                 info.parse_sheet()
                 self.info[sheet_name] = info 
-        
+     
     
 class Sheet():
     def __init__(self, smartsheet_obj, sheet_name, latest_modified, sheet_id, parsed_date, count, total):
@@ -255,5 +255,5 @@ class Task():
             if self.end_date >= self.timedelta:
                 self.list_date = get_work_days(self.start_date, self.end_date, time_delta=self.timedelta, holidays=self.holidays)
             
-            
+    
                 

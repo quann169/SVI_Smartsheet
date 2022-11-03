@@ -1,4 +1,4 @@
-LOGGING_LEVEL   = 'INFO'
+LOGGING_LEVEL   = 'ERROR'
 IS_PRODUCT      = True
 if IS_PRODUCT:
     WORKING_PATH    = ".data\workspace"

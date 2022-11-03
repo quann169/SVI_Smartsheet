@@ -157,6 +157,21 @@ def get_newest_data():
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
 
+@timesheet_bp.route(Route.SYNC_EFFECTIVE_DATA, methods=[OtherKeys.METHOD_POST])
+def sync_effective_data():
+    """ Get task from smartsheet and add to database
+    :param : 
+    :return: (1 or 0, message)
+    """
+    println(Route.SYNC_EFFECTIVE_DATA, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().sync_effective_data(sheet_ids=request_dict[SessionKey.SHEETS])
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
 @timesheet_bp.route(Route.GET_NEWEST_DATA_LOG, methods=[OtherKeys.METHOD_POST])
 def get_newest_data_log():
     """ Get log of 'get newest data' feature
@@ -165,7 +180,8 @@ def get_newest_data_log():
     """
     println(Route.GET_NEWEST_DATA_LOG, OtherKeys.LOGING_DEBUG)
     try:
-        result = ctrl().get_newest_data_log()
+        request_dict = get_request_form_ajax()
+        result = ctrl().get_newest_data_log(request_dict)
         return jsonify({'result': result})
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
@@ -705,6 +721,25 @@ def resource_productivity():
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)
         return abort(500, e)
+
+@timesheet_bp.route(Route.EFFECTIVE_RATE)
+def effective_rate():
+    """ Effective rate page
+    :param : 
+    :return: 
+    """
+    println(Route.EFFECTIVE_RATE, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_args()
+        ctrl_obj   = ctrl()
+        ctrl_obj.add_default_config_to_method_request(request_dict, more_option={SessionKey.TASK_FILTER: 'both'})
+        return render_template(Template.EFFECTIVE_RATE, ctrl_obj = ctrl_obj, role = Role(), db_header = DbHeader(),\
+                               route = Route() , template= Template(), session_enum = SessionKey(), \
+                               other_keys= OtherKeys(), request_dict = request_dict)
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+    
     
 @timesheet_bp.route(Route.SEND_REPORT, methods=[OtherKeys.METHOD_POST, OtherKeys.METHOD_GET])
 def send_report():
@@ -910,6 +945,21 @@ def update_admin_version():
         request_dict = get_request_form_ajax()
         ctrl_obj   = ctrl()
         result = ctrl_obj.update_other_config(request_dict)
+        return jsonify({'result': result})
+    except Exception as e:
+        println(e, OtherKeys.LOGING_EXCEPTION)
+        return abort(500, e)
+
+@timesheet_bp.route(Route.EXPORT_EFFECTIVE, methods=[OtherKeys.METHOD_POST])
+def export_effective():
+    """ Export effective rate to excel file
+    :param : 
+    :return: (0, error) or (1, file_name)
+    """
+    println(Route.EXPORT_EFFECTIVE, OtherKeys.LOGING_DEBUG)
+    try:
+        request_dict = get_request_form_ajax()
+        result = ctrl().export_effective_rate(request_dict)
         return jsonify({'result': result})
     except Exception as e:
         println(e, OtherKeys.LOGING_EXCEPTION)

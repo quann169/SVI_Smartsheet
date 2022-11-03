@@ -24,6 +24,20 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+
+def get_value_by_pattern(text, pattern):
+    '''
+    ::des::
+    ::params::
+    ::return::
+    '''
+    obj_search = re.search(pattern, text)
+    result = []
+    if obj_search:
+        for element in obj_search.groups():
+            result.append(element)
+    return result
+    
 def get_request_form():
     # for post method
     request_dict = {}

@@ -705,7 +705,7 @@ table, table.dataTable {
 /* get newest data popup*/
 #get_newest_data_console {
 	width: 50%;
-	height: 50%;
+	height: 70%;
 	background-color: #fff;
 	transform: translate(-50%, -50%);
 	position: absolute;

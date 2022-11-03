@@ -392,7 +392,7 @@ def str_to_date(string):
                     try:
                         obj_date = datetime.datetime.strptime(string, '%m/%d/%Y')
                     except:
-                        message      = message_generate(enums.MsgError.E001, string)
+                        message      = "Datetime format error: %s"%string
                         stuck(message, enums.LoggingKeys.LOGGING_EXCEPTION)
     year    = obj_date.year
     month   = obj_date.month

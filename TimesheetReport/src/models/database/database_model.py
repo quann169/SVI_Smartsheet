@@ -1317,4 +1317,49 @@ class Log(Connection):
             result = query_result
         return result
     
-    
+class DbEffectiveRate(Connection):
+    def __init__(self):
+        Connection.__init__(self)
+        
+    def remove_all_task_information_by_project_id(self):
+        query   = '''DELETE FROM
+                        `%s`
+                    WHERE
+                        `%s`="%d";'''%(\
+                    DbTable.EFFECTIVE_RATE, \
+                    DbHeader.SHEET_ID, self.sheet_id
+                    )
+        self.db_execute(query)
+        
+    def add_task(self, list_record):
+        query   = '''INSERT INTO `%s` 
+                        (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`)
+                    '''%(DbTable.EFFECTIVE_RATE,\
+                    DbHeader.SHEET_ID, DbHeader.USER_ID, DbHeader.TASK_NAME, DbHeader.START_DATE, DbHeader.END_DATE, DbHeader.ACTUAL_START_DATE, \
+                    DbHeader.ACTUAL_END_DATE, DbHeader.ACTUAL_DURATION, DbHeader.DURATION, DbHeader.PREFIX_NAME, DbHeader.EFFECTIVE_RATE)
+        query   += '''
+                    VALUES
+                        (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ;'''
+
+        self.db_execute_many(query, list_record)
+        
+    def get_tasks(self, sheet_id):
+        query = """
+                SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`
+                FROM `%s`
+                WHERE
+                `%s`="%s";
+        """%(
+            DbHeader.SHEET_ID, DbHeader.USER_ID, DbHeader.TASK_NAME, DbHeader.START_DATE, DbHeader.END_DATE, DbHeader.ACTUAL_START_DATE, \
+            DbHeader.ACTUAL_END_DATE, DbHeader.ACTUAL_DURATION, DbHeader.DURATION, DbHeader.PREFIX_NAME, DbHeader.EFFECTIVE_RATE,
+            DbTable.EFFECTIVE_RATE,
+            DbHeader.SHEET_ID, sheet_id
+            )
+        
+        query_result    = self.db_query(query)
+        result          = ()
+        if query_result:
+            return query_result
+        else:
+            return result
