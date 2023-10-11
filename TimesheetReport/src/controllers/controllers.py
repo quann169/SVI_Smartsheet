@@ -929,28 +929,32 @@ class Controllers:
                                 leader_name = user_ids[leader_id].user_name
                             else:
                                 leader_name = SettingKeys.NA_VALUE
-                            for week, max_hours in list_week:
-                                work_hours = 0
-                                if not info.get(eng_type):
-                                    info[eng_type]  = {}
-                                if not info[eng_type].get(team_name):
-                                    info[eng_type][team_name]  = {} 
-                                              
-                                if not info[eng_type][team_name].get(user_name):
-                                    info[eng_type][team_name][user_name]  = {}
-                                    info[eng_type][team_name][user_name]['leader_name'] = leader_name
-                                
-                                for element in cols_element:
-                                    if filter == 'monthly':
-                                        month, year, max_hour = element
-                                        col_name    = DateTime.LIST_MONTH[month]
-                                    else:
-                                        col_name, max_hour = element
-                                    if not info[eng_type][team_name][user_name].get(col_name):
-                                        info[eng_type][team_name][user_name][col_name]  = {'max_hour' : max_hour, 
-                                                                                           'summary': [0, 0], 
-                                                                                           'sheets': {},
-                                                                                           'href': ''}
+                           # if filter == 'monthly':
+                            #    loop_element = list_month
+                            #else:
+                            #    loop_element = list_week
+                            #for week, max_hours in loop_element:
+                                #work_hours = 0
+                            if not info.get(eng_type):
+                                info[eng_type]  = {}
+                            if not info[eng_type].get(team_name):
+                                info[eng_type][team_name]  = {} 
+                                          
+                            if not info[eng_type][team_name].get(user_name):
+                                info[eng_type][team_name][user_name]  = {}
+                                info[eng_type][team_name][user_name]['leader_name'] = leader_name
+                            
+                            for element in cols_element:
+                                if filter == 'monthly':
+                                    month, year, max_hour = element
+                                    col_name    = DateTime.LIST_MONTH[month]
+                                else:
+                                    col_name, max_hour = element
+                                if not info[eng_type][team_name][user_name].get(col_name):
+                                    info[eng_type][team_name][user_name][col_name]  = {'max_hour' : max_hour, 
+                                                                                       'summary': [0, 0], 
+                                                                                       'sheets': {},
+                                                                                       'href': ''}
                 
             total    = 0
             no_missing   = 0
@@ -1246,18 +1250,22 @@ class Controllers:
             color_style = defined_color()
             
             # export daily timesheet
+            println("Export daily timesheet")
             self.export_detail_timesheet(wb, from_date, to_date, sheet_ids, color_style, options)
             
             # export resource timesheet
+            println("Export resource timesheet")
             self.export_resource_timesheet(wb, from_date, to_date, sheet_ids, color_style, options)
             
             #Export Project timesheet
+            println("Export project timesheet")
             self.export_project_timesheet(wb, from_date, to_date, sheet_ids, color_style, options, granted_list, cost)
             try:
                 wb.save(output_path)
                 x2x = XLS2XLSX(output_path)
                 remove_path(output_path)
                 x2x.to_xlsx(output_path2)
+                println('Output file: %s'%output_path2)
                 os.system('start %s'%(output_path2))
             except IndexError:
                 return 0, 'Can not export file because there are no sheets in the output workbook.'
@@ -2027,11 +2035,24 @@ class Controllers:
                 message = 'Email error: NA'
                 println(message, 'error')
                 return 0, message
-            pm_cc = ['vantran@savarti.com', 'thaonguyen@savarti.com']
+            
+            config_obj = Configuration()
+            user_role = config_obj.get_user_role()
+            #PM email
+            user_email, users, user_ids, others_name = self.get_all_resource_information()
+            pm_cc = []
+            for elm in user_role:
+                user_id = elm[DbHeader.USER_ID]
+                role_name = elm[DbHeader.ROLE_NAME] 
+                if role_name == Role.PM:
+                    email =  user_ids[user_id].email
+                    if email != '%s@savarti.com'%user_name:
+                        pm_cc.append(email)
+                        
             for lead_email in request_dict:
                 body = request_dict[lead_email]['body']
                 cc = request_dict[lead_email]['cc']
-                cc_list = cc.split('; ')
+                cc_list = cc.split('; ')    
                 cc_list = cc_list + pm_cc
                 send_mail_status = send_mail(user_name, password, [lead_email], cc_list, 'Report Timesheet', body)
                 if not send_mail_status[0]:

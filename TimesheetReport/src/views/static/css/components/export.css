@@ -8,7 +8,7 @@
     border-radius: 5px;
 }
 .exportoption .exportoption__taskbar {
-    padding: 5px 0px;
+    padding: 5px 5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -23,10 +23,12 @@
 }
 .exportoption .exportoption__taskbar .exportoption__taskbar-close {
     display: block;
-    padding: 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
 }
 .exportoption .exportoption__taskbar .exportoption__taskbar-close:hover {
-    color: red;
+    color: white;
+    background: #dc3545;
     cursor: pointer;
 }
 .exportoption .exportoption__content {

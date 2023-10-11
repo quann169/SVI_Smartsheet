@@ -17,7 +17,7 @@ if config.IS_PRODUCT:
     template_path =  '.data/views/templates'
     static_path =  '.data/views/static'
 else:
-    port        = 6602
+    port        = 6603
     template_path =  'src/views/templates'
     static_path =  'src/views/static'
 

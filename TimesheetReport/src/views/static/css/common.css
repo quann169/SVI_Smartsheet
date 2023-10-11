@@ -14,6 +14,10 @@ body {
   height: 10px;
 }
 
+.custom-select {
+	height: auto;
+	padding: 0px 5px 0px 5px;	
+}
 /* Track */
 ::-webkit-scrollbar-track {
   box-shadow: inset 0 0 5px grey; 
@@ -722,7 +726,14 @@ table, table.dataTable {
 	position: absolute;
 	left: 100%;
 	border-radius: 5px;
-	
+	padding: 0px 6px;
+    vertical-align: middle;
+    text-align: center;
+}
+.close-p:hover {
+	color: white;
+    background: #dc3545;
+    cursor: pointer;
 }
 #get_newest_data_console .cnt1 {
 	height: 100%;

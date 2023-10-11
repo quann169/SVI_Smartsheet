@@ -129,11 +129,12 @@ def println(message, logging_level=None, is_print=True):
             print (message)
     elif logging_level == OtherKeys.LOGING_EXCEPTION:
         logging.exception(message)
-#         traceback.print_exc('')
+        traceback.print_exc('')
         if is_print:
             print (message)
     elif logging_level == OtherKeys.LOGING_ERROR:
         logging.error(message)
+        traceback.print_exc('')
         if is_print:
             print (message)
     elif logging_level == OtherKeys.LOGING_WARNING:

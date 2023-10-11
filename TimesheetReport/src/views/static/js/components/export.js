@@ -14,6 +14,7 @@ function export_file (form_id, options) {
 		return null;
 	}
     data['options'] = options;
+    data['cost'] = options['project']['cost'];
     $.ajax({
 	   url: EXPORT,
 	   type: "POST",
@@ -42,7 +43,8 @@ function getExportOptions() {
     var options = {};
     options['detail'] = {'task_filter': []};
     options['resource'] = {'task_filter': [], 'filter': []};
-    options['project'] = {'task_filter': [], 'filter': []};
+    var cost = $('#project_cost').val();
+    options['project'] = {'task_filter': [], 'filter': [], 'cost': cost};
     list_checkbox.each(function(){
         if (this.checked) {
             switch(this.id) {

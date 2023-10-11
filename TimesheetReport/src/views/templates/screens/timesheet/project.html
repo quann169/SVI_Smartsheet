@@ -34,7 +34,7 @@
 	{% set resource_info = ctrl_obj.get_resource_config() %}
 	{% set granted_info = ctrl_obj.get_granted_info() %}
 	<div class='row'>
-		<div class='col-md-10 d-flex align-items-center'>
+		<div class='col-md-9 d-flex align-items-center'>
 			<select id="list_sheet" class='mt-1' multiple="multiple">
 				{% for row in sheet_info %}
 		        	<option value="{{row[db_header.SHEET_ID]}}" {% if row[db_header.SHEET_ID] in request_dict[session_enum.SHEETS]%} selected {% endif %} >{{row[db_header.SHEET_NAME]}}</option>
@@ -47,7 +47,7 @@
 		    		{% endif %}
 		    	{% endfor %}
 		    </select>
-		    <select id="granted_list" name="granted_list" class='mxw-100 mr-1'>
+		    <select id="granted_list" name="granted_list" class='mxw-100 mr-1 custom-select'>
 		    	<option value="" >No Granted</option>
 				{% for granted_name in granted_info.keys()|sort %}
 		        	<option value="{{granted_name}}" {% if granted_name in request_dict[session_enum.GRANTED_LIST]%} selected {% endif %} >{{granted_name}}</option>
@@ -62,17 +62,17 @@
 			{% endif%}
 			<button type='button' id='export' class='mr-1 px-3' data-toggle="tooltip" title="Export"><i class="fas fa-file-export" ></i></button>
 		</div>
-		<div class='col-md-2 d-flex justify-content-end'>
-			<select id="task_filter" name="task_filter">
+		<div class='col-md-3 d-flex justify-content-end'>
+			<select id="task_filter" name="task_filter" class='custom-select'>
 		        <option value="current" {% if request_dict[session_enum.TASK_FILTER] == 'current' %}selected{% endif %}>Current</option>
 		        <option value="final" {% if request_dict[session_enum.TASK_FILTER] == 'final' %}selected{% endif %}>Final</option>
 		        <option value="both"  {% if request_dict[session_enum.TASK_FILTER] == 'both' %}selected{% endif %}>Both</option>
 		    </select>
-			<select id="filter" name="filter" class='ml-1'>
+			<select id="filter" name="filter" class='ml-1 custom-select'>
 		        <option value="weekly" {% if request_dict[session_enum.FILTER] == 'weekly' %}selected{% endif %}>Weekly</option>
 		        <option value="monthly" {% if request_dict[session_enum.FILTER] == 'monthly' %}selected{% endif %}>Monthly</option>
 		    </select>
-		    <select id="cost" name="cost" class='ml-1'>
+		    <select id="cost" name="cost" class='ml-1 custom-select'>
 		        <option value="normal" {% if request_dict[session_enum.COST] == 'normal' %}selected{% endif %}>Normal</option>
 		        <option value="cost" {% if request_dict[session_enum.COST] == 'cost' %}selected{% endif %}>Cost</option>
 		    </select>

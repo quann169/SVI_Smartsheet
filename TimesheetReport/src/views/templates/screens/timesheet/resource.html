@@ -56,12 +56,12 @@
 			<button type='button' id='export' class='mx-1 px-3' data-toggle="tooltip" title="Export"><i class="fas fa-file-export" ></i></button>
 		</div>
 		<div class='col-md-2 d-flex justify-content-end'>
-			<select id="task_filter" name="task_filter">
+			<select id="task_filter" name="task_filter" class='custom-select'>
 		        <option value="current" {% if request_dict[session_enum.TASK_FILTER] == 'current' %}selected{% endif %}>Current</option>
 		        <option value="final" {% if request_dict[session_enum.TASK_FILTER] == 'final' %}selected{% endif %}>Final</option>
 		        <option value="both"  {% if request_dict[session_enum.TASK_FILTER] == 'both' %}selected{% endif %}>Both</option>
 		    </select>
-			<select id="filter" name="filter" class='mg-l-5'>
+			<select id="filter" name="filter" class='mg-l-5 custom-select'>
 		        <option value="weekly" {% if request_dict[session_enum.FILTER] == 'weekly' %}selected{% endif %}>Weekly</option>
 		        <option value="monthly" {% if request_dict[session_enum.FILTER] == 'monthly' %}selected{% endif %}>Monthly</option>
 		    </select>

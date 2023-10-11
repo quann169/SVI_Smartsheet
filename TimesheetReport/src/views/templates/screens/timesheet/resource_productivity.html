@@ -70,7 +70,7 @@
 			</div>
 		</div>
 		<div class='col-md-2 d-flex justify-content-end'>
-			<select id="task_filter" name="task_filter">
+			<select id="task_filter" name="task_filter" class='custom-select'>
 		        <option value="current" {% if request_dict[session_enum.TASK_FILTER] == 'current' %}selected{% endif %}>Current</option>
 		        <option value="final" {% if request_dict[session_enum.TASK_FILTER] == 'final' %}selected{% endif %}>Final</option>
 		        <option value="both"  {% if request_dict[session_enum.TASK_FILTER] == 'both' %}selected{% endif %}>Both</option>

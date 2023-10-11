@@ -16,12 +16,12 @@ $(document).ready(function () {
 	$('#load').click(function(event) {
 		load_timesheet_report();
 	});
-	$('#task_filter').change(function(event) {
-		load_timesheet_report();
-	});
-	$('#filter').change(function(event) {
-		load_timesheet_report();
-	});
+	//$('#task_filter').change(function(event) {
+	//	load_timesheet_report();
+	//});
+	//$('#filter').change(function(event) {
+	//	load_timesheet_report();
+	//});
 });
 
 

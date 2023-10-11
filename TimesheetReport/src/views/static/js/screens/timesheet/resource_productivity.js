@@ -453,9 +453,9 @@ $(document).ready(function () {
 	$('#load').click(function(event) {
 		load_timesheet_report();
 	});
-	$('#task_filter').change(function(event) {
-		load_timesheet_report();
-	});
+	//$('#task_filter').change(function(event) {
+	//	load_timesheet_report();
+	//});
 	$('#export_productivity').click(function(event) {
 		export_productivity();
 	});

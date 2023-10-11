@@ -40,7 +40,7 @@
 		        	<option value="{{row[db_header.SHEET_ID]}}" {% if row[db_header.SHEET_ID] in request_dict[session_enum.SHEETS]%} selected {% endif %} >{{row[db_header.SHEET_NAME]}}</option>
 		    	{% endfor %}
 		    </select>
-		    <select id="list_user" class='mt-1 ' multiple="multiple" name="user">
+		    <select id="list_user" class='mt-1' multiple="multiple" name="user">
 				{% for row2 in resource_info %}
 					{% if row2[db_header.IS_ACTIVE]%}
 		        		<option value="{{row2[db_header.USER_NAME]}}" {% if row2[db_header.USER_NAME] in request_dict[session_enum.USERS]%} selected {% endif %} >{{row2[db_header.USER_NAME]}}</option>
@@ -58,12 +58,12 @@
 			<button type='button' id='export' class='mx-1 px-3' data-toggle="tooltip" title="Export"><i class="fas fa-file-export" ></i></button>
 		</div>
 		<div class='col-md-2 d-flex justify-content-end'>
-			<select id="task_filter" name="task_filter">
+			<select id="task_filter" name="task_filter" class='custom-select'>
 		        <option value="current" {% if request_dict[session_enum.TASK_FILTER] == 'current' %}selected{% endif %}>Current</option>
 		        <option value="final" {% if request_dict[session_enum.TASK_FILTER] == 'final' %}selected{% endif %}>Final</option>
 		        <option value="both"  {% if request_dict[session_enum.TASK_FILTER] == 'both' %}selected{% endif %}>Both</option>
 		    </select>
-			<select id="filter" name="filter" class='mg-l-5'>
+			<select id="filter" name="filter" class='mg-l-5 custom-select'>
 		        <option value="separate" {% if request_dict[session_enum.FILTER] == 'separate' %}selected{% endif %}>Separate</option>
 		        <option value="merge" {% if request_dict[session_enum.FILTER] == 'merge' %}selected{% endif %}>Merge</option>
 		    </select>
