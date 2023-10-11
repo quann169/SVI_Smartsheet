@@ -257,18 +257,19 @@ def println(message, logging_level=enums.LoggingKeys.LOGGING_INFO, is_print=True
         pass
     if logging_level == enums.LoggingKeys.LOGGING_CRITICAL:
         # logging.critical(message)
+        traceback.print_exc('')
         if is_print:
             print (('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message).encode("utf-8"))
             sys.stdout.flush()
     elif logging_level == enums.LoggingKeys.LOGGING_EXCEPTION:
         # logging.exception(message)
-        # traceback.print_exc('')
+        traceback.print_exc('')
         if is_print:
             print (('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message).encode("utf-8"))
             sys.stdout.flush()
     elif logging_level == enums.LoggingKeys.LOGGING_ERROR:
         # logging.error(message)
-        # traceback.print_exc()
+        traceback.print_exc()
         if is_print:
             print (('<span class="font-weight-bold console-error"> >> ERROR: </span>' + message).encode("utf-8"))
             sys.stdout.flush()
@@ -280,7 +281,7 @@ def println(message, logging_level=enums.LoggingKeys.LOGGING_INFO, is_print=True
     elif logging_level == enums.LoggingKeys.LOGGING_INFO:
         # logging.info(message)
         if is_print:
-            print ('<span class="font-weight-bold console-info"> >> INFO: </span>' + message)
+            print ('<span class="font-weight-bold console-info"> >> INFO: </span>' + str(message))
             sys.stdout.flush()
     elif logging_level == enums.LoggingKeys.LOGGING_DEBUG:
         if master_config.LOGGING_LEVEL.lower() ==  enums.LoggingKeys.LOGGING_DEBUG:

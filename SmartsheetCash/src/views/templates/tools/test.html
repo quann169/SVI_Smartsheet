@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/milestone_setting.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='font/fontawesome/css/all.css') }}" />
+
+<script src="{{ url_for('static', filename='js/enum.js') }}"></script>
+<script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+
+</head>
+    <body>
+    <button onclick="scroll_to_top()" id="btn_to_top" title="Go to top"><i class="fas fa-angle-double-up"></i></button>
+        <div class="loading" id ='full_screen_loader'>&#8230;</div>
+        <div class="container block-table" align='center'>
+            {% include "header.html" %}
+            <div class="breadcrumb text-align-left">
+              <li><a href="{{enum.Route.ROUTE_PREFIX}}/home"><i class="fa fa-home" aria-hidden="true"></i></a></li>
+              <li>Admin</li>
+            </div>
+            
+            
+            
+            <div class='main-div padding-0' align='left'>
+                <div class='div-content' id='save_block'>
+                    <div class="tab">
+                        <ul id='tab_ul'>
+                            <li>
+                                <a class="tab-links" href='{{enum.Route.ROUTE_PREFIX}}{{enum.Route.ROUTE_ADMIN}}'><i class="fas fa-project-diagram color-black" aria-hidden="true"></i>&emsp;Project</a>
+                            </li>
+                            <li>
+                                <a class="tab-links" href='{{enum.Route.ROUTE_PREFIX}}{{enum.Route.ROUTE_ADMIN_ROLE}}'><i class="fas fa-users-cog color-black" aria-hidden="true"></i>&emsp;Role</a>
+                            </li>
+                            
+                            <li>
+                                <a class="tab-links active" href='{{enum.Route.ROUTE_PREFIX}}{{enum.Route.ROUTE_ADMIN_QCS}}'><i class="fas fa-project-diagram color-black" aria-hidden="true"></i>&emsp;QCS</a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    
+                    <div id="qcs" class="tab-content d-block" align="center">
+                        <div>
+                            {% set checklist_type = qc_ctrl.get_master_checklist_type() %}
+                            {% set available_release_versions = qc_ctrl.get_master_release_versions(request_dict) %}
+                            {% set master_item = qc_ctrl.get_master_items(request_dict, available_release_versions) %}
+                            {% set current_checklist_tyie_id = request_dict.get('checklist_type_id') %}
+                            <select class='select-checklist mr-2 width-unset'>
+                                <option value='0'>-- Select Checklist --</option>
+                                {% for checklist_name in checklist_type %}
+                                {% set checklist_type_id = checklist_type[checklist_name] %}
+                                <option value='{{checklist_type_id}}' {% if checklist_type_id|string == current_checklist_tyie_id %}selected{% endif %}>{{checklist_name}}</option>
+                                {% endfor %}
+                            </select>
+                            {{master_item}}
+                                        </div>
+                                    
+                                    <div>
+                            <table class="table table-striped table-bordered w-100 relative popup-item" cellspacing="0">
+                            <thead class='sticky'>
+                                <tr>
+                                    <th class="th-sm">#</th>
+                                <th class="th-sm">ID<span class='total-active ml-2'></span></th>
+                                <th class="th-sm">Item</th>
+                                <th class="th-sm">Assignee Do</th>
+                                <th class="th-sm ">Reviewer Do</th>
+                                <th class="th-sm ">Release Version</th>
+                                </tr>
+                            </thead>
+                            <tbody class='item-body'>
+                                
+                                {% if master_item | length == 0%}
+                                <tr><td colspan='6'>No items. Please choose checklist and release version first.</td></tr>
+                                {% endif %}
+                                {% for item_obj in master_item %}
+                                <tr>
+                                    <td class=''>{{loop.index}}</td>
+                                    <td class=''>{{item_obj.item_code}}</td>
+                                    <td class='pre-line'>{{item_obj.item_name}}</td>
+                                    <td class='pre-line'>{{item_obj.assignee_do}}</td>
+                                    <td class='pre-line'>{{item_obj.reviewer_do}}</td>
+                                    <td class='pre-line'>{{item_obj.release_version}}</td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            
+                            </table>
+                        </div>
+                </div>
+                <div class="main-footer">
+                    
+                </div>
+
+            </div>
+            
+            <!-------------------FOOTER------------->
+            <div class='bottom-div'>
+            <footer >
+                {% extends "footer.html" %}
+            </footer>
+            </div>
+            <!---------------END FOOTER------------->
+            
+            
+        </div>
+        
+    </body>
+</html>

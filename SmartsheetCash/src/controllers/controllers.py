@@ -319,7 +319,7 @@ class Controllers:
         utils.make_folder(log_folder)
         log_file = os.path.join(log_folder, 'commit.log')
         utils.remove_path(log_file)
-        sys.stdout = open(log_file, 'w')
+        sys.stdout = open(log_file, 'w', encoding='utf-8')
         try:
             ids = self.methods.get(enums.MethodKeys.IDS)
             des_id = int(self.methods.get(enums.MethodKeys.DES_ID))
@@ -338,13 +338,14 @@ class Controllers:
                 #src_header = utils.convert_text(src_header)
                 des_header = utils.convert_text(des_header)
                 des_headers.append(des_header)
-                
+             
             attachments_folder = os.path.join(master_config.WORKING_PATH, enums.StructureKeys.ATTACHMENTS_FOLDER)
             utils.remove_path(attachments_folder)
             len_row = len(data)
             count = 0
             utils.println('Start commit..')
             mail_data_ids = []
+            utils.println('Headers: %s'%str(des_headers))
             for row in data:
                 count += 1
                 if (count % 2 == 0) or (count == len_row):
@@ -353,16 +354,23 @@ class Controllers:
                 update_file = False
                 compare_id = row['compare_id']
                 mail_data_ids.append(compare_id)
-                if action == enums.DataKeys.ADD:
-                    smartsheet_obj.add_new_row(row, des_headers, des_id, src_id)
-                    update_file = True
-                elif action == enums.DataKeys.MODIFIED:
-                    smartsheet_obj.update_row(row, des_headers, des_id, src_id)
-                    update_file = True
-                elif action == enums.DataKeys.DELETE:
-                    #smartsheet_obj.delete_row(row, des_headers, des_id, src_id)
-                    update_file = False
+                try:
+                    if action == enums.DataKeys.ADD:
+                        smartsheet_obj.add_new_row(row, des_headers, des_id, src_id)
+                        update_file = True
+                    elif action == enums.DataKeys.MODIFIED:
+                        smartsheet_obj.update_row(row, des_headers, des_id, src_id)
+                        update_file = True
+                    elif action == enums.DataKeys.DELETE:
+                        #smartsheet_obj.delete_row(row, des_headers, des_id, src_id)
+                        update_file = False
+                except Exception as e:
+                    utils.println(e, enums.LoggingKeys.LOGGING_EXCEPTION)
+                    result = [0, e]
+                    sys.stdout = sys.__stdout__
+                    return result
                 if update_file:
+                    utils.println('Record updated files')
                     result = {}
                     compare_folder = os.path.join(master_config.WORKING_PATH, enums.StructureKeys.COMPARE_FOLDER)
                     result_file = os.path.join(compare_folder, '%s_%s.py'%(src_id, des_id))
@@ -374,8 +382,11 @@ class Controllers:
                         content = 'result = '
                         content += pformat(compare_data['result'], width=400)
                         utils.make_file(result_file, content, False)
+                    utils.println('Record updated files')
             if mail_data_ids:
+                utils.println('Start send mail')
                 self.render_commit_mail(mail_data_ids, group_index)
+                utils.println('End send mail')
                 pass
             utils.println('End commit')
             result = [1, 'Commit successfully']
@@ -414,7 +425,7 @@ class Controllers:
         recipient_mail = self.all_settings[enums.ConfigKeys.RECIPIENT_MAIL]
         cc_mail = self.all_settings[enums.ConfigKeys.CC_MAIL]
         subject = self.all_settings[enums.ConfigKeys.SUBJECT]
-        bcc = ['cad_monitor@savarti.com']
+        bcc = self.all_settings.get(enums.ConfigKeys.BCC_MAIL, [])
         send_mail_status = utils.send_mail(user_name, password, recipient_mail, cc_mail, subject, content, bcc, False)
         utils.println('Remind email - Done')
             

@@ -1,5 +1,5 @@
 IS_PRODUCT = True
-VERSION = 'v0.2'
+VERSION = 'v0.3'
 LOGGING_LEVEL = 'INFO'
 if IS_PRODUCT:
     WORKING_PATH = './.data/workspace'

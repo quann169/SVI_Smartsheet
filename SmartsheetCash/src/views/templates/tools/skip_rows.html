@@ -1,0 +1,40 @@
+<style>
+  table tr {
+    border: 1px solid #aaa;
+  }
+
+  table th {
+    padding: 0.5rem !important;
+    font-weight: bold;
+    border: 1px solid #aaa !important;
+  }
+
+  table td {
+    padding: 0.5rem !important;
+    border: 1px solid #aaa !important;
+  }
+</style>
+<table>
+  <thead>
+    <tr>
+      <th>Row</th>
+      {% for header in column_index[sheet_name] %}
+        <th>{{header}}</th>
+      {% endfor %}
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for element in skip_rows %}
+      {% set reason, row_data = element %}
+      <tr>
+        <td>{{row_data['row_number']}}</td>
+        {% for header in column_index[sheet_name] %}
+          {% set header = utils.convert_text(header) %}
+          <td>{{row_data[header]['value']}}</td>
+        {% endfor %}
+        <td>{{reason}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

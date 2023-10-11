@@ -602,7 +602,12 @@ class SmartSheets:
             })
         
         # Add rows to sheet
+        print ('++++')
+        print(row_obj)
+        print ('===')
         response = self.master_sheet_obj.add_rows(sheet_id, [row_obj])
+        print(response)
+        print ('sdasd+')
         row_id  = response.result[0].id
         #row_id = 1706567723771780#173192458397572
         self.dowload_attachments(att_list, sheet_id, src_id)
