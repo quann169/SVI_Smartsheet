@@ -32,6 +32,7 @@ app.register_blueprint(timesheet_bp)
 
 argv = sys.argv[1:]
 all_configs     = {}
+
 url = 'http://%s:%d/'%(host, port)
 def open_browser():
     webbrowser.open_new(url)
@@ -48,10 +49,10 @@ def create_connection():
     
 
 if __name__ == "__main__":
+    print('URL: %s'%url)
     if config.IS_PRODUCT:
         thread  = threading.Thread(name='open GUI', target = app.run,  args=(host, port), kwargs={'threaded': True})
         thread.start()
-        print('URL: %s'%url)
         while True:
             # Waiting for Flask start server
             request = requests.get(url)
@@ -64,5 +65,15 @@ if __name__ == "__main__":
         Timer(1, open_browser).start()
         print('Start browser: Done')
     else:
-        app.run(port=port, host=host, debug=True, use_reloader=True, threaded=True)
-    
+        #app.run(port=port, host=host, debug=True, use_reloader=True, threaded=True)
+        thread  = threading.Thread(name='open GUI', target = app.run,  args=(host, port), kwargs={'threaded': True})
+        thread.start()
+        while True:
+            # Waiting for Flask start server
+            request = requests.get(url)
+            if request.status_code in [200]:
+                print('Starting browser...')
+                break
+            else:
+                print('Checking URL: %s...'%url)
+            time.sleep(1)

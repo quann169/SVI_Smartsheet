@@ -522,14 +522,19 @@ def save_password(password):
             
 def check_domain_password(username, password, domain_name='SVI'):
     try:
+        
         if not password:
             return False, 'Missing password'
-        token = win32security.LogonUser(
-            username,
-            domain_name,
-            password,
-            win32security.LOGON32_LOGON_NETWORK,
-            win32security.LOGON32_PROVIDER_DEFAULT)
+        try:
+            token = win32security.LogonUser(
+                username,
+                domain_name,
+                password,
+                win32security.LOGON32_LOGON_NETWORK,
+                win32security.LOGON32_PROVIDER_DEFAULT)
+        except win32security.error as e:
+            println('Authenticate fail: %s'%(str(e.args)), OtherKeys.LOGING_INFO)
+            return False, MsgError.E004
         result = bool(token)
         # result = True
         if result:

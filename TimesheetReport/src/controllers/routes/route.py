@@ -35,17 +35,23 @@ def before_request():
     path = request.path
     enum_route = Route()
     ctrl_obj   = ctrl()
+    
     # check login
     password = get_saved_password()
     username = getpass.getuser()
     if session.get(SessionKey.IS_LOGIN) == None:
+        
         if path not in [Route().LOGIN, Route().AUTH]:
             check_password = ctrl_obj.authenticate_account(username, password)
+            
             if not check_password[0]:
+               
                 return (redirect(url_for("timesheet_bp.login")))
+
     if not session.get(SessionKey.IS_LOGIN) or not session.get(SessionKey.IS_LOGIN) or not session.get(SessionKey.USER_ID):
         if path not in [Route().LOGIN, Route().AUTH]:
             return (redirect(url_for("timesheet_bp.login")))
+    
     # check role
     list_role_required = enum_route.REQUIRE_ROLE_OF_ROUTE.get(path)
     if list_role_required:

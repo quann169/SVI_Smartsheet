@@ -1,5 +1,5 @@
 LOGGING_LEVEL   = 'ERROR'
-IS_PRODUCT      = True
+IS_PRODUCT      = False
 if IS_PRODUCT:
     WORKING_PATH    = ".data\workspace"
 else:

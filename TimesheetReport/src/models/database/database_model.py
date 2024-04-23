@@ -357,7 +357,7 @@ class Configuration(Connection):
         self.db_execute_many(query, list_record)
     
     def get_list_timeoff(self, is_parse=False, start_date=None, end_date=None):
-        
+        self.get_list_holiday(is_parse=True)
         condition   = ""
         if start_date != None and end_date != None:
             condition = '''WHERE `%s`>="%s" AND `%s`<="%s" 
@@ -406,7 +406,7 @@ class Configuration(Connection):
         if query_result:
             if is_parse:
                 for row in query_result:
-                    timeoff_obj     = TimeOff(row)
+                    timeoff_obj     = TimeOff(row, self.holidays)
                     try:
                         unuse   = self.time_off[timeoff_obj.user_id]
                     except KeyError:
@@ -414,7 +414,6 @@ class Configuration(Connection):
                     
                     for date, week in timeoff_obj.dates:
                         self.time_off[timeoff_obj.user_id].append([date, week, timeoff_obj.timeoff_per_day, timeoff_obj])
-                    
             return query_result
         else:
             return result
@@ -1212,7 +1211,7 @@ class DbUsers(Connection):
                 self.leader_id        = int(info[DbHeader.LEADER_ID])
 
 class TimeOff(Connection):
-    def __init__(self, info=None):
+    def __init__(self, info=None, holidays=[]):
         Connection.__init__(self)
         self.time_off_id    = None
         self.user_name      = None
@@ -1225,9 +1224,9 @@ class TimeOff(Connection):
         self.status         = None
         self.user_id        = 0
         self.dates          = []
-        self.add_info(info)
+        self.add_info(info, holidays)
         
-    def add_info(self, info):
+    def add_info(self, info, holidays):
         if info:
             self.time_off_id    = info[DbHeader.TIME_OFF_ID]
             self.user_name      = info[DbHeader.USER_NAME]
@@ -1238,9 +1237,10 @@ class TimeOff(Connection):
             self.work_days      = int(info[DbHeader.WORK_DAYS])
             self.status         = info[DbHeader.STATUS]
             self.user_id        = info[DbHeader.USER_ID]
-            self.dates          = get_work_days(from_date=self.start_date, to_date=self.end_date)
+            
+            self.dates          = get_work_days(from_date=self.start_date, to_date=self.end_date, holidays=holidays)
             self.timeoff_per_day    = round_num(int(self.work_days / len(self.dates)))
-
+            
 class Log(Connection):
     def __init__(self, table_name=None):
         Connection.__init__(self)
